@@ -28,7 +28,7 @@ maker's paid slicer (choc OS) for these prints.
 - **Drawing (2D tab):** SVG for the AxiDraw through Saxi, or DXF, on standard paper sizes.
 - **Checks:** an error score in mm, the closest gap between lines, print-safety checks, and a test suite that runs
   before every build.
-- Runs in the browser (`web-app/index.html`) or as a Mac desktop app (`desktop/`).
+- Runs in the browser: [online on GitHub Pages](https://polynicolaas.github.io/Unbroken/), or open `web-app/index.html`.
 
 **Printers**
 
@@ -67,7 +67,6 @@ Unbroken/
 │   ├── css/app.css         Styles
 │   ├── js/                 The app's scripts, one file per area (see web-app/README.md)
 │   └── build.js            Tests, then builds the publishable copy in web-app/dist/
-├── desktop/                The desktop app (Electron): main.js around the same page, build.js makes Unbroken.app
 └── docs/history/           Past audits and reviews, as written (AUDIT.md, REVIEW.md)
 ```
 
@@ -78,7 +77,6 @@ Unbroken/
 | Tests | [`source/tests/README.md`](source/tests/README.md): the test plan |
 | Challenges | [`source/challenges/README.md`](source/challenges/README.md): `node source/challenges/run.js`, then `compare.js` to check a run against another |
 | Publishing | `node web-app/build.js` runs every test and only then builds `web-app/dist/`, the copy to publish |
-| Desktop app | [`desktop/README.md`](desktop/README.md): `node desktop/build.js` makes Unbroken.app for the Mac |
 
 The engine in `source/engine/` has no page code, so it can also run in Node (tests) or in another app later. The
 October 2026 code audit and review are kept in [`docs/history/`](docs/history/): what was checked, fixed and left,

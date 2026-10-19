@@ -65,9 +65,6 @@ the v91 clean-up. Cost per print waits for the chocolate database (PLAN.md).
   the design file, app version, needle, layer height, height, chocolate, speed, copies, and how the print came out.
   File names already have the parts that don't need the database (design, needle, copies; v93).
 - STL: a solid top skin over sparse fill.
-- Desktop app, next steps (the Mac app exists since v96, desktop/README.md): a Windows build; signing and notarising
-  with an Apple developer account (no first-launch question); recent files and opening designs from Finder; a
-  `.dmg` with the drag-to-Applications window.
 - Split a complex model into printable parts to glue (PLAN.md; first test: the tree).
 - Speed-ups found in the audit: the outline join in `modelLayer`, `minBox`, the pen-fill stroke order, the connector
   searches in `buildWalk` (see docs/history/AUDIT.md).
@@ -98,6 +95,7 @@ the v91 clean-up. Cost per print waits for the chocolate database (PLAN.md).
 
 | When | What | Why |
 |---|---|---|
+| 2026-10-19 | The desktop app (desktop/, the Electron Unbroken.app from v96) | Unbroken runs from GitHub Pages while it's still changing; a standalone app comes back when it's ready to roll out. The code is in the repo's history (commit 40a733b); its next steps were a Windows build, signing and notarising, opening designs from Finder and a `.dmg` |
 | 2026-10-17 | Straight wall and Skirt + small wall supports; bridging; printing copies layer by layer | Thin wall replaced the first; the second made a web the line had to cross on every layer; chocolate can't span a gap; copies print one at a time (PLAN.md) |
 | 2026-10-15 | The desktop-app track (taken up again in v96: desktop/) and the Simple / Advanced switch (one interface) | Not started / two views of one panel to maintain |
 | 2026-10-15 | PDF, EPS, HPGL and plain SVG exports; 3D DXF; chocolate product records; working-resolution menu; the static "Planned" list on the 3D tab (now this file and the Suggestion box) | Never used |

@@ -8,5 +8,3 @@ source/bench/images/
 source/bench/out/
 source/tests/results/
 source/tests/node_modules
-desktop/stage/
-desktop/out/
