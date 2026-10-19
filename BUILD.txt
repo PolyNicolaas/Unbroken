@@ -1,0 +1,48 @@
+Unbroken · web app build v98
+Built:  2026-10-19T14:32:38.830Z
+Tests:  60 of 60 tests passed
+Check:  opened and traced the sample: 332 terms · error 0.04 mm
+
+Files (sha1, first 12):
+  0902e2e523fa  00-util.js
+  09a2dce576eb  01-image.js
+  0a5e9abb100a  02-lines.js
+  941b223d9657  03-text.js
+  9c623d1c6a37  04-walk.js
+  c434fcb30c2d  05-fill.js
+  340aeaecfe87  06-fourier.js
+  e88cd163925f  07-measure.js
+  7e9bd7ea561b  08-shape.js
+  e4d4bce6607a  09-plate.js
+  33ce06ad72c0  10-export.js
+  361618121eb2  11-stages.js
+  3d8c8fd3f2ad  12-models.js
+  2f3a67e8ab05  core.js
+  efc3f0249a76  css/app.css
+  7efa0c130b02  css/theme.css
+  4a04df3953af  fonts.js
+  553270eb9f0f  index.html
+  298054212331  js/config.js
+  6dbe64907a0c  js/controls.js
+  1b7b18d51a47  js/engine-bridge.js
+  ca2f89bce105  js/export.js
+  982f26a2dde6  js/history.js
+  192eecdaddd9  js/layers.js
+  4223b9625623  js/main.js
+  b54fcd5ee976  js/model.js
+  26b7659e5ebe  js/notes.js
+  29411db13b01  js/optimize.js
+  d0c26df92071  js/pieces.js
+  87f4cd2f52e8  js/pipeline.js
+  6e50c8623e7e  js/plot.js
+  2bbe1ec9ae38  js/preview.js
+  d61b587f3303  js/readouts.js
+  f394d84b7fe5  js/source.js
+  78f5450a22d9  js/state.js
+  347002262ce1  js/testprint.js
+  52e072255a01  js/tools.js
+  5c8562531de3  js/ui.js
+  6a4b8d77d643  js/views.js
+  c7e8ce426229  js/zoom.js
+  b9c7d382e788  settings.js
+  85d8193792d8  worker.js

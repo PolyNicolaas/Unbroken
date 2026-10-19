@@ -1,0 +1,657 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>Unbroken · one continuous line</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
+<link rel="stylesheet" href="css/theme.css">
+<link rel="stylesheet" href="css/app.css">
+<style>[hidden]{display:none!important} body{margin:0}</style>
+</head>
+<body data-view="design" data-stage="line" data-copies="one">
+
+<header class="top">
+  <h1>Unbroken</h1>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v98</span></p>
+</header>
+
+<div class="wrap">
+  <div class="left">
+    <div class="stage">
+      <div class="seg small stage-tabs" role="radiogroup" aria-label="What the big view shows">
+        <input type="radio" name="stage" id="stLine" value="line" checked><label for="stLine">Line</label>
+        <input type="radio" name="stage" id="stPage" value="page"><label for="stPage">2D page</label>
+        <input type="radio" name="stage" id="stPlate" value="plate"><label for="stPlate">Plate</label>
+        <input type="radio" name="stage" id="stLayers" value="layers"><label for="stLayers">3D layers</label>
+      </div>
+      <div class="canvas-box" id="box">
+        <canvas id="view" aria-label="Traced line preview"></canvas>
+        <div class="stage-pane" id="panePage"><canvas class="page" id="pageView" aria-label="The drawing on the paper. Click a shape to fill it with the chosen pen."></canvas></div>
+        <div class="stage-pane" id="panePlate"><canvas class="plate" id="plate" aria-label="The drawing placed on the 340 by 232 mm print plate"></canvas></div>
+        <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
+          <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
+        <div class="chip" id="chip">loading…</div>
+        <div class="pathbar" role="group" aria-label="What the view shows">
+          <label class="check pv-3d" title="Each line as the chocolate bead it prints: the needle's width, one layer tall, at true height"><input type="checkbox" id="pvSolid" checked> <span>Solid (as printed)</span></label>
+          <label class="check" title="The line's layers"><input type="checkbox" id="pvWall" checked> <span class="pv-sw" data-k="wall"></span>Walls</label>
+          <label class="check" title="The filled base's lines (3D tab, Filled base)"><input type="checkbox" id="pvFill" checked> <span class="pv-sw" data-k="fill"></span>Fill</label>
+          <label class="check pv-whole" title="Moves between copies, needle up: no chocolate"><input type="checkbox" id="pvTravel" checked> <span class="pv-sw" data-k="travel"></span>Travel</label>
+          <label class="check pv-whole" title="The purge line before the print, and the wipe at the end of each copy"><input type="checkbox" id="pvPurge" checked> <span class="pv-sw" data-k="purge"></span>Purge &amp; wipes</label>
+        </div>
+        <div class="zoombar" role="group" aria-label="Zoom and copies">
+          <div class="seg small copies-seg" role="radiogroup" aria-label="Copies shown" title="One copy: just the design, to work on it. Whole plate: every copy where it prints">
+            <input type="radio" name="copiesView" id="copiesOne" value="one" checked><label for="copiesOne">One copy</label>
+            <input type="radio" name="copiesView" id="copiesAll" value="all"><label for="copiesAll">Whole plate</label>
+          </div>
+          <span class="zoom-btns" title="Pinch or Ctrl / ⌘ + scroll to zoom where you point; scroll, Space + drag or the middle button to move around">
+            <button class="btn mini" type="button" id="zoomOut" aria-label="Zoom out">−</button><span class="val" id="zoomVal">100%</span><button class="btn mini" type="button" id="zoomIn" aria-label="Zoom in">+</button><button class="btn mini" type="button" id="zoomFit" title="Fit the whole view">Fit</button>
+          </span>
+        </div>
+        <div class="toast" id="toast" role="status" hidden></div>
+        <button class="minimap design-only" id="minimap" type="button" title="The drawing on the 340 × 232 mm plate. Click for the 3D tab"><canvas id="miniPlate"></canvas><span id="miniInfo"></span></button>
+      </div>
+      <div class="toolbar">
+        <button class="btn primary" id="play" type="button" title="Watch it being drawn: the circles drawing the line, the pen drawing the page, or the layers stacking up">Play drawing</button>
+        <select id="speed" aria-label="Animation speed">
+          <option value="24">Slow</option>
+          <option value="10" selected>Normal</option>
+          <option value="4">Fast</option>
+        </select>
+        <span class="tb-sep" aria-hidden="true"></span>
+        <button class="btn icon" type="button" id="undoBtn" title="Undo (Ctrl/⌘ Z)" aria-label="Undo" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M7.5 5 3.5 9l4 4M4 9h7.5a5 5 0 0 1 0 10H9" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <button class="btn icon" type="button" id="redoBtn" title="Redo (Shift Ctrl/⌘ Z)" aria-label="Redo" disabled><svg viewBox="0 0 20 20" aria-hidden="true"><path d="M12.5 5l4 4-4 4M16 9H8.5a5 5 0 0 0 0 10H11" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></button>
+        <span class="spacer"></span>
+        <details class="viewmenu" id="fileMenu">
+          <summary class="btn" title="Save or open a design file">File <span aria-hidden="true">▾</span></summary>
+          <div class="viewpanel menu" role="menu" aria-label="Design file">
+            <button class="mitem" type="button" role="menuitem" id="saveDesign" title="Download this design as one file: the image or text, every setting, painted areas and erasing">Save design<small>one .unbroken.json file with the image or text and every setting (a big image takes a moment)</small></button>
+            <button class="mitem" type="button" role="menuitem" id="openDesign" title="Open a design file saved from this app">Open design…<small>or drop the file on the page</small></button>
+          </div>
+        </details>
+        <input type="file" id="designFile" accept=".json,application/json" hidden>
+        <details class="viewmenu" id="viewMenu">
+          <summary class="btn" title="What the preview shows">View <span class="vbadge" id="viewBadge" title="Problem spots marked on the preview" hidden></span> <span aria-hidden="true">▾</span></summary>
+          <div class="viewpanel" role="group" aria-label="Preview display">
+            <label class="vrow"><span>Behind the line</span>
+              <select id="bg" aria-label="Background">
+                <option value="source" selected>Source image</option>
+                <option value="lines">Detected lines</option>
+                <option value="none">Nothing</option>
+              </select></label>
+            <label class="vrow"><span>Line</span>
+              <select id="lineView" aria-label="How the line is shown" title="How the traced line is drawn in the preview">
+                <option value="thin">Centerline</option>
+                <option value="band" selected>Width (faded)</option>
+                <option value="print">As printed</option>
+              </select></label>
+            <hr>
+            <label class="check" title="Show the rotating circles while the drawing plays"><input type="checkbox" id="circles" checked> Circles</label>
+            <label class="check" title="Highlight the connectors: the straight strands the line prints to reach a part it doesn't touch (it never stops)"><input type="checkbox" id="showConn" checked> <span>Connectors</span><span class="swatch"></span></label>
+            <label class="check" title="Shade in orange where making room for the spacing pushed the line more than the medium-detail tolerance away from the drawing. Make the print bigger to bring it back"><input type="checkbox" id="showDrift" checked> <span>Moved lines</span><span class="swatch drift"></span></label>
+            <label class="check" title="Show the smallest box around the printed line, at any angle, with its size"><input type="checkbox" id="dims" checked> <span>Size box</span></label>
+            <label class="check" title="Mark where the line crosses itself or breaks the minimum spacing"><input type="checkbox" id="showProb"> <span>Problems</span><span class="swatch dot"></span><span class="val" id="probInfo"></span></label>
+            <label class="check" title="Small plate in the corner of the preview"><input type="checkbox" id="showMini" checked> <span>Plate mini-map</span></label>
+          </div>
+        </details>
+      </div>
+      <div class="toolbar tools" role="toolbar" aria-label="Edit tools">
+        <span class="tools-label">Tools</span>
+        <button class="btn" type="button" id="selectBtn" data-tool="select" aria-pressed="false">Select area</button>
+        <button class="btn" type="button" id="eraseBtn" data-tool="erase" aria-pressed="false">Erase</button>
+        <button class="btn" type="button" id="startBtn" data-tool="start" aria-pressed="false">Set start</button>
+        <button class="btn" type="button" id="drawBtn" data-tool="draw" aria-pressed="false">Draw</button>
+        <button class="btn" type="button" id="crossBtn" data-tool="cross" aria-pressed="false" title="Paint where the line may cross itself">Crossing areas</button>
+        <button class="btn" type="button" id="laneBtn" data-tool="lane" aria-pressed="false" title="Paint where connectors should run">Connector paths</button>
+      </div>
+      <div class="selbar" id="erasebar" hidden>
+        <div class="seg small" role="radiogroup" aria-label="Erase mode">
+          <input type="radio" name="eraseMode" id="erPiece" value="piece" checked><label for="erPiece">Whole piece</label>
+          <input type="radio" name="eraseMode" id="erBrush" value="brush"><label for="erBrush">Brush</label>
+        </div>
+        <label class="inline-field" id="brushField" hidden>Size <input type="range" id="brush" min="2" max="30" value="8"></label>
+        <span class="hint" id="eraseHint">Tap a stray piece of line to remove it.</span>
+        <button class="btn" type="button" id="eraseUndo">Undo</button>
+        <button class="btn" type="button" id="eraseClear">Restore all</button>
+        <button class="btn primary" type="button" id="eraseDone">Done</button>
+      </div>
+      <div class="selbar" id="startbar" hidden>
+        <span class="hint">Tap the trace where the line should begin.</span>
+        <button class="btn" type="button" id="startAuto">Automatic</button>
+        <button class="btn primary" type="button" id="startDone">Done</button>
+      </div>
+      <div class="selbar" id="optbar" hidden>
+        <span class="hint" id="optMsg"></span>
+        <button class="btn" type="button" id="optCancel" hidden>Cancel</button>
+        <button class="btn" type="button" id="optUndo" hidden>Undo</button>
+        <button class="btn primary" type="button" id="optAccept" hidden>Accept</button>
+      </div>
+      <div class="selbar" id="paintbar" hidden>
+        <span class="swatch zone" id="zoneSwatch"></span>
+        <label class="inline-field">Brush <input type="range" id="zoneBrush" min="3" max="40" value="12"></label>
+        <label class="check"><input type="checkbox" id="zoneErase"> Rub out</label>
+        <span class="hint" id="paintHint"></span>
+        <button class="btn" type="button" id="zoneUndo">Undo</button>
+        <button class="btn" type="button" id="zoneClear">Clear</button>
+        <button class="btn primary" type="button" id="zoneDone">Done</button>
+      </div>
+      <div class="selbar" id="drawbar" hidden>
+        <label class="inline-field">Pen <input type="range" id="pen" min="2" max="24" value="6"></label>
+        <span class="hint">Sketch with a mouse, finger or stylus.</span>
+        <button class="btn" type="button" id="drawUndo">Undo</button>
+        <button class="btn" type="button" id="drawClear">Clear</button>
+        <button class="btn primary" type="button" id="drawDone">Trace drawing</button>
+      </div>
+      <div class="selbar" id="selbar" hidden>
+        <div class="seg small" role="radiogroup" aria-label="Selection shape">
+          <input type="radio" name="selShape" id="selRect" value="rect" checked><label for="selRect">Rectangle</label>
+          <input type="radio" name="selShape" id="selLasso" value="lasso"><label for="selLasso">Freehand</label>
+        </div>
+        <span class="hint" id="selHint">Drag over the part of the image you want traced.</span>
+        <button class="btn" type="button" id="selClear">Whole image</button>
+        <button class="btn primary" type="button" id="selDone">Trace selection</button>
+      </div>
+    </div>
+
+  </div>
+
+  <div class="panel">
+    <div class="seg view-tabs" role="radiogroup" aria-label="View">
+      <input type="radio" name="view" id="viewDesign" value="design" checked><label for="viewDesign">Trace<small>trace and shape the line</small></label>
+      <input type="radio" name="view" id="view2D" value="plot"><label for="view2D">2D<small>pen plotter, flat files</small></label>
+      <input type="radio" name="view" id="viewChoc" value="choc"><label for="viewChoc">3D<small>printers, layers, G-code</small></label>
+    </div>
+    <div class="panel-tools">
+      <span style="flex:1"></span>
+      <span class="fold-all"><button class="btn mini" type="button" id="collapseAll">Collapse all</button><button class="btn mini" type="button" id="expandAll">Expand all</button></span>
+    </div>
+    <section class="card choc-only" aria-labelledby="h-choc">
+      <h2 id="h-choc">Printer</h2>
+      <p class="construction"><b>New.</b> The G-code now follows choc OS's own files (purge line, retraction and wipe, E per mm from the needle). Watch the first prints closely, and fine-tune the flow on the printer.</p>
+      <label class="field"><span>Printer</span><select id="printer"><!-- filled from settings.js --></select></label>
+      <p class="hint" id="printerSummary"><!-- the printer's cartridge, plate and retraction, from settings.js --></p>
+      <div class="choc-pick">
+        <span class="choc-swatch" id="chocSwatch" aria-hidden="true"></span>
+        <label class="field"><span>Chocolate</span><select id="chocolate"><!-- filled from settings.js --></select></label>
+      </div>
+      <p class="hint" id="chocInfo"></p>
+      <div class="two">
+        <label class="field"><span>Needle (inside diameter)</span>
+          <span class="needle-pick"><span class="needle-dot" id="needleDot"></span><select id="needle"><!-- filled from settings.js --></select></span>
+        </label>
+      </div>
+      <p class="hint help" id="needleHint"></p>
+      <p class="hint warn" id="settingsNote" hidden></p>
+    </section>
+
+    <section class="card choc-only" aria-labelledby="h-profile" data-fold="closed">
+      <h2 id="h-profile">Printer profile <span class="hval">edit in settings.js</span></h2>
+          <table class="profile" id="profileTable"><!-- filled from the printer in settings.js --></table>
+
+    </section>
+
+
+    <section class="card choc-only" aria-labelledby="h-plate">
+      <h2 id="h-plate">Plate <span id="plateInfo"></span></h2>
+      <label class="check" title="The size slider on the Trace tab stops at the widest the drawing can be on this printer's plate"><input type="checkbox" id="limitPlate"> <span>Keep the size within the build plate</span></label>
+      <p class="hint" id="plateHint"></p>
+      <div class="three">
+        <label class="field"><span id="copiesLab">Copies</span><input type="number" id="copies" min="1" max="200" step="1" value="1"></label>
+        <label class="field"><span>Spacing between copies (mm)</span><input type="number" id="copyGap" min="0" step="0.5" value="5"></label>
+        <label class="field"><span>Rotation</span><select id="plateRot"><option value="auto" selected>Auto (to fit)</option><option value="straight">Straight only</option></select></label>
+      </div>
+      <div class="two" id="piecesRow" hidden>
+        <label class="field" title="A piece for each line: every line of the text is traced on its own and printed as a separate piece, one continuous line each, with no strand joining one line to the next. One piece: the lines print joined, as the Trace tab draws them."><span>Lines of text</span><select id="textPieces"><option value="each" selected>A piece for each line</option><option value="one">One piece, lines joined</option></select></label>
+        <label class="field" id="pieceShownField" title="The piece One copy shows, in the Plate and 3D layers views"><span>One copy shows</span><select id="pieceShown"><option value="0">line 1</option></select></label>
+      </div>
+      <div class="inline"><button class="btn" type="button" id="plateCenter">Center on plate</button></div>
+    </section>
+
+    <section class="card choc-only" aria-labelledby="h-layers">
+      <h2 id="h-layers">Layers <span id="layerInfo"></span></h2>
+      <div class="two">
+        <label class="field" title="How tall the print is, from the plate to the top. The layers follow: the base layers, then as many layers above them as reach this height (whole layers)."><span>Height (mm)</span><input type="number" id="printHeightMM" min="0.05" max="500" step="0.05" value="0.3"></label>
+        <label class="field" title="Chocolate needs time to set before the next layer lands on it. Layers that would print faster are slowed down (not below the printer's slowest speed)."><span>Seconds per layer (at least)</span><input type="number" id="layerTime" min="0" max="300" step="1" value="20"></label>
+      </div>
+      <input type="hidden" id="wallLayers" value="1">
+      <div class="row model-only" id="cutRow">
+        <div class="lab"><span class="name">Cut off</span><span class="val" id="cutInfo"></span></div>
+        <div class="two">
+          <label class="field"><span>Bottom (mm)</span><input type="number" id="cutBottom" min="0" step="0.5" value="0"></label>
+          <label class="field"><span>Top (mm)</span><input type="number" id="cutTop" min="0" step="0.5" value="0"></label>
+        </div>
+        <p class="hint help">Only the part of the model between the two cuts is printed. Cut the top where it stops being flat (a dome or a point ends in a few tiny, wobbly last layers that don't hold their shape in chocolate), or the bottom of a round model so it stands on a flat first layer. The model's preview on the Trace tab fades the parts cut off and outlines the cuts; the Height above is the part that's left. Turning the model clears the cuts.</p>
+      </div>
+      <label class="field model-only" title="How many walls, one line spacing inside each other"><span>Walls</span><input type="number" id="wallCount" min="1" max="5" step="1" value="1"></label>
+      <p class="hint help model-only" data-anchor="wallCount">A model prints its outside contour only: the inside surface of a hollow model (a cup's inner wall) and any hole are not traced. Walls adds lines inside the outside contour, one spacing apart; how much of the inside gets chocolate is up to Base and Infill.</p>
+      <label class="field model-only" title="Holds up parts that reach out further than a bead can step: the support is part of the same line, from the plate up"><span>Support</span><select id="support"><option value="off" selected>Off</option><option value="skirt">Flared skirt</option><option value="thin">Thin wall</option></select></label>
+      <p class="hint help model-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, in Fine-tuning) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Each layer stays one loop. The ready list says how far the model steps out with Support off.</p>
+      <p class="hint" id="layerCount"></p>
+      <p class="hint" id="layerHint"></p>
+      <p class="hint" id="cartHint" hidden></p>
+    </section>
+
+    <section class="card choc-only" aria-labelledby="h-base">
+      <h2 id="h-base">Base <span id="infillVal">none</span></h2>
+      <div class="two">
+        <label class="field" title="Filled layers at the bottom (0: no base)"><span>Base layers</span><input type="number" id="baseLayers" min="0" max="50" step="1" value="0"></label>
+        <label class="field" title="Rows straight across, or rings following the edge"><span>Pattern</span><select id="basePattern"><option value="lines" selected>Lines</option><option value="rings">Rings</option></select></label>
+      </div>
+      <div class="row">
+        <div class="lab"><label for="baseDensity">Density</label><span class="val" id="baseDensityVal">100%</span></div>
+        <input type="range" id="baseDensity" min="0" max="100" step="5" value="100">
+      </div>
+      <div class="two lines-only" id="baseDirRow">
+        <label class="field" title="Direction of the rows, degrees (0 = across)"><span>Angle (°)</span><input type="number" id="baseAngle" min="-90" max="90" step="5" value="0"></label>
+        <label class="field" title="Rows keep their direction for this many layers, then turn 90° (1: every layer crosses the one below)"><span>Turn 90° every … layers</span><input type="number" id="baseTurn" min="1" max="50" step="1" value="1"></label>
+      </div>
+      <div class="row">
+        <div class="lab"><label for="infillMin">Leave small areas open</label><span class="val" id="infillMinVal">fill all</span></div>
+        <input type="range" id="infillMin" min="0" max="100" value="0">
+      </div>
+      <p class="hint help" id="infillHint">Fills every area the line encloses with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
+    </section>
+
+    <section class="card choc-only" aria-labelledby="h-infill">
+      <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>
+      <div class="row">
+        <div class="lab"><label for="fillDensity">Density</label><span class="val" id="fillDensityVal">0% · hollow</span></div>
+        <input type="range" id="fillDensity" min="0" max="100" step="5" value="0">
+      </div>
+      <div class="two">
+        <label class="field"><span>Pattern</span><select id="fillPattern"><option value="lines" selected>Lines</option><option value="rings">Rings</option></select></label>
+        <label class="field lines-only" title="Direction of the rows, degrees (0 = across)"><span>Angle (°)</span><input type="number" id="fillAngle" min="-90" max="90" step="5" value="45"></label>
+      </div>
+      <label class="field lines-only" id="fillTurnF" title="Rows keep their direction for this many layers, then turn 90°: a few layers the same, then across them, builds strength"><span>Turn 90° every … layers</span><input type="number" id="fillTurn" min="1" max="50" step="1" value="2"></label>
+      <div class="row">
+        <div class="lab"><label for="fillMin">Leave small areas open</label><span class="val" id="fillMinVal">fill all</span></div>
+        <input type="range" id="fillMin" min="0" max="100" value="0">
+      </div>
+      <p class="hint help" id="fillHint">Fills the inside of the layers above the base, as part of the same line: 0% leaves them hollow (walls only), 20–30% is a light support, 100% is solid.</p>
+    </section>
+
+    <section class="card choc-only" aria-labelledby="h-machine" data-fold="closed">
+      <h2 id="h-machine">Fine-tuning <span class="hval" id="tuneVal">as the profiles</span></h2>
+      <div class="three tune">
+        <label class="field" title="One layer of chocolate. Starts at the chocolate's own (settings.js), else the printer's."><span>Layer height (mm)</span><input type="number" id="layerH" min="0.05" max="3" step="0.05" value="0.3"><small class="from" id="fromLayerH"></small></label>
+        <label class="field" title="Printing speed along the line, in mm per second. Starts at the chocolate's (settings.js)."><span>Speed (mm/s)</span><input type="number" id="gFeed" min="0.5" max="1000" value="20" step="any"><small class="from" id="fromFeed"></small></label>
+        <label class="field" title="Height of the first layer above the plate. Follows the layer height unless you change it."><span>First layer Z (mm)</span><input type="number" id="gZ" min="0.05" max="50" value="0.3" step="any"><small class="from" id="fromZ"></small></label>
+        <label class="field" title="How far the needle rises to travel between copies. Starts at the printer's."><span>Lift (mm)</span><input type="number" id="gLift" min="0.5" max="100" value="5" step="any"><small class="from" id="fromLift"></small></label>
+        <label class="field" title="How far a layer may reach past the one below it before Support (Layers card, 3D models) holds it up. Empty: a third of the line width"><span>Overhang per layer (mm)</span><input type="number" id="gOver" min="0.05" max="2" step="0.01" placeholder="auto"><small class="from" id="fromOver"></small></label>
+        <label class="field" title="Where a single copy sits on the plate (Center on plate, or drag it in the Plate view)"><span>Position X (mm)</span><input type="number" id="gOx" value="10" step="any"></label>
+        <label class="field"><span>Position Y (mm)</span><input type="number" id="gOy" value="10" step="any"></label>
+        <label class="field" title="Plunger per mm of line: line width × layer height ÷ the cartridge's cross-section (settings.js). A wider needle pushes faster. Fine-tune the flow on the printer."><span>E per mm</span><input type="number" id="gE" value="" step="any" readonly tabindex="-1"></label>
+      </div>
+      <div class="inline"><button class="btn mini" type="button" id="tuneReset" disabled>Back to the profile values</button></div>
+    </section>
+
+    <section class="card choc-only" aria-labelledby="h-test" data-fold="closed">
+      <h2 id="h-test">Test print <span class="hval" id="testVal"></span></h2>
+      <div class="two">
+        <label class="field" title="The setting that changes from strip to strip; everything else is as set above"><span>Vary</span><select id="testVary">
+          <option value="layerH" selected>Layer height (mm)</option><option value="speed">Speed (mm/s)</option><option value="gap">Gap between lines (mm)</option><option value="flow">Flow (%)</option></select></label>
+        <label class="field"><span>Strips</span><input type="number" id="testN" min="2" max="10" step="1" value="5"></label>
+      </div>
+      <div class="three">
+        <label class="field"><span>From</span><input type="number" id="testFrom" step="any"></label>
+        <label class="field"><span>To</span><input type="number" id="testTo" step="any"></label>
+        <label class="field" title="Each strip's height in layers"><span>Layers</span><input type="number" id="testLayers" min="1" max="30" step="1" value="5"></label>
+      </div>
+      <p class="hint" id="testInfo"></p>
+      <div class="inline"><button class="btn" type="button" id="testBtn">Export test G-code</button></div>
+      <div class="inline"><label class="field inline-field" title="The strip that printed best: its value goes into the setting"><span>Best strip</span><input type="number" id="testPick" min="1" max="10" step="1" value="3"></label><button class="btn mini" type="button" id="testUse">Use it</button></div>
+      <p class="status" id="testMsg" role="status"></p>
+      <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it.</p>
+    </section>
+
+    <section class="card choc-only" aria-labelledby="h-gexport">
+      <h2 id="h-gexport">Export <span class="hval" id="readyVal"></span></h2>
+      <ul class="ready" id="readyList" aria-label="Ready to print"></ul>
+      <div class="inline"><span class="spacer" style="flex:1"></span><button class="btn" type="button" id="dxfBtn" title="The printed line as one closed curve, flat, for choc OS's 2D curve upload (a fallback)">DXF for choc OS</button><button class="btn primary" type="button" id="gcodeBtn">Export G-code</button></div>
+      <p class="status" id="gcodeMsg" role="status"></p>
+    </section>
+    <section class="card design-only" aria-labelledby="h-src">
+      <h2 id="h-src">Input <span id="srcinfo"></span></h2>
+      <div class="seg" role="radiogroup" aria-label="Source type">
+        <input type="radio" name="srcType" id="srcImage" value="image" checked><label for="srcImage">Image<small>trace a picture</small></label>
+        <input type="radio" name="srcType" id="srcText" value="text"><label for="srcText">Text<small>type words</small></label>
+        <input type="radio" name="srcType" id="srcModel" value="model"><label for="srcModel">3D model<small>slice an STL</small></label>
+      </div>
+      <div class="dropzone" id="dropZone" role="button" tabindex="0" aria-label="Choose or drop a file: an image, an STL model or a saved design">
+        <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span class="dz-main">Drop a file here, or click to choose</span>
+        <span class="dz-sub">Image (PNG, JPG, SVG) · 3D model (STL) · saved design (.unbroken.json) · or paste an image</span>
+      </div>
+      <input type="file" id="anyFile" accept="image/*,.stl,model/stl,application/sla,.json,application/json" hidden>
+      <div class="model-only row" id="modelBox">
+        <div class="inline">
+          <span class="val" id="modelInfo"></span>
+        </div>
+        <div class="lab"><span class="name">Which way up it prints</span></div>
+        <div class="inline">
+          <button class="btn mini" type="button" id="turnX" title="Tip it a quarter turn forward (about the left–right axis)">Tip forward</button>
+          <button class="btn mini" type="button" id="turnY" title="Tip it a quarter turn sideways (about the front–back axis)">Tip sideways</button>
+          <button class="btn mini" type="button" id="turnZ" title="Turn it a quarter turn on the plate">Turn</button>
+          <button class="btn mini" type="button" id="turnReset">As loaded</button>
+        </div>
+        <p class="hint help"><span class="slow">Big models (hundreds of thousands of triangles) load, turn and slice slowly.</span> Drag the preview to look around it. The 3D tab slices it into layers and fits each one with a Fourier series; set its height there. The line spacing below is the wall's.</p>
+        <div class="row" id="drawViewRow">
+          <div class="lab"><span class="name">Line drawing of this view</span><span class="val" id="creaseVal">folds over 20°</span></div>
+          <label class="check"><input type="checkbox" id="hlPreview"> <span>Show the preview as a drawing</span></label>
+          <div class="lab"><label for="crease">Draw folds sharper than</label></div>
+          <input type="range" id="crease" min="1" max="90" value="20" aria-describedby="drawViewHint">
+          <div class="inline"><button class="btn" type="button" id="drawView">Draw this view</button><button class="btn" type="button" id="drawSvg" title="The line drawing of this view as vectors, before any tracing: every visible edge, pieces that meet joined into strokes, at the model's size in mm">Export SVG</button></div>
+          <p class="status" id="drawMsg" role="status"></p>
+          <p class="hint help" id="drawViewHint">Outlines and folds as seen from the preview's angle, hidden lines removed (like plotter.vision). At the far left every edge between faces that aren't flat together is drawn, a wireframe (the plotter.vision look); further right only sharper folds and the outline. Export SVG saves the drawing itself as vectors (every visible edge, at the model's size). Draw this view makes it the picture to trace, for chocolate or the 2D tab; a dense wireframe is more than one line can follow, so keep the angle up for tracing. Pick 3D model again to change the angle. <span class="slow">Drawing or exporting a view takes a few seconds; a wireframe (far left) takes longest.</span></p>
+        </div>
+      </div>
+      <div class="text-only row" id="textBox">
+        <textarea id="textIn" rows="3" spellcheck="false" aria-label="Text to trace (up to 5 lines)">Happy Birthday</textarea>
+        <span class="val" id="lineCount" style="justify-self:end">1 of 5 lines</span>
+        <label class="field"><span>Font</span><select id="font"></select></label>
+        <div class="two">
+          <label class="field"><span>Letter spacing</span>
+            <select id="txtSpacing"><option value="auto" selected>Font default</option><option value="even">Even gaps</option><option value="font">Font's own (joined)</option></select>
+          </label>
+          <label class="field"><span>Letter gap (mm)</span><input type="number" id="letterGap" min="0" step="0.1" placeholder="auto" title="Used with even gaps; joined scripts keep the font's own spacing. Empty = 15% of the letter height"></label>
+        </div>
+        <div class="two">
+          <label class="field"><span>Word gap (mm)</span><input type="number" id="wordGap" min="0" step="0.5" placeholder="auto" title="Empty = half the letter height"></label>
+          <label class="field"><span>Line spacing (× height)</span><input type="number" id="lineGap" min="1" step="0.1" value="1.7"></label>
+        </div>
+
+        <div class="seg small" role="radiogroup" aria-label="Alignment">
+          <input type="radio" name="align" id="alLeft" value="left"><label for="alLeft">Left</label>
+          <input type="radio" name="align" id="alCenter" value="center" checked><label for="alCenter">Center</label>
+          <input type="radio" name="align" id="alRight" value="right"><label for="alRight">Right</label>
+        </div>
+        <p class="hint help" id="textHint">Single-stroke lettering: every letter is drawn with the same stroke at the same height. Even gaps keep the closest point between neighbouring letters at exactly the letter gap.</p>
+      </div>
+      <div class="img-only">
+        <select id="sample" aria-label="Sample image">
+          <option value="leaf">Sample: leaf</option>
+          <option value="shapes">Sample: shapes &amp; text</option>
+          <option value="smiley">Sample: smiley</option>
+          <option value="user" disabled>Your image</option>
+        </select>
+      </div>
+      <p class="hint help img-only">Or try a sample. The tools under the preview select an area, erase stray lines, set the start point or let you draw your own.</p>
+    </section>
+
+    <section class="card design-only img-only" aria-labelledby="h-trace">
+      <h2 id="h-trace">Tracing</h2>
+      <div class="row">
+        <div class="lab"><span class="name" title="Centerline suits drawings and lettering; Outline suits photos.">Trace style</span></div>
+        <div class="seg" role="radiogroup" aria-label="Trace style">
+          <input type="radio" name="mode" id="modeCenter" value="centerline" checked><label for="modeCenter">Centerline<small>one line per stroke</small></label>
+          <input type="radio" name="mode" id="modeOutline" value="edges"><label for="modeOutline">Outline<small>double line along edges</small></label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="lab"><label for="sens" id="sensLabel">Ink threshold</label><span class="lab-r"><span class="val" id="sensVal"></span><button class="btn mini" type="button" id="autoSens" title="Try a range of thresholds and keep the cleanest (a few seconds on a big image)">Auto</button></span></div>
+        <input type="range" id="sens" min="-60" max="60" value="0">
+      </div>
+      <div class="row">
+        <div class="lab"><label for="blur">Smoothing</label><span class="val" id="blurVal"></span></div>
+        <input type="range" id="blur" min="0" max="30" value="12">
+      </div>
+      <div class="row">
+        <div class="lab"><label for="minLen">Ignore specks under</label><span class="val" id="minLenVal"></span></div>
+        <input type="range" id="minLen" min="0" max="200" value="15">
+      </div>
+      <div class="row">
+        <div class="lab"><label for="far">Drop far-away parts</label><span class="val" id="farVal"></span></div>
+        <input type="range" id="far" min="0" max="40" value="12">
+      </div>
+      <div>
+        <label class="check"><input type="checkbox" id="invert"> Light lines on dark</label>
+      </div>
+
+    </section>
+
+
+    <section class="card design-only img-only" aria-labelledby="h-prep" data-fold="closed">
+      <h2 id="h-prep">Image prep <span id="prepVal">off</span></h2>
+          <div class="row"><div class="lab"><label for="bright">Brightness</label><span class="val" id="brightVal"></span></div><input type="range" id="bright" min="-100" max="100" value="0"></div>
+          <div class="row"><div class="lab"><label for="contrast">Contrast</label><span class="val" id="contrastVal"></span></div><input type="range" id="contrast" min="-80" max="150" value="0"></div>
+          <div class="row"><div class="lab"><label for="bgTol">Remove plain background</label><span class="val" id="bgTolVal"></span></div><input type="range" id="bgTol" min="0" max="60" value="0"></div>
+          <div class="inline" style="justify-content:space-between">
+            <label class="check"><input type="checkbox" id="flatten"> Even out lighting</label>
+            <button class="btn mini" type="button" id="prepReset">Reset</button>
+          </div>
+
+    </section>
+
+    <section class="card design-only img-only" aria-labelledby="h-shade" data-fold="closed">
+      <h2 id="h-shade">Shading <span id="shadeVal">off</span></h2>
+          <select id="shadeStyle" aria-label="Shading style">
+            <option value="off" selected>No shading</option>
+            <option value="hatch">Hatch</option>
+            <option value="cross">Cross-hatch (darkest areas)</option>
+            <option value="squiggle">Squiggle</option>
+          </select>
+          <div class="row"><div class="lab"><label for="shadeSp">Line spacing</label><span class="val" id="shadeSpVal"></span></div><input type="range" id="shadeSp" min="3" max="24" value="7"></div>
+          <div class="row"><div class="lab"><label for="shadeLv">Shade areas darker than</label><span class="val" id="shadeLvVal"></span></div><input type="range" id="shadeLv" min="20" max="230" value="110"></div>
+          <p class="hint help">Shading lines join the same single line, so they need more terms.</p>
+
+    </section>
+
+
+
+    <section class="card design-only" aria-labelledby="h-line">
+      <h2 id="h-line">Line</h2>
+      <div class="row">
+        <div class="lab"><span class="name" title="Centre to centre = line width + gap. Strokes the line goes out and back along print as a narrow loop. Pick the needle on the 3D tab. The size stays as it is (the Size card's marks move) unless lines this far apart no longer fit; then it grows to the new smallest.">Spacing</span><span class="val" id="gapVal"></span></div>
+        <div class="two">
+          <label class="field" title="The printed line's width: the needle's inside diameter (pick the needle on the 3D tab), or your pen"><span>Line width (mm)</span><input type="number" id="lineW" min="0.05" max="5" step="0.01" value="0.84"></label>
+          <label class="field"><span>Gap between lines (mm)</span><input type="number" id="lineGapMM" min="0" step="0.05" value="0.5"></label>
+        </div>
+        <p class="hint" id="spacingHint"></p>
+        <p class="hint help" data-anchor="lineGapMM">The gap is the space left between neighbouring beads, edge to edge. The line keeps its parts at least line width + gap apart, centre to centre, everywhere: the doubled strands of a stroke, the loops at stroke ends, and the smallest size the print can shrink to (it grows rather than letting lines overlap). Only where strokes meet at a junction may they touch, so they join. For chocolate, the line width is the needle and the flow is set for a bead exactly that wide and one layer tall, so a gap of 0 puts beads side by side, just touching, without overlapping. A little gap (0.5 mm to start) leaves room for chocolate that spreads before it sets: raise it if beads merge, lower it if you want them to touch. Base and Infill at 100% density work the same way (rows one line width apart). For a pen drawing, the line width is the pen and the gap is only how much white you want between strokes.</p>
+      </div>
+      <div class="row" id="pathRow">
+        <div class="lab"><span class="name">Path</span></div>
+        <div class="seg" role="radiogroup" aria-label="Path shape">
+          <input type="radio" name="loop" id="loopClosed" value="closed" checked><label for="loopClosed">Closed loop<small>ends where it starts</small></label>
+          <input type="radio" name="loop" id="loopOpen" value="open"><label for="loopOpen">Open<small>separate start and end</small></label>
+        </div>
+      </div>
+      <div class="row" id="looseRow">
+        <div class="lab"><label for="loose">Loose ends</label></div>
+        <select id="loose">
+          <option value="0">Loop back along the stroke</option>
+          <option value="2" selected>Connect across when much shorter</option>
+          <option value="1.2">Connect across whenever shorter</option>
+        </select>
+        <p class="hint help">The line can't stop or go back over itself, so it comes back from every stroke end as a narrow loop: out on one side, round a small loop, back on the other, one line spacing apart. A short connector, a straight strand across to a nearby loose end, can replace the way back (the line still doesn't stop).</p>
+      </div>
+      <div class="row" id="cornerRow">
+        <div class="lab"><label for="corner">Round corners</label><span class="val" id="cornerVal">off</span></div>
+        <input type="range" id="corner" min="0" max="50" value="0">
+        <p class="hint help" id="cornerHint">Rounds sharp corners in the drawing to at least this radius, so the needle never turns tighter. Stroke-end loops, junctions and connectors keep their shape.</p>
+      </div>
+      <div class="row">
+        <div class="lab"><label for="simplify">Export simplification</label><span class="val" id="simplifyVal"></span></div>
+        <input type="range" id="simplify" min="0" max="100" value="10">
+      </div>
+      <div class="row">
+        <div class="lab"><label for="uncross">Crossings</label><span class="val" id="uncrossVal"></span></div>
+        <select id="uncross">
+          <option value="0">Keep them (pure Fourier curve)</option>
+          <option value="30">Remove where the line doubles back</option>
+          <option value="90" selected>Remove all</option>
+        </select>
+        <p class="hint help">Removing a crossing reverses a short stretch of the line so the strands turn back instead of crossing. "Remove all" also keeps strands slightly apart; the gap between lines sets the real gap.</p>
+      </div>
+
+    </section>
+
+    <section class="card design-only" aria-labelledby="h-size">
+      <h2 id="h-size">Size</h2>
+      <div class="row" id="sizeRow">
+        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo"></span></div>
+        <div class="size-track">
+          <input type="range" id="sizeSlider" min="0" max="1000" value="500" aria-describedby="sizeHint">
+          <div class="size-marks" id="sizeMarks" aria-hidden="true"></div>
+        </div>
+      </div>
+      <div class="two" id="sizeBoxes">
+        <label class="field"><span>Width (mm)</span><input type="number" id="outW" min="1" step="any" value="100"></label>
+        <label class="field"><span>Height (mm)</span><input type="number" id="outH" min="1" step="any"></label>
+      </div>
+      <div class="text-only two" id="capRow">
+        <label class="field" title="Linked to the size: changing one changes the other"><span>Letter height (mm)</span><input type="number" id="capH" min="1" step="0.5" value="15"></label>
+      </div>
+      <p class="hint text-only" id="capHint"></p>
+      <div class="row" id="fitBoxRow">
+        <div class="lab"><span class="name">Fit inside a box</span></div>
+        <div class="inline"><input type="number" id="fitW" min="1" step="any" placeholder="width" aria-label="Box width (mm)"><span>×</span><input type="number" id="fitH" min="1" step="any" placeholder="height" aria-label="Box height (mm)"><span>mm</span><button class="btn" type="button" id="fitBtn">Fit</button></div>
+      </div>
+      <p class="hint warn" id="driftHint" hidden></p>
+      <p class="hint" id="sizeHint">Drag to scale the print, type a width or height, or fit it inside a box. It can't go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. Aspect ratio stays locked.</p>
+    </section>
+
+    <section class="card design-only" aria-labelledby="h-fit">
+      <h2 id="h-fit">Fit <span id="fitinfo"></span></h2>
+      <div class="row">
+        <div class="lab"><label for="terms">Complexity (terms)</label><span class="val" id="termsVal"></span></div>
+        <div class="inline"><input type="range" id="terms" min="0" max="1000" value="600"><button class="btn" type="button" id="auto" title="Fewest terms that keep 95% of the line within about a third of a traced pixel of its path">Auto</button></div>
+      </div>
+      <canvas class="chart" id="errChart" aria-label="Error versus number of terms"></canvas>
+      <div class="readouts">
+        <div title="How far the drawn line strays from the path it was fitted to (the strokes, their doubled strands and loops): half stray plus missing"><b id="rScore">–</b><small>error (mm)</small></div>
+        <div><b id="rStray">–</b><small>stray (mm)</small></div>
+        <div><b id="rMiss">–</b><small>missing (mm)</small></div>
+      </div>
+      <div class="inline">
+        <button class="btn" type="button" id="optBtn" title="Try tracing settings and keep the printable result closest to the image">Optimize tracing</button>
+        <span class="hint" id="optInfo">Tries tracing settings; your size, needle and painted areas stay as they are. <span class="slow">Can take a minute.</span></span>
+      </div>
+    </section>
+
+    <section class="card plot-only" aria-labelledby="h-plot">
+      <h2 id="h-plot">2D plot <span id="plotInfo"></span></h2>
+      <p class="hint help">For a pen plotter (the AxiDraw, through Saxi) and flat files. The pen can lift and go over a line twice, so this is the traced drawing itself: one stroke per line, no doubled strands or stroke-end loops, still one continuous line.</p>
+      <div class="three">
+        <label class="field"><span>Paper</span><select id="paper"><optgroup label="ISO"><option value="a6">A6 · 105 × 148</option><option value="a5">A5 · 148 × 210</option><option value="a4" selected>A4 · 210 × 297</option><option value="a3">A3 · 297 × 420</option><option value="a2">A2 · 420 × 594</option><option value="a1">A1 · 594 × 841</option></optgroup><optgroup label="US"><option value="letter">Letter · 8.5 × 11 in</option><option value="legal">Legal · 8.5 × 14 in</option><option value="tabloid">Tabloid · 11 × 17 in</option></optgroup><optgroup label="Drawing pads"><option value="6x8">6 × 8 in</option><option value="9x12">9 × 12 in</option><option value="11x14">11 × 14 in</option><option value="18x24">18 × 24 in</option></optgroup><optgroup label="Other"><option value="plate">Printer plate</option><option value="custom">Custom</option></optgroup></select></label>
+        <label class="field"><span>Orientation</span><select id="paperOrient"><option value="landscape" selected>Landscape</option><option value="portrait">Portrait</option></select></label>
+        <label class="field"><span>Margin (mm)</span><input type="number" id="paperMargin" min="0" max="100" step="1" value="20"></label>
+      </div>
+      <div class="three" id="paperCustomRow" hidden>
+        <label class="field"><span>Width (mm)</span><input type="number" id="paperW" min="20" max="2000" step="1" value="210"></label>
+        <label class="field"><span>Height (mm)</span><input type="number" id="paperH" min="20" max="2000" step="1" value="297"></label>
+      </div>
+      <div class="three">
+        <label class="field"><span>Pen 1 width (mm)</span><input type="number" id="penW" min="0.05" max="5" step="0.05" value="0.5"></label>
+        <label class="field"><span>Pen 1 colour</span><input type="color" id="penColor" value="#111111"></label>
+      </div>
+      <p class="hint" id="pageHint"></p>
+    </section>
+
+    <section class="card plot-only" aria-labelledby="h-fills">
+      <h2 id="h-fills">Fills <span id="penFillInfo"></span></h2>
+      <div class="pens" id="pens">
+        <p class="hint help" id="penHelp">Pick a pen, then click a shape on the page to fill it; click again to clear. Each pen is its own layer in the SVG, for changing pens in Saxi. Spacing = pen width fills solid.</p>
+        <label class="check"><input type="checkbox" id="showShapes" checked> <span>Show shapes</span></label>
+        <div class="row" id="gapRow">
+          <div class="lab"><label for="gapClose">Close gaps</label><span class="val" id="gapCloseVal">off</span></div>
+          <input type="range" id="gapClose" min="0" max="100" value="0">
+          <p class="hint help">Where a line stops short of another, a bridge (dashed) closes the gap so the shapes split there. Bridges only bound the fills unless you draw them.</p>
+        </div>
+        <label class="check" id="drawBridgesF"><input type="checkbox" id="drawBridges"> <span>Draw bridges</span><small class="hint">&nbsp;with Pen 1</small></label>
+        <div class="row" id="minShapeRow">
+          <div class="lab"><label for="minShape">Smallest shape</label><span class="val" id="minShapeVal">off</span></div>
+          <input type="range" id="minShape" min="0" max="100" value="0">
+          <p class="hint help">Shapes smaller than this join the neighbouring shape they share the most edge with, so slivers at junctions and inside small letters don't need clicking.</p>
+        </div>
+        <div id="penList"></div>
+        <div class="pen-actions"><button class="btn mini" type="button" id="addPen">+ Add pen</button>
+          <button class="btn mini" type="button" id="autoColour" title="Give each shape the fill pen closest in colour to the image there; white shapes stay empty. Set the pen colours to match your real pens first.">Colour from image</button></div>
+        <p class="status" id="autoColourMsg" role="status"></p>
+      </div>
+
+    </section>
+
+    <section class="card plot-only" aria-labelledby="h-pexport">
+      <h2 id="h-pexport">Export</h2>
+      <label class="check"><input type="checkbox" id="smooth"> Smooth curves</label>
+      <div class="inline"><span class="spacer" style="flex:1"></span><button class="btn primary" type="button" id="exportBtn">Export SVG for Saxi</button></div>
+      <p class="hint help">The page at the paper size in mm, the drawing at its size from the Trace tab, centred within the margins. Pen 1 (the drawing) and each fill pen are separate Inkscape layers with their own stroke colour, so Saxi can split them by group or by colour. Saxi sets the pen speeds. In Saxi pick the same paper; if your Saxi build scales drawings to its margins, the size will follow Saxi.</p>
+      <p class="status" id="exportMsg" role="status"></p>
+    </section>
+
+    <section class="card notes" aria-labelledby="h-notes">
+      <h2 id="h-notes">Suggestion box <span class="hval" id="notesCount"></span></h2>
+      <form class="note-form" id="noteForm" autocomplete="off">
+        <input type="text" id="noteIn" maxlength="500" aria-label="Suggestion" placeholder="An idea, a bug, anything to improve… (Enter to save)" aria-describedby="noteHelp">
+      </form>
+      <p class="status" id="noteMsg" role="status"></p>
+      <ul class="note-list" id="noteList"></ul>
+      <p class="hint" id="noteHelp">Start with "bug:" or "idea:" to say which it is. Tick a note when it's done. Notes are <span id="notesWhere">kept in this browser</span>. <button class="btn mini" type="button" id="notesCopy">Copy open notes</button></p>
+    </section>
+  </div>
+
+  <details class="math" id="math">
+    <summary><span class="sum-title">The math</span><span class="sum-sub" id="mathSummary">Formula, terms and error score</span></summary>
+    <div class="math-body">
+
+      <div>
+        <h3>The series</h3>
+      </div>
+      <div class="formula">
+        <math display="block"><mtable columnalign="left"><mtr><mtd><mrow><mi>x</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>x</mi><mn>0</mn></msub><mo>+</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>a</mi><mi>k</mi></msub><mo>&#x2062;</mo><mo>cos</mo><mo stretchy="false">(</mo><mn>2</mn><mi>π</mi><mi>k</mi><mi>t</mi><mo>+</mo><msub><mi>φ</mi><mi>k</mi></msub><mo stretchy="false">)</mo></mrow></mtd></mtr><mtr><mtd><mrow><mi>y</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><msub><mi>y</mi><mn>0</mn></msub><mo>+</mo><munder><mo>∑</mo><mi>k</mi></munder><msub><mi>b</mi><mi>k</mi></msub><mo>&#x2062;</mo><mo>cos</mo><mo stretchy="false">(</mo><mn>2</mn><mi>π</mi><mi>k</mi><mi>t</mi><mo>+</mo><msub><mi>ψ</mi><mi>k</mi></msub><mo stretchy="false">)</mo></mrow></mtd></mtr><mtr><mtd><mrow><mi>z</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn><mspace width="1.2em"></mspace><mn>0</mn><mo>≤</mo><mi>t</mi><mo>&lt;</mo><mn>1</mn></mrow></mtd></mtr></mtable></math>
+      </div>
+      <p>Each axis is its own series. A term is one axis at one frequency: a circle of radius <i>a<sub>k</sub></i> (or <i>b<sub>k</sub></i>) turning <i>k</i> times while <i>t</i> runs from 0 to 1, starting at angle <i>φ<sub>k</sub></i> (or <i>ψ<sub>k</sub></i>). Chain the X circles and the tip's left–right position is <i>x</i>; chain the Y circles and the tip's height is <i>y</i>; the pen is where the two meet. Terms are ordered by size across both axes, so the slider keeps the strongest first. <i>z</i> is the height above the print surface: 0 for a flat print, and later the climb of a continuous spiral.</p>
+      <div><h3>Your series</h3></div>
+      <div class="series" id="series"></div>
+      <div class="table-wrap"><table id="terms-table"></table></div>
+      <div><h3>Error score</h3></div>
+      <div class="errline" id="errline"></div>
+      <p class="hint" id="errnote"></p>
+    </div>
+  </details>
+</div>
+
+<!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
+<script src="00-util.js"></script>
+<script src="01-image.js"></script>
+<script src="02-lines.js"></script>
+<script src="03-text.js"></script>
+<script src="04-walk.js"></script>
+<script src="05-fill.js"></script>
+<script src="06-fourier.js"></script>
+<script src="07-measure.js"></script>
+<script src="08-shape.js"></script>
+<script src="09-plate.js"></script>
+<script src="10-export.js"></script>
+<script src="11-stages.js"></script>
+<script src="12-models.js"></script>
+<script src="core.js"></script>
+<script src="fonts.js"></script>
+<script src="settings.js"></script>
+<script src="js/state.js"></script>
+<script src="js/ui.js"></script>
+<script src="js/config.js"></script>
+<script src="js/engine-bridge.js"></script>
+<script src="js/source.js"></script>
+<script src="js/pipeline.js"></script>
+<script src="js/preview.js"></script>
+<script src="js/tools.js"></script>
+<script src="js/readouts.js"></script>
+<script src="js/controls.js"></script>
+<script src="js/export.js"></script>
+<script src="js/optimize.js"></script>
+<script src="js/pieces.js"></script>
+<script src="js/views.js"></script>
+<script src="js/zoom.js"></script>
+<script src="js/layers.js"></script>
+<script src="js/testprint.js"></script>
+<script src="js/plot.js"></script>
+<script src="js/model.js"></script>
+<script src="js/notes.js"></script>
+<script src="js/history.js"></script>
+<script src="js/main.js"></script>
+
+</body>
+</html>

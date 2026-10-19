@@ -1,0 +1,62 @@
+/* Unbroken — theme
+ *
+ * Everything that sets the look of the app is here, so restyling (your brand colours, a chocolate-shop palette,
+ * larger text) means editing this one file. Colours are set twice: once for light mode and once for dark mode (used
+ * when the computer is in dark mode). Save and reload to see changes. The rest of the styling is in app.css.
+ */
+:root {
+  /* ---------- Dials: 1 is the standard look. Try 0 for square corners, 1.15 for bigger text, 0.85 for a denser layout. */
+  --corner: 1;                 /* roundness of corners on cards, buttons, menus */
+  --text: 1;                   /* size of all text */
+  --space: 1;                  /* padding and gaps around and between things */
+
+  /* ---------- Fonts (loaded from Google Fonts in index.html; system fonts are used if they don't load) */
+  --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;   /* the title */
+  --font-body: "IBM Plex Sans", system-ui, -apple-system, "Segoe UI", sans-serif; /* everything else */
+  --font-mono: "IBM Plex Mono", ui-monospace, "SF Mono", Menlo, monospace;        /* numbers and readouts */
+
+  /* ---------- Colours: light mode */
+  --paper: #eef1f4;            /* page background */
+  --surface: #ffffff;          /* cards, menus, the preview */
+  --ink: #15181e;              /* text */
+  --muted: #5a6371;            /* secondary text, hints */
+  --rule: #d6dce3;             /* borders and dividers */
+  --grid: #e3e8ee;             /* preview grid */
+  --accent: #1d58c9;           /* buttons, links, highlights, the traced line */
+  --accent-soft: #dbe5f8;      /* soft highlight behind selected items */
+  --warn: #b5541f;             /* warnings and problems */
+  --good: #227a4c;             /* "fits", "ok" */
+  --choc: rgba(92, 52, 28, 0.88);   /* printed chocolate line; replaced by the chosen chocolate's colour (settings.js) */
+
+  /* preview overlays */
+  --zone-cross: rgba(60, 170, 90, 0.28);      /* painted "crossing areas" */
+  --zone-lane: rgba(40, 120, 230, 0.26);      /* painted "connector paths" */
+  --zone-erase: rgba(120, 120, 120, 0.5);     /* brush while rubbing out a painted area */
+  --drift: rgba(232, 120, 40, 0.42);          /* where the line was pushed off the drawing to keep the spacing */
+  --plate-fit: rgba(60, 170, 90, 0.12);       /* a copy's footprint that fits on the plate */
+  --plate-off: rgba(200, 80, 30, 0.18);       /* a copy's footprint that doesn't */
+
+  /* "Draw your own" pad: kept paper-like in both modes, since it stands for a sheet of paper */
+  --pad-paper: #ffffff;
+  --pad-ink: #111111;
+  --pad-hint: #8a93a0;
+
+  /* shadows */
+  --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.14);
+  --shadow-toast: 0 4px 14px rgba(0, 0, 0, 0.18);
+}
+
+/* ---------- Colours: dark mode. Two copies of the same values: the first follows the computer's setting, the second
+   is for pages that force dark mode with data-theme="dark". Keep them the same. */
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #0e1115; --surface: #161a20; --ink: #e7eaee; --muted: #959eab; --rule: #2a3039; --grid: #1c2129;
+    --accent: #7aa2ff; --accent-soft: #1f2a44; --warn: #e88a55; --good: #5cc28a; --choc: rgba(214, 160, 120, 0.9);
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #0e1115; --surface: #161a20; --ink: #e7eaee; --muted: #959eab; --rule: #2a3039; --grid: #1c2129;
+  --accent: #7aa2ff; --accent-soft: #1f2a44; --warn: #e88a55; --good: #5cc28a; --choc: rgba(214, 160, 120, 0.9);
+  color-scheme: dark;
+}
