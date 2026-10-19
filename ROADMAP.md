@@ -43,14 +43,9 @@ Last sorted: 18 October 2026 (v97: the Suggestion box notes of 18 October). Deci
   pieces of different sizes, `UNB.plateLayoutPieces`); drawings and models still print copies of one design.
 - A text's pieces use the automatic term count and aren't shown on the Trace tab (it draws the text joined, as the
   2D tab plots it). If a piece needs looking after on its own, show the pieces there too.
-- **The 4000-term limit** (Suggestion box, 18 October: why is it there?). Only busy photos reach it: at 4000 terms
-  their line stays up to 0.1–0.2 mm off its traced path (95th percentile), and they'd need 6000–8000 to come within
-  the tolerance. Working the terms out is cheap at any count (about 50 ms for every count up to 16 000), so the limit
-  isn't about speed any more; it dates from the early versions, when only the animation and the formula grew with it.
-  Decide whether to raise it to what the samples allow (16 384); drawings and lettering are unaffected either way.
 - Code: read the controls once per run (DESIGN.md step 4), then ES modules (step 6), as commits after the GitHub move.
 
-Done since the last sort: v92's review fixes (painted areas after a re-trace, cancelling stale layer runs, a saved
+Done since the last sort: the 4000-term limit lifted to what the samples allow (v99, 19 October); v92's review fixes (painted areas after a re-trace, cancelling stale layer runs, a saved
 model design matched by its model, the ready list from the 3D tab, the test print's range, travel speed without
 retraction, the spectrum sort), sparse Lines infill in small parts, Z speeds as printer settings; before that plate
 estimates (metres, minutes, chocolate per copy and plate, cartridge warning), the test print, the ready list, cut-off,

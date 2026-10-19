@@ -155,7 +155,8 @@
       tagS,
       jumpS,
       connRuns: runs,
-      Nmax: Math.min(sp.order.length, filled ? 30000 : 4000),
+      // every term the samples allow (lines are sampled at most 16,384 times; filled areas up to 30,000 terms)
+      Nmax: Math.min(sp.order.length, filled ? 30000 : 16384),
       filled,
       skipped,
       tooFine,

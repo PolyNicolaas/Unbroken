@@ -3,6 +3,14 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v99 · 2026-10-19
+
+- **The 4000-term limit is gone.** A line can now use as many terms as its samples allow (up to 16,384; filled areas
+  keep their 30,000), so busy photos and fine pencil drawings come as close to their traced path as everything else.
+  On the astronaut sample traced as outlines the line used 6677 terms instead of stopping at 4000, and its worst 5%
+  came in from 0.12 mm to 0.07 mm off the path. Drawings and lettering need far fewer terms and are unchanged; working
+  the terms out is about as fast at any count. The error chart marks 10000 when it reaches that far. 3D models too.
+
 ## v98 · 2026-10-18
 
 - **Two new fonts for lettering.** **Chocolate (choc OS lettering)**: Nicolaas's font made from choc OS's text, where

@@ -336,7 +336,7 @@
     const { N, curve: c } = UNB.autoTerms(
         sp.ax,
         sp.order,
-        Math.min(sp.order.length, o.fill ? 30000 : 4000),
+        Math.min(sp.order.length, o.fill ? 30000 : 16384),
         null,
         false,
         o.tol || 0.05
