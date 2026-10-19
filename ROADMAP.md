@@ -59,6 +59,10 @@ the v91 clean-up. Cost per print waits for the chocolate database (PLAN.md).
 
 ## Later
 
+- **Clay printers** (planned 19 October): add clay (paste-extrusion) 3D printers alongside the choc mate 2. Same
+  limitation as chocolate: the flow can't be stopped or lifted, so every print stays one continuous line, supports
+  included, with the minimum gap set by the nozzle. Needs a printer profile per clay printer (bed, nozzles, start and
+  end G-code, speeds, `source/printer/<name>/`) and a materials list for clay next to the chocolates in `settings.js`.
 - Sending the file straight to the printer (not for now, 17 October): the choc mate 2's start lines are Repetier-Server
   host commands, so its upload API is the likely route; download and copy over until then.
 - **A design database** (planned 17 October): each design gets a project number, kept for life and added to its file

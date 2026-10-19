@@ -5,6 +5,45 @@
 Traces an image into one continuous line built from a Fourier series (chained rotating circles),
 scores the fit, and exports it for pen plotters (the AxiDraw through Saxi) and chocolate 3D printers.
 
+## Overview
+
+Unbroken turns a picture, typed text or a 3D model into a single unbroken line, and writes that line out as
+printer-ready G-code or a plotter drawing.
+
+**Why one line?** A chocolate printer can't stop the flow mid-print and can't lift the nozzle, so every move it makes
+leaves chocolate behind. A normal slicer's travel moves and separate strokes don't work. Unbroken plans the whole design
+as one continuous path that never crosses itself, never goes back over a line it has laid, and keeps a minimum gap
+(about one nozzle width) between neighbouring lines so the chocolate doesn't merge. It also replaces the printer
+maker's paid slicer (choc OS) for these prints.
+
+**What it does**
+
+- **Sources:** images (photos, drawings, logos), text in single-stroke fonts, and 3D models (STL) sliced into layers.
+- **Tracing:** centreline or outline tracing with optional hatch, cross-hatch or squiggle shading, then a
+  non-crossing tour of every stroke, fitted with a Fourier series per axis (X, Y and Z).
+- **Printing (3D tab):** G-code for the choc mate 2 with needle size, line spacing, layers, infill, supports built
+  into the same line, and several copies on one plate, each finished before the next starts.
+- **Drawing (2D tab):** SVG for the AxiDraw through Saxi, or DXF, on standard paper sizes.
+- **Checks:** an error score in mm, the closest gap between lines, print-safety checks, and a test suite that runs
+  before every build.
+- Runs in the browser (`web-app/index.html`) or as a Mac desktop app (`desktop/`).
+
+**Printers**
+
+| Printer | Status |
+|---|---|
+| choc mate 2 (chocolate) | Supported: profile in `source/printer/choc-mate-2/` |
+| AxiDraw pen plotter (via Saxi) | Supported: 2D SVG export |
+| Clay printers | Planned |
+
+**Planned: clay printers.** Unbroken will add clay (paste-extrusion) 3D printers. They have the same limitation as the
+chocolate printer: the material can't be stopped or lifted mid-print, so every print must be one continuous line,
+with supports built into that line and a minimum gap set by the nozzle width. The same engine and rules apply; what
+changes is a printer profile (bed size, nozzle sizes, start and end G-code, speeds) and material settings in place of
+the chocolate list. See [`ROADMAP.md`](ROADMAP.md).
+
+**Status:** beta. Prints from the choc mate 2 are working well; settings and file formats may still change.
+
 ## Folder layout
 
 ```
