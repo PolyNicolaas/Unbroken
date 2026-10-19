@@ -6,68 +6,93 @@ ideas and bugs start in the **Suggestion box** at the bottom of every tab; from 
 file (and ticked off in the box). Every item says who it's for and what it's used for: an idea without a use stays in
 "Maybe later".
 
-Last sorted: 18 October 2026 (v97: the Suggestion box notes of 18 October). Decisions made together are in PLAN.md.
+Last sorted: 19 October 2026 (v99: grouped into areas; the data and accounts plan added). Decisions made together are in PLAN.md.
 
 ## Now
 
-- **Side-by-side checks of v92 on the Mac:** the suite (58 tests) and the model and lettering challenges passed
-  before the sync. Still to do there: the six drawing challenges (their SVGs are only on the Mac), then `compare.js`
-  against the v91 run. Expected to change: G-code with a travel speed set and retraction off, and Lines infill below
-  100% (and solid Lines fills of shapes whose rows split, like a heart's two lobes). Everything else should come out
-  byte for byte the same.
+- **Map the big picture** (19 October): the areas below, and the data and accounts plan in
+  [`docs/DATA-PLAN.md`](docs/DATA-PLAN.md). Its decisions for Nicolaas come first.
 - **Prove the tracer's own G-code on the choc mate 2** (v66–v67 follow choc OS's files: purge line, retraction and
   wipe, E per mm from the needle and the 50 cc syringe, copies one at a time, at least 20 s per layer). The goal is
   to stop paying for choc OS; its DXF upload stays as a fallback (3D tab, "DXF for choc OS") until then. Worth trying
   on the printer while at it: choc OS's 120 mm/s for the Z moves (settings.js `zTravelSpeed`, `zApproachSpeed`).
+  *Prints were working really well on 18 October: confirm and close.*
+- **Side-by-side checks on the Mac** (written for v92): the six drawing challenges (their SVGs are only on the Mac),
+  then `compare.js` against the last run. *Now v99: replace with a fresh baseline run.*
 
-## Next
+## 1 · Bugs and quality
 
-- Left from the code review of 16 October (docs/history/REVIEW.md):
-  - Tests: cover painting areas, Draw your own, image prep, shading, erase, the test print's speed / gap / flow kinds,
-    the ready list's second-click export, height staying put on a chocolate or printer change, the per-card
-    small-areas setting (review test 4); tighten the loose checks in A12, E14, E28 and A22 (test 5); move the timing
-    tests A02, E13 and E26 into their own group (test 7).
+Known bugs:
+- Solid fills: where a second filled area is joined into the wall, the join can cross the line once or twice before
+  the clean-up step untangles it (found measuring v92's infill; the same before v92). Join it on a stretch where it
+  can't.
+- Suggestion box on GitHub Pages: notes stay in the browser that typed them, so notes from friends never reach this
+  file. Fixed for good by the shared notes in DATA-PLAN.md stage 2; until then, an "Export notes" button.
+
+Tests:
+- Left from the code review of 16 October (docs/history/REVIEW.md): cover painting areas, Draw your own, image prep,
+  shading, erase, the test print's speed / gap / flow kinds, the ready list's second-click export, height staying put
+  on a chocolate or printer change, the per-card small-areas setting (review test 4); tighten the loose checks in A12,
+  E14, E28 and A22 (test 5); move the timing tests A02, E13 and E26 into their own group (test 7).
 - Tests for v92: painted areas at the same width after a re-trace at a new resolution; the ready list's Trace-tab
   lines switching tab; the test print's range following a chocolate change; a saved model design opened with another
   model loaded; nudging a model's height five times slicing once; the travel speed without retraction and the Z speeds
   (E28; E14 can check `zTravelSpeed` / `zApproachSpeed` like the other printer fields); the spectrum order unchanged
   (E17); sparse Lines infill in a small heart (rows in both lobes, row ends a line spacing from the ring); a design
   saved in mm/min opening as mm/s.
-- Solid fills: where a second filled area is joined into the wall, the join can cross the line once or twice before
-  the clean-up step untangles it (found measuring v92's infill; the same before v92). Join it on a stretch where it
-  can't.
+- A test for the term count above 4000 (v99): a busy image reaching the tolerance.
+
+## 2 · Printing
+
 - Time per layer for small models: every slice is its own lap, so small layers can't take 20 s even at the slowest
   speed (the ready list warns). Decide between a cooling pause off to the side and a bigger design (copies stay one
   at a time).
 - Several different designs on one plate: a text's lines can print as separate pieces since v97 (the plate packs
   pieces of different sizes, `UNB.plateLayoutPieces`); drawings and models still print copies of one design.
-- A text's pieces use the automatic term count and aren't shown on the Trace tab (it draws the text joined, as the
-  2D tab plots it). If a piece needs looking after on its own, show the pieces there too.
-- Code: read the controls once per run (DESIGN.md step 4), then ES modules (step 6), as commits after the GitHub move.
-
-Done since the last sort: the 4000-term limit lifted to what the samples allow (v99, 19 October); v92's review fixes (painted areas after a re-trace, cancelling stale layer runs, a saved
-model design matched by its model, the ready list from the 3D tab, the test print's range, travel speed without
-retraction, the spectrum sort), sparse Lines infill in small parts, Z speeds as printer settings; before that plate
-estimates (metres, minutes, chocolate per copy and plate, cartridge warning), the test print, the ready list, cut-off,
-support for overhangs (flared skirt, thin wall), connectors through the middle of 3D models, the challenge runner, and
-the v91 clean-up. Cost per print waits for the chocolate database (PLAN.md).
-
-## Later
-
+- STL: a solid top skin over sparse fill.
+- Split a complex model into printable parts to glue (PLAN.md; first test: the tree).
 - **Clay printers** (planned 19 October): add clay (paste-extrusion) 3D printers alongside the choc mate 2. Same
   limitation as chocolate: the flow can't be stopped or lifted, so every print stays one continuous line, supports
   included, with the minimum gap set by the nozzle. Needs a printer profile per clay printer (bed, nozzles, start and
   end G-code, speeds, `source/printer/<name>/`) and a materials list for clay next to the chocolates in `settings.js`.
 - Sending the file straight to the printer (not for now, 17 October): the choc mate 2's start lines are Repetier-Server
-  host commands, so its upload API is the likely route; download and copy over until then.
-- **A design database** (planned 17 October): each design gets a project number, kept for life and added to its file
-  names (`welcome_084_2x_U0007-gcode.zip`), with the details stored against that number rather than in the files:
-  the design file, app version, needle, layer height, height, chocolate, speed, copies, and how the print came out.
-  File names already have the parts that don't need the database (design, needle, copies; v93).
-- STL: a solid top skin over sparse fill.
-- Split a complex model into printable parts to glue (PLAN.md; first test: the tree).
+  host commands, so its upload API is the likely route; download and copy over until then. Best after the design
+  record (DATA-PLAN.md), so each print is tracked.
+
+## 3 · Tracing, drawing and lettering
+
+- A text's pieces use the automatic term count and aren't shown on the Trace tab (it draws the text joined, as the
+  2D tab plots it). If a piece needs looking after on its own, show the pieces there too.
+- More fonts for lettering (raised 18 October; Chocolate and Dune Rise came in v98).
+
+## 4 · Data and accounts (the big picture)
+
+The plan is in [`docs/DATA-PLAN.md`](docs/DATA-PLAN.md): every design kept as one record (source, trace, G-code,
+metadata, who made it), in three stages.
+
+- **Stage 1, the design bundle** (no server): one `.unbroken` file with a manifest, the source, the trace and the
+  outputs; G-code headers stamped with the design number and settings; a design number on every file
+  (`welcome_084_2x_U0007-gcode.zip`, planned 17 October).
+- **Stage 2, accounts and a cloud library**: sign-in, My designs with revisions, the Suggestion box shared by every
+  user. Likely Supabase in front of the GitHub Pages site.
+- **Stage 3, the workshop**: the chocolate and clay database with prices (grams and cost per print), print recipes,
+  the print log with ratings and photos, sharing, personalized batches (PLAN.md).
+
+## 5 · Code and publishing
+
+- Code: read the controls once per run (DESIGN.md step 4), then ES modules (step 6), as commits after the GitHub move.
 - Speed-ups found in the audit: the outline join in `modelLayer`, `minBox`, the pen-fill stroke order, the connector
   searches in `buildWalk` (see docs/history/AUDIT.md).
+- Publish GitHub Pages automatically on every push to `main` (a GitHub Action, after the tests pass); for now each
+  update is built and published by hand.
+
+Done since the last sort: the desktop app taken out for now (19 October, see Removed); the 4000-term limit lifted to
+what the samples allow (v99, 19 October); the move to GitHub and the GitHub Pages site (19 October); v92's review
+fixes (painted areas after a re-trace, cancelling stale layer runs, a saved model design matched by its model, the
+ready list from the 3D tab, the test print's range, travel speed without retraction, the spectrum sort), sparse Lines
+infill in small parts, Z speeds as printer settings; before that plate estimates (metres, minutes, chocolate per copy
+and plate, cartridge warning), the test print, the ready list, cut-off, support for overhangs (flared skirt, thin
+wall), connectors through the middle of 3D models, the challenge runner, and the v91 clean-up.
 
 ## Maybe later (each needs a real use first)
 

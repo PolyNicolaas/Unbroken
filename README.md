@@ -225,6 +225,7 @@ Tests E23 (slicing and fitting), E29 (cutting, outside only, overlapping shells)
 
 - [`CHANGELOG.md`](CHANGELOG.md): what each published version changed (the page shows its version next to the title).
 - [`ROADMAP.md`](ROADMAP.md): what's next, what might come later (with the use that would justify it), and what was removed. The one list of open work.
+- [`docs/DATA-PLAN.md`](docs/DATA-PLAN.md): the plan for keeping every design as one record (source, trace, G-code, metadata, who made it), accounts and security.
 - [`PLAN.md`](PLAN.md): decisions made with Nicolaas, the rules (one line per copy; the technique's limits), later and not doing.
 - [`DESIGN.md`](DESIGN.md): how the code is meant to be built: the principles, where it is over- or under-engineered, and the plan.
 - [`docs/history/`](docs/history/): the October 2026 code audit (AUDIT.md) and code review (REVIEW.md), as written. Their open items are carried in ROADMAP.md.
