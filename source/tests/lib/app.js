@@ -1,0 +1,50 @@
+// Browser helpers for the app tests.
+// SETTLE (installed in every browser context by run.js): counts the app's short timers (debounces, up to 1.5 s) and
+// asks its background engines whether a job is running, so a test can wait until the app has finished its work
+// instead of sleeping for a guessed time. window.__settled() is true when nothing is pending.
+const SETTLE = () => {
+  const live = new Set(), st0 = window.setTimeout, ct0 = window.clearTimeout;
+  window.setTimeout = function (fn, ms, ...a) {
+    const id = st0.call(window, function () { live.delete(id); return typeof fn === "function" ? fn.apply(this, arguments) : undefined; }, ms, ...a);
+    if (!(ms > 1500)) live.add(id);
+    return id;
+  };
+  window.clearTimeout = function (id) { live.delete(id); return ct0.call(window, id); };
+  const busy = (n) => { try { return !!(0, eval)(n).busy; } catch { return false; } };
+  window.__settled = () => live.size === 0 && !["PIPE", "LAY", "AUX", "OPT"].some(busy);
+};
+async function open(ctx, opts = {}) {
+  const context = await ctx.browser.newContext({ viewport: opts.viewport || { width: 1300, height: 1000 }, acceptDownloads: true });
+  const page = await context.newPage(), errors = [];
+  page.on("pageerror", (e) => errors.push(e.message + (process.env.STACK ? " " + e.stack : "")));
+  page.on("console", (m) => { if (m.type() === "error") errors.push("console: " + m.text()); });
+  if (opts.freezeProbe) await page.addInitScript(() => { window.__gaps = []; let last = performance.now(); setInterval(() => { const n = performance.now(); window.__gaps.push(n - last); last = n; }, 10); });
+  await page.goto(opts.url || ctx.url);
+  await idle(page, 300);
+  return { page, errors, close: () => context.close() };
+}
+// Wait until the app has finished: no debounce pending and no background job, three checks in a row 50 ms apart
+// (so a job that starts from an image load or a worker reply is caught). Waits at most `first` ms (up to 300) for
+// work to begin. Fails the test after 120 s instead of carrying on with half-finished work.
+async function idle(page, first = 300) {
+  await page.waitForTimeout(Math.min(first, 300));
+  if (await page.evaluate(() => typeof window.__settled === "function")) {
+    const t0 = Date.now();
+    for (let calm = 0; calm < 3;) {
+      if (Date.now() - t0 > 120000) throw new Error("the app never settled (120 s): a job or timer kept running");
+      calm = (await page.evaluate(() => window.__settled())) ? calm + 1 : 0; await page.waitForTimeout(50);
+    }
+    return;
+  }
+  let calm = 0;                                              // a page without SETTLE: the old "busy class stays off" check
+  for (let i = 0; i < 400 && calm < 4; i++) {
+    const busy = await page.evaluate(() => document.getElementById("chip").classList.contains("busy") || document.getElementById("box").classList.contains("working"));
+    calm = busy ? 0 : calm + 1; await page.waitForTimeout(150);
+  }
+}
+const chip = (page) => page.textContent("#chip");
+const terms = async (page) => +((await chip(page)).match(/(\d+) terms/) || [0, 0])[1];
+const errorMM = async (page) => +((await chip(page)).match(/error ([\d.]+) mm/) || [0, NaN])[1];
+async function setValue(page, sel, value, ev = "input") { await page.$eval(sel, (e, [v, t]) => { e.value = v; e.dispatchEvent(new Event(t, { bubbles: true })); }, [String(value), ev]); }
+async function longestFreeze(page, fn) { await page.evaluate(() => { window.__gaps = []; }); await fn(); return page.evaluate(() => Math.round(Math.max(0, ...window.__gaps))); }
+module.exports = { SETTLE, open, idle, chip, terms, errorMM, setValue, longestFreeze };

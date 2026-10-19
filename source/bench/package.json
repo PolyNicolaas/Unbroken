@@ -1,0 +1,6 @@
+{
+  "name": "unbroken-bench",
+  "private": true,
+  "description": "Trace-quality benchmark for source/engine/core.js (uses the test suite's shared trace; install ../tests first)",
+  "scripts": { "images": "python3 make_images.py", "bench": "node bench.js out" }
+}

@@ -1,0 +1,19 @@
+{
+  "name": "unbroken-tests",
+  "private": true,
+  "description": "Formal test suite for Unbroken (engine + web app). See README.md for the test plan.",
+  "scripts": {
+    "test": "node run.js engine",
+    "test:app": "node run.js app",
+    "test:all": "node run.js all",
+    "test:quick": "node run.js all --quick",
+    "plan": "node run.js --doc",
+    "images": "python3 ../bench/make_images.py",
+    "build": "node ../../web-app/build.js",
+    "test:fast": "node run.js fast"
+  },
+  "dependencies": {
+    "@napi-rs/canvas": "0.1.65",
+    "playwright": "1.47.2"
+  }
+}
