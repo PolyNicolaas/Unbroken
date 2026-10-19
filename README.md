@@ -5,6 +5,8 @@
 Traces an image into one continuous line built from a Fourier series (chained rotating circles),
 scores the fit, and exports it for pen plotters (the AxiDraw through Saxi) and chocolate 3D printers.
 
+**Try it in your browser:** https://polynicolaas.github.io/Unbroken/
+
 ## Overview
 
 Unbroken turns a picture, typed text or a 3D model into a single unbroken line, and writes that line out as
