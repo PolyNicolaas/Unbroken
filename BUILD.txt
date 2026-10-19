@@ -1,6 +1,6 @@
-Unbroken · web app build v98
-Built:  2026-10-19T14:32:38.830Z
-Tests:  60 of 60 tests passed
+Unbroken · web app build v99
+Built:  2026-10-19T15:13:19.424Z
+Tests:  48 of 48 tests passed (quick run)
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
@@ -15,13 +15,13 @@ Files (sha1, first 12):
   7e9bd7ea561b  08-shape.js
   e4d4bce6607a  09-plate.js
   33ce06ad72c0  10-export.js
-  361618121eb2  11-stages.js
-  3d8c8fd3f2ad  12-models.js
+  76a463479ba8  11-stages.js
+  59aaa64e2642  12-models.js
   2f3a67e8ab05  core.js
   efc3f0249a76  css/app.css
   7efa0c130b02  css/theme.css
   4a04df3953af  fonts.js
-  553270eb9f0f  index.html
+  bd8fca262ca1  index.html
   298054212331  js/config.js
   6dbe64907a0c  js/controls.js
   1b7b18d51a47  js/engine-bridge.js
@@ -35,7 +35,7 @@ Files (sha1, first 12):
   d0c26df92071  js/pieces.js
   87f4cd2f52e8  js/pipeline.js
   6e50c8623e7e  js/plot.js
-  2bbe1ec9ae38  js/preview.js
+  fc4489e24a60  js/preview.js
   d61b587f3303  js/readouts.js
   f394d84b7fe5  js/source.js
   78f5450a22d9  js/state.js
