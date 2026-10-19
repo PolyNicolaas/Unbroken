@@ -13,6 +13,40 @@ Unbroken itself doesn't have to hold the data. The app's job is to produce one c
 design; where that package is kept (a folder, a cloud library, a shared database) can change without touching the
 tracing engine.
 
+## Who it's for (decided 19 October)
+
+- **Now: Nicolaas.** He runs Unbroken, hosts it and owns the printers.
+- **Next: other people make designs that Nicolaas prints.** They need a way to save what they made and hand it in;
+  he needs it to arrive with everything attached and to move through a workflow until it's printed.
+- So there are two roles: the **owner** (Nicolaas: printers, materials, the print queue, the final say) and
+  **makers** (anyone he invites: make designs, submit them, see where they are). The owner is a maker too.
+
+## The workflow: from a design to a print
+
+```
+ Maker                              Owner (Nicolaas)
+ ─────                              ────────────────
+ 1 Make     design in Unbroken
+ 2 Save     design record (source, trace, settings, who)
+ 3 Submit   ───────────────────────► 4 Review   check it suits the technique
+                                        ├─ Needs changes ──► back to the maker, with a note
+                                        └─ Accepted
+                                     5 Prepare  pick printer, needle, chocolate; make the G-code
+                                     6 Queue    in the print queue, with copies and a due date
+                                     7 Print    the G-code stamped with design, revision, job
+                                     8 Log      date, outcome, rating, photo
+ 9 Done     sees "Printed" (and the photo) ◄─┘
+```
+
+Statuses a submission moves through: **Draft → Submitted → Needs changes / Accepted → Queued → Printing →
+Printed → Collected** (or **Declined**, with a reason). Each change is kept with who made it and when, so the
+history of a print can be read back.
+
+**The maker sends the design, never the G-code.** The owner makes the G-code from the design with his own printer,
+needle and chocolate settings. That keeps the machine safe (no G-code from outside reaches the printer) and the
+results consistent (the owner's recipes, not each maker's guesses). A maker sets what the piece looks like: the
+source, the trace, the size, the copies wanted; the owner sets how it's printed.
+
 ## Where things stand (v99)
 
 - **Design file** (`name.unbroken.json`, File → Save): the settings and the source image. The 3D model's mesh isn't
@@ -64,9 +98,12 @@ The G-code header gets the same essentials as comments (`; design U0007 rev 3`, 
 - Export stamps the G-code header and adds the export to the bundle's manifest.
 - A design number is made locally for now (date + counter); the database takes over numbering in stage 2.
 - A user name typed once (no login) goes into the manifest.
+- **Submit by file**: a maker's "Send for printing" saves the bundle with their name, contact and request (copies,
+  date wanted, a note) and offers to email it. The owner opens it; it goes into a **print queue** kept in his browser,
+  where he can review it, make the G-code and mark it printed. The workflow runs end to end before there's a server.
 
 Why first: it settles **what** is stored before deciding **where**. The bundle is the format stage 2 uploads, and
-it's useful straight away: one file holds everything about a print.
+it's useful straight away: one file holds everything about a print, and the first makers can send designs in.
 
 ### Stage 2: accounts and a cloud library
 
@@ -78,20 +115,25 @@ it's useful straight away: one file holds everything about a print.
   delete. Saving uploads the stage 1 bundle; files go to storage, metadata into tables.
 - **Offline still works**: with no sign-in the app saves bundles to disk as in stage 1. A signed-in user can upload
   local bundles later.
+- **Submissions online**: makers submit from the app; the owner gets an **inbox** (review, accept, ask for
+  changes, decline) and a **print queue** (order, due dates, copies, material). Makers see their designs' status;
+  email when it changes.
 - The Suggestion box moves into the same database, so notes from every user reach the roadmap.
 
 Tables, roughly:
 
 | Table | Holds |
 |---|---|
-| `profiles` | User id (from sign-in), display name, role (owner / friend / customer), created |
+| `profiles` | User id (from sign-in), display name, contact, role (owner / maker), created |
 | `designs` | Design number, owner, name, current revision, created / changed, visibility |
 | `revisions` | Design, revision number, manifest, app version, links to its files |
 | `files` | Revision, kind (source / design / trace / gcode / svg / dxf / photo), storage path, fingerprint, size |
 | `printers` | Printer profiles (choc mate 2, clay printers), versioned |
 | `materials` | Chocolates and clays: name, brand, settings, price per gram |
 | `recipes` | Saved 3D settings by name (the "print recipes" in PLAN.md) |
-| `prints` | Revision printed, printer, material, date, settings stamped, rating, notes, photo |
+| `jobs` | A submission: design revision, maker, request (copies, date wanted, note), status, owner's notes |
+| `job_events` | Each status change: job, from, to, who, when, note |
+| `prints` | Job (or the owner's own design), printer, material, date, settings stamped, rating, notes, photo |
 | `notes` | Suggestion box |
 
 ### Stage 3: the workshop
@@ -107,24 +149,32 @@ Tables, roughly:
 
 - **Sign-in by a provider, never our own passwords.** Magic links or Google / Apple sign-in.
 - **Private by default.** Each row and file belongs to its owner; the database's access rules (row-level security
-  in Supabase) enforce it on the server, not just in the page.
+  in Supabase) enforce it on the server, not just in the page. A maker sees only their own designs and jobs; the
+  owner sees everything submitted to him.
 - **Keys.** The public key the page needs can sit in the repo (that's its purpose); the service key never goes in the
   page or the repo.
 - **Invite-only to start.** Sign-up limited to people Nicolaas invites, until there's a reason to open it.
-- **G-code drives a machine.** Uploaded or shared G-code is checked before it's offered for printing: only the
-  commands Unbroken writes, inside the printer's bed and height, no unexpected host commands. The parser that reads
-  G-code back (`UNB.readGcode`) is the starting point.
+- **G-code drives a machine.** Makers never send G-code: the owner makes it from their design. Any G-code that
+  does come from outside (an old file, a shared one) is checked before it's offered for printing: only the commands
+  Unbroken writes, inside the printer's bed and height, no unexpected host commands. The parser that reads G-code
+  back (`UNB.readGcode`) is the starting point.
 - **Uploads** are size-limited and type-checked; images are re-encoded, not served as uploaded.
 - **Personal data kept small**: a display name and the sign-in email. Users can export everything they own and
   delete their account.
 - **Backups** of the database and storage, on a schedule.
 
-## Decisions for Nicolaas
+## Decisions
 
-1. **Who is it for, first?** Just you, you and friends (invite-only), or the public later? This sets how much of
-   stage 2 is needed and when.
-2. **Backend.** Supabase (recommended: SQL tables suit designs, prints and materials) or Firebase.
-3. **Stage 1 first?** Building the bundle and G-code stamping before any server (recommended).
-4. **Sharing.** Private only, or share-by-link from the start?
-5. **What "user info" means.** Just a name on each design, or profiles with a role (owner, friend, customer)?
-6. **Photos of prints.** Part of the print log from the start, or later?
+Made 19 October:
+- **For Nicolaas first**, hosted by him; other people's designs come in to be printed by him (owner and makers,
+  above).
+- **Stage 1 first**: the bundle, G-code stamping, and submit-by-file with a local print queue, before any server.
+
+Still open:
+1. **Backend** for stage 2: Supabase (recommended: SQL tables suit designs, jobs, prints and materials) or Firebase.
+2. **Where makers make designs**: in the same Unbroken page (one app, the owner's tools hidden from makers), or a
+   simpler "make a design" page for them.
+3. **What makers may change**: everything about the look, or only some (source, size, copies) with the owner's
+   tracing defaults?
+4. **Payment**, if makers are ever customers: out of scope until it's needed.
+5. **Photos of prints**: part of the print log from the start, or later?

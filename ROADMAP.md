@@ -68,13 +68,16 @@ Tests:
 ## 4 · Data and accounts (the big picture)
 
 The plan is in [`docs/DATA-PLAN.md`](docs/DATA-PLAN.md): every design kept as one record (source, trace, G-code,
-metadata, who made it), in three stages.
+metadata, who made it), in three stages. Decided 19 October: Unbroken is for Nicolaas first; other people (makers)
+will make designs he prints, so designs need a submit → review → queue → print → log workflow. Makers send the
+design, never G-code: the owner makes the G-code with his own printer and chocolate settings.
 
 - **Stage 1, the design bundle** (no server): one `.unbroken` file with a manifest, the source, the trace and the
   outputs; G-code headers stamped with the design number and settings; a design number on every file
-  (`welcome_084_2x_U0007-gcode.zip`, planned 17 October).
-- **Stage 2, accounts and a cloud library**: sign-in, My designs with revisions, the Suggestion box shared by every
-  user. Likely Supabase in front of the GitHub Pages site.
+  (`welcome_084_2x_U0007-gcode.zip`, planned 17 October); "Send for printing" (the bundle with the maker's
+  name and request) and a print queue in the owner's browser.
+- **Stage 2, accounts and a cloud library**: sign-in, My designs with revisions, online submissions with the owner's
+  inbox and print queue, the Suggestion box shared by every user. Likely Supabase in front of the GitHub Pages site.
 - **Stage 3, the workshop**: the chocolate and clay database with prices (grams and cost per print), print recipes,
   the print log with ratings and photos, sharing, personalized batches (PLAN.md).
 
