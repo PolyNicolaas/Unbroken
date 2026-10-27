@@ -286,3 +286,10 @@ p.hint.help { border-left: 2px solid var(--rule); padding-left: 0.6em; }
 /* the Art tab: the input in use shows its own card (art.js sets data-art) */
 body:not([data-art="picture"]) .art-picture, body:not([data-art="text"]) .art-text, body:not([data-art="pattern"]) .art-pattern, body:not([data-art="model"]) .art-model { display: none !important; }
 .seg.four { grid-template-columns: repeat(4, 1fr); }
+
+/* Image prep: grey levels, one row per grey (levels.js) */
+.level-list { display: grid; gap: 6px; margin: 8px 0 4px; }
+.level-row { display: grid; grid-template-columns: 22px 1fr auto; align-items: center; gap: 8px; }
+.level-swatch { width: 22px; height: 22px; border-radius: calc(4px * var(--corner)); border: 1px solid var(--rule); }
+.level-name { font-size: 0.85em; }
+.seg.mini label { padding: 4px 10px; font-size: 0.85em; }

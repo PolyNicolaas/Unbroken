@@ -8,26 +8,33 @@
     { bbox } = UNB._u; // shared helpers (00-util.js)
 
   // RGBA pixels → the working image, as the app does it: prepared gray (UNB.prep, then inverted for light lines on
-  // dark), the same blurred for tracing, and a gray RGBA copy for the preview. o: { prep, invert, blur (sigma, px) }.
+  // dark), the same blurred for tracing, and a gray RGBA copy for the preview. o: { prep, invert, blur (sigma, px),
+  // levels ({ count, smooth }: grey levels, UNB.levels; the picture becomes flat greys, not blurred) }. Returns gray,
+  // blurred, preview, levels (UNB.levels' result or null).
   // Runs in a worker so a big image doesn't freeze the page.
   UNB.stagePrep = function (rgba, w, h, o) {
-    const gray = UNB.prep(rgba, w, h, o.prep || {}),
-      N = w * h,
+    let gray = UNB.prep(rgba, w, h, o.prep || {});
+    const N = w * h,
       preview = new Uint8ClampedArray(4 * N);
     if (o.invert) for (let i = 0; i < N; i++) gray[i] = 255 - gray[i];
+    // grey levels: the picture as flat greys from here on (lab: level per pixel, for the line map and the fills)
+    const L = o.levels && o.levels.count >= 2 ? UNB.levels(gray, w, h, o.levels) : null;
+    if (L) gray = Float32Array.from(L.lab, (j) => L.tones[j]);
     for (let i = 0; i < N; i++) {
       const v = o.invert ? 255 - gray[i] : gray[i];
       preview[4 * i] = preview[4 * i + 1] = preview[4 * i + 2] = v;
       preview[4 * i + 3] = 255;
     }
-    return { gray, blurred: UNB.blur(gray, w, h, o.blur || 0), preview };
+    return { gray, blurred: L ? gray : UNB.blur(gray, w, h, o.blur || 0), preview, levels: L };
   };
 
   // image → line map, as the app does it: centerline or edges, then the selection mask and erasing.
-  // o: { mode: "centerline"|"edges", sens, split, selMask (Uint8Array or null), erase: [ops] }
+  // o: { mode: "centerline"|"edges", sens, split, selMask (Uint8Array or null), erase: [ops], levels ({ lab, edge }:
+  // grey levels, their edges instead: UNB.levelEdges) }
   UNB.stageLines = function (blurred, w, h, o) {
     let lines;
-    if (o.mode === "edges") {
+    if (o.levels) lines = UNB.levelEdges(o.levels.lab, w, h, o.levels.edge);
+    else if (o.mode === "edges") {
       const hi = 150 - o.sens * 1.8;
       lines = UNB.canny(blurred, w, h, hi * 0.4, hi);
       // o.split: packed-stroke splitting (default 0.1)

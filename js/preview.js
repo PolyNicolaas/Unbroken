@@ -545,7 +545,8 @@ function drawChart() {
     g.fillText(v === 0 ? "0" : v.toFixed(v < 0.1 ? 2 : v < 1 ? 1 : 0), L - 5 * dpr, y + 3.5 * dpr);
   }
   g.textAlign = "center";
-  for (const n of [10, 100, 1000, 10000].filter((n) => n >= 4 && n <= st.Nmax)) g.fillText(String(n), lx(n), H - 4 * dpr);
+  for (const n of [10, 100, 1000, 10000].filter((n) => n >= 4 && n <= st.Nmax))
+    g.fillText(String(n), lx(n), H - 4 * dpr);
   g.strokeStyle = css("--accent");
   g.lineWidth = 1.6 * dpr;
   g.beginPath();

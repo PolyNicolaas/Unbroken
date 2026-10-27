@@ -11,6 +11,8 @@ const DESIGN_IDS = [
   "srcImage",
   "srcText",
   "srcPattern",
+  "artForPrint",
+  "artForPlot",
   "srcModel",
   "textIn",
   "font",
@@ -36,6 +38,9 @@ const DESIGN_IDS = [
   "contrast",
   "bgTol",
   "flatten",
+  "levels",
+  "levelSmooth",
+  "levelModes",
   "lineW",
   "needle",
   "lineGapMM",
@@ -124,6 +129,7 @@ function designState() {
       sel: st.sel || null,
       erase: st.erase || [],
       start: st.start || null,
+      bgAt: st.bgAt || null,
       zones: st.zones,
       penFill: structuredClone(st.penFill),
       model: st.model
@@ -242,6 +248,7 @@ function applyDesign(d, src, imageSource, pics) {
     st.sel = structuredClone(s.sel || null);
     st.erase = structuredClone(s.erase || []);
     st.start = structuredClone(s.start || null);
+    st.bgAt = structuredClone(s.bgAt || null);
     st.zones = structuredClone(s.zones || { cross: [], lane: [] });
     st.zoneVer = (st.zoneVer || 0) + 1;
     st.zm = {};

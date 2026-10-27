@@ -1,12 +1,12 @@
-Unbroken · web app build v104
-Built:  2026-10-27T15:31:35.552Z
-Tests:  62 of 62 tests passed
+Unbroken · web app build v105
+Built:  2026-10-27T16:23:35.463Z
+Tests:  64 of 64 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
   0902e2e523fa  00-util.js
-  09a2dce576eb  01-image.js
-  0bbd905253f5  02-lines.js
+  7e44e48da503  01-image.js
+  04c33071a9c1  02-lines.js
   941b223d9657  03-text.js
   9c623d1c6a37  04-walk.js
   c434fcb30c2d  05-fill.js
@@ -15,35 +15,36 @@ Files (sha1, first 12):
   d0cc374de0d6  08-shape.js
   322bde11c0c0  09-plate.js
   c390f7b99aa7  10-export.js
-  2f10a1d06552  11-stages.js
+  3715a9249713  11-stages.js
   59aaa64e2642  12-models.js
-  9c4e1d0addb6  13-patterns.js
-  692b71050839  core.js
-  c9df82f5ef31  css/app.css
+  135d6e45a412  13-patterns.js
+  f3d58ef273bc  core.js
+  d76569f8d3e5  css/app.css
   7efa0c130b02  css/theme.css
-  4a04df3953af  fonts.js
-  dc69dacfee60  index.html
-  699861cf6d05  js/art.js
+  666f911d2119  fonts.js
+  3fb1e8c5df1d  index.html
+  39540521eb08  js/art.js
   cc338cd5a339  js/config.js
-  2b85f47fddf5  js/controls.js
+  80cd2546cc70  js/controls.js
   1b7b18d51a47  js/engine-bridge.js
   7f7a2abc4aa4  js/export.js
-  9de81df5095e  js/history.js
+  943d1d2167f9  js/history.js
   282a67c9225f  js/layers.js
+  e0dc293af130  js/levels.js
   0268e1ab91bd  js/main.js
   29f041a9b488  js/model.js
   26b7659e5ebe  js/notes.js
-  5075a0426bb9  js/optimize.js
-  73ab50219cb3  js/patterns.js
+  911e52e413f3  js/optimize.js
+  58fdd1836272  js/patterns.js
   21a8f0ca8b37  js/pieces.js
-  3a52a5b6fb5e  js/pipeline.js
+  ffc2ebe9a59f  js/pipeline.js
   7bfcb51aeb0a  js/plot.js
-  fc4489e24a60  js/preview.js
+  98bc484bb1b4  js/preview.js
   d61b587f3303  js/readouts.js
-  8994780613da  js/source.js
+  ea3d565b7cdf  js/source.js
   78f5450a22d9  js/state.js
   347002262ce1  js/testprint.js
-  cbb9bdc847f1  js/tools.js
+  b22c4183d365  js/tools.js
   5c8562531de3  js/ui.js
   c0bf468e1779  js/views.js
   c7e8ce426229  js/zoom.js

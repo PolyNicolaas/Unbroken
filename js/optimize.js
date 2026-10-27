@@ -33,7 +33,8 @@ function applyPreset(key, quiet) {
     $("font").value = UNB_FONTS[t.font] ? t.font : "sans";
     $("txtSpacing").value = MAP.letterSpacing[t.letterSpacing] || "auto";
     $({ left: "alLeft", right: "alRight" }[t.align] || "alCenter").checked = true;
-    if (!textMode()) artUse("text"); // art.js: the text in use
+    if (!textMode())
+      artUse("text"); // art.js: the text in use
     else textChanged();
     return;
   }

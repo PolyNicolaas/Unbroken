@@ -74,6 +74,25 @@
     return UNB.thin(out, w, h); // make edges strictly 1px so each becomes a single stroke
   };
 
+  // Grey levels → a line map: the edges between levels (UNB.levels), for the levels whose edges are wanted (edge[j]
+  // true: Trace). An edge is drawn where either side wants it, on the darker side's pixel, so every block's outline is
+  // one pixel wide; thinned so the tracer sees single strokes. Edges along the picture's border aren't drawn.
+  UNB.levelEdges = function (lab, w, h, edge) {
+    const m = new Uint8Array(w * h);
+    for (let y = 0; y < h; y++)
+      for (let x = 0; x < w; x++) {
+        const i = y * w + x,
+          a = lab[i];
+        for (const j of [x + 1 < w ? i + 1 : -1, y + 1 < h ? i + w : -1]) {
+          if (j < 0) continue;
+          const b = lab[j];
+          if (a === b || !(edge[a] || edge[b])) continue;
+          m[a < b ? i : j] = 1;
+        }
+      }
+    return UNB.thin(m, w, h);
+  };
+
   // Otsu's threshold: the gray level (0–255) that best splits the image into ink and paper
   UNB.otsu = function (g) {
     const hist = new Float64Array(256);

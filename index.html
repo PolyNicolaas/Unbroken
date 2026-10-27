@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v104</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v105</span></p>
 </header>
 
 <div class="wrap">
@@ -115,6 +115,11 @@
         <button class="btn" type="button" id="eraseUndo">Undo</button>
         <button class="btn" type="button" id="eraseClear">Restore all</button>
         <button class="btn primary" type="button" id="eraseDone">Done</button>
+      </div>
+      <div class="selbar" id="bgbar" hidden>
+        <span class="hint">Tap the picture's background: it is removed from there (Remove plain background sets how close a colour counts).</span>
+        <button class="btn" type="button" id="bgBorder" title="Back to removing the background from the picture's border">From the border</button>
+        <button class="btn primary" type="button" id="bgDone">Done</button>
       </div>
       <div class="selbar" id="startbar" hidden>
         <span class="hint">Tap the trace where the line should begin.</span>
@@ -320,6 +325,14 @@
         <input type="radio" name="srcType" id="srcPattern" value="pattern"><label for="srcPattern">Pattern<small>geometric art</small></label>
         <input type="radio" name="srcType" id="srcModel" value="model"><label for="srcModel">3D model<small>an STL</small></label>
       </div>
+      <div class="row" id="artForRow">
+        <div class="lab"><span class="name">Made for</span><span class="val" id="artForVal"></span></div>
+        <div class="seg" role="radiogroup" aria-label="What the art is made for">
+          <input type="radio" name="artFor" id="artForPrint" value="print" checked><label for="artForPrint">Printing<small>one line, the needle's spacing</small></label>
+          <input type="radio" name="artFor" id="artForPlot" value="plot"><label for="artForPlot">Plotting<small>pens, any detail</small></label>
+        </div>
+        <p class="hint help">Printing keeps what a printer can make: one line, every part the needle's line spacing apart, so the patterns stop at the detail that still prints (Fit the needle sets their width). Plotting is for the pen plotter: patterns go much finer (up to 200 rows of waves, order 8 curves…), their width is the 2D tab's page, and the closest lines are measured against the pen. A pattern made for plotting is traced only when you ask (Trace it); Plot as drawn sends its exact lines to the 2D tab.</p>
+      </div>
       <div class="dropzone" id="dropZone" role="button" tabindex="0" aria-label="Choose or drop a file: an image, an STL model or a saved design">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="dz-main">Drop a file here, or click to choose</span>
@@ -336,10 +349,17 @@
         <option value="shapes">Sample: shapes &amp; text</option>
         <option value="smiley">Sample: smiley</option>
         <option value="face">Sample: face (light and dark, for picture patterns)</option>
+        <option value="still">Sample: still life (flat greys, for grey levels and fills)</option>
         <option value="user" disabled>Your image</option>
       </select>
       <div class="inline"><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
       <input type="file" id="picFile" accept="image/*" hidden>
+      <div class="row" id="picTurnRow">
+        <div class="lab"><label for="picAngle">Straighten</label><span class="val" id="picAngleVal">0°</span></div>
+        <input type="range" id="picAngle" min="-20" max="20" step="0.5" value="0">
+        <div class="inline"><button class="btn mini" type="button" id="picLeft" title="Turn the picture a quarter turn to the left">Turn left</button><button class="btn mini" type="button" id="picRight" title="Turn the picture a quarter turn to the right">Turn right</button><button class="btn mini" type="button" id="picUnturn">As loaded</button></div>
+        <p class="hint help">Turns the picture before anything else: a quarter turn at a time, or a few degrees to straighten a photo (the corners that come in are white, the paper). To crop, use Select area on the Trace tab: the trace keeps to the selection and gets the full resolution there.</p>
+      </div>
       <p class="hint help">A sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. To edit a traced line by hand, export it as SVG from the 2D tab, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
     </section>
 
@@ -383,7 +403,7 @@
         <button class="btn" type="button" id="artShuffle" title="Another random version of this style">Shuffle</button>
       </div>
       <div class="row" id="artSizeRow">
-        <div class="lab"><label for="artWidth">Width (mm)</label><span class="val" id="artGapInfo"></span></div>
+        <div class="lab"><label for="artWidth" id="artWidthLab">Width (mm)</label><span class="val" id="artGapInfo"></span></div>
         <div class="inline"><input type="number" id="artWidth" min="5" max="1000" step="1" aria-describedby="artGapHint"><button class="btn mini" type="button" id="artFit" title="The width where the pattern's closest lines are the needle's line spacing apart">Fit the needle</button></div>
         <p class="hint" id="artGapHint"></p>
       </div>
@@ -467,10 +487,23 @@
       <h2 id="h-prep">Image prep <span id="prepVal">off</span></h2>
           <div class="row"><div class="lab"><label for="bright">Brightness</label><span class="val" id="brightVal"></span></div><input type="range" id="bright" min="-100" max="100" value="0"></div>
           <div class="row"><div class="lab"><label for="contrast">Contrast</label><span class="val" id="contrastVal"></span></div><input type="range" id="contrast" min="-80" max="150" value="0"></div>
-          <div class="row"><div class="lab"><label for="bgTol">Remove plain background</label><span class="val" id="bgTolVal"></span></div><input type="range" id="bgTol" min="0" max="60" value="0"></div>
+          <div class="row"><div class="lab"><label for="bgTol">Remove plain background</label><span class="val" id="bgTolVal"></span></div><input type="range" id="bgTol" min="0" max="60" value="0">
+            <div class="inline"><button class="btn mini" type="button" id="bgPick" data-tool="bg" aria-pressed="false" title="Tap the background on the preview: it is removed from there, through every colour close to the one you tapped">Tap the background</button><span class="hint" id="bgPickInfo"></span></div>
+          </div>
           <div class="inline" style="justify-content:space-between">
             <label class="check"><input type="checkbox" id="flatten"> Even out lighting</label>
             <button class="btn mini" type="button" id="prepReset">Reset</button>
+          </div>
+          <div class="row" id="levelsRow">
+            <div class="lab"><label for="levels">Grey levels</label><span class="val" id="levelsVal">off</span></div>
+            <input type="range" id="levels" min="1" max="6" value="1" aria-describedby="levelsHint">
+            <div id="levelsBox" hidden>
+              <div class="row"><div class="lab"><label for="levelSmooth">Smooth blocks</label><span class="val" id="levelSmoothVal"></span></div>
+              <input type="range" id="levelSmooth" min="0" max="10" value="2"></div>
+              <div id="levelList" class="level-list" role="group" aria-label="What each grey does"></div>
+              <input type="hidden" id="levelModes" value="">
+            </div>
+            <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the trace style and ink threshold are not used. A still-life sample (Art tab, Picture) shows them well.</p>
           </div>
 
     </section>
@@ -688,6 +721,7 @@
 <script src="js/art.js"></script>
 <script src="js/readouts.js"></script>
 <script src="js/controls.js"></script>
+<script src="js/levels.js"></script>
 <script src="js/export.js"></script>
 <script src="js/optimize.js"></script>
 <script src="js/pieces.js"></script>
