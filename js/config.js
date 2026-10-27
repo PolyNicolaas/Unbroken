@@ -511,16 +511,6 @@ for (const q of CFG.printers) {
         if (bool(v.evenOutLighting)) tick("flatten", v.evenOutLighting);
       },
     ],
-    [
-      "shading",
-      (v) => v && typeof v === "object",
-      (v) => {
-        if (list("off", "hatch", "cross", "squiggle")(v.style)) set("shadeStyle", v.style);
-        else if (v.style != null) notes.push('defaults.shading.style should be "off", "hatch", "cross" or "squiggle"');
-        if (num(v.spacing, 3, 24)) set("shadeSp", v.spacing);
-        if (num(v.level, 20, 230)) set("shadeLv", v.level);
-      },
-    ],
     ["crossings", oneOf(MAP.crossings), (v) => set("uncross", MAP.crossings[v])],
     ["baseDensity", range(0, 100), (v) => set("baseDensity", Math.round(v / 5) * 5)],
     ["basePattern", list("rings", "lines"), (v) => set("basePattern", v)],

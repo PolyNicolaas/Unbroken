@@ -1,10 +1,10 @@
 /* Unbroken · engine · 02-lines.js
-   2. Line maps — grayscale → a 1-pixel map of the lines to draw: centerline or outline, shading, erasing.
+   2. Line maps — grayscale → a 1-pixel map of the lines to draw: centerline or outline, erasing.
    One part of the engine (no DOM), loaded after 01-image.js; core.js lists every part and what's in it. */
 (function (root) {
   "use strict";
   const UNB = root.UNB,
-    { labelComponents, plotLine } = UNB._u; // shared helpers (00-util.js)
+    { labelComponents } = UNB._u; // shared helpers (00-util.js)
 
   // Outline mode: Canny edges (Sobel with an L1 gradient, as OpenCV's default threshold scale; non-maximum
   // suppression; hysteresis between lo and hi), thinned to 1 px so each edge becomes a single stroke.
@@ -332,52 +332,6 @@
       }
     }
     return removed ? UNB.thin(m, w, h) : m;
-  };
-
-  // Shading: hatch / cross-hatch / squiggle lines inside areas darker than `level`, to be traced with everything else.
-  UNB.shade = function (g, w, h, o) {
-    const sp = Math.max(3, o.spacing),
-      level = o.level,
-      out = new Uint8Array(w * h),
-      tmp = new Uint8Array(w * h);
-    const dark = (x, y) => {
-      const xi = Math.min(w - 1, Math.max(0, Math.round(x))),
-        yi = Math.min(h - 1, Math.max(0, Math.round(y)));
-      return g[yi * w + xi];
-    };
-    const hatch = (ax, ay, thr) => {
-      // parallel lines along direction (ax, ay)
-      tmp.fill(0);
-      const nx = -ay,
-        ny = ax,
-        R = Math.hypot(w, h);
-      for (let c = -R; c <= R; c += sp) {
-        const cx = w / 2 + nx * c,
-          cy = h / 2 + ny * c;
-        plotLine(tmp, w, h, cx - ax * R, cy - ay * R, cx + ax * R, cy + ay * R);
-      }
-      for (let i = 0; i < w * h; i++) if (tmp[i] && g[i] < thr) out[i] = 1;
-    };
-    if (o.style === "hatch" || o.style === "cross") hatch(Math.SQRT1_2, Math.SQRT1_2, level);
-    if (o.style === "cross") hatch(Math.SQRT1_2, -Math.SQRT1_2, level * 0.6);
-    if (o.style === "squiggle") {
-      const period = sp * 1.15;
-      for (let y0 = sp / 2; y0 < h; y0 += sp) {
-        let px = null,
-          py = null;
-        for (let x = 0; x <= w; x += 0.5) {
-          const v = dark(x, y0),
-            d = Math.max(0, Math.min(1, (level - v) / Math.max(1, level)));
-          const y = y0 + d * sp * 0.45 * Math.sin((2 * Math.PI * x) / period);
-          if (v < level) {
-            if (px !== null) plotLine(out, w, h, px, py, x, y);
-            px = x;
-            py = y;
-          } else px = null;
-        }
-      }
-    }
-    return out;
   };
 
   // Erase: brush strokes wipe line pixels; a tap removes the whole connected piece nearest to it. Coordinates in

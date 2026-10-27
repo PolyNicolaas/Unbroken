@@ -54,7 +54,7 @@ async function working(res, engine = PIPE) {
   return (st.wk = { key, w, h, small: c, gray: r.gray, blurred: r.blurred, crop });
 }
 
-// line map for one threshold: detection + shading + selection mask + erasing.
+// line map for one threshold: detection + selection mask + erasing.
 // lineSpec() describes it for the background engine (UNB.stageLines); detect() runs it here (auto threshold,
 // optimizer).
 function selMask(W) {
@@ -92,16 +92,6 @@ function lineSpec(W, sens, textMask) {
             : { type: "part", ...(([x, y]) => ({ x, y }))(toWork(o.p, W.crop)) }
         )
       : null;
-  // hand edits to the line (Edit line tool), in working px; applied to the walk after it is traced (UNB.editWalk)
-  const edits =
-    st.edits && st.edits.length
-      ? st.edits.map((o) => ({
-          type: o.type,
-          r: o.r * kx,
-          pts: o.pts.map((p) => toWork(p, W.crop)),
-          to: o.to ? toWork(o.to, W.crop) : null,
-        }))
-      : null;
   if (st.text) {
     // typed text: the font strokes themselves, no image detection
     const lines = new Uint8Array(w * h),
@@ -111,17 +101,15 @@ function lineSpec(W, sens, textMask) {
     const m = selMask(W);
     if (m) for (let i = 0; i < w * h; i++) if (!m[i]) lines[i] = 0;
     if (erase) UNB.erase(lines, w, h, erase);
-    return { lines, edits };
+    return { lines };
   }
   return {
     blurred: W.blurred,
     mode: s.mode,
     sens,
     split: CFG.engine.packedStrokeSplit,
-    shade: s.shade,
     selMask: selMask(W),
     erase,
-    edits,
   };
 }
 function detect(W, sens) {
@@ -504,7 +492,6 @@ function marksKeyNow() {
     baseRes(),
     st.sel,
     st.erase,
-    st.edits,
     st.start,
     st.zones,
     st.spacing,

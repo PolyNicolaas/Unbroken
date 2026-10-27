@@ -146,7 +146,6 @@ window.UNB_SETTINGS = {
     workingResolution: 500,           // px the image is traced at per 100 mm of print, and never fewer (200–1500; 320 is faster, 720 more detailed). Bigger prints trace finer, up to engine.maxWorkingResolution
     lightLinesOnDark: false,          // true for light drawings on a dark background
     imagePrep: { brightness: 0, contrast: 0, backgroundTolerance: 0, evenOutLighting: false },   // -100–100, -80–150, 0–60 %, true/false
-    shading: { style: "off", spacing: 7, level: 110 },   // style "off", "hatch", "cross" or "squiggle"; spacing px (3–24); darkness level 20–230
     crossings: "remove-all",          // "remove-all", "remove-doubling-back" or "keep"
 
     // --- Lines and size

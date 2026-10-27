@@ -43,7 +43,7 @@ function clampPan(v, cv) {
   Z.px = Math.max(-mx, Math.min(mx, Z.px));
   Z.py = Math.max(-my, Math.min(my, Z.py));
 }
-const STAGE_CANVAS = { art: "artView", line: "view", page: "pageView", plate: "plate", layers: "stackView" };
+const STAGE_CANVAS = { line: "view", page: "pageView", plate: "plate", layers: "stackView" };
 const stageCanvas = () => $(STAGE_CANVAS[stageNow()]);
 // zoom the view that's showing by f, keeping the canvas point (x, y) where it is (default: the centre)
 function zoomBy(f, x, y) {

@@ -122,7 +122,7 @@ async function loadModelFile(file) {
   try {
     const mesh = UNB.parseSTL(new Uint8Array(await file.arrayBuffer()));
     setModel(mesh, file.name.replace(/\.stl$/i, ""));
-    artModel(st.model.name); // art.js: the model layer, shown
+    artModel(); // art.js: the model in use
   } catch (e) {
     toast(`Couldn't read ${file.name}: ${(e && e.message) || "not an STL file"}`, true);
   }
@@ -512,8 +512,8 @@ $("drawView").addEventListener("click", async () => {
     ]);
     const c = hlCanvas(r, 3);
     applyPreset("drawing", true); // first, so the trace already uses it (one trace, not two)
-    artModelDrawing(c, `${M.name} · drawing`); // art.js: a picture layer; the model layer is hidden
-    toast("Drawing added to the art as a picture layer, and traced as a line drawing");
+    artModelDrawing(c, `${M.name} · drawing`); // art.js: the drawing becomes the picture
+    toast("Drawing made: tracing it as a line drawing");
   } catch (e) {
     if (e !== CANCELLED) toast(`Couldn't draw the view: ${(e && e.message) || "error"}`, true);
   } finally {

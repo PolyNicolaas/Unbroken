@@ -9,15 +9,15 @@
                       cumLength, resampleLoop, makeUF, makeHeap, gaussKernel, plotLine, bilinear, f3, svgPolylines
     01-image.js    1. Image in — RGBA pixels → a clean grayscale image.
                       UNB.toGray, UNB.blur, boxBlur, UNB.prep, UNB.gradient
-    02-lines.js 2. Line maps — grayscale → a 1-pixel map of the lines to draw: centerline or outline, shading, erasing.
-                      UNB.canny, UNB.otsu, UNB.thin, UNB.centerline, UNB.pruneSpurs, UNB.shade, UNB.erase, UNB.lineScore
+    02-lines.js 2. Line maps — grayscale → a 1-pixel map of the lines to draw: centerline or outline, erasing.
+                      UNB.canny, UNB.otsu, UNB.thin, UNB.centerline, UNB.pruneSpurs, UNB.erase, UNB.lineScore
     03-text.js     3. Text — typed text → strokes in a single-stroke font → a line map.
                       UNB.textLayout, UNB.rasterText
     04-walk.js     4. The walk — line map → one continuous path over every line pixel, onto the middle of each stroke;
                       corners rounded; out-and-back strokes spread into strands with stroke-end loops.
                       UNB.edt, walkRouter, walkParts, walkGraph, walkPairEnds, walkDouble, walkTour, UNB.buildWalk,
                       UNB.roundCorners, UNB.offsetDoubled, UNB.cutSwallowtails, UNB.mirror,
-                      smoothRun, UNB.snapWalk, UNB.editWalk
+                      smoothRun, UNB.snapWalk
     05-fill.js     4b. Fills — chocolate infill (areas the printed line encloses) and the 2D tab's pen fills.
                       UNB.infill, UNB.penFills
     06-fourier.js  5. Fourier series — path → evenly spaced samples → one series per axis → the curve from chosen terms.
@@ -52,7 +52,7 @@
                       doubleSpiral, whirl, waves, spirograph, lissajous, truchet, UNB.PATTERNS, UNB.PATTERN_SHAPES,
                       UNB.patternLayout, UNB.pattern
 
-   Typical run (11-stages.js): stageLines → stageWalk (→ editWalk: hand edits) → stageSignal → sweepSteps + pickTerms
+   Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
 
    Loading: the page lists the parts in web-app/index.html (in this order); a Web Worker loads core.js, which loads

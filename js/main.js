@@ -48,14 +48,14 @@ labels();
 syncSpacingUI();
 infillUI();
 lineUI(); // the spacing from line width + gap, and the needle shown
-// the art starts as one layer: the sample picture, or the text (art.js)
+// the Art tab starts on the sample picture, or the text (art.js)
 const start = CFG.defaults.startFrom;
 if (start === "lettering")
-  applyPreset("lettering"); // starts with a text layer
-else if (CFG.defaults.source === "text") artOnly("text");
+  applyPreset("lettering"); // starts on the text
+else if (CFG.defaults.source === "text") artUse("text");
 else {
   if (start) applyPreset(start, true);
-  artOnly("picture", { name: "sample", picture: { canvas: makeSample(CFG.defaults.sample), sample: CFG.defaults.sample } });
+  artUsePicture(makeSample(CFG.defaults.sample), "sample", CFG.defaults.sample);
 }
 viewChanged(); // the tab that opens (Art) brings its view
 showE();

@@ -160,21 +160,16 @@ function drawArtPage() {
   const name = $("paper").selectedOptions[0].textContent.split(" ·")[0],
     n = A ? A.layers.length : 0,
     h = $("pageHint");
-  $("plotInfo").textContent = A && n ? `art as drawn · ${n} pen${n === 1 ? "" : "s"}` : "art as drawn";
-  h.className = A && A.pictures ? "hint warn" : "hint";
-  h.textContent = !A
-    ? "Nothing shown in the Art tab."
-    : `The art exactly as drawn, not traced: ${n} layer${n === 1 ? "" : "s"} of lines, each on its own pen, ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}.` +
-      (A.pictures
-        ? ` ${A.pictures} picture layer${A.pictures === 1 ? " has" : "s have"} no lines until traced: pick Traced line for ${A.pictures === 1 ? "it" : "them"}.`
-        : "") +
-      " For a printer, trace it on the Trace tab.";
+  $("plotInfo").textContent = "art as drawn";
+  h.className = !A || A.pictures ? "hint warn" : "hint";
+  h.textContent =
+    !A || A.pictures
+      ? "Only a pattern or text can be plotted as drawn: a picture has no lines until it is traced, so pick Traced line (and a 3D model needs Draw this view)."
+      : `The ${A.layers[0].name} exactly as drawn, not traced: ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}. For a printer, trace it on the Trace tab.`;
 }
-// the art as drawn has a pen per layer (their colours are set in the Art tab) and no fills (fill pens fill the traced
-// drawing's shapes)
+// the art as drawn has no fills (fill pens fill the traced drawing's shapes)
 function plotFromUI() {
   $("card-h-fills").hidden = plotFromArt();
-  $("penColor").closest("label").hidden = plotFromArt();
 }
 document.querySelectorAll('input[name="plotFrom"]').forEach((r) =>
   r.addEventListener("change", () => {
@@ -887,7 +882,7 @@ new ResizeObserver(() => drawPage()).observe($("pageView"));
 async function plotFile() {
   if (plotFromArt()) {
     const A = artOnPage();
-    if (!A || !A.layers.length) throw new Error("the art has no lines to plot as drawn (pictures need tracing)");
+    if (!A || !A.layers.length) throw new Error("only a pattern or text can be plotted as drawn: pick Traced line");
     const w = +$("penW").value || 0.5;
     return {
       name: designSlug() + "-art.svg",
@@ -895,7 +890,7 @@ async function plotFile() {
         A.layers.map((l, i) => ({ label: `${i + 1} ${l.name}`, color: l.pen, width: w, strokes: l.strokes })),
         { paperW: A.P.w, paperH: A.P.h }
       ),
-      info: `the art as drawn, ${A.layers.length} pen${A.layers.length === 1 ? "" : "s"}, ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm on a ${fmt(A.P.w, 0)} × ${fmt(A.P.h, 0)} mm page`,
+      info: `the ${A.layers[0].name} as drawn, ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm on a ${fmt(A.P.w, 0)} × ${fmt(A.P.h, 0)} mm page`,
     };
   }
   const L = await penLine();
