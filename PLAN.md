@@ -24,6 +24,11 @@ Gone over one at a time with Nicolaas. The first list was built in v75.
   complex model (a mug and its handle, a tree's tiers, letters standing up) where it overhangs or branches, lay each
   part on its flattest side, and print them as copies on one plate. Suggested 17 October after the support challenges.
 
+## Decided 26 October: the Art tab
+Every source comes in through an Art tab, then Art → Trace → 2D or 3D; single line for the printers (all layers merged
+by default, or one picked), multi-line for the plotter, 2D may skip Trace; styles per layer with taps to override;
+image-driven art may try the printer. The whole plan and its phases: [`docs/ART-PLAN.md`](docs/ART-PLAN.md).
+
 ## Not doing
 - Backing plate under the drawing.
 - Bridging (a line spanning open air between two supports): chocolate can't span even short gaps. A span is
