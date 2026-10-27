@@ -28,7 +28,7 @@ module.exports = {
     s = await size();
     checks.push(check("limit on: a typed 400 mm stops at the plate (mm over)", s.w - s.plate, "<=", 0.5));
     await page.click("label[for=viewChoc]"); await page.uncheck("#limitPlate"); await page.click("label[for=viewDesign]");
-    await A.source(page, "text"); await A.idle(page, 1200);
+    await A.source(page, "text"); await page.click("label[for=viewDesign]"); await A.idle(page, 1200);
     const cap = () => page.evaluate(() => st.text.cap), cap0 = await cap(), w0 = (await size()).w;
     await page.fill("#outW", String(+(2 * w0).toFixed(1))); await page.press("#outW", "Enter"); await A.idle(page, 1500);
     const cap1 = await cap(), w1 = (await size()).w;

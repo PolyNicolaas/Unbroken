@@ -34,7 +34,7 @@ module.exports = {
         checks.push(check("opening View closes File", +!(await page.$eval("#fileMenu", (e) => e.open)), "==", 1));
         await page.keyboard.press("Escape"); await page.click("#fileMenu summary"); await page.keyboard.press("Escape"); await page.waitForTimeout(100);
         checks.push(check("Esc closes File", +!(await page.$eval("#fileMenu", (e) => e.open)), "==", 1));
-        await A.source(page, "text"); await A.idle(page, 800);
+        await A.source(page, "text"); await page.click("label[for=viewDesign]"); await A.idle(page, 800);
         checks.push(check("text: no Tracing card (style, threshold); letter height and editable size in the Size card", +!(await visible(page, "#modeCenter")) + +!(await visible(page, "#sens")) + +(await visible(page, "#capH")) + +!(await page.$eval("#outW", (e) => e.readOnly)), "==", 4));
         checks.push(check("text: readout counts the connectors", +/\d+ terms · error [\d.]+ mm · \d+ connectors?/.test(await page.textContent("#chip")), "==", 1));
         checks.push(check("text: readout tip says connectors are always drawn", +/always drawn/i.test(await page.$eval("#chip", (e) => e.title)), "==", 1));
