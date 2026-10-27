@@ -7,7 +7,7 @@ module.exports = {
   pass: "The 356 mm lettering is reported as fitting rotated; the mini-map agrees; 12 copies are reported as fitting; the downloaded G-code has 12 lift-and-lower sequences and every X/Y on the 340 × 232 mm plate; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
-    await A.source(page, "text"); await A.idle(page, 800); await A.setValue(page, "#capH", "40"); await A.idle(page, 1200);
+    await A.source(page, "text"); await page.click("label[for=viewDesign]"); await A.idle(page, 800); await A.setValue(page, "#capH", "40"); await A.idle(page, 1200);
     const mini = await page.textContent("#miniInfo");
     checks.push(check("40 mm lettering: mini-map says it fits rotated", +/fits plate · rotated/.test(mini), "==", 1));
     await page.click("label[for=viewChoc]"); await A.idle(page, 300);
