@@ -473,6 +473,7 @@ function setSize(W, byUser) {
   if (byUser) {
     st.sizeUser = true;
     recordSoon();
+    artSized(W); // art.js: a pattern keeps the width set by hand
   } // an undo step even when nothing needs tracing again
   $("outW").value = +W.toFixed(1);
   syncHeight();
@@ -706,6 +707,7 @@ function finalizeReadout() {
   if (!dh.hidden)
     dh.textContent = `At this size ${fmt(100 * share, 0)}% of the line is pushed more than ${fmt(CFG.engine.sizeDetail.medium * st.outW, 1)} mm off the drawing to keep the spacing${$("showDrift").checked ? " (shaded orange)" : ""}.${m && m.fits && Number.isFinite(m.medium) && st.outW < m.medium ? ` Medium detail from ${fmt(m.medium, 1)} mm.` : " Make it bigger to bring it back."}`;
   syncSizeUI();
+  artSizeUI(); // art.js: the Pattern card's width and gap
 }
 
 // ---------- error sweep for the chart (its own background engine, so it doesn't hold up the trace) ----------

@@ -106,7 +106,8 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
 - **Picture**: a sample, an image of yours (Choose an image…, or drop one anywhere on the page) or a sketch (Draw your
   own, on the preview).
 - **Text**: lettering in a single-stroke font (the Text card).
-- **Pattern**: a geometric pattern (see [Geometric art](#geometric-art)).
+- **Pattern**: a geometric pattern, or a pattern that draws a picture's light and dark as one line (see
+  [Geometric art](#geometric-art)).
 - **3D model**: an STL (or the sample vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
   makes its line drawing the picture to trace.
 
@@ -140,7 +141,29 @@ as you go; **Shuffle** makes another random version of the styles that have one.
 | Lissajous | x = sin(a t + phase), y = sin((a + 1) t) | Lobes, Phase | closed; crosses itself |
 | Truchet tiles | Quarter circles on a grid of tiles, joined into loops and curves | Tiles across, Mix, Shape | many pieces |
 
-- **For chocolate:** the one-line styles (the first seven) have an even gap between neighbouring lines and trace as one
+**Drawn from a picture** (the second group in the Style menu): the pattern draws a picture's light and dark, still as one
+line, so it prints in chocolate as well as plots. The picture is the Art tab's picture (the Pattern card's **Picture**
+row picks another, or the **Face sample**; with a line-drawing sample as the picture, the face sample is used, since a
+line drawing has no light and dark to draw). It is fitted inside the pattern, and **Contrast** bends its darkness
+(d^γ: 0 keeps only the darkest, 50 as it is, 100 brings out the light greys).
+
+| Style | What it is | Detail | The line |
+|---|---|---|---|
+| Space-filling curve | A Hilbert curve whose cells are finer where the picture is darker: from three orders coarser in white to the finest order in black; consecutive cells always share an edge, so it stays one line | Finest order (3–8) | one open line |
+| Wave rows | Rows across the picture, wiggling harder and tighter where it is darker (wiggle up to (row spacing − gap) / 2, wavelength at least 4 gaps; the gap is 35% of the row spacing), joined by half circles | Rows | one open line |
+| Vibrating spiral | One spiral from the middle out, wobbling across its path harder and faster where it is darker (the same limits, against the pitch); the picture's middle square fills its circle | Turns | one open line |
+| Labyrinth | A maze on a quadtree of cells, finer where the picture is darker (three orders, neighbours at most one apart): a room in each cell, corridors as wide as the smaller room, the one line round it | Finest order (3–7), Shuffle | one closed loop |
+
+Their gap is the closest lines, in the darkest parts; light parts have more room. Wave rows and the spiral can put about
+1.8 × as much line in black as in white before their folds would come closer than the gap; the space-filling curve and
+the labyrinth change their cell size and range much further.
+
+**Width (mm)** sets the print's width directly (the same size as the Trace tab's Size card), and says how far apart the
+closest lines come; under the needle's line spacing it warns that those lines will be pushed apart. **Fit the needle**
+picks the width where the closest lines are the spacing apart (3% over), which is where every pattern with an even gap
+starts. A width set by hand stays when the detail changes; a new style starts fitted again.
+
+- **For chocolate:** the one-line styles (the first seven, and all four drawn from a picture) have an even gap between neighbouring lines and trace as one
   line with nothing doubled, so they print without out-and-back strokes. A pattern sets the Line card
   to Closed loop or Open to suit, the trace style to Centerline, and starts the print at the width where the pattern's
   gap is the line spacing (3% over, `startSize` in pipeline.js), so nothing needs pushing apart; the size slider and
@@ -149,8 +172,8 @@ as you go; **Shuffle** makes another random version of the styles that have one.
   joined by connectors) suit it best.
 - **Drawn for the tracer:** strokes a third of the closest gap, never wider than 0.9% of the picture (the centreline
   trace outlines strokes over 1.6% as filled shapes), and a 6% margin. The densest settings keep about 70 gaps across.
-- A design file keeps the pattern's settings. Tests E33 (every style keeps its promise and the one-line styles
-  trace as one line), A31.
+- A design file keeps the pattern's settings and width. Tests E33 (every style keeps its promise, the ones drawn from a
+  picture put more line in its dark parts, and the one-line styles trace as one line), A31.
 
 ## Units
 

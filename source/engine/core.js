@@ -46,10 +46,13 @@
                       UNB.fillPlan,
                       regionGrid, boxOf, shareIn, UNB.unionOverlaps, UNB.modelOverhang, UNB.modelSupport,
                       UNB.modelStack, UNB.hiddenLines, UNB.chainSegments, UNB.exportLinesSVG
-    13-patterns.js 12. Patterns — geometric abstract art as lines to trace (the Geometric art card): labyrinths,
-                      space-filling curves, spirals, a whirl, waves, harmonic curves, tiles.
+    13-patterns.js 12. Patterns — geometric abstract art as lines to trace (the Art tab's Pattern): labyrinths,
+                      space-filling curves, spirals, a whirl, waves, harmonic curves, tiles; and patterns that draw a
+                      picture's light and dark as one line.
                       seeded, polyInside, largestGroup, roundLoop, labyrinth, lsystem, boxed, moore, hilbert, gosper,
-                      doubleSpiral, whirl, waves, spirograph, lissajous, truchet, UNB.PATTERNS, UNB.PATTERN_SHAPES,
+                      doubleSpiral, whirl, waves, spirograph, lissajous, truchet, gammaOf, toneIn, toneGrid,
+                      hilbertTone, wavesTone, spiralTone, labyrinthTone, closeGaps, outlineLoop, UNB.PATTERNS,
+                      UNB.PATTERN_SHAPES,
                       UNB.patternLayout, UNB.pattern
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms

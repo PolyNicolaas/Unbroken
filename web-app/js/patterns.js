@@ -8,12 +8,22 @@
 
 const artStyle = () => UNB.PATTERNS[$("artStyle").value] || UNB.PATTERNS.labyrinth;
 
+// the styles in two groups: patterns of their own, and patterns drawn from a picture
 (() => {
-  for (const [key, P] of Object.entries(UNB.PATTERNS)) {
-    const o = document.createElement("option");
-    o.value = key;
-    o.textContent = P.label;
-    $("artStyle").appendChild(o);
+  for (const [label, tone] of [
+    ["Patterns", false],
+    ["Drawn from a picture", true],
+  ]) {
+    const grp = document.createElement("optgroup");
+    grp.label = label;
+    for (const [key, P] of Object.entries(UNB.PATTERNS))
+      if (!!P.tone === tone) {
+        const o = document.createElement("option");
+        o.value = key;
+        o.textContent = P.label.replace(/ \(picture\)$/, "");
+        grp.appendChild(o);
+      }
+    $("artStyle").appendChild(grp);
   }
 })();
 
@@ -53,12 +63,15 @@ function patternUI() {
   }
   $("artSidesF").hidden = !P.sides;
   $("artShapeF").hidden = !P.shape;
+  $("artShapeF").parentElement.hidden = !P.sides && !P.shape; // (their row, when neither is used)
   $("artShuffle").hidden = !P.seed;
-  const suits = P.oneLine
-    ? `One unbroken ${P.line === "open" ? "open " : ""}line with even gaps: on its own it prints without doubled strokes.`
-    : P.crosses
-      ? "Where it crosses itself it suits the pen plotter best; for a printer every crossing is undone."
-      : "Many separate pieces joined by connectors: best on the pen plotter.";
+  const suits = P.tone
+    ? "One unbroken line that draws the picture's light and dark: it prints in chocolate, the darkest parts at the line spacing."
+    : P.oneLine
+      ? `One unbroken ${P.line === "open" ? "open " : ""}line with even gaps: on its own it prints without doubled strokes.`
+      : P.crosses
+        ? "Where it crosses itself it suits the pen plotter best; for a printer every crossing is undone."
+        : "Many separate pieces joined by connectors: best on the pen plotter.";
   $("artTip").textContent = `${P.tip}. ${suits}`;
   $("artVal").textContent = P.label;
 }

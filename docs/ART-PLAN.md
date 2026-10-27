@@ -30,7 +30,7 @@ complicated, the shading didn't work well, and Edit line wasn't very useful. So:
 | # | What | Version |
 |---|---|---|
 | 1 | One input at a time; Edit line and Shading removed | v102 ✓ |
-| 2 | Patterns from pictures (the four above); sizes in mm | v103 |
+| 2 | Patterns from pictures (the four above); sizes in mm | v103 ✓ |
 | 3 | Fit inside a shape; deeper settings per style; mix and vary (seeds, a variation grid) | v104 |
 
 ## Earlier: decided 26 October (superseded)

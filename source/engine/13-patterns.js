@@ -510,6 +510,339 @@
     return { paths, closed, box: [n, n], gap: Math.SQRT2 - 1 };
   }
 
+  // ---------- patterns from a picture: its light and dark drawn as one line ----------
+  // tone: { w, h, d } (d: darkness per pixel, 0 white … 1 black, row by row). The picture is fitted inside the
+  // pattern's
+  // box (letterboxed: outside it counts as white).
+  // Contrast (0–100) bends the darkness: d^γ, γ = 2^((50 − c) / 50), so 0 keeps only the darkest, 50 is as is, 100
+  // brings out the light greys.
+  const gammaOf = (c) => Math.pow(2, (50 - (c == null ? 50 : c)) / 50);
+  // darkness at (u, v) in 0…1 of a box of aspect A (width ÷ height), the picture fitted inside it
+  function toneIn(T, A) {
+    const a = T.w / T.h,
+      sw = a >= A ? 1 : a / A, // the picture's share of the box's width and height
+      sh = a >= A ? A / a : 1;
+    return (u, v) => {
+      const pu = (u - (1 - sw) / 2) / sw,
+        pv = (v - (1 - sh) / 2) / sh;
+      if (pu < 0 || pv < 0 || pu > 1 || pv > 1) return 0;
+      const x = Math.min(T.w - 1.001, Math.max(0, pu * T.w - 0.5)),
+        y = Math.min(T.h - 1.001, Math.max(0, pv * T.h - 0.5)),
+        x0 = Math.floor(x),
+        y0 = Math.floor(y),
+        fx = x - x0,
+        fy = y - y0,
+        i = y0 * T.w + x0;
+      const r0 = T.d[i] * (1 - fx) + T.d[i + 1] * fx,
+        r1 = T.d[i + T.w] * (1 - fx) + T.d[i + T.w + 1] * fx;
+      return r0 * (1 - fy) + r1 * fy;
+    };
+  }
+  // the darkness of an N × N grid of cells over the square box (each the mean of 3 × 3 samples), bent by γ, and its
+  // summed-area table, for the mean over any block of cells
+  function toneGrid(T, N, gamma) {
+    const f = toneIn(T, 1),
+      S = new Float64Array((N + 1) * (N + 1));
+    for (let j = 0; j < N; j++)
+      for (let i = 0; i < N; i++) {
+        let t = 0;
+        for (let a = 0; a < 3; a++)
+          for (let b = 0; b < 3; b++) t += f((i + (a + 0.5) / 3) / N, (j + (b + 0.5) / 3) / N);
+        const g = Math.pow(t / 9, gamma);
+        S[(j + 1) * (N + 1) + i + 1] = g + S[j * (N + 1) + i + 1] + S[(j + 1) * (N + 1) + i] - S[j * (N + 1) + i];
+      }
+    return (x, y, s) =>
+      (S[(y + s) * (N + 1) + x + s] - S[y * (N + 1) + x + s] - S[(y + s) * (N + 1) + x] + S[y * (N + 1) + x]) / (s * s);
+  }
+  // Space-filling curve by tone: a Hilbert curve whose cells are finer where the picture is darker (from order lo in
+  // white to the finest order in black), the centres of the cells joined in Hilbert order. Consecutive cells share an
+  // edge at every mix of sizes, so the curve stays one open line that never crosses itself.
+  function hilbertTone(o, rnd, T) {
+    const hi = o.detail,
+      lo = Math.max(1, hi - (o.range || 3)),
+      N = 1 << hi,
+      mean = toneGrid(T, N, gammaOf(o.twist)),
+      pts = [];
+    const rec = (x0, y0, xi, xj, yi, yj, n) => {
+      const d = hi - n,
+        s = 1 << n,
+        bx = Math.min(x0, x0 + xi + yi),
+        by = Math.min(y0, y0 + xj + yj);
+      if (n > 0 && (d < lo || (d < hi && mean(bx, by, s) > (d - lo + 1) / (hi - lo + 1)))) {
+        rec(x0, y0, yi / 2, yj / 2, xi / 2, xj / 2, n - 1);
+        rec(x0 + xi / 2, y0 + xj / 2, xi / 2, xj / 2, yi / 2, yj / 2, n - 1);
+        rec(x0 + xi / 2 + yi / 2, y0 + xj / 2 + yj / 2, xi / 2, xj / 2, yi / 2, yj / 2, n - 1);
+        rec(x0 + xi / 2 + yi, y0 + xj / 2 + yj, -yi / 2, -yj / 2, -xi / 2, -xj / 2, n - 1);
+      } else pts.push(x0 + (xi + yi) / 2, y0 + (xj + yj) / 2);
+    };
+    rec(0, 0, N, 0, 0, N, hi);
+    return { paths: [pts], closed: [false], box: [N, N], gap: 0.8 };
+  }
+
+  // Wave rows by tone: rows across the picture, each wiggling harder and tighter where it is darker, joined end to end
+  // by half circles into one open line. The wiggle is held to (row spacing − gap) / 2 and its wavelength to at least 4
+  // gaps, so neighbouring rows, and the folds of one row, stay at least a gap (35% of the row spacing) apart.
+  function wavesTone(o, rnd, T) {
+    const A = T.w / T.h,
+      rows = o.detail,
+      sp = 1 / rows,
+      gap = 0.35 * sp,
+      amax = (sp - gap) / 2,
+      lmin = 4 * gap,
+      lmax = 4 * sp,
+      g = gammaOf(o.twist),
+      f = toneIn(T, A),
+      pts = [],
+      dx = gap / 3;
+    for (let r = 0; r < rows; r++) {
+      const ltr = r % 2 === 0,
+        yc = (r + 0.5) * sp;
+      let ph = 0;
+      const row = [];
+      for (let x = 0; x <= A + 1e-9; x += dx) {
+        const t = Math.pow(f(x / A, yc), g),
+          lam = lmax - (lmax - lmin) * t;
+        row.push([x, yc + amax * t * Math.sin(ph)]);
+        ph += (2 * Math.PI * dx) / lam;
+      }
+      if (!ltr) row.reverse(); // right to left
+      for (const [x, y] of row) pts.push(x, y);
+      if (r + 1 < rows) {
+        // a half circle out past the end, down to the next row's centre (each row starts and ends on its centre line
+        // only roughly: the next row is reached from where this one ends)
+        const xe = ltr ? A : 0,
+          y0 = row[row.length - 1][1],
+          y1 = (r + 1.5) * sp,
+          cy = (y0 + y1) / 2,
+          rad = (y1 - y0) / 2;
+        for (let k = 1; k < 12; k++) {
+          const a = -Math.PI / 2 + (Math.PI * k) / 12;
+          pts.push(xe + (ltr ? 1 : -1) * rad * Math.cos(a), cy + rad * Math.sin(a));
+        }
+      }
+    }
+    return { paths: [pts], closed: [false], box: boxed(pts), gap };
+  }
+
+  // Vibrating spiral: one spiral from the centre out (Turns), wobbling across its path harder and faster where the
+  // picture is darker, as one open line. The picture fills the spiral's circle (its middle square shows; the corners
+  // are cut). Held like the waves: wobble ≤ (pitch − gap) / 2, wavelength ≥ 4 gaps, gap 35% of the pitch.
+  function spiralTone(o, rnd, T) {
+    const turns = o.detail,
+      R = 1,
+      p = R / (turns + 0.5),
+      gap = 0.35 * p,
+      amax = (p - gap) / 2,
+      lmin = 4 * gap,
+      lmax = 4 * p,
+      g = gammaOf(o.twist),
+      f = toneIn(T, 1),
+      a = T.w / T.h,
+      // fill the circle: the picture's short side is the circle's diameter
+      fill = (x, y) => {
+        const u = 0.5 + (x / (2 * R) / (a >= 1 ? 1 / a : 1)) * (a >= 1 ? 1 / a : 1),
+          v = 0.5 + y / (2 * R);
+        return f(Math.min(1, Math.max(0, u)), Math.min(1, Math.max(0, v)));
+      },
+      pts = [],
+      ds = gap / 3;
+    let th = Math.PI, // start half a turn out, so the middle isn't a knot
+      ph = 0;
+    for (;;) {
+      const r = (p * th) / (2 * Math.PI);
+      if (r > R - p / 2) break;
+      const x = r * Math.cos(th),
+        y = r * Math.sin(th),
+        t = Math.pow(fill(x, y), g),
+        lam = lmax - (lmax - lmin) * t,
+        w = amax * t * Math.sin(ph);
+      pts.push(x + w * Math.cos(th), y + w * Math.sin(th));
+      th += ds / Math.max(r, p);
+      ph += (2 * Math.PI * ds) / lam;
+    }
+    return { paths: [pts], closed: [false], box: boxed(pts), gap };
+  }
+
+  // Labyrinth by tone: a maze on cells that are finer where the picture is darker (a quadtree, from order lo in white
+  // to the finest order in black, neighbours at most one level apart), and the one line round it. Every cell is a room
+  // half its size in its middle; the maze's passages join rooms with a corridor as wide as the smaller room. Drawn on a
+  // grid of 4 per finest cell: walls and corridors are at least 2 of it wide, gaps narrower are closed, holes filled,
+  // so the outline is one closed loop, its lines 2 apart in the darkest parts (1.3 across a diagonal corner).
+  function labyrinthTone(o, rnd, T) {
+    const hi = o.detail,
+      lo = Math.max(1, hi - (o.range || 3)),
+      N = 1 << hi,
+      mean = toneGrid(T, N, gammaOf(o.twist));
+    // the quadtree: leaves [x, y, s] in finest cells, owner of every finest cell
+    const own = new Int32Array(N * N).fill(-1),
+      leaves = [];
+    const split = (x, y, s, d) => {
+      if (s > 1 && (d < lo || (d < hi && mean(x, y, s) > (d - lo + 1) / (hi - lo + 1)))) {
+        const h = s / 2;
+        split(x, y, h, d + 1);
+        split(x + h, y, h, d + 1);
+        split(x, y + h, h, d + 1);
+        split(x + h, y + h, h, d + 1);
+      } else leaves.push([x, y, s]);
+    };
+    split(0, 0, N, 0);
+    // balance: a leaf more than twice the size of a neighbour splits, until none is
+    for (let changed = true; changed; ) {
+      changed = false;
+      own.fill(-1);
+      leaves.forEach(([x, y, s], k) => {
+        for (let j = y; j < y + s; j++) own.fill(k, j * N + x, j * N + x + s);
+      });
+      const next = [];
+      for (const L of leaves) {
+        const [x, y, s] = L;
+        let tooBig = false;
+        if (s > 2)
+          for (let i = 0; i < s && !tooBig; i++)
+            for (const [cx, cy] of [
+              [x - 1, y + i],
+              [x + s, y + i],
+              [x + i, y - 1],
+              [x + i, y + s],
+            ])
+              if (cx >= 0 && cy >= 0 && cx < N && cy < N && leaves[own[cy * N + cx]][2] * 2 < s) tooBig = true;
+        if (tooBig) {
+          const h = s / 2;
+          next.push([x, y, h], [x + h, y, h], [x, y + h, h], [x + h, y + h, h]);
+          changed = true;
+        } else next.push(L);
+      }
+      leaves.length = 0;
+      leaves.push(...next);
+    }
+    own.fill(-1);
+    leaves.forEach(([x, y, s], k) => {
+      for (let j = y; j < y + s; j++) own.fill(k, j * N + x, j * N + x + s);
+    });
+    // neighbours (each pair once, with the side: 0 right, 1 down)
+    const nb = leaves.map(() => new Set());
+    leaves.forEach(([x, y, s], k) => {
+      for (let i = 0; i < s; i++) {
+        if (x + s < N) nb[k].add(own[(y + i) * N + x + s]);
+        if (y + s < N) nb[k].add(own[(y + s) * N + x + i]);
+        if (x > 0) nb[k].add(own[(y + i) * N + x - 1]);
+        if (y > 0) nb[k].add(own[(y - 1) * N + x + i]);
+      }
+    });
+    // a random spanning tree (growing tree: mostly the newest cell, sometimes any)
+    const seen = new Uint8Array(leaves.length),
+      edges = [],
+      active = [Math.floor(rnd() * leaves.length)];
+    seen[active[0]] = 1;
+    while (active.length) {
+      const k = rnd() < 0.3 ? Math.floor(rnd() * active.length) : active.length - 1,
+        c = active[k],
+        free = [...nb[c]].filter((q) => !seen[q]);
+      if (!free.length) {
+        active.splice(k, 1);
+        continue;
+      }
+      const q = free[Math.floor(rnd() * free.length)];
+      seen[q] = 1;
+      edges.push([c, q]);
+      active.push(q);
+    }
+    // rooms and corridors on the fine grid (4 per finest cell)
+    const F = 4 * N,
+      occ = new Uint8Array(F * F),
+      fillRect = (x0, y0, x1, y1) => {
+        for (let y = Math.max(0, y0); y < Math.min(F, y1); y++)
+          occ.fill(1, y * F + Math.max(0, x0), y * F + Math.min(F, x1));
+      },
+      room = ([x, y, s]) => [4 * x + s, 4 * y + s, 4 * x + 3 * s, 4 * y + 3 * s];
+    for (const L of leaves) fillRect(...room(L));
+    for (const [a, b] of edges) {
+      const A = room(leaves[a]),
+        B = room(leaves[b]),
+        small = leaves[a][2] <= leaves[b][2] ? A : B;
+      const ox = Math.min(A[2], B[2]) <= Math.max(A[0], B[0]); // side by side (left–right), else one above the other
+      if (ox) fillRect(Math.min(A[2], B[2]), small[1], Math.max(A[0], B[0]), small[3]);
+      else fillRect(small[0], Math.min(A[3], B[3]), small[2], Math.max(A[1], B[1]));
+    }
+    closeGaps(occ, F);
+    return { ...outlineLoop(occ, F, 0.9), gap: 1.3 }; // (2 between straight lines; 1.3 across diagonal corners)
+  }
+  // close gaps of one fine cell between occupied parts (a dilation then an erosion), then fill every hole, so the
+  // occupied set is one piece with one outline
+  function closeGaps(occ, F) {
+    const d = new Uint8Array(occ.length);
+    for (let y = 0; y < F; y++)
+      for (let x = 0; x < F; x++) {
+        let v = 0;
+        for (let j = -1; j <= 1 && !v; j++)
+          for (let i = -1; i <= 1 && !v; i++) {
+            const X = x + i,
+              Y = y + j;
+            if (X >= 0 && Y >= 0 && X < F && Y < F && occ[Y * F + X]) v = 1;
+          }
+        d[y * F + x] = v;
+      }
+    for (let y = 0; y < F; y++)
+      for (let x = 0; x < F; x++) {
+        let v = 1;
+        for (let j = -1; j <= 1 && v; j++)
+          for (let i = -1; i <= 1 && v; i++) {
+            const X = x + i,
+              Y = y + j;
+            if (X >= 0 && Y >= 0 && X < F && Y < F && !d[Y * F + X]) v = 0;
+          }
+        occ[y * F + x] = occ[y * F + x] || v;
+      }
+    // holes: empty cells not reached from the border
+    const out = new Uint8Array(occ.length),
+      q = [];
+    for (let i = 0; i < F; i++)
+      for (const c of [i, (F - 1) * F + i, i * F, i * F + F - 1]) if (!occ[c] && !out[c]) (out[c] = 1), q.push(c);
+    while (q.length) {
+      const c = q.pop(),
+        x = c % F,
+        y = (c / F) | 0;
+      for (const [X, Y] of [
+        [x + 1, y],
+        [x - 1, y],
+        [x, y + 1],
+        [x, y - 1],
+      ]) {
+        const e = Y * F + X;
+        if (X >= 0 && Y >= 0 && X < F && Y < F && !occ[e] && !out[e]) (out[e] = 1), q.push(e);
+      }
+    }
+    for (let i = 0; i < occ.length; i++) if (!out[i]) occ[i] = 1;
+  }
+  // the outline of an occupied grid (one piece, no holes) as one closed loop, its corners rounded to rho
+  function outlineLoop(occ, F, rho) {
+    const nextOf = new Map(),
+      key = (x, y) => y * (F + 1) + x,
+      at = (x, y) => x >= 0 && y >= 0 && x < F && y < F && occ[y * F + x];
+    let first = -1;
+    for (let y = 0; y < F; y++)
+      for (let x = 0; x < F; x++) {
+        if (!occ[y * F + x]) continue;
+        if (!at(x, y - 1)) nextOf.set(key(x, y), key(x + 1, y));
+        if (!at(x + 1, y)) nextOf.set(key(x + 1, y), key(x + 1, y + 1));
+        if (!at(x, y + 1)) nextOf.set(key(x + 1, y + 1), key(x, y + 1));
+        if (!at(x - 1, y)) nextOf.set(key(x, y + 1), key(x, y));
+        if (first < 0) first = key(x, y);
+      }
+    const loop = [];
+    for (let v = first, k = 0; k <= nextOf.size; k++) {
+      loop.push([v % (F + 1), Math.floor(v / (F + 1))]);
+      v = nextOf.get(v);
+      if (v === first) break;
+    }
+    const V = loop.filter((p, i) => {
+      const a = loop[(i + loop.length - 1) % loop.length],
+        b = loop[(i + 1) % loop.length];
+      return (p[0] - a[0]) * (b[1] - p[1]) - (p[1] - a[1]) * (b[0] - p[0]) !== 0;
+    });
+    return { paths: [roundLoop(V, rho, 6)], closed: [true], box: [F, F] };
+  }
+
   // What each style is and which controls it uses, for the app's Geometric art card. detail and twist: the two
   // sliders (name, range, starting value, and how to say a value); sides: the Sides menu; shape: the Shape menu;
   // seed: a Shuffle button; line: which Line setting traces it as drawn (closed: a loop; open: from end to end);
@@ -621,6 +954,51 @@
       evenGap: true,
     },
   };
+  // patterns drawn from a picture (o.tone: { w, h, d }); detail and twist as above. evenGap: their gap is the finest
+  // one (in the darkest parts), so the app starts them where that is the line spacing
+  Object.assign(UNB.PATTERNS, {
+    hilbertTone: {
+      label: "Space-filling curve (picture)",
+      tip: "A Hilbert curve that fills in finer where the picture is darker",
+      detail: { name: "Finest order", min: 3, max: 8, value: 5, say: (v) => `order ${v} · ${2 ** v} cells across` },
+      twist: { name: "Contrast", min: 0, max: 100, value: 50, say: (v) => `${v}%` },
+      tone: true,
+      line: "open",
+      oneLine: true,
+      evenGap: true,
+    },
+    wavesTone: {
+      label: "Wave rows (picture)",
+      tip: "Rows across the picture, wiggling harder and tighter where it is darker",
+      detail: { name: "Rows", min: 4, max: 120, value: 20, say: (v) => `${v} rows` },
+      twist: { name: "Contrast", min: 0, max: 100, value: 50, say: (v) => `${v}%` },
+      tone: true,
+      line: "open",
+      oneLine: true,
+      evenGap: true,
+    },
+    spiralTone: {
+      label: "Vibrating spiral (picture)",
+      tip: "One spiral from the middle out, wobbling harder where the picture is darker",
+      detail: { name: "Turns", min: 4, max: 120, value: 10, say: (v) => `${v} turns` },
+      twist: { name: "Contrast", min: 0, max: 100, value: 50, say: (v) => `${v}%` },
+      tone: true,
+      line: "open",
+      oneLine: true,
+      evenGap: true,
+    },
+    labyrinthTone: {
+      label: "Labyrinth (picture)",
+      tip: "A maze with smaller cells where the picture is darker, one closed line",
+      detail: { name: "Finest order", min: 3, max: 7, value: 4, say: (v) => `order ${v} · ${2 ** v} cells across` },
+      twist: { name: "Contrast", min: 0, max: 100, value: 50, say: (v) => `${v}%` },
+      seed: true,
+      tone: true,
+      line: "closed",
+      oneLine: true,
+      evenGap: true,
+    },
+  });
   UNB.PATTERN_SHAPES = ["square", "circle", "hexagon", "diamond", "heart", "star"];
 
   // How a pattern is drawn as a picture to trace, long px on its long side: a margin of 6% all round, and strokes a
@@ -652,9 +1030,14 @@
     spirograph,
     lissajous,
     truchet,
+    hilbertTone,
+    wavesTone,
+    spiralTone,
+    labyrinthTone,
   };
 
-  // One pattern. style: a key of UNB.PATTERNS; o: { detail, twist, sides (0: circle, 3–8), shape, seed }.
+  // One pattern. style: a key of UNB.PATTERNS; o: { detail, twist, sides (0: circle, 3–8), shape, seed, tone (the
+  // picture, for the styles drawn from one: { w, h, d }) }.
   // Returns { paths: [[x, y, …]], closed: [bool], box: [w, h], gap, crosses } in the pattern's own units (y down): gap
   // is the closest any two neighbouring lines come (the app draws the strokes a third of that wide). null when the
   // style is unknown or nothing is left inside the shape.
@@ -666,7 +1049,8 @@
       clampTo = (v, spec) => Math.round(Math.min(spec.max, Math.max(spec.min, v == null ? spec.value : +v)));
     p.detail = clampTo(p.detail, S.detail);
     if (S.twist) p.twist = clampTo(p.twist, S.twist);
-    const r = make(p, seeded(p.seed || 1));
+    if (S.tone && !(p.tone && p.tone.w > 1 && p.tone.h > 1)) return null; // drawn from a picture: needs one
+    const r = make(p, seeded(p.seed || 1), p.tone);
     if (!r) return null;
     r.crosses = !!r.crosses;
     return r;

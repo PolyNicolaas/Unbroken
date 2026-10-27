@@ -3,6 +3,20 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v103 · 2026-10-27
+
+- **Patterns drawn from a picture.** Four new styles in the Pattern card, in a group of their own, draw a picture's
+  light and dark as one continuous line, so they print in chocolate as well as plot: **Space-filling curve** (a Hilbert
+  curve with finer cells where it's darker), **Wave rows** (wiggling harder and tighter in the dark), **Vibrating
+  spiral** (portraits) and **Labyrinth** (a maze with smaller cells in the dark). They use the Art tab's picture, or the
+  new **face sample** (the Picture row in the card picks either); **Contrast** bends the darkness. They replace the old
+  Shading. The darkest parts keep the line spacing, so nothing merges.
+- **Sizes in mm for patterns.** The Pattern card's **Width (mm)** sets the print's width and shows how far apart the
+  closest lines come, warning when that is under the needle's line spacing; **Fit the needle** picks the width where
+  they are exactly the spacing apart. A width set by hand stays when the detail changes.
+- Engine: `UNB.pattern` takes the picture's darkness (`o.tone`). Tests E33 (each picture pattern stays one line and
+  puts more line in the dark), A31.
+
 ## v102 · 2026-10-27
 
 Simpler, after trying v101 (decided with Nicolaas, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)):

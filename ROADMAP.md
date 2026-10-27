@@ -61,10 +61,9 @@ Tests:
 
 ## 3 · Tracing, drawing and lettering
 
-- **Patterns from pictures, and more control** (decided 27 October, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)): trace a
-  picture with a pattern that draws its light and dark as one line (a space-filling curve, wave rows, a vibrating
-  spiral and a labyrinth, by tone), and give the patterns sizes in mm, fitting inside a shape, deeper settings per
-  style, and seeds with a grid of variations. v103.
+- **More control in the patterns** (decided 27 October, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)): fitting inside a
+  shape (a picture's silhouette, text, an SVG outline), deeper settings per style, and seeds with a grid of variations.
+  v104. (Patterns from pictures and sizes in mm came in v103.)
 
 - Patterns (v100): try them on real prints in the challenges (a labyrinth and a double spiral in chocolate, a whirl and
   Truchet tiles on the plotter). Ideas waiting for a use: more styles (circle packing, Voronoi cells, a Greek-key

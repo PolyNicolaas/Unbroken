@@ -38,6 +38,21 @@ function shape(r) {
       }
   return { cross, near: near / G };
 }
+// a test portrait for the patterns drawn from a picture (300 × 400): light background, a darker face, dark eyes,
+// nose, mouth and hair; as the app hands it over: darkness 0 (white) … 1 (black) per pixel
+function portraitTone() {
+  const c = createCanvas(300, 400), g = c.getContext("2d");
+  g.fillStyle = "#f4f4f4"; g.fillRect(0, 0, 300, 400);
+  const r = g.createRadialGradient(140, 170, 20, 150, 190, 130); r.addColorStop(0, "#e0e0e0"); r.addColorStop(1, "#555"); g.fillStyle = r;
+  g.beginPath(); g.ellipse(150, 190, 100, 130, 0, 0, 7); g.fill();
+  g.fillStyle = "#111"; g.beginPath(); g.ellipse(110, 160, 18, 9, 0, 0, 7); g.fill(); g.beginPath(); g.ellipse(190, 160, 18, 9, 0, 0, 7); g.fill();
+  g.fillStyle = "#333"; g.fillRect(140, 180, 18, 50); g.beginPath(); g.ellipse(150, 270, 40, 12, 0, 0, 7); g.fill();
+  g.fillStyle = "#222"; g.beginPath(); g.ellipse(150, 70, 110, 50, 0, Math.PI, 2 * Math.PI); g.fill();
+  const d = g.getImageData(0, 0, 300, 400).data, out = new Float32Array(300 * 400);
+  for (let i = 0; i < out.length; i++) out[i] = 1 - (0.2126 * d[4 * i] + 0.7152 * d[4 * i + 1] + 0.0722 * d[4 * i + 2]) / 255;
+  return { w: 300, h: 400, d: out };
+}
+const TONE = portraitTone();
 // the picture the app traces (web-app/js/patterns.js drawArt), at the app's 1600 px
 function picture(r) {
   const L = UNB.patternLayout(r, 1600), c = createCanvas(L.w, L.h), g = c.getContext("2d");
@@ -49,8 +64,8 @@ module.exports = {
   id: "E33", title: "Geometric art: every style draws the line it promises, and the one-line styles trace as one line",
   guards: "a pattern that crosses itself or touches where it promises an even gap, a closed style that doesn't close, a seed that doesn't give the same pattern again, and a one-line pattern the tracer breaks up or doubles",
   why: "The Geometric art card makes patterns as pictures to trace (UNB.pattern, source/engine/13-patterns.js). Labyrinth, Moore loop and Double spiral promise one closed line, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: that is what makes them print in chocolate without doubled strokes. The app draws them with UNB.patternLayout and starts them at the width where that gap is the line spacing.",
-  how: "Makes every style at its starting values and at both ends of its sliders (and with other sides and shapes where it has them); checks each path's points, its crossings (a loop's closing step included) and the closest approach of non-neighbouring parts against the gap it reports; makes the seeded styles twice with one seed and once with another; then draws each one-line style at the app's size and traces it with the app's defaults.",
-  pass: "Every pattern has points and a box; the one-line styles are one path with no crossings and nothing closer than 0.75 × their gap; the same seed gives the same pattern and another seed a different one; every one-line style traces as 1 part with no doubled strokes (under 1% of the walk) and no connectors.",
+  how: "Makes every style at its starting values and at both ends of its sliders (and with other sides and shapes where it has them); checks each path's points, its crossings (a loop's closing step included) and the closest approach of non-neighbouring parts against the gap it reports; makes the seeded styles twice with one seed and once with another; measures how much line the picture patterns put in dark and light parts of a test portrait; then draws each one-line style at the app's size and traces it with the app's defaults at the working resolution for the width where its gap is the line spacing.",
+  pass: "Every pattern has points and a box; the one-line styles are one path with no crossings and nothing closer than 0.75 × their gap; the same seed gives the same pattern and another seed a different one; a pattern drawn from a picture needs one, and puts at least 1.25 × as much line per area in the darkest parts of a test portrait as in the lightest; every one-line style traces as 1 part with no doubled strokes (under 1% of the walk) and no connectors.",
   async run(ctx) {
     const checks = [], bad = [], notes = [];
     for (const [key, P] of Object.entries(UNB.PATTERNS)) {
@@ -59,7 +74,8 @@ module.exports = {
       if (P.sides) vars.push({ sides: 0 }, { sides: 3 }, { sides: 6 });
       if (P.shape) for (const s of UNB.PATTERN_SHAPES) vars.push({ shape: s });
       for (const v of vars) {
-        const o = { seed: 5, sides: 4, shape: "square", ...v }, r = UNB.pattern(key, o), name = `${key} ${JSON.stringify(v)}`;
+        const o = { seed: 5, sides: 4, shape: "square", tone: P.tone ? TONE : undefined, ...v }, r = UNB.pattern(key, o), name = `${key} ${JSON.stringify(v)}`;
+        if (ctx.quick && P.tone && v.detail === P.detail.max) continue;   // the densest picture patterns take seconds
         if (!r || !r.paths.length || !r.paths.every((p) => p.length >= 4 && p.every(Number.isFinite)) || !(r.box[0] > 0 && r.box[1] > 0 && r.gap > 0)) { bad.push(`${name}: empty or not finite`); continue; }
         if (!P.oneLine) continue;
         if (r.paths.length !== 1) { bad.push(`${name}: ${r.paths.length} paths`); continue; }
@@ -68,17 +84,38 @@ module.exports = {
         if (sh.near < 0.75) bad.push(`${name}: parts ${sh.near.toFixed(2)} × the gap apart`);
       }
       if (P.seed) {
-        const a = UNB.pattern(key, { seed: 11 }), b = UNB.pattern(key, { seed: 11 }), c = UNB.pattern(key, { seed: 12 });
+        const tone = P.tone ? TONE : undefined, a = UNB.pattern(key, { seed: 11, tone }), b = UNB.pattern(key, { seed: 11, tone }), c = UNB.pattern(key, { seed: 12, tone });
         if (JSON.stringify(a.paths) !== JSON.stringify(b.paths)) bad.push(`${key}: the same seed gave another pattern`);
         if (JSON.stringify(a.paths) === JSON.stringify(c.paths)) bad.push(`${key}: another seed gave the same pattern`);
       }
+    }
+    for (const [key, P] of Object.entries(UNB.PATTERNS)) if (P.tone && UNB.pattern(key, {})) bad.push(`${key}: drawn without a picture`);
+    // drawn from a picture: darker parts get more line (the line's length in the darkest quarter of the box ÷ in the
+    // lightest, against their areas)
+    for (const [key, P] of Object.entries(UNB.PATTERNS)) {
+      if (!P.tone) continue;
+      const r = UNB.pattern(key, { seed: 3, tone: TONE }), p = r.paths[0], [bw, bh] = r.box, ink = new Float64Array(16), n = p.length / 2;
+      const a = TONE.w / TONE.h, fitW = a >= bw / bh ? bw : bh * a, fitH = a >= bw / bh ? bw / a : bh;   // the picture fitted inside the box
+      for (let i = 0; i + 1 < n; i++) {
+        const x = (p[2 * i] + p[2 * i + 2]) / 2, y = (p[2 * i + 1] + p[2 * i + 3]) / 2, pu = (x - (bw - fitW) / 2) / fitW, pv = (y - (bh - fitH) / 2) / fitH;
+        if (pu < 0 || pv < 0 || pu >= 1 || pv >= 1) continue;
+        const dk = TONE.d[Math.floor(pv * TONE.h) * TONE.w + Math.floor(pu * TONE.w)];
+        ink[Math.min(15, Math.floor(dk * 16))] += Math.hypot(p[2 * i + 2] - p[2 * i], p[2 * i + 3] - p[2 * i + 1]);
+      }
+      const area = new Float64Array(16); for (const v of TONE.d) area[Math.min(15, Math.floor(v * 16))]++;
+      const dens = [...ink].map((v, k) => (area[k] > 200 ? v / area[k] : NaN)), light = dens.find(Number.isFinite), dark = [...dens].reverse().find(Number.isFinite);
+      notes.push(`${key}: line per area, darkest ÷ lightest ${(dark / light).toFixed(2)}`);
+      // (waves and the spiral can only wiggle so far and keep their gap: at most about 1.8 × as much line)
+      if (!(dark > 1.25 * light)) bad.push(`${key}: the dark parts don't get more line (${(dark / light).toFixed(2)} ×)`);
     }
     checks.push(check("patterns that break their promise", bad.length, "==", 0));
     // traced like the app: one part, nothing doubled, no connectors
     let traced = 0;
     for (const [key, P] of Object.entries(UNB.PATTERNS)) {
       if (!P.oneLine) continue;
-      const r = UNB.pattern(key, { seed: 3, sides: 4, shape: "square" }), t = trace(picture(r), { open: P.line === "open" }), w = t.walk;
+      // traced at the working resolution the app would use at the width where the gap is the 18G line spacing
+      const r = UNB.pattern(key, { seed: 3, sides: 4, shape: "square", tone: P.tone ? TONE : undefined }), mm = (r.box[0] / r.gap) * 1.34;
+      const t = trace(picture(r), { open: P.line === "open", res: Math.min(2000, Math.max(500, 5 * mm * Math.max(1, r.box[1] / r.box[0]))) }), w = t.walk;
       const parts = w ? w.nParts : 0, dbl = w ? w.doubledFrac : 1, jumps = t.sg ? t.sg.connRuns : -1;
       notes.push(`${key} ${parts} part, ${(100 * dbl).toFixed(1)}% doubled, ${t.N} terms, error ${t.fin ? (t.fin.err.score * t.scale).toFixed(3) : "–"} mm`);
       if (parts !== 1 || dbl > 0.01 || jumps !== 0) bad.push(`${key} traced: ${parts} parts, ${(100 * dbl).toFixed(1)}% doubled, ${jumps} connectors`); else traced++;

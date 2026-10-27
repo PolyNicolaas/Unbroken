@@ -335,6 +335,7 @@
         <option value="leaf">Sample: leaf</option>
         <option value="shapes">Sample: shapes &amp; text</option>
         <option value="smiley">Sample: smiley</option>
+        <option value="face">Sample: face (light and dark, for picture patterns)</option>
         <option value="user" disabled>Your image</option>
       </select>
       <div class="inline"><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
@@ -372,6 +373,10 @@
       <h2 id="h-art">Pattern <span id="artVal"></span></h2>
       <label class="field"><span>Style</span><select id="artStyle" aria-describedby="artTip"></select></label>
       <p class="hint" id="artTip"></p>
+      <div class="row" id="artPicRow">
+        <div class="lab"><span class="name">Picture</span><span class="val" id="artPicName"></span></div>
+        <div class="inline"><button class="btn mini" type="button" id="artPicChoose" title="An image whose light and dark the pattern draws (or drop one on the page)">Choose an image…</button><button class="btn mini" type="button" id="artPicFace" title="The face sample: soft greys to try the picture patterns on">Face sample</button></div>
+      </div>
       <div class="row">
         <div class="lab"><label for="artDetail" id="artDetailLab">Detail</label><span class="val" id="artDetailVal"></span></div>
         <input type="range" id="artDetail" min="1" max="40" value="12">
@@ -390,8 +395,13 @@
       <div class="inline">
         <button class="btn" type="button" id="artShuffle" title="Another random version of this style">Shuffle</button>
       </div>
+      <div class="row" id="artSizeRow">
+        <div class="lab"><label for="artWidth">Width (mm)</label><span class="val" id="artGapInfo"></span></div>
+        <div class="inline"><input type="number" id="artWidth" min="5" max="1000" step="1" aria-describedby="artGapHint"><button class="btn mini" type="button" id="artFit" title="The width where the pattern's closest lines are the needle's line spacing apart">Fit the needle</button></div>
+        <p class="hint" id="artGapHint"></p>
+      </div>
       <p class="status" id="artMsg" role="status"></p>
-      <p class="hint help">Geometric art drawn as exact lines. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: traced on their own they print without doubled strokes (the Line card's Closed loop or Open is set to suit, and the print starts at the width where the gap is the line spacing). Spirograph with loops and Lissajous cross themselves, and Truchet tiles are many pieces: those suit the pen plotter.</p>
+      <p class="hint help">Geometric art drawn as exact lines, then traced. The first group are patterns of their own; the second draw a picture's light and dark (the Picture row picks it), still as one line, so they print in chocolate. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print without doubled strokes (the Line card's Closed loop or Open is set to suit). Width sets the print's size in mm, and says how far apart its closest lines come against the needle's line spacing; Fit the needle picks the width where they are exactly that. Spirograph with loops and Lissajous cross themselves, and Truchet tiles are many pieces: those suit the pen plotter.</p>
     </section>
 
     <section class="card art-only art-model" aria-labelledby="h-model">
