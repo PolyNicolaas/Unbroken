@@ -44,6 +44,13 @@
     return lines;
   };
 
+  // the Line step's Separate strokes: line map (as stageTrace takes it) → strokes the pen draws one by one, lifting
+  // between them (UNB.lineStrokes). opt: minLen (px), tol (px).
+  UNB.stageStrokes = function (src, w, h, opt) {
+    const lines = src.lines || UNB.stageLines(src.blurred, w, h, src);
+    return UNB.lineStrokes(lines, w, h, opt);
+  };
+
   // lines → walk → subpixel walk. snap: { blurred, edges } — snaps to the ink's middle (centerline, text) or the edge's
   // peak (outline); null keeps whole pixels.
   UNB.stageWalk = function (lines, w, h, walkOpt, snap) {

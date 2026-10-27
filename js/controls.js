@@ -232,7 +232,8 @@ function afterSize() {
     drawMini();
   }
 }
-// The line: spacing (centre to centre) = line width + gap (edge to edge). The 3D tab's needle sets the width; typing a
+// The line: spacing (centre to centre) = line width + gap (edge to edge). The Print step's needle sets the width;
+// typing a
 // width picks the needle that matches, or Custom.
 // The line spacing or width changed: text is laid out again, a model's layers rebuilt, an image's line re-fitted.
 function spacingChanged() {
@@ -245,7 +246,7 @@ function spacingChanged() {
 }
 function lineUI() {
   // the spacing (st.spacing, owned here) and the needle's look and hint
-  // made for plotting (Art tab): pen 1's width (2D tab) instead of the needle's
+  // made for plotting (Art step): pen 1's width (Plot step) instead of the needle's
   const w = artForPlot() ? Math.max(0.05, +$("penW").value || 0.5) : lineWidthMM(),
     g = Math.max(0, +$("lineGapMM").value || 0);
   st.spacing = w + g;
@@ -255,13 +256,13 @@ function lineUI() {
   $("needleDot").style.background = opt.dataset.c;
   $("needleDot").title = opt.textContent;
   $("needleHint").textContent = o
-    ? `Sets the line width on the Trace tab (${fmt(w, 2)} mm) and, with the ${CFG.printer.cartridge || "cartridge"}, how fast the plunger pushes (E per mm, Fine-tuning).`
-    : `Custom: the Trace tab's line width (${fmt(w, 2)} mm) doesn't match a needle in settings.js.`;
+    ? `Sets the line width on the Line step (${fmt(w, 2)} mm) and, with the ${CFG.printer.cartridge || "cartridge"}, how fast the plunger pushes (E per mm, Fine-tuning).`
+    : `Custom: the Line step's line width (${fmt(w, 2)} mm) doesn't match a needle in settings.js.`;
   if (!$("spacingHint").classList.contains("warn")) $("spacingHint").textContent = spacingText();
 }
 const spacingText = () =>
   artForPlot()
-    ? `Made for plotting: pen 1 (${fmt(+$("penW").value || 0.5, 2)} mm, 2D tab) + the gap, lines ${fmt(st.spacing, 2)} mm apart, centre to centre.`
+    ? `Made for plotting: pen 1 (${fmt(+$("penW").value || 0.5, 2)} mm, Plot step) + the gap, lines ${fmt(st.spacing, 2)} mm apart, centre to centre.`
     : `Lines ${fmt(st.spacing, 2)} mm apart, centre to centre; stroke ends loop back ${fmt(lineWidthMM() + st.spacing, 2)} mm wide.`;
 function lineChanged() {
   lineUI();
@@ -289,4 +290,4 @@ $("simplify").addEventListener("input", () => {
   recordSoon();
   layersSoon();
   plotSoon();
-}); // exports and the 3D / 2D tabs simplify the line too
+}); // exports and the 3D / Plot steps simplify the line too

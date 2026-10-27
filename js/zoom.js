@@ -1,7 +1,8 @@
 // Unbroken · web app · zoom.js
 // Zoom and pan in the big view, and the One copy / Whole plate switch.
 // Each view (line, page, plate, layers) keeps its own zoom: z (1 = everything fitted, down to 0.25 and up to 30) and a
-// pan in canvas pixels. A renderer draws as usual and calls zoomOn(g, view, cv) first, which sets the canvas transform; pointer code
+// pan in canvas pixels. A renderer draws as usual and calls zoomOn(g, view, cv) first, which sets the canvas transform;
+// pointer code
 // turns a click back into the fitted picture with unzoom(). The line view folds the zoom into view() instead
 // (preview.js), so the image tools follow it.
 // Pinch, or Ctrl / ⌘ + scroll, zooms about the pointer; scrolling pans once zoomed in; Space + drag or the middle

@@ -1,12 +1,12 @@
-Unbroken · web app build v106
-Built:  2026-10-27T17:43:54.752Z
-Tests:  64 of 64 tests passed
+Unbroken · web app build v107
+Built:  2026-10-27T21:40:33.275Z
+Tests:  66 of 66 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
   0902e2e523fa  00-util.js
   7e44e48da503  01-image.js
-  04c33071a9c1  02-lines.js
+  badcff892ed9  02-lines.js
   941b223d9657  03-text.js
   9c623d1c6a37  04-walk.js
   c434fcb30c2d  05-fill.js
@@ -14,39 +14,40 @@ Files (sha1, first 12):
   e88cd163925f  07-measure.js
   d0cc374de0d6  08-shape.js
   322bde11c0c0  09-plate.js
-  c390f7b99aa7  10-export.js
-  3715a9249713  11-stages.js
+  5d6faec33c27  10-export.js
+  2189b17474c4  11-stages.js
   59aaa64e2642  12-models.js
   135d6e45a412  13-patterns.js
-  f3d58ef273bc  core.js
-  d76569f8d3e5  css/app.css
+  136005c5372b  core.js
+  5393eab567bc  css/app.css
   7efa0c130b02  css/theme.css
   666f911d2119  fonts.js
-  8e16f62801fc  index.html
-  7525ad3a46e5  js/art.js
-  cc338cd5a339  js/config.js
-  ad1b62cd00a7  js/controls.js
-  1b7b18d51a47  js/engine-bridge.js
-  e0a3055dd6c5  js/export.js
-  943d1d2167f9  js/history.js
-  282a67c9225f  js/layers.js
-  b4e70645970d  js/levels.js
-  0268e1ab91bd  js/main.js
-  29f041a9b488  js/model.js
+  8d520e3d76d6  index.html
+  6bb64091f959  js/art.js
+  0e1dfa79417b  js/config.js
+  4b8afd365d63  js/controls.js
+  e666f8bf0b57  js/engine-bridge.js
+  7b57af784570  js/export.js
+  d40f679cf96b  js/history.js
+  31154129f62f  js/layers.js
+  7d8da1fe3b83  js/levels.js
+  49bc0882fd05  js/main.js
+  a462e8546261  js/model.js
   26b7659e5ebe  js/notes.js
   911e52e413f3  js/optimize.js
-  58fdd1836272  js/patterns.js
-  21a8f0ca8b37  js/pieces.js
-  71228ef0dd95  js/pipeline.js
-  57fcbe695967  js/plot.js
-  98bc484bb1b4  js/preview.js
+  cdc36022946d  js/patterns.js
+  e11158a47338  js/pieces.js
+  7e26c66beff1  js/pipeline.js
+  6d2141106196  js/plot.js
+  e89c6324eeb0  js/preview.js
   d61b587f3303  js/readouts.js
-  ea3d565b7cdf  js/source.js
+  1d05617e71e8  js/source.js
   78f5450a22d9  js/state.js
-  347002262ce1  js/testprint.js
+  9bdbe1dadb94  js/testprint.js
   b22c4183d365  js/tools.js
   e651a30c34d9  js/ui.js
-  c0bf468e1779  js/views.js
-  c7e8ce426229  js/zoom.js
+  55c6223a5cf4  js/views.js
+  81100b697e42  js/workflow.js
+  53b02936e233  js/zoom.js
   8c1e4e3be548  settings.js
   85d8193792d8  worker.js

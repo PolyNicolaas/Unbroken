@@ -293,3 +293,25 @@ body:not([data-art="picture"]) .art-picture, body:not([data-art="text"]) .art-te
 .level-swatch { width: 22px; height: 22px; border-radius: calc(4px * var(--corner)); border: 1px solid var(--rule); }
 .level-name { font-size: 0.85em; }
 .seg.mini label { padding: 4px 10px; font-size: 0.85em; }
+
+/* The workflow (workflow.js): what it's made for, then the steps Art → Line → Print or Plot */
+.output-row { display: grid; gap: calc(6px * var(--space)); margin-bottom: calc(10px * var(--space)); }
+.output-row .name { font-size: calc(12px * var(--text)); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
+.steps label b { display: inline-block; min-width: 1.4em; height: 1.4em; line-height: 1.4em; margin-right: 4px; border-radius: 50%; background: var(--rule); font-size: 0.8em; text-align: center; }
+.steps input:checked + label b { background: var(--accent); color: var(--paper); }
+body[data-out="plot"] label[for="viewChoc"], body[data-out="print"] label[for="view2D"] { display: none; }
+/* the preview follows the step: its own tabs only on Print, for the plate or the layers */
+body:not([data-view="choc"]) .stage-tabs { display: none; }
+body[data-view="choc"] .stage-tabs label[for="stLine"], body[data-view="choc"] .stage-tabs label[for="stPage"] { display: none; }
+/* the Line step's switch: a printer takes one line */
+body[data-out="print"] .line-modes label[for="lineStrokes"], body[data-out="print"] .line-modes label[for="lineDrawn"] { display: none; }
+.line-modes input:disabled + label { opacity: 0.45; cursor: not-allowed; }
+/* cards the line in use doesn't need: As drawn traces nothing; separate strokes have no spacing, size or series */
+body[data-line="drawn"] #card-h-trace, body[data-line="drawn"] #card-h-levels, body[data-line="drawn"] #card-h-prep,
+body[data-line="drawn"] #card-h-line, body[data-line="drawn"] #card-h-size, body[data-line="drawn"] #card-h-fit,
+body[data-line="drawn"] .toolbar.tools { display: none; }
+body[data-line="strokes"] #card-h-line, body[data-line="strokes"] #card-h-size, body[data-line="strokes"] #card-h-fit { display: none; }
+/* the tools for one continuous line only (start, crossing areas, connector paths) */
+body[data-line="strokes"] #startBtn, body[data-line="strokes"] #crossBtn, body[data-line="strokes"] #laneBtn { display: none; }
+/* the math is the one continuous line's Fourier series: nothing to show for strokes or as drawn */
+body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; }

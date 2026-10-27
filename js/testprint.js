@@ -1,5 +1,5 @@
 // Unbroken · web app · testprint.js
-// Test print (3D tab): one G-code of numbered strips with one setting stepped from strip to strip (UNB.testStrips),
+// Test print (Print step): one G-code of numbered strips with one setting stepped from strip to strip (UNB.testStrips),
 // to find the layer height, speed, gap or flow that suits a chocolate; then the best strip's value goes into the
 // setting.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in

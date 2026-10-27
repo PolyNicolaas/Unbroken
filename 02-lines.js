@@ -74,6 +74,138 @@
     return UNB.thin(out, w, h); // make edges strictly 1px so each becomes a single stroke
   };
 
+  // A line map → separate strokes, for a pen that can lift (the Line step's Separate strokes). Pixels are joined to their
+  // 4 neighbours, and to a diagonal one only where neither pixel between them is set, so a corner isn't a little
+  // triangle. Strokes run between ends and junctions; closed rings with neither are loops. Each is smoothed (ends and
+  // junctions stay put) and simplified (tol px), shorter ones than minLen px are dropped, and they're put in an order
+  // that keeps the pen's travel short (nearest next, either way round). Returns { strokes: [[x, y, …]], closed: [bool],
+  // travel (px the pen moves up), length (px drawn) }.
+  UNB.lineStrokes = function (lines, w, h, opt) {
+    const o = opt || {},
+      minLen = o.minLen || 0,
+      tol = o.tol == null ? 0.35 : o.tol,
+      N = w * h,
+      on = (x, y) => x >= 0 && y >= 0 && x < w && y < h && lines[y * w + x] > 0;
+    const nbrs = (p) => {
+      const x = p % w,
+        y = (p / w) | 0,
+        out = [];
+      for (const [dx, dy] of [
+        [1, 0],
+        [-1, 0],
+        [0, 1],
+        [0, -1],
+      ])
+        if (on(x + dx, y + dy)) out.push(p + dy * w + dx);
+      for (const [dx, dy] of [
+        [1, 1],
+        [1, -1],
+        [-1, 1],
+        [-1, -1],
+      ])
+        if (on(x + dx, y + dy) && !on(x + dx, y) && !on(x, y + dy)) out.push(p + dy * w + dx);
+      return out;
+    };
+    const deg = new Uint8Array(N),
+      adj = new Map();
+    for (let p = 0; p < N; p++)
+      if (lines[p]) {
+        const a = nbrs(p);
+        adj.set(p, a);
+        deg[p] = a.length;
+      }
+    const seen = new Set(),
+      key = (a, b) => (a < b ? a * N + b : b * N + a);
+    const walk = (p, q) => {
+      const path = [p, q];
+      seen.add(key(p, q));
+      let prev = p,
+        cur = q;
+      while (deg[cur] === 2) {
+        const next = adj.get(cur).find((r) => r !== prev && !seen.has(key(cur, r)));
+        if (next === undefined) break;
+        seen.add(key(cur, next));
+        path.push(next);
+        prev = cur;
+        cur = next;
+      }
+      return path;
+    };
+    const raw = [];
+    for (const [p, a] of adj)
+      if (deg[p] !== 2) for (const q of a) if (!seen.has(key(p, q))) raw.push({ px: walk(p, q), closed: false });
+    for (const [p, a] of adj)
+      if (deg[p] === 2) for (const q of a) if (!seen.has(key(p, q))) raw.push({ px: walk(p, q), closed: true });
+    // pixel paths → smoothed, simplified polylines
+    const strokes = [],
+      closed = [];
+    let length = 0;
+    for (const r of raw) {
+      let n = r.px.length;
+      if (r.closed && r.px[n - 1] === r.px[0]) n--;
+      if (n < 2) continue;
+      let x = new Float64Array(n),
+        y = new Float64Array(n);
+      for (let i = 0; i < n; i++) {
+        x[i] = r.px[i] % w;
+        y[i] = (r.px[i] / w) | 0;
+      }
+      for (let pass = 0; pass < 2; pass++) {
+        const nx = Float64Array.from(x),
+          ny = Float64Array.from(y);
+        for (let i = r.closed ? 0 : 1; i < (r.closed ? n : n - 1); i++) {
+          const a = (i - 1 + n) % n,
+            b = (i + 1) % n;
+          nx[i] = (x[a] + 2 * x[i] + x[b]) / 4;
+          ny[i] = (y[a] + 2 * y[i] + y[b]) / 4;
+        }
+        x = nx;
+        y = ny;
+      }
+      let L = 0;
+      for (let i = 1; i < n; i++) L += Math.hypot(x[i] - x[i - 1], y[i] - y[i - 1]);
+      if (r.closed) L += Math.hypot(x[0] - x[n - 1], y[0] - y[n - 1]);
+      if (L < minLen) continue;
+      const sp = UNB.simplify(x, y, tol, r.closed);
+      const flat = [];
+      for (let i = 0; i < sp.x.length; i++) flat.push(sp.x[i], sp.y[i]);
+      if (r.closed) flat.push(sp.x[0], sp.y[0]);
+      strokes.push(flat);
+      closed.push(r.closed);
+      length += L;
+    }
+    // order: nearest next start or end (turned round to start there), from the top left
+    const left = strokes.map((_, i) => i),
+      order = [],
+      orderClosed = [];
+    let at = [0, 0],
+      travel = 0;
+    while (left.length) {
+      let best = 0,
+        bd = Infinity,
+        rev = false;
+      left.forEach((i, k) => {
+        const s = strokes[i],
+          d0 = (s[0] - at[0]) ** 2 + (s[1] - at[1]) ** 2,
+          d1 = (s[s.length - 2] - at[0]) ** 2 + (s[s.length - 1] - at[1]) ** 2;
+        if (d0 < bd) [bd, best, rev] = [d0, k, false];
+        if (d1 < bd && !closed[i]) [bd, best, rev] = [d1, k, true];
+      });
+      const i = left.splice(best, 1)[0];
+      let s = strokes[i];
+      if (rev) {
+        const t = [];
+        for (let j = s.length - 2; j >= 0; j -= 2) t.push(s[j], s[j + 1]);
+        s = t;
+      }
+      if (order.length) travel += Math.sqrt(bd);
+      order.push(s);
+      orderClosed.push(closed[i]);
+      at = [s[s.length - 2], s[s.length - 1]];
+    }
+    return { strokes: order, closed: orderClosed, travel, length };
+  };
+
   // Grey levels → a line map: the edges between levels (UNB.levels), for the levels whose edges are wanted (edge[j]
   // true: Trace). An edge is drawn where either side wants it, on the darker side's pixel, so every block's outline is
   // one pixel wide; thinned so the tracer sees single strokes. Edges along the picture's border aren't drawn.

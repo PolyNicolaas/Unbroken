@@ -26,7 +26,7 @@ try {
 } catch {}
 new MutationObserver(rethemed).observe(document.documentElement, { attributes: true, attributeFilter: ["data-theme"] });
 
-// problems found in settings.js: listed in the 3D tab, and a short note on screen
+// problems found in settings.js: listed in the Print step, and a short note on screen
 if (CFG.problems.length) {
   $("settingsNote").hidden = false;
   $("settingsNote").textContent = "settings.js: " + CFG.problems.join("; ") + ".";
@@ -36,7 +36,7 @@ if (CFG.problems.length) {
       toast(
         CFG.problems.length === 1 && /couldn't be read/.test(CFG.problems[0])
           ? "settings.js couldn't be read, so built-in settings are in use"
-          : `settings.js: ${CFG.problems.length} problem${CFG.problems.length === 1 ? "" : "s"}, see the 3D tab`,
+          : `settings.js: ${CFG.problems.length} problem${CFG.problems.length === 1 ? "" : "s"}, see the Print step`,
         true
       ),
     300
@@ -48,7 +48,7 @@ labels();
 syncSpacingUI();
 infillUI();
 lineUI(); // the spacing from line width + gap, and the needle shown
-// the Art tab starts on the sample picture, or the text (art.js)
+// the Art step starts on the sample picture, or the text (art.js)
 const start = CFG.defaults.startFrom;
 if (start === "lettering")
   applyPreset("lettering"); // starts on the text

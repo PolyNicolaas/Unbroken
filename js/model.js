@@ -1,6 +1,7 @@
 // Unbroken · web app · model.js
 // 3D models as a source: load an STL (or the sample vase), turn it to the side it should print on, look at it in the
-// preview, and hand it to the 3D tab, where it is sliced and every layer is fitted with a Fourier series (layers.js).
+// preview, and hand it to the Print step, where it is sliced and every layer is fitted with a Fourier series
+// (layers.js).
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
 "use strict";
@@ -69,7 +70,8 @@ const modelScale = () => (st.model ? st.model.heightMM / Math.max(st.model.om.si
 // Cutting: the share of the model's height cut off at the bottom and the top, and what is left to print (mm)
 const modelCut = () => (st.model && st.model.cut) || { bottom: 0, top: 0 };
 const printedMM = () => (st.model ? st.model.heightMM * (1 - modelCut().bottom - modelCut().top) : 0);
-// the printed height (mm), from the Height field on the 3D tab: the model is scaled so the part left after cutting is
+// the printed height (mm), from the Height field on the Print step: the model is scaled so the part left after cutting
+// is
 // that tall
 function setModelHeight(H) {
   const c = modelCut();
@@ -213,7 +215,7 @@ function modelPlate(n, gap, straight) {
   return lay;
 }
 
-// ---------- slicing (the 3D tab) ----------
+// ---------- slicing (the Print step) ----------
 // Every layer of the model: sliced, moved in by half a line width, joined into one loop, filled for the filled base,
 // and fitted with a Fourier series (UNB.modelStack, in the layers engine), then placed on the plate and stacked.
 const modelStacks = new Map(); // key → UNB.modelStack result (mm, model centred)
@@ -278,7 +280,7 @@ async function buildModelLayers() {
   };
 }
 
-// ---------- the preview: the model, shaded; on the 3D tab, its layers ----------
+// ---------- the preview: the model, shaded; on the Print step, its layers ----------
 // Orthographic, turned by yaw (about the vertical) and pitch (tipped towards you); drag the preview to look around.
 function modelProj(M, cv) {
   const k = modelScale(),
@@ -381,7 +383,7 @@ function drawModel() {
     shade[i] = Math.max(0, (sg * (nx * lx + ny * ly + nz * lz)) / nl / ll);
   }
   order.sort((p, q) => depth[p] - depth[q]);
-  // cut parts (Cut off, Trace tab) are drawn faint, and each cut is outlined where it goes through the model
+  // cut parts (Cut off, Line step) are drawn faint, and each cut is outlined where it goes through the model
   const C = modelCut(),
     Zs = M.om.size[2],
     zb = C.bottom * Zs,
@@ -442,7 +444,7 @@ for (const ev of ["pointerup", "pointercancel"])
   $("view").addEventListener(ev, () => {
     orbit = null;
   });
-// Walls: model only, on the 3D tab (the base and infill settings are layers.js's)
+// Walls: model only, on the Print step (the base and infill settings are layers.js's)
 $("wallCount").addEventListener("input", () => layersSoon(0));
 $("support").addEventListener("change", () => layersSoon(0));
 for (const ev of ["input", "change"])
@@ -522,7 +524,7 @@ $("drawView").addEventListener("click", async () => {
 });
 creaseUI();
 // the drawing as vectors, before any tracing: rendered at 2000 px for precision, pieces that meet joined into strokes,
-// scaled to the model's size in mm (its height as set on the 3D tab)
+// scaled to the model's size in mm (its height as set on the Print step)
 async function modelViewSVG() {
   const M = st.model,
     r = await LAY.call("hiddenLines", [

@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v106</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v107</span></p>
 </header>
 
 <div class="wrap">
@@ -36,7 +36,7 @@
         <div class="pathbar" role="group" aria-label="What the view shows">
           <label class="check pv-3d" title="Each line as the chocolate bead it prints: the needle's width, one layer tall, at true height"><input type="checkbox" id="pvSolid" checked> <span>Solid (as printed)</span></label>
           <label class="check" title="The line's layers"><input type="checkbox" id="pvWall" checked> <span class="pv-sw" data-k="wall"></span>Walls</label>
-          <label class="check" title="The filled base's lines (3D tab, Filled base)"><input type="checkbox" id="pvFill" checked> <span class="pv-sw" data-k="fill"></span>Fill</label>
+          <label class="check" title="The filled base's lines (Print step, Filled base)"><input type="checkbox" id="pvFill" checked> <span class="pv-sw" data-k="fill"></span>Fill</label>
           <label class="check pv-whole" title="Moves between copies, needle up: no chocolate"><input type="checkbox" id="pvTravel" checked> <span class="pv-sw" data-k="travel"></span>Travel</label>
           <label class="check pv-whole" title="The purge line before the print, and the wipe at the end of each copy"><input type="checkbox" id="pvPurge" checked> <span class="pv-sw" data-k="purge"></span>Purge &amp; wipes</label>
         </div>
@@ -50,7 +50,7 @@
           </span>
         </div>
         <div class="toast" id="toast" role="status" hidden></div>
-        <button class="minimap design-only" id="minimap" type="button" title="The drawing on the 340 × 232 mm plate. Click for the 3D tab"><canvas id="miniPlate"></canvas><span id="miniInfo"></span></button>
+        <button class="minimap design-only" id="minimap" type="button" title="The drawing on the 340 × 232 mm plate. Click for the Print step"><canvas id="miniPlate"></canvas><span id="miniInfo"></span></button>
       </div>
       <div class="toolbar">
         <button class="btn primary" id="play" type="button" title="Watch it being drawn: the circles drawing the line, the pen drawing the page, or the layers stacking up">Play drawing</button>
@@ -162,11 +162,18 @@
   </div>
 
   <div class="panel">
-    <div class="seg view-tabs" role="radiogroup" aria-label="View">
-      <input type="radio" name="view" id="viewArt" value="art" checked><label for="viewArt">Art<small>picture, text, pattern, model</small></label>
-      <input type="radio" name="view" id="viewDesign" value="design"><label for="viewDesign">Trace<small>trace and shape the line</small></label>
-      <input type="radio" name="view" id="view2D" value="plot"><label for="view2D">2D<small>pen plotter, flat files</small></label>
-      <input type="radio" name="view" id="viewChoc" value="choc"><label for="viewChoc">3D<small>printers, layers, G-code</small></label>
+    <div class="output-row">
+      <span class="name">Making it for</span>
+      <div class="seg output-seg" role="radiogroup" aria-label="Making it for">
+        <input type="radio" name="artFor" id="artForPrint" value="print" checked><label for="artForPrint">A printer<small>chocolate, clay · one line</small></label>
+        <input type="radio" name="artFor" id="artForPlot" value="plot"><label for="artForPlot">A pen plotter<small>pens · any detail</small></label>
+      </div>
+    </div>
+    <div class="seg view-tabs steps" role="radiogroup" aria-label="Step">
+      <input type="radio" name="view" id="viewArt" value="art" checked><label for="viewArt"><b>1</b> Art<small>picture, text, pattern, model</small></label>
+      <input type="radio" name="view" id="viewDesign" value="design"><label for="viewDesign"><b>2</b> Line<small id="stepLineSub">traced into one line</small></label>
+      <input type="radio" name="view" id="view2D" value="plot"><label for="view2D"><b>3</b> Plot<small>the page, pens, SVG</small></label>
+      <input type="radio" name="view" id="viewChoc" value="choc"><label for="viewChoc"><b>3</b> Print<small>plate, layers, G-code</small></label>
     </div>
     <div class="panel-tools">
       <span style="flex:1"></span>
@@ -200,7 +207,7 @@
 
     <section class="card choc-only" aria-labelledby="h-plate">
       <h2 id="h-plate">Plate <span id="plateInfo"></span></h2>
-      <label class="check" title="The size slider on the Trace tab stops at the widest the drawing can be on this printer's plate"><input type="checkbox" id="limitPlate"> <span>Keep the size within the build plate</span></label>
+      <label class="check" title="The size slider on the Line step stops at the widest the drawing can be on this printer's plate"><input type="checkbox" id="limitPlate"> <span>Keep the size within the build plate</span></label>
       <p class="hint" id="plateHint"></p>
       <div class="three">
         <label class="field"><span id="copiesLab">Copies</span><input type="number" id="copies" min="1" max="200" step="1" value="1"></label>
@@ -208,7 +215,7 @@
         <label class="field"><span>Rotation</span><select id="plateRot"><option value="auto" selected>Auto (to fit)</option><option value="straight">Straight only</option></select></label>
       </div>
       <div class="two" id="piecesRow" hidden>
-        <label class="field" title="A piece for each line: every line of the text is traced on its own and printed as a separate piece, one continuous line each, with no strand joining one line to the next. One piece: the lines print joined, as the Trace tab draws them."><span>Lines of text</span><select id="textPieces"><option value="each" selected>A piece for each line</option><option value="one">One piece, lines joined</option></select></label>
+        <label class="field" title="A piece for each line: every line of the text is traced on its own and printed as a separate piece, one continuous line each, with no strand joining one line to the next. One piece: the lines print joined, as the Line step draws them."><span>Lines of text</span><select id="textPieces"><option value="each" selected>A piece for each line</option><option value="one">One piece, lines joined</option></select></label>
         <label class="field" id="pieceShownField" title="The piece One copy shows, in the Plate and 3D layers views"><span>One copy shows</span><select id="pieceShown"><option value="0">line 1</option></select></label>
       </div>
       <div class="inline"><button class="btn" type="button" id="plateCenter">Center on plate</button></div>
@@ -227,7 +234,7 @@
           <label class="field"><span>Bottom (mm)</span><input type="number" id="cutBottom" min="0" step="0.5" value="0"></label>
           <label class="field"><span>Top (mm)</span><input type="number" id="cutTop" min="0" step="0.5" value="0"></label>
         </div>
-        <p class="hint help">Only the part of the model between the two cuts is printed. Cut the top where it stops being flat (a dome or a point ends in a few tiny, wobbly last layers that don't hold their shape in chocolate), or the bottom of a round model so it stands on a flat first layer. The model's preview on the Trace tab fades the parts cut off and outlines the cuts; the Height above is the part that's left. Turning the model clears the cuts.</p>
+        <p class="hint help">Only the part of the model between the two cuts is printed. Cut the top where it stops being flat (a dome or a point ends in a few tiny, wobbly last layers that don't hold their shape in chocolate), or the bottom of a round model so it stands on a flat first layer. The model's preview on the Line step fades the parts cut off and outlines the cuts; the Height above is the part that's left. Turning the model clears the cuts.</p>
       </div>
       <label class="field model-only" title="How many walls, one line spacing inside each other"><span>Walls</span><input type="number" id="wallCount" min="1" max="5" step="1" value="1"></label>
       <p class="hint help model-only" data-anchor="wallCount">A model prints its outside contour only: the inside surface of a hollow model (a cup's inner wall) and any hole are not traced. Walls adds lines inside the outside contour, one spacing apart; how much of the inside gets chocolate is up to Base and Infill.</p>
@@ -325,14 +332,6 @@
         <input type="radio" name="srcType" id="srcPattern" value="pattern"><label for="srcPattern">Pattern<small>geometric art</small></label>
         <input type="radio" name="srcType" id="srcModel" value="model"><label for="srcModel">3D model<small>an STL</small></label>
       </div>
-      <div class="row" id="artForRow">
-        <div class="lab"><span class="name">Made for</span><span class="val" id="artForVal"></span></div>
-        <div class="seg" role="radiogroup" aria-label="What the art is made for">
-          <input type="radio" name="artFor" id="artForPrint" value="print" checked><label for="artForPrint">Printing<small>one line, the needle's spacing</small></label>
-          <input type="radio" name="artFor" id="artForPlot" value="plot"><label for="artForPlot">Plotting<small>pens, any detail</small></label>
-        </div>
-        <p class="hint help">Printing keeps what a printer can make: one line, every part the needle's line spacing apart, so the patterns stop at the detail that still prints (Fit the needle sets their width). Plotting is for the pen plotter: patterns go much finer (up to 200 rows of waves, order 8 curves…), their width is the 2D tab's page, and the closest lines are measured against the pen. A pattern made for plotting is traced only when you ask (Trace it); Plot as drawn sends its exact lines to the 2D tab.</p>
-      </div>
       <div class="dropzone" id="dropZone" role="button" tabindex="0" aria-label="Choose or drop a file: an image, an STL model or a saved design">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="dz-main">Drop a file here, or click to choose</span>
@@ -358,9 +357,9 @@
         <div class="lab"><label for="picAngle">Straighten</label><span class="val" id="picAngleVal">0°</span></div>
         <input type="range" id="picAngle" min="-20" max="20" step="0.5" value="0">
         <div class="inline"><button class="btn mini" type="button" id="picLeft" title="Turn the picture a quarter turn to the left">Turn left</button><button class="btn mini" type="button" id="picRight" title="Turn the picture a quarter turn to the right">Turn right</button><button class="btn mini" type="button" id="picUnturn">As loaded</button></div>
-        <p class="hint help">Turns the picture before anything else: a quarter turn at a time, or a few degrees to straighten a photo (the corners that come in are white, the paper). To crop, use Select area on the Trace tab: the trace keeps to the selection and gets the full resolution there.</p>
+        <p class="hint help">Turns the picture before anything else: a quarter turn at a time, or a few degrees to straighten a photo (the corners that come in are white, the paper). To crop, use Select area on the Line step: the trace keeps to the selection and gets the full resolution there.</p>
       </div>
-      <p class="hint help">A sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. To edit a traced line by hand, export it as SVG from the 2D tab, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
+      <p class="hint help">A sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. To edit a traced line by hand, export it as SVG from the Plot step, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
     </section>
 
     <section class="card art-only art-text" aria-labelledby="h-text">
@@ -408,7 +407,7 @@
         <p class="hint" id="artGapHint"></p>
       </div>
       <p class="status" id="artMsg" role="status"></p>
-      <p class="hint help">Geometric art drawn as exact lines, then traced. The first group are patterns of their own; the second draw a picture's light and dark (the Picture row picks it), still as one line, so they print in chocolate. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print without doubled strokes (the Line card's Closed loop or Open is set to suit). Width sets the print's size in mm, and says how far apart its closest lines come against the needle's line spacing; Fit the needle picks the width where they are exactly that. Spirograph, Lissajous and Rose are one line that crosses itself: the trace follows their exact line, and with Allow overlaps (the Trace tab's Line card) the needle prints over each crossing; without it every crossing is undone. Truchet tiles are many pieces: those suit the pen plotter. Every style has its own settings below the style; Shuffle gives the random ones another version.</p>
+      <p class="hint help">Geometric art drawn as exact lines, then traced. The first group are patterns of their own; the second draw a picture's light and dark (the Picture row picks it), still as one line, so they print in chocolate. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print without doubled strokes (the Line card's Closed loop or Open is set to suit). Width sets the print's size in mm, and says how far apart its closest lines come against the needle's line spacing; Fit the needle picks the width where they are exactly that. Spirograph, Lissajous and Rose are one line that crosses itself: the trace follows their exact line, and with Allow overlaps (the Line step's Line card) the needle prints over each crossing; without it every crossing is undone. Truchet tiles are many pieces: those suit the pen plotter. Every style has its own settings below the style; Shuffle gives the random ones another version.</p>
     </section>
 
     <section class="card art-only art-model" aria-labelledby="h-model">
@@ -424,7 +423,7 @@
           <button class="btn mini" type="button" id="turnZ" title="Turn it a quarter turn on the plate">Turn</button>
           <button class="btn mini" type="button" id="turnReset">As loaded</button>
         </div>
-        <p class="hint help"><span class="slow">Big models (hundreds of thousands of triangles) load, turn and slice slowly.</span> Drag the preview to look around it. The 3D tab slices it into layers and fits each one with a Fourier series; set its height there. The Trace tab's line spacing is the wall's.</p>
+        <p class="hint help"><span class="slow">Big models (hundreds of thousands of triangles) load, turn and slice slowly.</span> Drag the preview to look around it. The Print step slices it into layers and fits each one with a Fourier series; set its height there. The Line step's line spacing is the wall's.</p>
         <div class="row" id="drawViewRow">
           <div class="lab"><span class="name">Line drawing of this view</span><span class="val" id="creaseVal">folds over 20°</span></div>
           <label class="check"><input type="checkbox" id="hlPreview"> <span>Show the preview as a drawing</span></label>
@@ -432,7 +431,7 @@
           <input type="range" id="crease" min="1" max="90" value="20" aria-describedby="drawViewHint">
           <div class="inline"><button class="btn" type="button" id="drawView">Draw this view</button><button class="btn" type="button" id="drawSvg" title="The line drawing of this view as vectors, before any tracing: every visible edge, pieces that meet joined into strokes, at the model's size in mm">Export SVG</button></div>
           <p class="status" id="drawMsg" role="status"></p>
-          <p class="hint help" id="drawViewHint">Outlines and folds as seen from the preview's angle, hidden lines removed (like plotter.vision). At the far left every edge between faces that aren't flat together is drawn, a wireframe (the plotter.vision look); further right only sharper folds and the outline. Export SVG saves the drawing itself as vectors (every visible edge, at the model's size). Draw this view makes it the picture to trace, for a printer or the 2D tab; a dense wireframe is more than one line can follow, so keep the angle up for tracing. Pick 3D model again to change the angle. <span class="slow">Drawing or exporting a view takes a few seconds; a wireframe (far left) takes longest.</span></p>
+          <p class="hint help" id="drawViewHint">Outlines and folds as seen from the preview's angle, hidden lines removed (like plotter.vision). At the far left every edge between faces that aren't flat together is drawn, a wireframe (the plotter.vision look); further right only sharper folds and the outline. Export SVG saves the drawing itself as vectors (every visible edge, at the model's size). Draw this view makes it the picture to trace, for a printer or the Plot step; a dense wireframe is more than one line can follow, so keep the angle up for tracing. Pick 3D model again to change the angle. <span class="slow">Drawing or exporting a view takes a few seconds; a wireframe (far left) takes longest.</span></p>
         </div>
       </div>
     </section>
@@ -440,15 +439,21 @@
     <section class="card art-only" aria-labelledby="h-next">
       <h2 id="h-next">Next</h2>
       <div class="inline">
-        <button class="btn primary" type="button" id="goTrace" title="Trace the art into one continuous line: needed for the 3D printers">Trace it</button>
-        <button class="btn" type="button" id="goPlot" title="Plot the art exactly as drawn on the 2D tab, without tracing">Plot as drawn</button>
+        <button class="btn primary" type="button" id="goTrace">Next: the line →</button>
       </div>
-      <p class="hint" id="nextHint">Trace it for a printer (chocolate, clay): they need one continuous line. The pen plotter can also take a pattern or text exactly as drawn.</p>
+      <p class="hint" id="nextHint">The Line step turns the art into lines: one continuous line for a printer; for a pen plotter also separate strokes, or a pattern or text exactly as drawn.</p>
     </section>
 
     <section class="card design-only" aria-labelledby="h-src">
-      <h2 id="h-src">From the Art tab <span id="srcinfo"></span></h2>
-      <div class="inline"><span class="hint" id="fromArt"></span><button class="btn mini" type="button" id="toArt">Edit the art</button></div>
+      <h2 id="h-src">The line <span id="srcinfo"></span></h2>
+      <div class="seg line-modes" role="radiogroup" aria-label="How the art becomes lines">
+        <input type="radio" name="lineMode" id="lineOne" value="one" checked><label for="lineOne">One continuous line<small>traced · prints, plots without lifting</small></label>
+        <input type="radio" name="lineMode" id="lineStrokes" value="strokes"><label for="lineStrokes">Separate strokes<small>traced · the pen lifts between</small></label>
+        <input type="radio" name="lineMode" id="lineDrawn" value="drawn"><label for="lineDrawn">As drawn<small>no trace · a pattern's or text's own lines</small></label>
+      </div>
+      <p class="hint" id="lineModeHint"></p>
+      <div class="inline"><span class="hint" id="fromArt" hidden></span><button class="btn mini" type="button" id="toArt">← Edit the art</button></div>
+      <p class="hint help">Everything the Line step does follows this switch. One continuous line is the Fourier trace, the only line a printer can make, and a plotter can draw it without lifting the pen. Separate strokes traces the art into strokes the pen draws one by one, lifting between them: closer to the drawing, nothing joined or doubled. As drawn skips tracing: a pattern's or the text's exact lines go to the page (a picture has no lines until it is traced).</p>
     </section>
 
     <section class="card design-only img-only" aria-labelledby="h-trace">
@@ -495,7 +500,7 @@
           <div id="levelList" class="level-list" role="group" aria-label="What each grey does"></div>
           <input type="hidden" id="levelModes" value="">
         </div>
-        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. The still-life sample (Art tab, Picture) shows them well.</p>
+        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. The still-life sample (Art step, Picture) shows them well.</p>
       </div>
     </section>
 
@@ -519,9 +524,9 @@
     <section class="card design-only" aria-labelledby="h-line">
       <h2 id="h-line">Line</h2>
       <div class="row">
-        <div class="lab"><span class="name" title="Centre to centre = line width + gap. Strokes the line goes out and back along print as a narrow loop. Pick the needle on the 3D tab. The size stays as it is (the Size card's marks move) unless lines this far apart no longer fit; then it grows to the new smallest.">Spacing</span><span class="val" id="gapVal"></span></div>
+        <div class="lab"><span class="name" title="Centre to centre = line width + gap. Strokes the line goes out and back along print as a narrow loop. Pick the needle on the Print step. The size stays as it is (the Size card's marks move) unless lines this far apart no longer fit; then it grows to the new smallest.">Spacing</span><span class="val" id="gapVal"></span></div>
         <div class="two">
-          <label class="field" title="The printed line's width: the needle's inside diameter (pick the needle on the 3D tab), or your pen"><span>Line width (mm)</span><input type="number" id="lineW" min="0.05" max="5" step="0.01" value="0.84"></label>
+          <label class="field" title="The printed line's width: the needle's inside diameter (pick the needle on the Print step), or your pen"><span>Line width (mm)</span><input type="number" id="lineW" min="0.05" max="5" step="0.01" value="0.84"></label>
           <label class="field"><span>Gap between lines (mm)</span><input type="number" id="lineGapMM" min="0" step="0.05" value="0.5"></label>
         </div>
         <p class="hint" id="spacingHint"></p>
@@ -585,7 +590,7 @@
       <p class="hint text-only" id="capHint"></p>
       <div class="row" id="fitBoxRow">
         <div class="lab"><span class="name">Fit inside a box</span></div>
-        <div class="inline"><input type="number" id="fitW" min="1" step="any" placeholder="width" aria-label="Box width (mm)"><span>×</span><input type="number" id="fitH" min="1" step="any" placeholder="height" aria-label="Box height (mm)"><span>mm</span><button class="btn" type="button" id="fitBtn">Fit</button><button class="btn" type="button" id="fitPage" title="Made for plotting: fill the 2D tab's page inside its margins" hidden>Fit the page</button></div>
+        <div class="inline"><input type="number" id="fitW" min="1" step="any" placeholder="width" aria-label="Box width (mm)"><span>×</span><input type="number" id="fitH" min="1" step="any" placeholder="height" aria-label="Box height (mm)"><span>mm</span><button class="btn" type="button" id="fitBtn">Fit</button><button class="btn" type="button" id="fitPage" title="Made for plotting: fill the Plot step's page inside its margins" hidden>Fit the page</button></div>
       </div>
       <p class="hint warn" id="driftHint" hidden></p>
       <p class="hint" id="sizeHint">Drag to scale the print, type a width or height, or fit it inside a box. It can't go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. Aspect ratio stays locked.</p>
@@ -609,13 +614,18 @@
       </div>
     </section>
 
+    <section class="card design-only" aria-labelledby="h-next2">
+      <h2 id="h-next2">Next</h2>
+      <div class="inline"><button class="btn primary" type="button" id="goOut">Next: print it →</button></div>
+    </section>
+
     <section class="card plot-only" aria-labelledby="h-plot">
-      <h2 id="h-plot">2D plot <span id="plotInfo"></span></h2>
-      <div class="seg" role="radiogroup" aria-label="What is plotted">
-        <input type="radio" name="plotFrom" id="plotTraced" value="traced" checked><label for="plotTraced">Traced line<small>from the Trace tab</small></label>
+      <h2 id="h-plot">The page <span id="plotInfo"></span></h2>
+      <div class="seg" role="radiogroup" aria-label="What is plotted" hidden>
+        <input type="radio" name="plotFrom" id="plotTraced" value="traced" checked><label for="plotTraced">Traced line<small>from the Line step</small></label>
         <input type="radio" name="plotFrom" id="plotArt" value="art"><label for="plotArt">Art as drawn<small>exact lines, no trace</small></label>
       </div>
-      <p class="hint help">For a pen plotter (the AxiDraw, through Saxi) and flat files. Traced line: the traced drawing itself (the pen can lift and go over a line twice, so one stroke per line, no doubled strands or stroke-end loops, still one continuous line). Art as drawn: the Art tab's lines exactly as made, each layer on its own pen, fitted inside the margins; pictures need tracing first, and a printer always needs the traced line.</p>
+      <p class="hint help">For a pen plotter (the AxiDraw, through Saxi). What goes on the page is set by the Line step: one continuous line (the traced drawing, one stroke per line, no doubled strands or stroke-end loops), separate strokes (the pen lifting between them), or a pattern or text as drawn. The drawing fills the page inside the margins.</p>
       <div class="three">
         <label class="field"><span>Paper</span><select id="paper"><optgroup label="ISO"><option value="a6">A6 · 105 × 148</option><option value="a5">A5 · 148 × 210</option><option value="a4" selected>A4 · 210 × 297</option><option value="a3">A3 · 297 × 420</option><option value="a2">A2 · 420 × 594</option><option value="a1">A1 · 594 × 841</option></optgroup><optgroup label="US"><option value="letter">Letter · 8.5 × 11 in</option><option value="legal">Legal · 8.5 × 14 in</option><option value="tabloid">Tabloid · 11 × 17 in</option></optgroup><optgroup label="Drawing pads"><option value="6x8">6 × 8 in</option><option value="9x12">9 × 12 in</option><option value="11x14">11 × 14 in</option><option value="18x24">18 × 24 in</option></optgroup><optgroup label="Other"><option value="plate">Printer plate</option><option value="custom">Custom</option></optgroup></select></label>
         <label class="field"><span>Orientation</span><select id="paperOrient"><option value="landscape" selected>Landscape</option><option value="portrait">Portrait</option></select></label>
@@ -660,7 +670,7 @@
       <h2 id="h-pexport">Export</h2>
       <label class="check"><input type="checkbox" id="smooth"> Smooth curves</label>
       <div class="inline"><span class="spacer" style="flex:1"></span><button class="btn primary" type="button" id="exportBtn">Export SVG for Saxi</button></div>
-      <p class="hint help">The page at the paper size in mm, the drawing at its size from the Trace tab, centred within the margins. Pen 1 (the drawing) and each fill pen are separate Inkscape layers with their own stroke colour, so Saxi can split them by group or by colour. Saxi sets the pen speeds. In Saxi pick the same paper; if your Saxi build scales drawings to its margins, the size will follow Saxi.</p>
+      <p class="hint help">The page at the paper size in mm, the drawing at its size from the Line step, centred within the margins. Pen 1 (the drawing) and each fill pen are separate Inkscape layers with their own stroke colour, so Saxi can split them by group or by colour. Saxi sets the pen speeds. In Saxi pick the same paper; if your Saxi build scales drawings to its margins, the size will follow Saxi.</p>
       <p class="status" id="exportMsg" role="status"></p>
     </section>
 
@@ -735,6 +745,7 @@
 <script src="js/layers.js"></script>
 <script src="js/testprint.js"></script>
 <script src="js/plot.js"></script>
+<script src="js/workflow.js"></script>
 <script src="js/model.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/history.js"></script>

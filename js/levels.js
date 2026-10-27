@@ -1,5 +1,5 @@
 // Unbroken · web app · levels.js
-// The Grey levels card (Trace tab) and the Image prep card's background tap. Grey levels turn the picture into 2–6 flat
+// The Grey levels card (Line step) and the Image prep card's background tap. Grey levels turn the picture into 2–6 flat
 // greys (the engine's
 // UNB.levels, run in the prep: pipeline.js working()); each grey's edges are traced or skipped (UNB.levelEdges, via
 // lineSpec). Tap the background (a tool, like Set start) removes the background from the point tapped.

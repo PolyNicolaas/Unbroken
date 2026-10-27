@@ -10,7 +10,7 @@
     01-image.js    1. Image in — RGBA pixels → a clean grayscale image.
                       UNB.toGray, UNB.blur, boxBlur, UNB.prep, UNB.levels, boxSum, UNB.gradient
     02-lines.js 2. Line maps — grayscale → a 1-pixel map of the lines to draw: centerline or outline, erasing.
-                      UNB.canny, UNB.levelEdges, UNB.otsu, UNB.thin, UNB.centerline, UNB.pruneSpurs, UNB.erase, UNB.lineScore
+                      UNB.canny, UNB.lineStrokes, UNB.levelEdges, UNB.otsu, UNB.thin, UNB.centerline, UNB.pruneSpurs, UNB.erase, UNB.lineScore
     03-text.js     3. Text — typed text → strokes in a single-stroke font → a line map.
                       UNB.textLayout, UNB.rasterText
     04-walk.js     4. The walk — line map → one continuous path over every line pixel, onto the middle of each stroke;
@@ -37,7 +37,7 @@
                       UNB.readGcode, CRC,
                       UNB.zip
     11-stages.js  10. Pipeline stages — what the app calls, in order; pure data in and out (Web Worker or page).
-                      UNB.stagePrep, UNB.stageLines, UNB.stageWalk, UNB.stageTrace, UNB.stageVector, UNB.overlapAllow,
+                      UNB.stagePrep, UNB.stageLines, UNB.stageWalk, UNB.stageTrace, UNB.stageStrokes, UNB.stageVector, UNB.overlapAllow,
                       UNB.allowFromMask, UNB.decodeArgs,
                       UNB.stageSignal,
                       UNB.sweepSteps, UNB.pickTerms, UNB.TERM_TOL, UNB.autoTerms, UNB.shapeLine, UNB.stageFinal,

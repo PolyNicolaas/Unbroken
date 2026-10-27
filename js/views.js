@@ -1,5 +1,5 @@
 // Unbroken · web app · views.js
-// Layout and views: the printer menu, plate and copies, the mini-map, the View menu, the Trace / 2D / 3D tabs, and
+// Layout and views: the printer menu, plate and copies, the mini-map, the View menu, the Trace / 2D / Print steps, and
 // collapsible sections.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
@@ -7,7 +7,7 @@
 
 // Every section is one card that folds (no groups inside groups); see "collapsible control sections" below.
 
-// ---------- 3D tab: plate preview ----------
+// ---------- Print step: plate preview ----------
 // plate size of the printer in use (settings.js), set by applyPrinter
 const BED = { w: CFG.printer.bedWidth, h: CFG.printer.bedDepth };
 // the printer in use: plate, first-layer Z, lift, layer height (unless the chocolate has its own), profile, labels
@@ -27,7 +27,7 @@ function applyPrinter(resetFields = true) {
   for (const id of ["plate", "miniPlate"]) $(id).style.aspectRatio = `${P.bedWidth} / ${P.bedDepth}`;
   $("plate").style.setProperty("--ar", P.bedWidth / P.bedDepth);
   const plate = `${P.bedWidth} × ${P.bedDepth} mm`;
-  $("minimap").title = `The drawing on the ${P.name} plate (${plate}). Click for the 3D tab`;
+  $("minimap").title = `The drawing on the ${P.name} plate (${plate}). Click for the Print step`;
   $("plate").setAttribute("aria-label", `The drawing placed on the ${plate} plate of the ${P.name}`);
   const rows = [
     ["Printer", P.name],
@@ -303,7 +303,7 @@ function drawPlate() {
   if (!res) {
     $("plateHint").textContent = piecesOn()
       ? "Tracing each line of the text as a piece of its own…"
-      : "Trace something in the Trace tab first.";
+      : "Trace something in the Line step first.";
     return;
   }
   const { lay, pl, ok } = res;
@@ -450,23 +450,23 @@ function viewChanged() {
       : $("viewChoc").checked
         ? "choc"
         : "design";
-  // each tab brings its own big view (the Art tab: the Line view, where the input shows traced, or a model turns); the
+  // each tab brings its own big view (the Art step: the Line view, where the input shows traced, or a model turns); the
   // view tabs can change it
-  setStage(STAGE_FOR_TAB[document.body.dataset.view]);
+  setStage(stageFor(document.body.dataset.view)); // workflow.js: the preview follows the step
   drawPlate();
   drawMini();
-  render(); // the 3D tab shows the filled base layer (or a model's layers)
+  render(); // the Print step shows the filled base layer (or a model's layers)
 }
 document.querySelectorAll('input[name="view"]').forEach((r) => r.addEventListener("change", viewChanged));
 
 // ---------- the big view: Line, 2D page, Plate, 3D layers ----------
-// The settings tabs (Art, Trace, 2D, 3D) are on the side; the big view above shows the line, the pen plotter's page (click
+// The settings tabs (Art, Trace, 2D, 3D) are on the side; the big view above shows the line, the pen plotter's page
+// (click
 // shapes to fill), the plate with every copy, or the layers in 3D (drag to turn). Picking a settings tab brings its
 // view;
 // Play drawing plays whichever view is showing.
 const stageNow = () => document.body.dataset.stage;
-const STAGE_FOR_TAB = { art: "line", design: "line", plot: "page", choc: "layers" },
-  STAGE_IDS = { line: "stLine", page: "stPage", plate: "stPlate", layers: "stLayers" };
+const STAGE_IDS = { line: "stLine", page: "stPage", plate: "stPlate", layers: "stLayers" };
 // the pen line and fills are needed
 const plotWanted = () => document.body.dataset.view === "plot" || stageNow() === "page";
 const layersWanted = () => document.body.dataset.view === "choc" || stageNow() === "plate" || stageNow() === "layers";

@@ -177,10 +177,25 @@ function render() {
   v.ink = css("--ink");
   v.accent = css("--accent");
   renderUnder(v);
+  if (lineModeNow() === "strokes") return renderStrokes(v); // workflow.js: separate strokes
   if (!st.final) return;
   const r = renderLine(v);
   renderMarks(v, r);
   if (r.animating && $("circles").checked && st.epi) renderCircles(v, r);
+}
+// the Line step's separate strokes (st.sepStrokes, working px), each in the ink colour
+function renderStrokes({ g, k, ox, oy, dpr, ink }) {
+  const S = st.sepStrokes;
+  if (!S) return;
+  g.strokeStyle = ink;
+  g.lineWidth = 1.6 * dpr;
+  g.lineJoin = g.lineCap = "round";
+  for (const s of S.strokes) {
+    g.beginPath();
+    for (let i = 0; i < s.length; i += 2)
+      i ? g.lineTo(ox + s[i] * k, oy + s[i + 1] * k) : g.moveTo(ox + s[i] * k, oy + s[i + 1] * k);
+    g.stroke();
+  }
 }
 // under the line: the background (source, detected lines or nothing), a freehand selection, painted areas, the brush
 function renderUnder({ g, k, ox, oy, dpr, accent }) {
@@ -244,7 +259,7 @@ function renderLine({ g, k, ox, oy, dpr, ink, accent }) {
   const animating = st.playing || (st.t > 0 && st.t < 1);
   if (!animating && $("dims").checked && st.mbox && st.bw) drawBox(g, T, dpr);
   const tSeries = st.t * (st.open ? 0.5 : 1); // open paths use the outbound half of the cycle
-  // on the 3D tab with a filled base, the first base layer as it prints (the fill is only in the layers)
+  // on the Print step with a filled base, the first base layer as it prints (the fill is only in the layers)
   const L3 = st.layers,
     baseView =
       !animating &&

@@ -163,13 +163,14 @@
   };
 
   // A page of separate strokes for a pen plotter, one Inkscape layer per pen: the Art tab's layers plotted as drawn,
-  // without tracing. layers: [{ label, color, width (mm), strokes: [[x, y, …] page mm] }]; o: paperW, paperH (mm).
+  // without tracing, or the Line step's separate strokes. layers: [{ label, color, width (mm), strokes: [[x, y, …] page
+  // mm] }]; o: paperW, paperH (mm), what (how the lines were made, for the file's comment).
   UNB.exportLayersSVG = function (layers, o) {
     const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"),
       X = (v) => f3(v),
       used = layers.filter((L) => L.strokes && L.strokes.length);
     let out =
-      `<?xml version="1.0" encoding="UTF-8"?>\n<!-- Unbroken: art for a pen plotter, as drawn (not traced), ${f3(o.paperW)} x ${f3(o.paperH)} mm page, ${used.length} pen${used.length === 1 ? "" : "s"} (one layer each) -->\n` +
+      `<?xml version="1.0" encoding="UTF-8"?>\n<!-- Unbroken: art for a pen plotter, ${o.what || "as drawn (not traced)"}, ${f3(o.paperW)} x ${f3(o.paperH)} mm page, ${used.length} pen${used.length === 1 ? "" : "s"} (one layer each) -->\n` +
       `<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="${f3(o.paperW)}mm" height="${f3(o.paperH)}mm" viewBox="0 0 ${f3(o.paperW)} ${f3(o.paperH)}">\n`;
     used.forEach((L, i) => {
       const attrs = `fill="none" stroke="${L.color}" stroke-width="${f3(L.width)}"`;

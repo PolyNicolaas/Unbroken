@@ -1,5 +1,5 @@
 // Unbroken · web app · patterns.js
-// The Pattern card on the Art tab: the settings of the chosen pattern (a style from the engine's UNB.PATTERNS,
+// The Pattern card on the Art step: the settings of the chosen pattern (a style from the engine's UNB.PATTERNS,
 // source/engine/13-patterns.js). Each style lists its own settings (params: sliders, choices and switches, some shown
 // only with others); the card builds its controls from that list, so a new setting in the engine needs nothing here.
 // The pattern itself, and drawing it, belong to art.js; this file shows its settings and hands every change back
@@ -8,7 +8,7 @@
 // the order listed in index.html.
 "use strict";
 
-// made for plotting (the Art tab's Input card, Made for): the ranges go up to their plotMax, and nothing is traced
+// made for plotting (the Art step's Input card, Made for): the ranges go up to their plotMax, and nothing is traced
 // until asked (art.js)
 const artForPlot = () => $("artForPlot").checked;
 const artStyle = () => UNB.PATTERNS[$("artStyle").value] || UNB.PATTERNS.labyrinth;
@@ -107,13 +107,13 @@ function patternUI() {
   }
   $("artShuffle").hidden = !P.seed;
   const suits = artForPlot()
-    ? "Made for plotting: drawn as exact lines on the 2D tab (Plot as drawn), as fine as your pen allows."
+    ? "Made for plotting: drawn as exact lines on the Plot step (Plot as drawn), as fine as your pen allows."
     : P.tone
       ? "One unbroken line that draws the picture's light and dark: it prints in chocolate, the darkest parts at the line spacing."
       : P.oneLine
         ? `One unbroken ${P.line === "open" ? "open " : ""}line with even gaps: on its own it prints without doubled strokes.`
         : P.crosses
-          ? `One unbroken line that crosses itself: to print it with its crossings, tick Allow overlaps on the Trace tab's Line card (${$("overlaps").checked ? "on now" : "off now: every crossing is undone"}); on the pen plotter it draws as it is.`
+          ? `One unbroken line that crosses itself: to print it with its crossings, tick Allow overlaps on the Line step's Line card (${$("overlaps").checked ? "on now" : "off now: every crossing is undone"}); on the pen plotter it draws as it is.`
           : "Many separate pieces joined by connectors: best on the pen plotter.";
   $("artTip").textContent = `${P.tip}. ${suits}`;
   $("artVal").textContent = P.label;
