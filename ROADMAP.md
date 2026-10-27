@@ -61,9 +61,13 @@ Tests:
 
 ## 3 · Tracing, drawing and lettering
 
+- **A simpler workflow** (decided 27 October, [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)): Printer or Pen plotter
+  first; Art → Line → Print or Plot; one switch for the line (One continuous line, Separate strokes, As drawn); the
+  preview follows the step. v107.
+
 - **Image prep and grey levels** (decided 27 October, [`docs/PREP-PLAN.md`](docs/PREP-PLAN.md)): a still-life sample;
   the picture reduced to 2–6 flat greys, each traced, filled or both; smooth blocks, crop and rotate, background by
-  tapping (v105); fills per level on the 2D tab, hatch, cross-hatch, rings or a pattern, one pen each (v107).
+  tapping (v105); fills per level on the 2D tab, hatch, cross-hatch, rings or a pattern, one pen each (v108).
 
 - **More control in the patterns** (decided 27 October, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)): fitting inside a
   shape (a picture's silhouette, text, an SVG outline) and seeds with a grid of variations: v105. (Patterns from
