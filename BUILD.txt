@@ -1,5 +1,5 @@
-Unbroken · web app build v102
-Built:  2026-10-27T13:36:14.454Z
+Unbroken · web app build v103
+Built:  2026-10-27T14:18:36.761Z
 Tests:  50 of 50 tests passed (quick run)
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
@@ -17,13 +17,13 @@ Files (sha1, first 12):
   c390f7b99aa7  10-export.js
   1311de362831  11-stages.js
   59aaa64e2642  12-models.js
-  5ed33abe7616  13-patterns.js
-  1b7564d46537  core.js
+  976b824bfe2c  13-patterns.js
+  1ba1dbb7be2a  core.js
   c9df82f5ef31  css/app.css
   7efa0c130b02  css/theme.css
   4a04df3953af  fonts.js
-  22c4dc12662b  index.html
-  94f3368e5086  js/art.js
+  70aae2d9746f  index.html
+  f7d9c5e9186c  js/art.js
   1c0577a2d077  js/config.js
   2b9fcfb8d36e  js/controls.js
   1b7b18d51a47  js/engine-bridge.js
@@ -34,13 +34,13 @@ Files (sha1, first 12):
   29f041a9b488  js/model.js
   26b7659e5ebe  js/notes.js
   5075a0426bb9  js/optimize.js
-  4fbdae883113  js/patterns.js
+  f6b512252472  js/patterns.js
   d0c26df92071  js/pieces.js
-  e39355d18e84  js/pipeline.js
+  5ba2d8d27be6  js/pipeline.js
   756051052ea1  js/plot.js
   fc4489e24a60  js/preview.js
   d61b587f3303  js/readouts.js
-  32b194b8be02  js/source.js
+  8994780613da  js/source.js
   78f5450a22d9  js/state.js
   347002262ce1  js/testprint.js
   cbb9bdc847f1  js/tools.js

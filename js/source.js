@@ -19,7 +19,41 @@ function makeSample(kind) {
   g.fillStyle = "#000";
   g.lineCap = "round";
   g.lineJoin = "round";
-  if (kind === "smiley") {
+  if (kind === "face") {
+    // a soft portrait in greys, for the patterns drawn from a picture (light and dark, not lines)
+    c.width = 480;
+    c.height = 640;
+    g.fillStyle = "#f2f2f2";
+    g.fillRect(0, 0, 480, 640);
+    const r = g.createRadialGradient(225, 270, 30, 240, 300, 210);
+    r.addColorStop(0, "#e6e6e6");
+    r.addColorStop(1, "#4d4d4d");
+    g.fillStyle = r;
+    g.beginPath();
+    g.ellipse(240, 305, 160, 205, 0, 0, 7);
+    g.fill();
+    g.fillStyle = "#1a1a1a";
+    for (const x of [176, 304]) {
+      g.beginPath();
+      g.ellipse(x, 255, 30, 14, 0, 0, 7);
+      g.fill();
+    }
+    g.fillStyle = "#3a3a3a";
+    g.beginPath();
+    g.moveTo(240, 280);
+    g.lineTo(212, 370);
+    g.lineTo(258, 370);
+    g.fill();
+    g.beginPath();
+    g.ellipse(240, 435, 62, 18, 0, 0, 7);
+    g.fill();
+    g.fillStyle = "#222";
+    g.beginPath();
+    g.ellipse(240, 115, 180, 85, 0, Math.PI, 2 * Math.PI);
+    g.fill();
+    g.fillRect(60, 110, 40, 260);
+    g.fillRect(380, 110, 40, 260);
+  } else if (kind === "smiley") {
     g.lineWidth = 9;
     g.beginPath();
     g.arc(320, 220, 170, 0, 7);
