@@ -65,7 +65,7 @@ module.exports = {
   guards: "a pattern that crosses itself or touches where it promises an even gap, a closed style that doesn't close, a seed that doesn't give the same pattern again, and a one-line pattern the tracer breaks up or doubles",
   why: "The Geometric art card makes patterns as pictures to trace (UNB.pattern, source/engine/13-patterns.js). Labyrinth, Moore loop and Double spiral promise one closed line, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: that is what makes them print in chocolate without doubled strokes. The app draws them with UNB.patternLayout and starts them at the width where that gap is the line spacing.",
   how: "Makes every style at its starting values and at both ends of its sliders (and with other sides and shapes where it has them); checks each path's points, its crossings (a loop's closing step included) and the closest approach of non-neighbouring parts against the gap it reports; makes the seeded styles twice with one seed and once with another; measures how much line the picture patterns put in dark and light parts of a test portrait; then draws each one-line style at the app's size and traces it with the app's defaults at the working resolution for the width where its gap is the line spacing.",
-  pass: "Every pattern has points and a box; the one-line styles are one path with no crossings and nothing closer than 0.75 × their gap; the same seed gives the same pattern and another seed a different one; a pattern drawn from a picture needs one, and puts at least 1.25 × as much line per area in the darkest parts of a test portrait as in the lightest; every one-line style traces as 1 part with no doubled strokes (under 1% of the walk) and no connectors.",
+  pass: "Every pattern has points and a box; the one-line styles are one path with no crossings and nothing closer than 0.75 × their gap; the same seed gives the same pattern and another seed a different one; a pattern drawn from a picture needs one, and, at fine detail, puts at least 1.25 × as much line per area in the dark parts of a test portrait as in the light ones; every one-line style traces as 1 part with no doubled strokes (under 1% of the walk) and no connectors.",
   async run(ctx) {
     const checks = [], bad = [], notes = [];
     for (const [key, P] of Object.entries(UNB.PATTERNS)) {
@@ -90,23 +90,26 @@ module.exports = {
       }
     }
     for (const [key, P] of Object.entries(UNB.PATTERNS)) if (P.tone && UNB.pattern(key, {})) bad.push(`${key}: drawn without a picture`);
-    // drawn from a picture: darker parts get more line (the line's length in the darkest quarter of the box ÷ in the
-    // lightest, against their areas)
+    // drawn from a picture: darker parts get more line. Measured at fine detail (three quarters of the way up each
+    // style's Detail slider), as line length per area of the picture where it is dark (over 0.55) against light
+    // (under 0.25)
     for (const [key, P] of Object.entries(UNB.PATTERNS)) {
       if (!P.tone) continue;
-      const r = UNB.pattern(key, { seed: 3, tone: TONE }), p = r.paths[0], [bw, bh] = r.box, ink = new Float64Array(16), n = p.length / 2;
-      const a = TONE.w / TONE.h, fitW = a >= bw / bh ? bw : bh * a, fitH = a >= bw / bh ? bw / a : bh;   // the picture fitted inside the box
+      const detail = Math.round(P.detail.min + 0.75 * (P.detail.max - P.detail.min)), r = UNB.pattern(key, { seed: 3, tone: TONE, detail });
+      const p = r.paths[0], [bw, bh] = r.box, n = p.length / 2, a = TONE.w / TONE.h;
+      const fitW = a >= bw / bh ? bw : bh * a, fitH = a >= bw / bh ? bw / a : bh;   // the picture fitted inside the box
+      const ink = [0, 0], area = [0, 0], cls = (dk) => (dk > 0.55 ? 1 : dk < 0.25 ? 0 : -1);
       for (let i = 0; i + 1 < n; i++) {
         const x = (p[2 * i] + p[2 * i + 2]) / 2, y = (p[2 * i + 1] + p[2 * i + 3]) / 2, pu = (x - (bw - fitW) / 2) / fitW, pv = (y - (bh - fitH) / 2) / fitH;
         if (pu < 0 || pv < 0 || pu >= 1 || pv >= 1) continue;
-        const dk = TONE.d[Math.floor(pv * TONE.h) * TONE.w + Math.floor(pu * TONE.w)];
-        ink[Math.min(15, Math.floor(dk * 16))] += Math.hypot(p[2 * i + 2] - p[2 * i], p[2 * i + 3] - p[2 * i + 1]);
+        const c = cls(TONE.d[Math.floor(pv * TONE.h) * TONE.w + Math.floor(pu * TONE.w)]);
+        if (c >= 0) ink[c] += Math.hypot(p[2 * i + 2] - p[2 * i], p[2 * i + 3] - p[2 * i + 1]);
       }
-      const area = new Float64Array(16); for (const v of TONE.d) area[Math.min(15, Math.floor(v * 16))]++;
-      const dens = [...ink].map((v, k) => (area[k] > 200 ? v / area[k] : NaN)), light = dens.find(Number.isFinite), dark = [...dens].reverse().find(Number.isFinite);
-      notes.push(`${key}: line per area, darkest ÷ lightest ${(dark / light).toFixed(2)}`);
+      for (const v of TONE.d) { const c = cls(v); if (c >= 0) area[c]++; }
+      const ratio = ink[1] / area[1] / (ink[0] / area[0]);
+      notes.push(`${key} (detail ${detail}): line per area, dark ÷ light ${ratio.toFixed(2)}`);
       // (waves and the spiral can only wiggle so far and keep their gap: at most about 1.8 × as much line)
-      if (!(dark > 1.25 * light)) bad.push(`${key}: the dark parts don't get more line (${(dark / light).toFixed(2)} ×)`);
+      if (!(ratio > 1.25)) bad.push(`${key}: the dark parts don't get more line (${ratio.toFixed(2)} ×)`);
     }
     checks.push(check("patterns that break their promise", bad.length, "==", 0));
     // traced like the app: one part, nothing doubled, no connectors

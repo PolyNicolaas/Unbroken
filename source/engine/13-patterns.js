@@ -517,6 +517,8 @@
   // Contrast (0–100) bends the darkness: d^γ, γ = 2^((50 − c) / 50), so 0 keeps only the darkest, 50 is as is, 100
   // brings out the light greys.
   const gammaOf = (c) => Math.pow(2, (50 - (c == null ? 50 : c)) / 50);
+  // how hard waves and the spiral wiggle for a darkness t: eased out (1 − (1 − t)²), so mid greys already wiggle well
+  const easeOut = (t) => 1 - (1 - t) * (1 - t);
   // darkness at (u, v) in 0…1 of a box of aspect A (width ÷ height), the picture fitted inside it
   function toneIn(T, A) {
     const a = T.w / T.h,
@@ -600,7 +602,7 @@
       let ph = 0;
       const row = [];
       for (let x = 0; x <= A + 1e-9; x += dx) {
-        const t = Math.pow(f(x / A, yc), g),
+        const t = easeOut(Math.pow(f(x / A, yc), g)),
           lam = lmax - (lmax - lmin) * t;
         row.push([x, yc + amax * t * Math.sin(ph)]);
         ph += (2 * Math.PI * dx) / lam;
@@ -653,7 +655,7 @@
       if (r > R - p / 2) break;
       const x = r * Math.cos(th),
         y = r * Math.sin(th),
-        t = Math.pow(fill(x, y), g),
+        t = easeOut(Math.pow(fill(x, y), g)),
         lam = lmax - (lmax - lmin) * t,
         w = amax * t * Math.sin(ph);
       pts.push(x + w * Math.cos(th), y + w * Math.sin(th));
@@ -767,31 +769,27 @@
     closeGaps(occ, F);
     return { ...outlineLoop(occ, F, 0.9), gap: 1.3 }; // (2 between straight lines; 1.3 across diagonal corners)
   }
-  // close gaps of one fine cell between occupied parts (a dilation then an erosion), then fill every hole, so the
-  // occupied set is one piece with one outline
+  // Close gaps of one fine cell between occupied parts (an empty cell with occupied cells on both sides, across or
+  // down, and two occupied cells touching only at a corner), then fill every hole, so the occupied set is one piece
+  // with
+  // one outline and its walls are at least 2 wide
   function closeGaps(occ, F) {
-    const d = new Uint8Array(occ.length);
-    for (let y = 0; y < F; y++)
-      for (let x = 0; x < F; x++) {
-        let v = 0;
-        for (let j = -1; j <= 1 && !v; j++)
-          for (let i = -1; i <= 1 && !v; i++) {
-            const X = x + i,
-              Y = y + j;
-            if (X >= 0 && Y >= 0 && X < F && Y < F && occ[Y * F + X]) v = 1;
-          }
-        d[y * F + x] = v;
-      }
-    for (let y = 0; y < F; y++)
-      for (let x = 0; x < F; x++) {
-        let v = 1;
-        for (let j = -1; j <= 1 && v; j++)
-          for (let i = -1; i <= 1 && v; i++) {
-            const X = x + i,
-              Y = y + j;
-            if (X >= 0 && Y >= 0 && X < F && Y < F && !d[Y * F + X]) v = 0;
-          }
-        occ[y * F + x] = occ[y * F + x] || v;
+    const at = (x, y) => x >= 0 && y >= 0 && x < F && y < F && occ[y * F + x];
+    for (let pass = 0; pass < 2; pass++)
+      for (let y = 0; y < F; y++)
+        for (let x = 0; x < F; x++) {
+          if (occ[y * F + x]) continue;
+          if ((at(x - 1, y) && at(x + 1, y)) || (at(x, y - 1) && at(x, y + 1))) occ[y * F + x] = 1;
+        }
+    // two occupied cells touching only at a corner: join them
+    for (let y = 0; y + 1 < F; y++)
+      for (let x = 0; x + 1 < F; x++) {
+        const a = occ[y * F + x],
+          b = occ[y * F + x + 1],
+          c = occ[(y + 1) * F + x],
+          d = occ[(y + 1) * F + x + 1];
+        if (a && d && !b && !c) occ[y * F + x + 1] = 1;
+        else if (b && c && !a && !d) occ[y * F + x] = 1;
       }
     // holes: empty cells not reached from the border
     const out = new Uint8Array(occ.length),

@@ -50,7 +50,7 @@
                       space-filling curves, spirals, a whirl, waves, harmonic curves, tiles; and patterns that draw a
                       picture's light and dark as one line.
                       seeded, polyInside, largestGroup, roundLoop, labyrinth, lsystem, boxed, moore, hilbert, gosper,
-                      doubleSpiral, whirl, waves, spirograph, lissajous, truchet, gammaOf, toneIn, toneGrid,
+                      doubleSpiral, whirl, waves, spirograph, lissajous, truchet, gammaOf, easeOut, toneIn, toneGrid,
                       hilbertTone, wavesTone, spiralTone, labyrinthTone, closeGaps, outlineLoop, UNB.PATTERNS,
                       UNB.PATTERN_SHAPES,
                       UNB.patternLayout, UNB.pattern
