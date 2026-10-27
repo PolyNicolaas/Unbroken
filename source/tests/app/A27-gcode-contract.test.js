@@ -7,7 +7,7 @@ module.exports = {
   pass: "The file is named design_needle_copies (e.g. leaf_084_2x-gcode.zip). Printer start lines with the purge line come first, then mm / absolute XYZ / absolute E; two copies, each with its layers 1 … N in order (N = the app's laps), one unretract before its first layer and one wipe or retract at its end, no travel inside a copy; every full layer pushes E per mm within 1% of #gE (the first and last wall laps ease in and out, 40–60%); every printing feed between the printer's slowest and #gFeed, and each layer at least the seconds per layer unless already at the slowest; first layer at #gZ, top at the height; every travel at least #gLift above everything printed so far; all printing on the plate; the end lines after a final lift; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
-    await page.click("label[for=viewChoc]"); await A.idle(page);
+    await A.print(page); await A.idle(page);
     await A.setValue(page, "#copies", 2); await A.setValue(page, "#baseLayers", 2);
     await page.fill("#printHeightMM", "1.5"); await page.press("#printHeightMM", "Tab"); await A.idle(page);
     const app = await page.evaluate(() => ({ e: +$("gE").value, feed: +$("gFeed").value * 60, z: +$("gZ").value, lift: +$("gLift").value, need: +$("layerTime").value,

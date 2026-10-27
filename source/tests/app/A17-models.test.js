@@ -15,12 +15,12 @@ module.exports = {
     await page.setInputFiles("#anyFile", { name: "posts.stl", mimeType: "model/stl", buffer: Buffer.from(M.stl([...M.cylinder(5, 10, -10, 0), ...M.cylinder(5, 10, 10, 0)])) });
     await page.waitForTimeout(1200);
     checks.push(check("posts: 768 triangles, 30 × 10 × 10 mm", +/^768 triangles · 30(\.0)? × 10(\.0)? × 10(\.0)? mm/.test(await page.textContent("#modelInfo")), "==", 1));
-    await page.click("label[for=viewChoc]"); await waitLayers();
+    await A.print(page); await waitLayers();
     checks.push(check("3D tab: sliced (layers in the readout)", +/^\d+ layers ·/.test(await page.textContent("#layerInfo")), "==", 1));
     checks.push(check("one layer's line reaches both posts (spans over 25 mm)", await page.evaluate(() => { const L = st.layers.wall, sp = (a) => Math.max(...a) - Math.min(...a); return +(Math.max(sp(L.x), sp(L.y)) > 25); }), "==", 1));
     await page.click("label[for=viewArt]"); await page.click("#turnY"); await page.waitForTimeout(800);
     checks.push(check("tipped sideways: 30 mm tall", +/× 30(\.0)? mm$/.test(await page.textContent("#modelInfo")), "==", 1));
-    await page.click("label[for=viewChoc]"); await page.waitForTimeout(300); await waitLayers();
+    await A.print(page); await page.waitForTimeout(300); await waitLayers();
     checks.push(check("Height field shows the model's 30 mm", +(await page.inputValue("#printHeightMM")), "==", 30));
     const metres = async () => +((await page.textContent("#layerInfo")).match(/([\d.]+) m ·/) || [0, 0])[1];
     const hollowM = await metres();
@@ -38,7 +38,7 @@ module.exports = {
     const txt = fs.readFileSync(await dl.path()).toString("latin1"), lift = [...txt.matchAll(/^G1 Z[\d.]+ F600$/gm)].pop().index,
       zs = [...txt.slice(txt.indexOf("M82 ; absolute E"), lift).matchAll(/^G1 [^\n]*Z([\d.]+)/gm)].map((m) => +m[1]);   // printing Z only: not the purge line, the final lift or the end lines
     checks.push(check("G-code: top printing Z off 15 mm (the 50th layer at 0.3 + 49 × 0.3)", Math.abs(Math.max(...zs) - 15), "<", 0.02));
-    await page.click("label[for=view2D]"); await page.waitForTimeout(500);
+    await A.plot(page); await page.waitForTimeout(500);
     checks.push(check("2D tab: points to Draw this view", +/Draw this view/.test(await page.textContent("#pageHint")), "==", 1));
     checks.push(check("2D page: the last picture's drawing isn't shown for a model (dark pixels on the page)", await page.$eval("#pageView", (c) => { const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i] < 60 && d[i + 3]) n++; return n; }), "==", 0));
     await page.click("label[for=viewDesign]"); await page.mouse.click(5, 5);
@@ -47,9 +47,9 @@ module.exports = {
     await A.source(page, "picture"); await A.idle(page, 1500);
     checks.push(check("back to Image: the leaf is traced (terms)", await A.terms(page), ">", 10));
     // cutting the model: the 10 mm posts cut 2 mm from the top and 1 mm from the bottom print the 7 mm between
-    await page.click("label[for=viewDesign]"); await A.source(page, "model"); await A.idle(page); await page.click("label[for=viewChoc]"); await waitLayers();
+    await page.click("label[for=viewDesign]"); await A.source(page, "model"); await A.idle(page); await A.print(page); await waitLayers();
     await page.fill("#cutTop", "2"); await page.press("#cutTop", "Tab"); await page.fill("#cutBottom", "1"); await page.press("#cutBottom", "Tab"); await A.idle(page);
-    const cutInfo = await page.textContent("#cutInfo"); await page.click("label[for=viewChoc]"); await waitLayers();
+    const cutInfo = await page.textContent("#cutInfo"); await A.print(page); await waitLayers();
     checks.push(check(`cut 1 + 2 mm off the 10 mm posts: Height shows what's left (${cutInfo})`, +(await page.inputValue("#printHeightMM")), "==", 7),
       check("… and the layers stop there (readout mm)", +((await page.textContent("#layerInfo")).match(/· ([\d.]+) mm/) || [0, 0])[1], "<=", 7.01));
     // the layers view lights its beads (shape and layer texture readable): a wide spread of brightness, not one flat brown

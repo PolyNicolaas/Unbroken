@@ -2,7 +2,7 @@
 // Reads the editable settings (web-app/settings.js), checks every value, and applies it: needle and chocolate menus,
 // printer, every control's starting value, the starting-point presets, the text rules and the engine tuning.
 // A value that's missing or invalid is skipped (the control keeps the default written in index.html) and named in
-// the 3D tab. If settings.js can't be read at all, the app runs entirely on those built-in defaults.
+// the Print step. If settings.js can't be read at all, the app runs entirely on those built-in defaults.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
 "use strict";
@@ -447,10 +447,10 @@ function applyChocolatePrinting() {
   $("gZ").value = $("layerH").value; // the first layer is one layer height
 }
 
-// the 2D tab's paper sizes (plot.js has their sizes; "plate" is the printer's plate)
+// the Plot step's paper sizes (plot.js has their sizes; "plate" is the printer's plate)
 const PAPER_IDS = "a6 a5 a4 a3 a2 a1 letter legal tabloid 6x8 9x12 11x14 18x24 plate custom".split(" ");
 
-// ---- printer menu (the 3D tab), from settings.js
+// ---- printer menu (the Print step), from settings.js
 for (const q of CFG.printers) {
   const o = document.createElement("option");
   o.value = q.id;

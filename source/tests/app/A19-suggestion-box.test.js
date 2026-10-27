@@ -10,7 +10,7 @@ module.exports = {
     const add = async (t) => { await page.fill("#noteIn", t); await page.press("#noteIn", "Enter"); await page.waitForTimeout(200); };
     const list = () => page.$$eval("#noteList li", (L) => L.map((li) => ({ kind: li.querySelector(".tag").textContent, text: li.querySelector(".txt").textContent, when: li.querySelector("small").textContent, done: li.querySelector("input").checked })));
     await add("Try a darker preview colour for white chocolate");
-    await page.click("label[for=viewChoc]"); await page.waitForTimeout(300);
+    await A.print(page); await page.waitForTimeout(300);
     await add("bug: copies overlap at 0 mm spacing");
 
     let L = await list();

@@ -1,5 +1,6 @@
 // Unbroken · web app · plot.js
-// The 2D tab: the pen version of the line (for a pen plotter, the AxiDraw through Saxi), placed on a page, areas filled
+// The Plot step: the pen version of the line (for a pen plotter, the AxiDraw through Saxi), placed on a page, areas
+// filled
 // with other pens, and the files made from it (SVG for Saxi with one layer per pen, flat DXF).
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
@@ -102,7 +103,7 @@ function placeOnPage(L) {
   const F = { x0, y0, w: Math.max(P.w, ox + L.W + pad) - x0, h: Math.max(P.h, oy + L.H + pad) - y0 };
   return { P, mg, fits, ox, oy, F };
 }
-// ---------- the art as drawn (Art as drawn): its lines straight from the Art tab, no trace ----------
+// ---------- the art as drawn (Art as drawn): its lines straight from the Art step, no trace ----------
 const plotFromArt = () => $("plotArt").checked;
 // the art's lines fitted inside the margins, each shown layer on its own pen (mm, page coordinates)
 function artOnPage() {
@@ -160,12 +161,21 @@ function drawArtPage() {
   const name = $("paper").selectedOptions[0].textContent.split(" ·")[0],
     n = A ? A.layers.length : 0,
     h = $("pageHint");
-  $("plotInfo").textContent = "art as drawn";
+  const strokes = lineModeNow() === "strokes"; // workflow.js: separate strokes, or as drawn
+  $("plotInfo").textContent = A
+    ? `${fmt(A.W, 0)} × ${fmt(A.H, 0)} mm on ${name}`
+    : strokes
+      ? "tracing…"
+      : "art as drawn";
   h.className = !A || A.pictures ? "hint warn" : "hint";
   h.textContent =
     !A || A.pictures
-      ? "Only a pattern or text can be plotted as drawn: a picture has no lines until it is traced, so pick Traced line (and a 3D model needs Draw this view)."
-      : `The ${A.layers[0].name} exactly as drawn, not traced: ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}. For a printer, trace it on the Trace tab.`;
+      ? strokes
+        ? "No strokes yet: the Line step traces them (or lower the threshold or the speck filter there)."
+        : "Only a pattern or text can be plotted as drawn: a picture has no lines until it is traced (the Line step: separate strokes or one continuous line), and a 3D model needs Draw this view."
+      : strokes
+        ? `${A.layers[0].strokes.length} separate strokes, the pen lifting between them: ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}.`
+        : `The ${A.layers[0].name} exactly as drawn, not traced: ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}.`;
 }
 // the art as drawn has no fills (fill pens fill the traced drawing's shapes)
 function plotFromUI() {
@@ -187,7 +197,7 @@ function plotSoon(delay = 150) {
       $("plotInfo").textContent = "3D model";
       $("pageHint").className = "hint";
       $("pageHint").textContent =
-        "To plot a model, use Draw this view in Trace: it makes a line drawing of the model from the preview's angle and traces it, and the 2D tab plots that.";
+        "To plot a model, use Draw this view in Trace: it makes a line drawing of the model from the preview's angle and traces it, and the Plot step plots that.";
       return;
     }
     if (!st.walk || !st.final) return;
@@ -827,7 +837,7 @@ function drawPage() {
     g.font = `${13 * d}px ${css("--font-body")}`;
     g.fillText("A 3D model is loaded.", cv.width / 2, cv.height / 2 - 10 * d);
     g.fillText(
-      "Use Draw this view on the Trace tab to make a line drawing to plot.",
+      "Use Draw this view on the Line step to make a line drawing to plot.",
       cv.width / 2,
       cv.height / 2 + 12 * d
     );
@@ -854,8 +864,8 @@ function drawPage() {
   h.className = fits ? "hint" : "hint warn";
   h.textContent = fits
     ? `Centred on ${name} ${$("paperOrient").value} (${fmt(P.w, 0)} × ${fmt(P.h, 0)} mm) with ${fmt(mg, 0)} mm margins. ` +
-      (pageFitW() ? "Made for plotting: it fills the page." : "The size comes from the Trace tab.")
-    : `Too big for ${name} ${$("paperOrient").value} with ${fmt(mg, 0)} mm margins (room for ${fmt(P.w - 2 * mg, 0)} × ${fmt(P.h - 2 * mg, 0)} mm). It shows hanging over the paper's edge: make it smaller in the Trace tab, or pick bigger paper or smaller margins.`;
+      (pageFitW() ? "Made for plotting: it fills the page." : "The size comes from the Line step.")
+    : `Too big for ${name} ${$("paperOrient").value} with ${fmt(mg, 0)} mm margins (room for ${fmt(P.w - 2 * mg, 0)} × ${fmt(P.h - 2 * mg, 0)} mm). It shows hanging over the paper's edge: make it smaller in the Line step, or pick bigger paper or smaller margins.`;
   if (F && st.penFill.areas.length) {
     // a saved fill whose spot is no longer inside an area (the drawing changed)
     const lost = F.res.seedAreas.reduce((n, ids) => n + ids.filter((i) => i < 0).length, 0);
@@ -879,7 +889,7 @@ $("penW").addEventListener("input", () => {
 }); // the outline's width sets where fills stop
 new ResizeObserver(() => drawPage()).observe($("pageView"));
 
-// Made for plotting: a traced drawing fills the page inside its margins, unless a size was set by hand on the Trace tab
+// Made for plotting: a traced drawing fills the page inside its margins, unless a size was set by hand on the Line step
 // (st.pageFit false; Fit the page sets it again). The width (mm) that does, or null.
 function pageFitW() {
   if (!artForPlot() || st.pageFit === false || st.text || isModel() || !(st.bw > 0 && st.bh > 0)) return null;
@@ -909,7 +919,7 @@ async function plotFile() {
       name: designSlug(20, st.art.kind === "pattern" ? patternName(st.art.pattern) : null) + "-art.svg",
       data: UNB.exportLayersSVG(
         A.layers.map((l, i) => ({ label: `${i + 1} ${l.name}`, color: l.pen, width: w, strokes: l.strokes })),
-        { paperW: A.P.w, paperH: A.P.h }
+        { paperW: A.P.w, paperH: A.P.h, what: lineModeNow() === "strokes" ? "traced into separate strokes" : null }
       ),
       info: `the ${A.layers[0].name} as drawn, ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm on a ${fmt(A.P.w, 0)} × ${fmt(A.P.h, 0)} mm page`,
     };

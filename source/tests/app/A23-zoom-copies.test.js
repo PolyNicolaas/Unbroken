@@ -19,7 +19,7 @@ module.exports = {
     await page.mouse.move(sx, sy); await page.keyboard.down("Control"); await page.mouse.wheel(0, -100); await page.keyboard.up("Control"); await page.waitForTimeout(200);
     const after = await lineAt((sx - box[0]) * box[3], (sy - box[1]) * box[3]);
     checks.push(check("Ctrl + scroll zooms in", +(after[2] > before[2] * 1.5), "==", 1), check("the point under the pointer stays put (px off)", Math.hypot(after[0] - before[0], after[1] - before[1]) * after[2], "<=", 1));
-    await page.click("label[for=view2D]"); await A.idle(page, 300); await page.waitForFunction(() => st.plot, null, { timeout: 30000 });
+    await A.plot(page); await A.idle(page, 300); await page.waitForFunction(() => st.plot, null, { timeout: 30000 });
     checks.push(check("the 2D page keeps its own zoom (starts fitted)", await page.textContent("#zoomVal"), "==", "100%"));
     const mmAtCentre = () => page.evaluate(() => { const c = $("pageView"), r = c.getBoundingClientRect(); return eventMM({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }); });
     const m0 = await mmAtCentre(); await page.click("#zoomIn"); await page.click("#zoomIn"); const m1 = await mmAtCentre();
@@ -30,7 +30,7 @@ module.exports = {
     for (let i = 0; i < 6 && !(await page.$eval("#zoomOut", (b) => b.disabled)); i++) await page.click("#zoomOut");
     checks.push(check("− zooms out past fitted, down to 25%", await page.textContent("#zoomVal"), "==", "25%"), check("… and stops there (− greyed out)", +(await page.$eval("#zoomOut", (b) => b.disabled)), "==", 1));
     await page.click("#zoomFit"); checks.push(check("Fit from zoomed out: back to 100%", await page.textContent("#zoomVal"), "==", "100%"));
-    await page.click("label[for=viewChoc]"); await page.fill("#copies", "6"); await page.dispatchEvent("#copies", "input");
+    await A.print(page); await page.fill("#copies", "6"); await page.dispatchEvent("#copies", "input");
     await page.waitForFunction(() => st.layers, null, { timeout: 60000 }); await A.idle(page, 300);
     const ink = (id) => page.$eval(id, (c) => { const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i]) n++; return n; });
     const pic = () => page.$eval("#stackView", (c) => c.toDataURL());

@@ -9,7 +9,7 @@ module.exports = {
     const { page, errors, close } = await A.open(ctx), checks = [];
     await A.source(page, "model"); await A.idle(page);
     await page.setInputFiles("#anyFile", { name: "mushroom.stl", mimeType: "model/stl", buffer: Buffer.from(M.stl(M.mushroom())) }); await A.idle(page, 1000);
-    await page.click("label[for=viewChoc]"); await page.fill("#printHeightMM", "22"); await page.press("#printHeightMM", "Tab"); await A.idle(page);
+    await A.print(page); await page.fill("#printHeightMM", "22"); await page.press("#printHeightMM", "Tab"); await A.idle(page);
     const ready = () => page.$$eval("#readyList li", (l) => l.map((x) => x.textContent).join(" · ")), len = () => page.evaluate(() => st.layers.stack.laps.reduce((a, q) => a + q.length, 0));
     const off = await ready(), m = /Overhang: a layer steps out ([\d.]+) mm/.exec(off), L0 = await len();
     checks.push(check("Support off: the ready list warns of the cap's overhang (mm a layer)", m ? +m[1] : 0, ">", 1),

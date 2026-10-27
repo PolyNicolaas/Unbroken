@@ -9,10 +9,10 @@ module.exports = {
     const { page, errors, close } = await A.open(ctx), checks = [];
     const idle = () => A.idle(page, 300);
     await A.source(page, "model"); await idle();
-    await page.click("label[for=viewChoc]"); await idle();
+    await A.print(page); await idle();
     const modelH = +(await page.inputValue("#printHeightMM"));
     await page.click("label[for=viewDesign]"); await A.source(page, "picture"); await idle();
-    await page.click("label[for=viewChoc]"); await idle();
+    await A.print(page); await idle();
     await page.selectOption("#chocolate", { index: 1 }); await idle();
     checks.push(check(`after a ${modelH} mm model: the drawing's layers`, await page.evaluate(() => st.layers.S.N + st.layers.S.M), "==", 1),
       check("… and the Height box shows the drawing's height (mm)", +(await page.inputValue("#printHeightMM")), "<", 1));
@@ -33,7 +33,7 @@ module.exports = {
     try {
       await p2.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body: body2 }));
       await p2.goto(ctx.url); await A.idle(p2, 2500);
-      await p2.click("label[for=viewChoc]");
+      await A.print(p2);
       const i0 = await p2.textContent("#chocInfo"); await p2.selectOption("#chocolate", { index: 1 }); await A.idle(p2, 300);
       const info = await p2.textContent("#chocInfo");
       checks.push(check("quoted price: named in the 3D tab", +/costPer100g should be a number/.test(await p2.textContent("#settingsNote")), "==", 1),

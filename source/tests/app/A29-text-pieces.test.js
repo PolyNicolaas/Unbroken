@@ -10,7 +10,7 @@ module.exports = {
     await A.source(page, "text"); await A.idle(page);
     await page.fill("#textIn", "Anna\nBen\nChloe"); await A.idle(page); await A.idle(page);
     const trace0 = await page.evaluate(() => ({ n: st.final.re.length, N: st.N, ver: st.finalVer }));
-    await page.click("label[for=viewChoc]"); await A.idle(page);
+    await A.print(page); await A.idle(page);
     await page.waitForFunction(() => st.pieces && st.layers && st.layers.pieces, null, { timeout: 60000 }); await A.idle(page);
     checks.push(check("Plate card: Lines of text shown, A piece for each line chosen", +((await page.isVisible("#textPieces")) && (await page.inputValue("#textPieces")) === "each"), "==", 1));
     const P = await page.evaluate(() => st.pieces.list.map((d) => ({ name: d.name, w: d.fb.x1 - d.fb.x0, N: d.N })));

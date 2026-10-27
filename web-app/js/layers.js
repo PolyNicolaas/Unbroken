@@ -6,9 +6,9 @@
 "use strict";
 
 // ---------- layers ----------
-// The filled base and its infill live here, on the 3D tab: the first layers print with the areas the line encloses
+// The filled base and its infill live here, on the Print step: the first layers print with the areas the line encloses
 // filled (Rings or Lines; with Lines the base alternates between the rows as set and the rows turned 90°), the rest
-// are walls: the drawing as the Trace tab shows it. The filled lines are worked out by their own background engine and
+// are walls: the drawing as the Line step shows it. The filled lines are worked out by their own background engine and
 // kept
 // per drawing, so moving between tabs doesn't redo them.
 const layerLinesCache = new WeakMap(); // walk → Map(key → { final, filled, skipped, tooFine }, working px)
@@ -431,7 +431,7 @@ function layerReadout() {
       (!S.pat
         ? "open (0%)"
         : !(d > 0)
-          ? "needs a line spacing (Trace tab)"
+          ? "needs a line spacing (Line step)"
           : F && F.tooFine
             ? "too fine to fill at this size"
             : F

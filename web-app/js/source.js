@@ -1,5 +1,5 @@
 // Unbroken · web app · source.js
-// The source the trace starts from, as the Art tab hands it over (useSource): built-in samples, reading the settings,
+// The source the trace starts from, as the Art step hands it over (useSource): built-in samples, reading the settings,
 // setting the source image, and the Text source (fonts, layout, line limits).
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
@@ -286,7 +286,7 @@ const MIN_CAP_RATIO = CFG.rules.minLetterHeight;
 function spacingMM() {
   return st.spacing;
 }
-// Line width in mm (Trace tab, Line card): the needle's inside diameter, set by the needle picked on the 3D tab
+// Line width in mm (Line step, Line card): the needle's inside diameter, set by the needle picked on the Print step
 function lineWidthMM() {
   return Math.min(5, Math.max(0.05, +$("lineW").value || 0.84));
 }
@@ -359,7 +359,7 @@ function buildText() {
     if (s2.length === 2) g.lineTo(s2[0] * ppm + margin * ppm + 0.1, s2[1] * ppm + margin * ppm);
   }
   g.stroke();
-  // each line with letters, by its text (a piece per line on the 3D tab, pieces.js)
+  // each line with letters, by its text (a piece per line on the Print step, pieces.js)
   const typed = ($("textIn").value || " ").split("\n");
   const lineNames = [...new Set(lay.lineOf)].sort((a, b) => a - b).map((i) => (typed[i] || "").trim());
   st.text = { ...R, cap, layout: lay, lineNames };
@@ -382,9 +382,9 @@ function textChanged() {
     schedule(extract);
   }, 150);
 }
-// What the trace starts from, as the Art tab's Input switch decides it (art.js sets the switch first): "picture" (a
+// What the trace starts from, as the Art step's Input switch decides it (art.js sets the switch first): "picture" (a
 // picture to trace: an image, or a pattern drawn as one), "text" (traced from its font strokes) or "model" (a 3D model,
-// sliced on the 3D tab)
+// sliced on the Print step)
 function useSource(kind, canvas, label) {
   clearTimeout(textTimer);
   stopOptimize(); // a text change or an Optimize run still going is for the old source
@@ -441,7 +441,9 @@ function limitLines() {
   $("lineCount").textContent =
     `${n} of ${MAX_LINES} lines` + (n > 1 && $("textPieces").value === "each" ? ` · ${n} pieces` : "");
   $("lineCount").title =
-    n > 1 ? "On the 3D tab each line prints as a piece of its own, or joined into one (Plate card, Lines of text)" : "";
+    n > 1
+      ? "On the Print step each line prints as a piece of its own, or joined into one (Plate card, Lines of text)"
+      : "";
   $("lineCount").style.color = n >= MAX_LINES ? "var(--warn)" : "";
 }
 $("textIn").addEventListener("keydown", (e) => {

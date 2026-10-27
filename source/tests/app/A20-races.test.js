@@ -30,7 +30,7 @@ module.exports = {
     await page.evaluate(() => { const t = $("textIn"); t.value = "Hello there"; t.dispatchEvent(new Event("input", { bubbles: true })); artShowOnly("picture"); });
     await A.idle(page, 1500);
     checks.push(check("text then Image at once: the source stays the image", +(await page.evaluate(() => document.body.dataset.src === "image" && !st.text)), "==", 1));
-    await page.click("label[for=view2D]"); await A.idle(page, 2500);
+    await A.plot(page); await A.idle(page, 2500);
     await page.evaluate(() => { const c = document.createElement("canvas"); c.width = 400; c.height = 300; const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, 400, 300); setSource(c, "blank"); });
     await A.idle(page, 2500);
     checks.push(check("blank image on the 2D tab: no drawing left on the page", +(await page.evaluate(() => !st.plot && !st.final)), "==", 1));

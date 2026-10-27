@@ -3,6 +3,23 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v107 · 2026-10-27
+
+A simpler workflow (decided with Nicolaas, [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)):
+- **Making it for: a printer or a pen plotter**, chosen first at the top (it replaces Made for). It decides the last
+  step: the steps are now **1 Art → 2 Line → 3 Print** or **3 Plot**, never both.
+- **The Line step has the one switch for tracing**: **One continuous line** (the Fourier trace; the only line a printer
+  makes), **Separate strokes** (new: the art traced into strokes, the pen lifting between them) or **As drawn** (a
+  pattern's or the text's own lines, nothing traced). On a plotter a pattern or text starts as drawn and a picture as
+  separate strokes, until you pick. The cards the line doesn't use are hidden (no spacing, size or series for strokes;
+  no tracing at all for as drawn).
+- **The preview follows the step**: the art or the line on Art and Line, the page on Plot, the plate or the layers on
+  Print (its only view switch). The Next card has one button per step (Next: the line → / Next: plot it → or print it
+  →), and the 2D tab's Traced line / Art as drawn switch is gone.
+- The tabs are steps in the app's text (the Line step, the Plot step, the Print step).
+- Engine: `UNB.lineStrokes`, `UNB.stageStrokes`; `UNB.exportLayersSVG` notes how the lines were made. Tests E35, A33;
+  the app tests reach Plot and Print through the new `plot` / `print` helpers.
+
 ## v106 · 2026-10-27
 
 Usability fixes from a walkthrough of v105:

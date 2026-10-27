@@ -4,8 +4,8 @@ module.exports = {
   id: "A32", title: "Image prep and plotting: grey levels, the background tapped, a picture turned, and art made for plotting",
   guards: "grey levels that don't change the trace, a grey set to Skip that is still traced, a tap that doesn't remove the background, a turned picture that doesn't turn, the printing limits holding back art made for plotting, a plotting pattern traced before it's asked for, and any of it lost by a design file",
   why: "The Image prep card can reduce a picture to a few flat greys and trace the edges of the ones you pick, and remove the background from a point you tap; the Picture card turns and straightens the picture. The Art tab's Made for switch sets whether art is for printing (one line at the needle's spacing) or plotting (much finer patterns, plotted as drawn, traced only when asked).",
-  how: "Opens the app; picks the still-life sample; on the Trace tab sets 5 grey levels, then sets the second grey to Skip; taps the background with the tool; turns the picture right on the Art tab; switches Made for to Plotting, picks Wave rows (from a picture) and sets 200 rows; plots it as drawn; exports the SVG; presses Trace it; picks the Spirograph for printing; saves the design and opens it again.",
-  pass: "Grey levels make the trace follow the greys' edges (the line changes) and the Grey levels card lists 5 greys; Skip changes the line again; the tap sets the background point and some tolerance; the turned picture is as tall as it was wide; Made for Plotting lets Wave rows go to 200 rows (printing stops at 120), leaves the trace alone and makes Plot as drawn the way on; the 2D page shows the rows; its SVG is named after it; Trace it traces them, filling the page with lines pen 1 + the gap apart; a Spirograph for printing turns Allow overlaps on and says so; the reopened design keeps 5 greys, the skipped grey and Made for Plotting; no page errors.",
+  how: "Opens the app; picks the still-life sample; on the Trace tab sets 5 grey levels, then sets the second grey to Skip; taps the background with the tool; turns the picture right on the Art tab; picks Pattern and makes it for a pen plotter, picks Wave rows (from a picture) and sets 200 rows; goes on to the Plot step (as drawn); exports the SVG; picks One continuous line; picks the Spirograph for printing; saves the design and opens it again.",
+  pass: "Grey levels make the trace follow the greys' edges (the line changes) and the Grey levels card lists 5 greys; Skip changes the line again; the tap sets the background point and some tolerance; the turned picture is as tall as it was wide; for a pen plotter Wave rows go to 200 rows (printing stops at 120) and start as drawn, nothing traced; the 2D page shows the rows; its SVG is named after it; One continuous line traces them, filling the page with lines pen 1 + the gap apart; a Spirograph for printing turns Allow overlaps on and says so; the reopened design keeps 5 greys, the skipped grey and made for a pen plotter; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { art: true }), checks = [];
     await page.selectOption("#sample", "still"); await A.idle(page, 2000);
@@ -32,19 +32,19 @@ module.exports = {
     const after = await page.evaluate(() => [st.art.picture.canvas.width, st.art.picture.canvas.height, st.source.width]);
     checks.push(check("Turn right: the picture as tall as it was wide", +(after[0] === before[1] && after[1] === before[0] && after[2] === before[1]), "==", 1));
     // made for plotting
-    await page.click("label[for=artForPlot]"); await page.click("label[for=srcPattern]"); await A.idle(page, 1000);
+    await page.click("label[for=srcPattern]"); await page.click("label[for=artForPlot]"); await A.idle(page, 1000);
     await page.selectOption("#artStyle", "wavesTone"); await A.idle(page, 1500);
     const src = await page.evaluate(() => st.source.__id);
     await A.setValue(page, "#artP-detail", 200); await A.idle(page, 2500);
-    const pl = await page.evaluate(() => ({ max: +$("artP-detail").max, rows: st.art.pattern.detail, untraced: st.art.untraced, primary: $("goPlot").classList.contains("primary") }));
+    const pl = await page.evaluate(() => ({ max: +$("artP-detail").max, rows: st.art.pattern.detail, untraced: st.art.untraced, drawn: lineModeNow() === "drawn" }));
     checks.push(check("Plotting: Wave rows go to 200 rows (printing stops at 120)", +(pl.max === 250 && pl.rows === 200), "==", 1),
-      check("… not traced until asked, Plot as drawn the way on", +(pl.untraced && pl.primary && (await page.evaluate(() => st.source.__id)) === src), "==", 1));
-    await page.click("#goPlot"); await A.idle(page, 2000);
+      check("… as drawn: nothing traced", +(pl.untraced && pl.drawn && (await page.evaluate(() => st.source.__id)) === src), "==", 1));
+    await page.click("#goTrace"); await page.click("#goOut"); await A.idle(page, 2000);
     checks.push(check("2D: the rows as drawn", +/Wave rows \(picture\) exactly as drawn/.test(await page.textContent("#pageHint")), "==", 1));
     const [sv] = await Promise.all([page.waitForEvent("download"), page.click("#exportBtn")]);
     checks.push(check("… its SVG named after the pattern", sv.suggestedFilename(), "==", "wave-rows-picture-art.svg"));
-    await page.click("label[for=viewArt]"); await page.click("#goTrace"); await A.idle(page, 4000);
-    checks.push(check("Trace it: traced now (parts)", +(!(await page.evaluate(() => st.art.untraced)) && (await page.evaluate(() => st.source.__id)) !== src) * (await parts(page)), ">=", 1));
+    await page.click("label[for=viewDesign]"); await page.click("label[for=lineOne]"); await A.idle(page, 4000);
+    checks.push(check("One continuous line: traced now (parts)", +(!(await page.evaluate(() => st.art.untraced)) && (await page.evaluate(() => st.source.__id)) !== src) * (await parts(page)), ">=", 1));
     // made for plotting, a traced drawing fills the page, its lines pen 1 + the gap apart
     const fit = await page.evaluate(() => ({ w: st.outW, page: pageFitW(), sp: st.spacing, pen: +$("penW").value + +$("lineGapMM").value }));
     checks.push(check("… made for plotting it fills the page (width ÷ the page's room)", fit.w / fit.page, ">=", 0.99), check("… and its spacing is pen 1 + the gap (mm off)", Math.abs(fit.sp - fit.pen), "<", 0.001));

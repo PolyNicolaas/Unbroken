@@ -10,10 +10,10 @@ module.exports = {
     await A.source(page, "text"); await page.click("label[for=viewDesign]"); await A.idle(page, 800); await A.setValue(page, "#capH", "40"); await A.idle(page, 1200);
     const mini = await page.textContent("#miniInfo");
     checks.push(check("40 mm lettering: mini-map says it fits rotated", +/fits plate · rotated/.test(mini), "==", 1));
-    await page.click("label[for=viewChoc]"); await A.idle(page, 300);
+    await A.print(page); await A.idle(page, 300);
     checks.push(check("plate tab: fits rotated", +/Rotated .* to fit/.test(await page.textContent("#plateHint")), "==", 1));
     await page.click("label[for=viewDesign]"); await A.source(page, "picture"); await page.evaluate(() => applyPreset("drawing")); await A.idle(page, 800);
-    await page.click("label[for=viewChoc]"); await A.setValue(page, "#outW", "60", "change"); await A.setValue(page, "#copies", "12"); await A.idle(page, 300);
+    await A.print(page); await A.setValue(page, "#outW", "60", "change"); await A.setValue(page, "#copies", "12"); await A.idle(page, 300);
     checks.push(check("12 copies reported as fitting", +/12 copies fit/.test(await page.textContent("#plateHint")), "==", 1));
     const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#gcodeBtn")]);
     const zip = fs.readFileSync(await dl.path()).toString("latin1"), text = zip.slice(zip.indexOf("; Unbroken"), zip.indexOf("; end") + 5);

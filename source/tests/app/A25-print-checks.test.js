@@ -16,7 +16,7 @@ module.exports = {
     checks.push(check("Gap between lines has its own ⓘ", await gapInfo.count(), "==", 1));
     await gapInfo.click();
     checks.push(check("… which explains centre to centre = line width + gap, and 0 = just touching", +/centre to centre[\s\S]*gap of 0 puts beads side by side, just touching/.test(await page.evaluate(() => [...document.querySelectorAll("p.hint.help")].filter((p) => !p.hidden).map((p) => p.textContent).join(" "))), "==", 1));
-    await page.click("label[for=viewChoc]"); await page.waitForFunction(() => st.layers, null, { timeout: 30000 }); await idle();
+    await A.print(page); await page.waitForFunction(() => st.layers, null, { timeout: 30000 }); await idle();
     const marks = () => page.$$eval("#readyList li", (l) => l.map((x) => x.className).join(","));
     checks.push(check("ready list: every line ✓ to start", +/^(ok,)*ok$/.test(await marks()), "==", 1), check("… heading says ready", await page.textContent("#readyVal"), "==", "ready"));
     await page.fill("#printHeightMM", "15"); await page.press("#printHeightMM", "Tab"); await A.setValue(page, "#copies", 20); await idle(); await idle();

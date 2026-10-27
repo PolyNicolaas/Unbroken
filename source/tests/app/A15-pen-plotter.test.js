@@ -10,7 +10,7 @@ module.exports = {
     const { page, errors, close } = await A.open(ctx), checks = [];
     const idle = () => A.idle(page, 300);
     await page.fill("#outW", "60"); await page.press("#outW", "Enter"); await idle();
-    await page.click("label[for=view2D]"); await idle();
+    await A.plot(page); await idle();
     const share = await page.evaluate(() => {
       // share of points within 0.1 mm of the line at least 3 mm of arc away: a line drawn back over itself
       const over = (x, y) => {
@@ -37,11 +37,11 @@ module.exports = {
     checks.push(check("SVG: page 215.9 × 279.4 mm, matching viewBox", +/width="215\.9mm" height="279\.4mm" viewBox="0 0 215\.9 279\.4"/.test(svg), "==", 1));
     checks.push(check("SVG: one path", (svg.match(/<path /g) || []).length, "==", 1));
     checks.push(check("SVG: points outside the 20 mm margins", xs.filter((v) => v < 20 || v > 195.9).length + ys.filter((v) => v < 20 || v > 259.4).length, "==", 0));
-    await page.click("label[for=viewChoc]"); await page.waitForTimeout(300);
+    await A.print(page); await page.waitForTimeout(300);
     const [dl2] = await Promise.all([page.waitForEvent("download"), page.click("#dxfBtn")]);
     const zip = fs.readFileSync(await dl2.path()), dxf = zip.toString("latin1");
     checks.push(check("3D tab, DXF for choc OS: zip with one closed curve", +(zip[0] === 0x50 && zip[1] === 0x4b && /\.zip$/.test(dl2.suggestedFilename()) && (dxf.match(/\nPOLYLINE\n/g) || []).length === 1 && /POLYLINE\n8\nTRACE\n66\n1\n70\n1\n/.test(dxf)), "==", 1));
-    await page.click("label[for=view2D]"); await page.waitForTimeout(300);
+    await A.plot(page); await page.waitForTimeout(300);
     await page.selectOption("#paper", "a5"); await page.fill("#paperMargin", "70"); await page.waitForTimeout(300);
     checks.push(check("A5 with 70 mm margins: too-big warning", +/Too big/.test(await page.textContent("#pageHint")) && +(await page.$eval("#pageHint", (e) => e.classList.contains("warn"))), "==", 1));
     // a drawing bigger than the paper (60 mm on 40 × 40): the view takes in the whole drawing, hanging over the paper

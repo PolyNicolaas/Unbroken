@@ -66,7 +66,7 @@ $("tuneReset").addEventListener("click", () => {
 
 // 2D (plot.js): SVG for Saxi and flat DXF, from the pen version of the line.
 // 3D (layers.js): G-code, from the layers stacked for every copy on the plate.
-// the G-code settings: the 3D tab's fields and the printer's profile (also used by the print preview, layers.js)
+// the G-code settings: the Print step's fields and the printer's profile (also used by the print preview, layers.js)
 // The Fine-tuning numbers as the printer gets them: an empty, negative or absurd box never reaches the G-code (an
 // empty First-layer Z would print into the plate). machineIssues() names any box that was replaced, for the ready list.
 const layerHmm = () => {
@@ -320,7 +320,8 @@ function readyItems() {
     );
   return out;
 }
-// Bring a card into view and open it. A card on another tab (the Trace tab's cards, from the 3D tab's ready list) is
+// Bring a card into view and open it. A card on another tab (the Line step's cards, from the Print step's ready list)
+// is
 // hidden, so its tab is shown first; if no tab shows it, the tab you were on stays.
 function showCard(card) {
   const seen = () => card.getClientRects().length > 0,
@@ -376,7 +377,7 @@ async function exportAs(fmtName, msg) {
     setStatus(
       msg,
       "bad",
-      "For 2D files of a model, use Draw this view on the Art tab first (it adds a line drawing of the view to the art). The 3D tab exports the layers."
+      "For 2D files of a model, use Draw this view on the Art step first (it adds a line drawing of the view to the art). The Print step exports the layers."
     );
     return;
   }

@@ -47,7 +47,7 @@ module.exports = {
           await page.click(`#${id} .card-toggle`); await page.waitForTimeout(100);
           checks.push(check(`${id} opens to its controls`, await count(page, sels), "==", sels.length));
         }
-        await page.click("label[for=view2D]"); await page.waitForTimeout(200);
+        await A.plot(page); await page.waitForTimeout(200);
         checks.push(check("2D: paper, pen, page, export and smoothing visible", await count(page, PLOT), "==", PLOT.length));
         for (const [id, sels] of Object.entries(MORE_2D)) {
           checks.push(check(`2D: ${id} starts folded`, +(await folded(page, id)), "==", 1));
@@ -57,13 +57,14 @@ module.exports = {
         checks.push(check("2D: Fills card open with its controls", await count(page, FILLS), "==", FILLS.length));
         checks.push(check("2D: SVG only (no format menu, no DXF)", (await page.$$("#format")).length, "==", 0));
         checks.push(check("2D: no Trace or 3D controls showing", +!(await visible(page, "#sens")) + +!(await visible(page, "#gcodeBtn")), "==", 2));
-        await page.click("label[for=viewChoc]"); await page.waitForTimeout(200);
+        await A.print(page); await page.waitForTimeout(200);
         checks.push(check("3D: main controls visible", await count(page, CHOC), "==", CHOC.length));
         await page.click("label[for=stPlate]"); await page.waitForTimeout(200);
         checks.push(check("big view: Plate shows the plate, not the layers", +(await visible(page, "#plate")) + +!(await visible(page, "#stackView")), "==", 2));
-        await page.click("label[for=stLine]"); await page.waitForTimeout(200);
-        checks.push(check("big view: Line shows the line, with its tools and mini-map", +(await visible(page, "#view")) + +(await visible(page, "#selectBtn")) + +!(await visible(page, "#plate")), "==", 3));
-        await page.click("label[for=stLayers]"); await page.waitForTimeout(200);
+        checks.push(check("big view on Print: only Plate and 3D layers to pick", +(await visible(page, "label[for=stPlate]")) + +(await visible(page, "label[for=stLayers]")) + +!(await visible(page, "label[for=stLine]")) + +!(await visible(page, "label[for=stPage]")), "==", 4));
+        await page.click("label[for=viewDesign]"); await page.waitForTimeout(200);
+        checks.push(check("big view follows the step: Line shows the line, with its tools and mini-map, no view tabs", +(await visible(page, "#view")) + +(await visible(page, "#selectBtn")) + +!(await visible(page, "#plate")) + +!(await visible(page, ".stage-tabs")), "==", 4));
+        await A.print(page); await page.click("label[for=stLayers]"); await page.waitForTimeout(200);
         checks.push(check("3D: cards that fold", await page.$$eval("section.card.choc-only .card-toggle", (b) => b.map((x) => x.querySelector(".t").textContent).join(",")), "==", "Printer,Printer profile,Plate,Layers,Base,Infill,Fine-tuning,Test print,Export"));
         checks.push(check("one level of folding: no menus inside cards", await nested(page), "==", 0));
         checks.push(check("3D: Fine-tuning starts folded", +(await folded(page, "card-h-machine")), "==", 1));
@@ -73,7 +74,7 @@ module.exports = {
       if (w < 500) {
         checks.push(check("phone: plate mini-map width (px)", await page.$eval("#minimap", (e) => Math.round(e.getBoundingClientRect().width)), "<=", 100));
         for (const v of ["viewDesign", "view2D", "viewChoc"]) {                     // every group open, nothing wider than its card
-          await page.click(`label[for=${v}]`);
+          if (v === "view2D") await A.plot(page); else if (v === "viewChoc") await A.print(page); else await page.click(`label[for=${v}]`);
           await page.evaluate(() => document.querySelectorAll("section.card.collapsed .card-toggle").forEach((b) => b.click())); await page.waitForTimeout(200);
           const over = await page.evaluate(() => [...document.querySelectorAll("section.card")].filter((c) => c.offsetParent).reduce((m, c) => { const b = c.querySelector(".card-body"); return Math.max(m, b.scrollWidth - b.clientWidth); }, 0));
           checks.push(check(`${w} px ${{ viewChoc: "3D", view2D: "2D" }[v] || "Trace"}, all groups open: px wider than the card`, over, "==", 0));

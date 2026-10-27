@@ -21,13 +21,13 @@ module.exports = {
     await page.fill("#fitW", "50"); await page.fill("#fitH", "50"); await page.click("#fitBtn"); await A.idle(page, 800);
     s = await size();
     checks.push(check("fit inside 50 × 50: larger side off 50 mm by", Math.abs(Math.max(s.w, s.h) - 50), "<=", 0.2), check("fit inside 50 × 50: neither side over (mm over)", Math.max(s.w, s.h) - 50, "<=", 0.2));
-    await page.click("label[for=viewChoc]"); await page.check("#limitPlate"); await page.click("label[for=viewDesign]");
+    await A.print(page); await page.check("#limitPlate"); await page.click("label[for=viewDesign]");
     s = await size();
     checks.push(check("limit on: slider top is the plate's widest (mm off)", Math.abs(s.top - s.plate), "<=", 0.5));
     await page.fill("#outW", "400"); await page.press("#outW", "Enter"); await A.idle(page, 800);
     s = await size();
     checks.push(check("limit on: a typed 400 mm stops at the plate (mm over)", s.w - s.plate, "<=", 0.5));
-    await page.click("label[for=viewChoc]"); await page.uncheck("#limitPlate"); await page.click("label[for=viewDesign]");
+    await A.print(page); await page.uncheck("#limitPlate"); await page.click("label[for=viewDesign]");
     await A.source(page, "text"); await page.click("label[for=viewDesign]"); await A.idle(page, 1200);
     const cap = () => page.evaluate(() => st.text.cap), cap0 = await cap(), w0 = (await size()).w;
     await page.fill("#outW", String(+(2 * w0).toFixed(1))); await page.press("#outW", "Enter"); await A.idle(page, 1500);

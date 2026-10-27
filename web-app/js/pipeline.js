@@ -168,6 +168,8 @@ function traceWalk(W, s, engine = PIPE) {
   ]);
 }
 async function extract(g, P = Object.create(st), again = false) {
+  if (lineModeNow() === "drawn") return plotSoon(0); // workflow.js: As drawn, nothing to trace (the page redrawn)
+  if (lineModeNow() === "strokes") return traceStrokes(g); // workflow.js: the Line step's Separate strokes
   const s = settings(),
     W = await working();
   guard(g);
@@ -289,7 +291,7 @@ function zoneTint(kind) {
 const scale = () => st.outW / st.bw; // output units per working pixel
 const pxSpacing = (P) => P.spacing / (P.outW / P.bw);
 const cornerMM = () => +$("corner").value / 10;
-// The 3D tab's Base (filled layers at the bottom) and Infill (inside the layers above): each a density (0–100%: 100
+// The Print step's Base (filled layers at the bottom) and Infill (inside the layers above): each a density (0–100%: 100
 // puts
 // the rows a line width apart, touching), a pattern, and for Lines an angle and how many layers keep it before turning
 // 90°
@@ -345,7 +347,7 @@ async function signal(g, P = Object.create(st)) {
     P.w,
     P.h,
     { w: d * lineRatio(), loop: CFG.engine.loopRadius, round: cornerMM() / (P.outW / P.bw), fill: null },
-  ]); // corners rounded, strands d apart, a loop at each stroke end (infill belongs to the 3D tab's base layers)
+  ]); // corners rounded, strands d apart, a loop at each stroke end (infill belongs to the Print step's base layers)
   guard(g);
   Object.assign(P, {
     open: r.open,
@@ -371,7 +373,8 @@ async function fit(g, P = Object.create(st), newSignal = false) {
   await sizeMarks(g);
 }
 
-// ---------- size: one slider from the smallest size that fits up to the plate (Keep within the plate, 3D tab) or 1 m
+// ---------- size: one slider from the smallest size that fits up to the plate (Keep within the plate, Print step) or 1
+// m
 // ----------
 // The slider's marks are the smallest widths where the finished print (strands, a loop at each stroke end, crossings
 // removed) keeps the spacing, at three detail levels: how far lines may move from the drawing to make room

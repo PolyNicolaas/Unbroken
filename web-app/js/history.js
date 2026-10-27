@@ -13,6 +13,9 @@ const DESIGN_IDS = [
   "srcPattern",
   "artForPrint",
   "artForPlot",
+  "lineOne",
+  "lineStrokes",
+  "lineDrawn",
   "srcModel",
   "textIn",
   "font",
@@ -130,6 +133,7 @@ function designState() {
       erase: st.erase || [],
       start: st.start || null,
       bgAt: st.bgAt || null,
+      lineChosen: !!st.lineChosen,
       zones: st.zones,
       penFill: structuredClone(st.penFill),
       model: st.model
@@ -249,6 +253,7 @@ function applyDesign(d, src, imageSource, pics) {
     st.erase = structuredClone(s.erase || []);
     st.start = structuredClone(s.start || null);
     st.bgAt = structuredClone(s.bgAt || null);
+    st.lineChosen = !!s.lineChosen;
     st.zones = structuredClone(s.zones || { cross: [], lane: [] });
     st.zoneVer = (st.zoneVer || 0) + 1;
     st.zm = {};
@@ -256,7 +261,7 @@ function applyDesign(d, src, imageSource, pics) {
     posManual = !!s.posManual;
     st.penFill = s.penFill ? structuredClone(s.penFill) : defaultPenFill();
     st.pfill = null; // older design files: no fill pens
-    // the Art tab's input (art.js); a design from before the Art tab comes back as its source was
+    // the Art step's input (art.js); a design from before the Art step comes back as its source was
     if (s.art) artRestore(s.art, pics || null);
     else artFromOld($("srcModel").checked ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
     if (s.sample && [...$("sample").options].some((o) => o.value === s.sample)) $("sample").value = s.sample;
@@ -362,7 +367,7 @@ async function saveDesign() {
   if (recTimer) record();
   const d = designState(),
     imgCanvas = st.text ? st.imageSource && st.imageSource.canvas : st.source,
-    pic = artCanvas(), // the Art tab's picture, kept while a pattern, the text or a model is in use
+    pic = artCanvas(), // the Art step's picture, kept while a pattern, the text or a model is in use
     artImage = !pic ? null : pic === st.source ? "source" : sourceImageURL(pic);
   const file = {
     app: DESIGN_APP,
@@ -415,9 +420,9 @@ async function openDesign(f) {
     if (!text && !canvas) throw new Error("the file has no image");
     if (d.s) {
       d.s.sample = "user";
-      if (!d.s.art && file.pattern) d.s.pattern = file.pattern; // v100: a pattern made on the Trace tab
+      if (!d.s.art && file.pattern) d.s.pattern = file.pattern; // v100: a pattern made on the Line step
     }
-    // the Art tab's picture (art.js); a v101 file has one per layer, by layer id
+    // the Art step's picture (art.js); a v101 file has one per layer, by layer id
     let pics = null;
     if (file.artImage) pics = file.artImage === "source" ? canvas : await loadImageURL(file.artImage);
     else if (file.artImages) {

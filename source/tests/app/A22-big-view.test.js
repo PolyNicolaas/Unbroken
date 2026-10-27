@@ -15,12 +15,12 @@ module.exports = {
       const mid = await ink(sel); await page.waitForFunction(() => !st.playing, null, { timeout: 15000 }); await page.waitForTimeout(200);
       return [mid, await ink(sel)];
     };
-    await page.click("label[for=view2D]"); await A.idle(page, 300);
+    await A.plot(page); await A.idle(page, 300);
     await page.waitForFunction(() => st.plot, null, { timeout: 30000 }); await page.waitForTimeout(500);
     checks.push(check("2D tab brings the 2D page", +((await stage()) === "page"), "==", 1));
     const p0 = await ink("#pageView"), [pm, p1] = await playPartway("#pageView");
     checks.push(check("2D page: partway through playing, share of the ink", pm / p0, "<", 0.9), check("2D page: at the end, ink vs before (ratio)", Math.abs(p1 / p0 - 1), "<=", 0.02));
-    await page.click("label[for=viewChoc]");
+    await A.print(page);
     await page.waitForFunction(() => st.layers, null, { timeout: 60000 }); await page.waitForTimeout(800);
     checks.push(check("3D tab brings the 3D layers", +((await stage()) === "layers"), "==", 1));
     const s0 = await ink("#stackView"), [sm, s1] = await playPartway("#stackView");

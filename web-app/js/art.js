@@ -1,8 +1,8 @@
 // Unbroken · web app · art.js
-// The Art tab: where everything comes in, one thing at a time. The Input switch picks what the trace starts from: a
+// The Art step: where everything comes in, one thing at a time. The Input switch picks what the trace starts from: a
 // picture, the text, a geometric pattern or a 3D model. Each keeps its own settings while another is in use, so
 // switching back finds it as it was. artApply hands the one in use to the trace (useSource, source.js). A pattern or
-// the text can also go to the 2D tab exactly as drawn, without tracing (artVectors, for plot.js).
+// the text can also go to the Plot step exactly as drawn, without tracing (artVectors, for plot.js).
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
 "use strict";
@@ -40,7 +40,7 @@ function patternDrawn() {
   patternCache = { key, r, L: r ? UNB.patternLayout(r, ART_LONG) : null };
   return patternCache;
 }
-// The picture's darkness for the patterns drawn from one (UNB.PATTERNS[…].tone): the Art tab's picture, at most 400 px
+// The picture's darkness for the patterns drawn from one (UNB.PATTERNS[…].tone): the Art step's picture, at most 400 px
 // on its long side, 0 white … 1 black; the face sample instead of none or of a line-drawing sample (the leaf, shapes,
 // smiley: thin lines on white, no light and dark to draw). null for the other patterns.
 const LINE_SAMPLES = ["leaf", "shapes", "smiley"];
@@ -130,22 +130,20 @@ function artApplySoon(delay = 250) {
   clearTimeout(applyTimer);
   applyTimer = setTimeout(artApply, delay);
 }
-// trace: a pattern made for plotting goes to the trace only when asked (Trace it, or the Trace tab)
-function artApply(trace) {
+// A pattern whose line is As drawn (the Line step, workflow.js) isn't traced at all: its exact lines go to the page.
+function artApply() {
   clearTimeout(applyTimer);
   const A = st.art;
   $(KIND_RADIO[A.kind]).checked = true;
   document.body.dataset.art = A.kind;
-  A.untraced = A.kind === "pattern" && artForPlot() && trace !== true;
+  lineDefault(); // workflow.js: the line that suits this input, until one is picked
+  A.untraced = (A.kind === "pattern" || A.kind === "text") && lineModeNow() === "drawn";
   if (A.untraced) {
-    $("artMsg").textContent = patternDrawn().r
-      ? ""
-      : "Nothing left inside that shape: try more detail or another shape.";
-    // the preview shows it as it will be plotted: the 2D page, the pattern as drawn
-    $("plotArt").checked = true;
-    plotFromUI(); // plot.js
-    if (stageNow() !== "page") setStage("page");
-    else plotSoon(0);
+    $("artMsg").textContent =
+      A.kind !== "pattern" || patternDrawn().r
+        ? ""
+        : "Nothing left inside that shape: try more detail or another shape.";
+    plotSoon(0); // (the preview shows the page, the pattern as drawn: workflow.js)
   } else if (A.kind === "model") {
     if (!st.model) setModel(sampleVase(), "sample vase");
     useSource("model");
@@ -160,7 +158,7 @@ function artApply(trace) {
       if (P.crosses && !$("overlaps").checked && A.overlapsFor !== A.pattern.style) {
         $("overlaps").checked = true;
         note =
-          "Allow overlaps is on now (Trace tab, Line card): the needle prints over each crossing. Untick it to undo every crossing instead (slow, and the pattern bends).";
+          "Allow overlaps is on now (Line step, Line card): the needle prints over each crossing. Untick it to undo every crossing instead (slow, and the pattern bends).";
       }
       if (P.crosses) A.overlapsFor = A.pattern.style;
       // traced as drawn: centreline, and the closed or open line it is
@@ -216,7 +214,7 @@ function artSizeUI() {
   $("artWidth").closest(".inline").hidden = artForPlot();
   $("artWidthLab").textContent = artForPlot() ? "Size" : "Width (mm)";
   if (artForPlot()) {
-    // made for plotting: as wide as the 2D tab's page allows (Art as drawn), measured against pen 1
+    // made for plotting: as wide as the Plot step's page allows (Art as drawn), measured against pen 1
     const P = paperSize(), // plot.js
       mg = Math.max(0, +$("paperMargin").value || 0),
       W = r.box[0] * L.s * Math.min((P.w - 2 * mg) / L.w, (P.h - 2 * mg) / L.h), // (as artOnPage places it)
@@ -227,8 +225,8 @@ function artSizeUI() {
     h.className = gapMM < pen ? "hint warn" : "hint";
     h.textContent =
       gapMM < pen
-        ? `Closer than pen 1 (${fmt(pen, 2)} mm): neighbouring lines run into each other. Pick less detail, a finer pen, or a bigger page (2D tab).`
-        : `Pen 1 is ${fmt(pen, 2)} mm: every line stays clear of its neighbours. The page size and margin (2D tab) set the width.`;
+        ? `Closer than pen 1 (${fmt(pen, 2)} mm): neighbouring lines run into each other. Pick less detail, a finer pen, or a bigger page (Plot step).`
+        : `Pen 1 is ${fmt(pen, 2)} mm: every line stays clear of its neighbours. The page size and margin (Plot step) set the width.`;
     return;
   }
   if (!st.outW) return;
@@ -261,7 +259,7 @@ $("artFit").addEventListener("click", () => {
   st.art.width = null; // follows the needle again (setSize kept it as set by hand)
   artSizeUI();
 });
-// made for plotting, the width follows the 2D tab's page and the closest lines its pen
+// made for plotting, the width follows the Plot step's page and the closest lines its pen
 for (const id of ["paper", "paperW", "paperH", "paperMargin", "penW", "paperOrient"])
   $(id).addEventListener(id === "paper" || id === "paperOrient" ? "change" : "input", artSizeUI);
 $("artPicChoose").addEventListener("click", () => $("picFile").click());
@@ -285,12 +283,18 @@ function patternEdited(p) {
   if (st.art.kind === "pattern") artApplySoon();
 }
 
-// ---------- the 2D tab's Art as drawn ----------
+// ---------- the Plot step's Art as drawn ----------
 // A pattern's or the text's lines exactly as made, in px of their own picture: { W, H, layers: [{ name, pen, strokes
 // }], pictures } (one layer, pen 1's colour). A picture or a model has no lines until traced.
 function artVectors() {
   const A = st.art,
     pen = $("penColor").value || "#111111";
+  // separate strokes (the Line step): the traced strokes, in px of the working image
+  if (lineModeNow() === "strokes") {
+    const S = st.sepStrokes;
+    if (!S || !S.strokes.length) return null;
+    return { W: S.w, H: S.h, layers: [{ name: "strokes", pen, strokes: S.strokes }], pictures: 0 };
+  }
   if (A.kind === "pattern") {
     const { r, L } = patternDrawn();
     if (!r) return null;
@@ -351,7 +355,7 @@ function artRestore(a, pic) {
       : null,
   };
 }
-// a design from before the Art tab (v100 and older): its source as it was
+// a design from before the Art step (v100 and older): its source as it was
 function artFromOld(kind, canvas, label, pattern) {
   const pat = pattern && UNB.PATTERNS[pattern.style];
   st.art = {
@@ -395,17 +399,9 @@ function artUI() {
     picture: "The picture, traced into one line.",
     text: "The text, traced from its font's strokes.",
     pattern: `The ${patternName(A.pattern)} pattern, traced into one line.`,
-    model: "A 3D model: it is sliced on the 3D tab.",
+    model: "A 3D model: it is sliced on the Print step.",
   }[A.kind];
-  // made for plotting: Plot as drawn is the way on (for a pattern or text); printing: Trace it
-  const plot = artForPlot();
-  $("artForVal").textContent = plot ? "plotting" : "printing";
-  $("goPlot").classList.toggle("primary", plot && asDrawnOK());
-  $("goTrace").classList.toggle("primary", !(plot && asDrawnOK()));
-  $("goPlot").disabled = !asDrawnOK();
-  $("goPlot").title = asDrawnOK()
-    ? "Plot it exactly as drawn on the 2D tab, without tracing"
-    : "Only a pattern or text can be plotted as drawn: a picture needs tracing, and a model its view drawn";
+  workflowUI(); // workflow.js: what the Line step can do with this input
 }
 // ---------- the picture turned: quarter turns and a few degrees to straighten, from the picture as loaded ----------
 function turnedCanvas(src, deg) {
@@ -466,13 +462,8 @@ $("picDraw").addEventListener("click", () => {
   enterTool("draw");
 });
 $("goTrace").addEventListener("click", () => {
-  if (st.art.untraced) artApply(true);
   $("viewDesign").checked = true;
   viewChanged();
-});
-// the Trace tab opened on a pattern made for plotting: trace it now
-$("viewDesign").addEventListener("change", () => {
-  if (st.art.untraced) artApply(true);
 });
 document.querySelectorAll('input[name="artFor"]').forEach((r) =>
   r.addEventListener("change", () => {
@@ -482,13 +473,6 @@ document.querySelectorAll('input[name="artFor"]').forEach((r) =>
     recordSoon();
   })
 );
-$("goPlot").addEventListener("click", () => {
-  $("plotArt").checked = true;
-  plotFromUI(); // plot.js
-  $("view2D").checked = true;
-  viewChanged();
-  plotSoon(0);
-});
 $("toArt").addEventListener("click", () => {
   $("viewArt").checked = true;
   viewChanged();

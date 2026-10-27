@@ -18,4 +18,4 @@ without a visible step, and there were two rows of tabs (Art / Trace / 2D / 3D a
   (a small switch there). The preview's own row of tabs goes, and so do the Next card's two buttons and the 2D tab's
   Traced line / Art as drawn switch: the Line step's switch is the one place.
 
-Version v107; fills per grey move to v108 (docs/PREP-PLAN.md).
+Version v107 ✓ (27 October); fills per grey move to v108 (docs/PREP-PLAN.md).

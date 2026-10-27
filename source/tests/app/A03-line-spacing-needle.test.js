@@ -13,7 +13,7 @@ module.exports = {
     const steps = [["18G + 0.5", null, null, null, 0.84 + 0.5], ["16G + 0.5", "1.19", null, null, 1.19 + 0.5], ["16G + 0.2", null, null, "0.2", 1.19 + 0.2], ["typed 1.0 + 0.2", null, "1.0", null, 1.2]];
     for (const [label, needle, width, gapMM, expect] of steps) {
       if (needle) {
-        await page.click("label[for=viewChoc]"); await page.selectOption("#needle", needle); await page.click("label[for=viewDesign]");
+        await A.print(page); await page.selectOption("#needle", needle); await page.click("label[for=viewDesign]");
         checks.push(check(`${label}: the needle sets the line width (mm)`, +(await page.inputValue("#lineW")), "==", +needle));
       }
       if (width) { await A.setValue(page, "#lineW", width); checks.push(check(`${label}: a width no needle has shows Custom`, +((await page.inputValue("#needle")) === "custom"), "==", 1)); }

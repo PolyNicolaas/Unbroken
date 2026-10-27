@@ -4,7 +4,7 @@ module.exports = {
   id: "A16", title: "2D tab: shapes to click and fill, one pen per layer",
   guards: "a click that fills the wrong thing or nothing, an area holding two pens at once, a removed pen leaving its fills behind, fills missing from the files or from undo and design files",
   why: "Fills on the 2D tab are picked by clicking areas on the page: the chosen pen fills the area, the same pen clears it, another pen takes it over. Each pen must end up in its own layer of the SVG so the pen can be changed between layers in Saxi, and every change must undo and save with the design like any other.",
-  how: "Opens the app, sets the leaf to 60 mm, goes to the 2D tab and clicks the blade with Pen 2. Adds Pen 3 and clicks the blade again, then again, then once more. Undoes and redoes the last click. Exports the SVG and reads its layers. Removes Pen 3 and reads what's left. Checks a click outside the leaf does nothing. Then sets Close gaps to 4.9 mm, counts the shapes, turns on Draw bridges and exports the SVG again, drags across the blade and undoes back. Finally loads a picture of an outlined light-red circle, light-blue square and white triangle, adds a blue pen and presses Colour from image.",
+  how: "Opens the app, makes it for a pen plotter, sets the leaf to 60 mm on the Line step, goes to the Plot step and clicks the blade with Pen 2. Adds Pen 3 and clicks the blade again, then again, then once more. Undoes and redoes the last click. Exports the SVG and reads its layers. Removes Pen 3 and reads what's left. Checks a click outside the leaf does nothing. Then sets Close gaps to 4.9 mm, counts the shapes, turns on Draw bridges and exports the SVG again, drags across the blade and undoes back. Finally loads a picture of an outlined light-red circle, light-blue square and white triangle, adds a blue pen and presses Colour from image.",
   pass: "Pen 2's click fills the blade (hatch strokes on the page); Pen 3 takes the area over (still one filled area); clicking it with Pen 3 again clears it, and once more fills it; a click outside the drawing changes nothing; undo goes back a step and redo forward; the SVG has 2 layers (drawing, Pen 3) with Pen 3's colour on the fill; the design state holds the fills; removing Pen 3 removes its fill; Close gaps splits the blade into at least 3 more shapes, the shapes are tinted, drawn bridges are a second path in pen 1's layer, undo opens the gaps again; dragging across the split blade fills 3 or more shapes and one undo takes it back; Colour from image gives a light-red circle the red pen and a light-blue square the blue pen and leaves a white triangle empty; the Design tab's readouts are untouched; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
@@ -12,7 +12,9 @@ module.exports = {
     const at = (fx, fy) => page.evaluate(([fx, fy]) => { const L = st.plot, { P, ox, oy } = placeOnPage(L), r = $("pageView").getBoundingClientRect(); return [r.left + (ox + L.W * fx) / P.w * r.width, r.top + (oy + L.H * fy) / P.h * r.height]; }, [fx, fy]);
     const click = async (fx, fy) => { await page.evaluate(() => $("pageView").scrollIntoView({ block: "center" })); const [X, Y] = await at(fx, fy); await page.mouse.click(X, Y); await A.idle(page, 300); };
     const state = () => page.evaluate(() => ({ areas: st.penFill.areas.map((a) => a.pen), strokes: st.pfill ? st.pfill.res.fills.map((f) => f.length) : [] }));
-    await page.fill("#outW", "60"); await page.press("#outW", "Enter"); await idle();
+    // made for a pen plotter (it would fill the page), then 60 mm set by hand on the Line step
+    await A.plot(page); await idle();
+    await page.click("label[for=viewDesign]"); await page.fill("#outW", "60"); await page.press("#outW", "Enter"); await idle();
     await page.click("label[for=view2D]"); await idle();
     checks.push(check("Fills card is open", +!(await page.$eval("#card-h-fills", (e) => e.classList.contains("collapsed"))), "==", 1));
     await page.waitForTimeout(150);
@@ -72,7 +74,7 @@ module.exports = {
       g.fillStyle = "#a9c4f2"; g.fillRect(220, 70, 160, 160); g.strokeRect(220, 70, 160, 160);
       g.beginPath(); g.moveTo(490, 70); g.lineTo(570, 230); g.lineTo(410, 230); g.closePath(); g.stroke(); setSource(c, "test shapes"); });
     await idle(); await page.fill("#outW", "120"); await page.press("#outW", "Enter"); await idle();
-    await page.click("label[for=view2D]"); await idle();
+    await A.plot(page); await idle();
     await page.click("#addPen"); await page.waitForTimeout(300);
     const cols = await page.evaluate(() => st.penFill.pens.map((p) => p.color));
     await page.click("#autoColour"); await A.idle(page, 300);

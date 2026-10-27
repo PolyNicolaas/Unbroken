@@ -125,4 +125,20 @@ async function source(page, kind) {
     await page.waitForTimeout(100);
   }
 }
-module.exports = { SETTLE, open, idle, source, chip, terms, errorMM, setValue, longestFreeze };
+// The last step since v107 is Plot (made for a pen plotter) or Print (for a printer), chosen at the top. plot(page,
+// line): Making it for a pen plotter, the Line step's line (default "one": the traced line, as the tests before v107
+// plotted), then the Plot step. print(page): Making it for a printer, then the Print step.
+async function plot(page, line = "one") {
+  await page.evaluate((m) => {
+    const set = (id) => { if (!$(id).checked) { $(id).checked = true; $(id).dispatchEvent(new Event("change", { bubbles: true })); } };
+    set("artForPlot");
+    set({ one: "lineOne", strokes: "lineStrokes", drawn: "lineDrawn" }[m]);
+  }, line);
+  await idle(page, 300);
+  await page.click("label[for=view2D]");
+}
+async function print(page) {
+  if (!(await page.isChecked("#artForPrint"))) { await page.click("label[for=artForPrint]"); await idle(page, 300); }
+  await page.click("label[for=viewChoc]");
+}
+module.exports = { SETTLE, open, idle, source, chip, terms, errorMM, setValue, longestFreeze, plot, print };

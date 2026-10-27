@@ -158,7 +158,7 @@ function makeEngine(name) {
     },
   };
 }
-// trace: the main pipeline · chart: the term-count sweep · optimize: Optimize tracing · layers: the 3D tab's layer
+// trace: the main pipeline · chart: the term-count sweep · optimize: Optimize tracing · layers: the Print step's layer
 // lines and model slicing (so they never wait behind a trace)
 const PIPE = makeEngine("trace"),
   AUX = makeEngine("chart"),

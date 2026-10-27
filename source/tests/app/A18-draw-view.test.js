@@ -27,7 +27,7 @@ module.exports = {
     await page.click("#drawView"); await page.waitForTimeout(800); await A.idle(page, 1500);
     checks.push(check("Draw this view: source is the drawing", +((await page.textContent("#srcinfo")) === "sample vase · drawing" && (await page.isChecked("#srcImage"))), "==", 1));
     checks.push(check("the drawing is traced (terms)", await A.terms(page), ">", 20));
-    await page.click("label[for=view2D]"); await page.waitForTimeout(500); await A.idle(page, 800);
+    await A.plot(page); await page.waitForTimeout(500); await A.idle(page, 800);
     for (let i = 0; i < 40 && !/mm on/.test(await page.textContent("#plotInfo")); i++) await page.waitForTimeout(500);
     checks.push(check("2D tab: the pen line is on the page", +/mm on/.test(await page.textContent("#plotInfo")), "==", 1));
     await page.click("label[for=viewDesign]"); await A.source(page, "model"); await page.waitForTimeout(1000);

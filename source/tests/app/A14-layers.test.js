@@ -12,7 +12,7 @@ module.exports = {
     await page.fill("#outW", "60"); await page.press("#outW", "Enter"); await idle();
     const N0 = await A.terms(page);
     checks.push(check("Design: no base or infill control showing", +(await page.isVisible("#baseLayers")) + +(await page.isVisible("#fillDensity")), "==", 0));
-    await page.click("label[for=viewChoc]"); await idle();
+    await A.print(page); await idle();
     checks.push(check("3D: Base and Infill cards shown", +(await page.isVisible("#basePattern")) + +(await page.isVisible("#fillDensity")), "==", 2));
     await page.waitForFunction(() => st.layers, null, { timeout: 30000 }); await A.idle(page, 300);
     checks.push(check("no base to start with: 0 base layers", await page.inputValue("#baseLayers"), "==", "0"),

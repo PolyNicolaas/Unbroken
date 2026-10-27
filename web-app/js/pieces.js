@@ -1,5 +1,6 @@
 // Unbroken · web app · pieces.js
-// A text of several lines printed as a piece per line (3D tab, Plate card: Lines of text). The Trace and 2D tabs keep
+// A text of several lines printed as a piece per line (Print step, Plate card: Lines of text). The Trace and Plot steps
+// keep
 // the text as one drawing, one continuous line; for the printer each line is traced again on its own, so every piece
 // is one continuous line of its own, with no connector strand from one line to the next. The pieces are laid out on
 // the plate together (UNB.plateLayoutPieces), each gets its own layers (layers.js designLayers) and the G-code prints
@@ -45,7 +46,7 @@ function piecesKeyNow() {
 // the pieces for the text on screen, if they're traced
 const piecesNow = () => (st.pieces && st.pieces.key === piecesKeyNow() ? st.pieces : null);
 
-// Trace every line on its own: the line's letters (UNB.rasterText's lines) through the same stages as the Trace tab
+// Trace every line on its own: the line's letters (UNB.rasterText's lines) through the same stages as the Line step
 // (stageTrace, then stagePrint: strands, loops, series with the automatic term count, untangled and spaced).
 async function tracePieces() {
   const key = piecesKeyNow();

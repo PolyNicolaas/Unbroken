@@ -14,7 +14,7 @@ module.exports = {
       check("default chocolate selected", await page.inputValue("#chocolate"), "==", S.defaults.chocolate));
     for (const c of S.chocolates) {
       const before = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--choc"));
-      await page.click("label[for=viewChoc]"); await page.selectOption("#chocolate", c.id); await page.waitForTimeout(200);
+      await A.print(page); await page.selectOption("#chocolate", c.id); await page.waitForTimeout(200);
       if (c.printSpeed) checks.push(check(`${c.id}: speed (mm/s)`, +(await page.inputValue("#gFeed")), "==", c.printSpeed));
       if (c.costPer100g != null) checks.push(check(`${c.id}: price shown`, +/per 100 g/.test(await page.textContent("#chocInfo")), "==", 1));
       const after = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--choc"));

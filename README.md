@@ -98,6 +98,24 @@ and the slow spots. Anything still open from them is in [`ROADMAP.md`](ROADMAP.m
 8. **Score**: error = ½ (stray + missing), measured against the traced path, shown in mm.
 9. **Output**: the 2D tab (a pen plotter: SVG for Saxi, flat DXF) or the 3D tab (a printer: G-code). See [Outputs](#outputs-2d-and-3d). The line is always continuous: the chocolate printer can't stop the flow, so connectors are drawn, never lifted.
 
+## The workflow
+
+What it's made for comes first, at the top: **a printer** (chocolate, clay) or **a pen plotter**. Then three steps,
+**1 Art → 2 Line → 3 Print** (a printer) or **3 Plot** (a pen plotter) (`web-app/js/workflow.js`,
+[`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)):
+
+- **Art**: what to start from (below).
+- **Line**: how the art becomes lines, the one switch for tracing. **One continuous line** is the Fourier trace, the
+  only line a printer can make (a plotter draws it without lifting the pen). **Separate strokes** traces the art into
+  strokes the pen draws one by one, lifting between them (`UNB.lineStrokes`: the line map split at ends and junctions,
+  smoothed, put in an order that keeps the pen's travel short); it's traced at the page's size. **As drawn** traces
+  nothing: a pattern's or the text's own lines go to the page. On a plotter a pattern or text starts as drawn and a
+  picture as separate strokes, until you pick one. The cards a line doesn't use are hidden.
+- **Print** (plate, layers, G-code) or **Plot** (the page, pens, SVG for Saxi).
+
+The preview follows the step: the art or the line on Art and Line (the page for as drawn), the page on Plot, the plate or
+the layers on Print. **Next** at the end of each step goes on. Test A33.
+
 ## The Art tab
 
 Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 3D): **Art → Trace → 2D (plotter) or 3D
