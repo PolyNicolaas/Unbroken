@@ -23,9 +23,8 @@
     return { gray, blurred: UNB.blur(gray, w, h, o.blur || 0), preview };
   };
 
-  // image → line map, as the app does it: centerline or edges, optional shading lines, then the selection mask and
-  // erasing.
-  // o: { mode: "centerline"|"edges", sens, split, shade: {style,…}, selMask (Uint8Array or null), erase: [ops] }
+  // image → line map, as the app does it: centerline or edges, then the selection mask and erasing.
+  // o: { mode: "centerline"|"edges", sens, split, selMask (Uint8Array or null), erase: [ops] }
   UNB.stageLines = function (blurred, w, h, o) {
     let lines;
     if (o.mode === "edges") {
@@ -33,11 +32,6 @@
       lines = UNB.canny(blurred, w, h, hi * 0.4, hi);
     // o.split: packed-stroke splitting (default 0.1)
     } else lines = UNB.centerline(blurred, w, h, o.sens, undefined, undefined, o.split);
-    if (o.shade && o.shade.style !== "off") {
-      const sh = UNB.shade(blurred, w, h, o.shade);
-      for (let i = 0; i < w * h; i++) if (sh[i]) lines[i] = 1;
-      lines = UNB.thin(lines, w, h);
-    }
     if (o.selMask) for (let i = 0; i < w * h; i++) if (!o.selMask[i]) lines[i] = 0;
     if (o.erase && o.erase.length) UNB.erase(lines, w, h, o.erase);
     return lines;
@@ -57,12 +51,10 @@
     return UNB.snapWalk(walk, field, w, h);
   };
 
-  // the whole first stage in one call: line map (or given lines, for text) → walk → subpixel walk → hand edits to the
-  // line (src.edits, working px: see UNB.editWalk)
+  // the whole first stage in one call: line map (or given lines, for text) → walk → subpixel walk
   UNB.stageTrace = function (src, w, h, walkOpt, snap) {
-    const lines = src.lines || UNB.stageLines(src.blurred, w, h, src),
-      walk = UNB.stageWalk(lines, w, h, walkOpt, snap);
-    return walk && src.edits && src.edits.length ? UNB.editWalk(walk, src.edits) : walk;
+    const lines = src.lines || UNB.stageLines(src.blurred, w, h, src);
+    return UNB.stageWalk(lines, w, h, walkOpt, snap);
   };
 
   // A crossing-area mask can't be sent to a worker as a function, so stages take { allowMask, allowW, allowH } and

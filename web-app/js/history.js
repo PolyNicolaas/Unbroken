@@ -10,6 +10,7 @@
 const DESIGN_IDS = [
   "srcImage",
   "srcText",
+  "srcPattern",
   "srcModel",
   "textIn",
   "font",
@@ -35,9 +36,6 @@ const DESIGN_IDS = [
   "contrast",
   "bgTol",
   "flatten",
-  "shadeStyle",
-  "shadeSp",
-  "shadeLv",
   "lineW",
   "needle",
   "lineGapMM",
@@ -124,7 +122,6 @@ function designState() {
       N: st.N,
       sel: st.sel || null,
       erase: st.erase || [],
-      edits: st.edits || [],
       start: st.start || null,
       zones: st.zones,
       penFill: structuredClone(st.penFill),
@@ -152,7 +149,7 @@ function snapshot() {
     d,
     src: st.text ? null : st.source,
     imageSource: st.text ? st.imageSource : null,
-    pics: artCanvases(), // art.js: each picture layer's canvas, by layer id
+    pics: artCanvas(), // art.js: the picture's canvas (kept while another input is in use)
     key: stateKey(d, st.text ? null : st.source),
   };
 }
@@ -190,6 +187,7 @@ function histButtons() {
 function syncDesignUI() {
   const t = textMode();
   document.body.dataset.src = $("srcModel").checked ? "model" : t ? "text" : "image";
+  document.body.dataset.art = st.art.kind;
   textSizeUI(t);
   if (!t) syncSizeUI();
   lineUI();
@@ -242,7 +240,6 @@ function applyDesign(d, src, imageSource, pics) {
     } // older design files could be in pixels; everything is mm now
     st.sel = structuredClone(s.sel || null);
     st.erase = structuredClone(s.erase || []);
-    st.edits = structuredClone(s.edits || []);
     st.start = structuredClone(s.start || null);
     st.zones = structuredClone(s.zones || { cross: [], lane: [] });
     st.zoneVer = (st.zoneVer || 0) + 1;
@@ -251,8 +248,8 @@ function applyDesign(d, src, imageSource, pics) {
     posManual = !!s.posManual;
     st.penFill = s.penFill ? structuredClone(s.penFill) : defaultPenFill();
     st.pfill = null; // older design files: no fill pens
-    // the art's layers (art.js); a design from before the Art tab becomes one layer, as its source was
-    if (s.art) artRestore(s.art, pics || new Map());
+    // the Art tab's input (art.js); a design from before the Art tab comes back as its source was
+    if (s.art) artRestore(s.art, pics || null);
     else artFromOld($("srcModel").checked ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
     if (s.sample && [...$("sample").options].some((o) => o.value === s.sample)) $("sample").value = s.sample;
     if ($("srcModel").checked) {
@@ -357,9 +354,8 @@ async function saveDesign() {
   if (recTimer) record();
   const d = designState(),
     imgCanvas = st.text ? st.imageSource && st.imageSource.canvas : st.source,
-    artImages = {}; // each picture layer's image (or "source": the same as the picture traced)
-  for (const l of st.art.layers)
-    if (l.picture) artImages[l.id] = l.picture.canvas === st.source ? "source" : sourceImageURL(l.picture.canvas);
+    pic = artCanvas(), // the Art tab's picture, kept while a pattern, the text or a model is in use
+    artImage = !pic ? null : pic === st.source ? "source" : sourceImageURL(pic);
   const file = {
     app: DESIGN_APP,
     version: 1,
@@ -367,7 +363,7 @@ async function saveDesign() {
     design: d,
     image: sourceImageURL(imgCanvas),
     imageLabel: st.text ? (st.imageSource && st.imageSource.label) || null : st.srcLabel,
-    artImages,
+    artImage,
   };
   const name = `${designSlug(40)}.unbroken.json`,
     data = JSON.stringify(file);
@@ -413,9 +409,14 @@ async function openDesign(f) {
       d.s.sample = "user";
       if (!d.s.art && file.pattern) d.s.pattern = file.pattern; // v100: a pattern made on the Trace tab
     }
-    const pics = new Map(); // the art's pictures (art.js), by layer id
-    for (const [id, url] of Object.entries(file.artImages || {}))
-      pics.set(+id, url === "source" ? canvas : await loadImageURL(url));
+    // the Art tab's picture (art.js); a v101 file has one per layer, by layer id
+    let pics = null;
+    if (file.artImage) pics = file.artImage === "source" ? canvas : await loadImageURL(file.artImage);
+    else if (file.artImages) {
+      pics = new Map();
+      for (const [id, url] of Object.entries(file.artImages))
+        pics.set(+id, url === "source" ? canvas : await loadImageURL(url));
+    }
     if (recTimer) record(); // keep the state before opening as its own undo step
     const note = applyDesign(
       d,

@@ -33,7 +33,7 @@ function applyPreset(key, quiet) {
     $("font").value = UNB_FONTS[t.font] ? t.font : "sans";
     $("txtSpacing").value = MAP.letterSpacing[t.letterSpacing] || "auto";
     $({ left: "alLeft", right: "alRight" }[t.align] || "alCenter").checked = true;
-    if (!textMode()) artOnly("text"); // art.js: the art becomes the text alone
+    if (!textMode()) artUse("text"); // art.js: the text in use
     else textChanged();
     return;
   }
@@ -47,7 +47,6 @@ function applyPreset(key, quiet) {
   $("contrast").value = p.prep.contrast;
   $("bgTol").value = p.prep.bgTol;
   $("flatten").checked = p.prep.flatten;
-  $("shadeStyle").value = "off";
   $("uncross").value = "90";
   labels();
   if (quiet) return;

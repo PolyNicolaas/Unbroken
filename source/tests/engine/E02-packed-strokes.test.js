@@ -11,7 +11,7 @@ module.exports = {
       if (gap <= lw + 0.5) continue;
       const { canvas, truth } = S.packed(kind, gap, lw), W = canvas.width, H = canvas.height;
       const gray = UNB.prep(canvas.getContext("2d").getImageData(0, 0, W, H).data, W, H, { brightness: 0, contrast: 0, bgTol: 0, flatten: false }), bl = UNB.blur(gray, W, H, 1.2);
-      const walk = UNB.stageTrace({ blurred: bl, mode: "centerline", sens: 0, shade: { style: "off" } }, W, H, { minPix: 15, maxJump: 0, open: false }, { blurred: bl, edges: false });
+      const walk = UNB.stageTrace({ blurred: bl, mode: "centerline", sens: 0 }, W, H, { minPix: 15, maxJump: 0, open: false }, { blurred: bl, edges: false });
       cases.push({ kind, lw, gap, cov: walk ? M.coverage(truth, walk.px, walk.py, false, 1) : 0 });
     }
     const mean = cases.reduce((a, c) => a + c.cov, 0) / cases.length, worst = cases.reduce((a, c) => (c.cov < a.cov ? c : a));

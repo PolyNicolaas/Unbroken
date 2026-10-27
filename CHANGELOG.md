@@ -3,6 +3,18 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v102 · 2026-10-27
+
+Simpler, after trying v101 (decided with Nicolaas, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)):
+- **One input at a time.** The Art tab's layers are gone: its **Input** switch picks a **Picture**, **Text**, a
+  **Pattern** or a **3D model**, and each keeps its settings while another is in use. Pen colours per layer, Placement
+  and the Art view went with the layers. Plot as drawn stays, for a pattern or the text.
+- **Edit line removed.** Hand edits to the line are better made in a drawing app: export the SVG from the 2D tab, edit
+  it in Illustrator, Affinity or Inkscape, and drop it back in as the picture.
+- **Shading removed** (hatch, cross-hatch and squiggle in the Tracing card). Light and dark will come back as patterns
+  that draw a picture's tones as one line (next, v103).
+- Tests: A31 rewritten for one input; E32 and A30 (Edit line) removed.
+
 ## v101 · 2026-10-27
 
 The Art tab, phase 1 of the plan in [`docs/ART-PLAN.md`](docs/ART-PLAN.md): **Art → Trace → 2D or 3D**.

@@ -104,14 +104,12 @@ function settings() {
       bgTol: +$("bgTol").value,
       flatten: $("flatten").checked,
     },
-    shade: { style: $("shadeStyle").value, spacing: +$("shadeSp").value, level: +$("shadeLv").value },
   };
 }
 
 // a new source: forget what was painted, erased or placed by hand on the old one
 function resetHandEdits() {
   st.erase = [];
-  st.edits = [];
   st.start = null;
   st.zones = { cross: [], lane: [] };
   st.zoneVer = (st.zoneVer || 0) + 1;
@@ -121,8 +119,7 @@ let srcCounter = 0;
 function setSource(canvas, label) {
   clearTimeout(textTimer);
   stopOptimize(); // a new picture: pending text and a running Optimize are for the old one
-  if (textMode()) {
-    $("srcImage").checked = true;
+  if (document.body.dataset.src === "text") {
     document.body.dataset.src = "image";
     st.text = null;
     st.imageSource = null;
@@ -264,14 +261,14 @@ function textChanged() {
     schedule(extract);
   }, 150);
 }
-// What the trace starts from, as the Art tab decides it (art.js): "picture" (the art drawn as one picture), "text" (a
-// text layer on its own, traced from its font strokes) or "model" (a 3D model, sliced on the 3D tab)
+// What the trace starts from, as the Art tab's Input switch decides it (art.js sets the switch first): "picture" (a
+// picture to trace: an image, or a pattern drawn as one), "text" (traced from its font strokes) or "model" (a 3D model,
+// sliced on the 3D tab)
 function useSource(kind, canvas, label) {
   clearTimeout(textTimer);
   stopOptimize(); // a text change or an Optimize run still going is for the old source
   if (st.tool) exitTool();
   if (kind === "model") {
-    $("srcModel").checked = true;
     document.body.dataset.src = "model";
     st.text = null;
     textSizeUI(false);
@@ -279,22 +276,20 @@ function useSource(kind, canvas, label) {
     return;
   }
   if (kind === "text") {
-    const was = textMode();
-    $("srcText").checked = true;
+    const was = document.body.dataset.src === "text";
     document.body.dataset.src = "text";
     if (!was) resetHandEdits();
     textSizeUI(true);
     textChanged();
     return;
   }
-  $("srcImage").checked = true;
   document.body.dataset.src = "image";
   st.text = null;
   textSizeUI(false);
   setSource(canvas, label);
   syncSizeUI();
 }
-// The text layer drawn as a picture, for art that has other layers too: the canvas, and its strokes in canvas px (for
+// The text drawn as a picture: the canvas, and its strokes in canvas px (for
 // plotting the art as drawn). The text on screen (st.text) is left as it was.
 function textPicture() {
   const keep = st.text,

@@ -12,7 +12,7 @@ module.exports = {
     g.beginPath(); for (let a = 0; a < 8 * Math.PI; a += 0.01) { const r = 14 + 11 * a / (2 * Math.PI); const x = 680 + r * Math.cos(a), y = 300 + r * Math.sin(a); a ? g.lineTo(x, y) : g.moveTo(x, y); } g.stroke();
     g.beginPath(); g.moveTo(860, 560); g.lineTo(885, 565); g.stroke();                       // stray mark, far corner
     const { w, h, gray } = workingImage(c, 500), bl = UNB.blur(gray, w, h, 1.2);
-    const walk = UNB.stageTrace({ blurred: bl, mode: "centerline", sens: 0, shade: { style: "off" } }, w, h, { minPix: 6, maxJump: 0.12 * Math.hypot(w, h), open: false, jumpCost: 2 }, { blurred: bl, edges: false });
+    const walk = UNB.stageTrace({ blurred: bl, mode: "centerline", sens: 0 }, w, h, { minPix: 6, maxJump: 0.12 * Math.hypot(w, h), open: false, jumpCost: 2 }, { blurred: bl, edges: false });
     return { checks: [check("parts kept", walk.nParts, "==", 6), check("parts dropped", walk.dropped, "==", 1)] };
   },
 };

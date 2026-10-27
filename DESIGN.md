@@ -55,11 +55,10 @@ In practice:
 - *Still here, worth watching:*
   - **settings.js validation** (about 270 lines in `config.js`) guards a file only you edit. It's fine as it is, but
     don't grow it.
-  - **Extras with a narrow use:** shading (hatch / squiggle), connector-path painting, the sketch pad, the circles
+  - **Extras with a narrow use:** connector-path painting, the sketch pad, the circles
     animation and the math panel. You chose to keep them; each should still earn its place over time.
-  - **New in v100:** Edit line's three brushes and the ten Geometric art styles. Both keep their logic in the engine
-    (`UNB.editWalk`, `13-patterns.js`) with the page only reading controls and drawing; watch which brushes and styles
-    get used and move the rest to "Maybe later".
+  - **New in v100:** the ten pattern styles (`13-patterns.js`); watch which get used. *Removed in v102:* Edit line,
+    Shading and v101's layered Art tab (not used, or too complicated: ROADMAP.md, Removed).
 
 ### Badly engineered (the real risks left)
 

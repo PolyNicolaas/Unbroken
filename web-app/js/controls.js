@@ -82,8 +82,7 @@ function labels() {
   const cr = +$("corner").value / 10;
   $("cornerVal").textContent = cr ? `${fmt(cr, 1)} mm radius` : "off";
   $("farVal").textContent = s.far ? s.far + "% of image" : "keep all";
-  const p = s.prep,
-    sh = s.shade;
+  const p = s.prep;
   $("brightVal").textContent = (p.brightness > 0 ? "+" : "") + p.brightness;
   $("contrastVal").textContent = (p.contrast > 0 ? "+" : "") + p.contrast;
   $("bgTolVal").textContent = p.bgTol ? p.bgTol + "% tolerance" : "off";
@@ -94,17 +93,13 @@ function labels() {
     p.flatten && "lighting",
   ].filter(Boolean);
   $("prepVal").textContent = on.length ? on.join(", ") : "off";
-  $("shadeSpVal").textContent = mmAtSize(sh.spacing);
-  $("shadeLvVal").textContent = `${sh.level} of 255`;
-  $("shadeVal").textContent =
-    sh.style === "off" ? "off" : $("shadeStyle").selectedOptions[0].textContent.split(" (")[0].toLowerCase();
 }
-for (const id of ["sens", "blur", "minLen", "far", "bright", "contrast", "bgTol", "shadeSp", "shadeLv"])
+for (const id of ["sens", "blur", "minLen", "far", "bright", "contrast", "bgTol"])
   $(id).addEventListener("input", () => {
     labels();
     schedule(extract);
   });
-for (const id of ["flatten", "shadeStyle", "loose"])
+for (const id of ["flatten", "loose"])
   $(id).addEventListener("change", () => {
     labels();
     st.autoPending = true;

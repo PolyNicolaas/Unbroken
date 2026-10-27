@@ -61,17 +61,14 @@ Tests:
 
 ## 3 · Tracing, drawing and lettering
 
-- **The Art tab** (planned 26 October, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)): every source comes in through a new Art
-  tab (pictures, text, 3D models, generators, image-driven generators), dressed with line and area styles on layers and
-  pens, then Art → Trace (single line for the printers, multi-line for the plotter) → 2D or 3D. Five phases; phase 1
-  (the tab, layers, pens, Plot as drawn) is done in v101. Next: phase 2, line and area styles (the 2D tab's fill pens
-  move in).
+- **Patterns from pictures, and more control** (decided 27 October, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)): trace a
+  picture with a pattern that draws its light and dark as one line (a space-filling curve, wave rows, a vibrating
+  spiral and a labyrinth, by tone), and give the patterns sizes in mm, fitting inside a shape, deeper settings per
+  style, and seeds with a grid of variations. v103.
 
-- Edit line and Geometric art (v100, 26 October): try them on real prints in the challenges (a labyrinth and a double
-  spiral in chocolate, a whirl and Truchet tiles on the plotter), and collect what's missing in the Suggestion box.
-  Ideas that came up while building them, each waiting for a use: an Edit line brush that **reroutes** a connector
-  along a path you draw; more styles (circle packing, Voronoi cells, a Greek-key border, rose curves); a labyrinth
-  inside your own picture's outline; and Geometric art in the 2D tab's fills.
+- Patterns (v100): try them on real prints in the challenges (a labyrinth and a double spiral in chocolate, a whirl and
+  Truchet tiles on the plotter). Ideas waiting for a use: more styles (circle packing, Voronoi cells, a Greek-key
+  border, rose curves) and patterns in the 2D tab's fills.
 
 - A text's pieces use the automatic term count and aren't shown on the Trace tab (it draws the text joined, as the
   2D tab plots it). If a piece needs looking after on its own, show the pieces there too.
@@ -136,6 +133,9 @@ wall), connectors through the middle of 3D models, the challenge runner, and the
 
 | When | What | Why |
 |---|---|---|
+| 2026-10-27 | Edit line (push, smooth, straighten the traced line by hand, v100) | Not very useful in practice: hand edits are better made in a drawing app (export the SVG, edit, drop it back in) |
+| 2026-10-27 | Shading in the Tracing card (hatch, cross-hatch, squiggle) | Didn't work well and was hard to use; patterns that draw a picture's tones replace it (v103) |
+| 2026-10-27 | The Art tab's layers (v101): stacking, pen colours per layer, placement, the Art view | Too complicated: one input at a time is clearer. Layered plotter art could come back for multi-pen plots |
 | 2026-10-19 | The desktop app (desktop/, the Electron Unbroken.app from v96) | Unbroken runs from GitHub Pages while it's still changing; a standalone app comes back when it's ready to roll out. The code is in the repo's history (commit 40a733b); its next steps were a Windows build, signing and notarising, opening designs from Finder and a `.dmg` |
 | 2026-10-17 | Straight wall and Skirt + small wall supports; bridging; printing copies layer by layer | Thin wall replaced the first; the second made a web the line had to cross on every layer; chocolate can't span a gap; copies print one at a time (PLAN.md) |
 | 2026-10-15 | The desktop-app track (taken up again in v96: desktop/) and the Simple / Advanced switch (one interface) | Not started / two views of one panel to maintain |

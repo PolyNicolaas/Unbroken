@@ -2,7 +2,7 @@ const A = require("../lib/app.js"), { check } = require("../lib/check.js");
 const MAIN = ["#sens", "#autoSens", "#blur", "#modeCenter", "#lineW", "#lineGapMM", "#loopOpen", "#loose", "#corner", "#fitBtn", "#sizeSlider", "#outW", "#outH", "#optBtn", "#terms", "#crossBtn", "#laneBtn", "#collapseAll", "#expandAll", "#minLen", "#far", "#invert", "#simplify", "#uncross"];
 const PLOT = ["#paper", "#paperOrient", "#paperMargin", "#penW", "#pageView", "#exportBtn", "#smooth"];
 const CHOC = ["#printer", "#printerSummary", "#chocolate", "#needle", "#limitPlate", "#layerTime", "#printHeightMM", "#layerCount", "#dxfBtn", "#stackView", "#copies", "#copyGap", "#plateRot", "#plateCenter", "#baseLayers", "#baseDensity", "#basePattern", "#fillDensity", "#fillPattern", "#gcodeBtn"], CHOC_MORE = ["#layerH", "#gFeed", "#gZ", "#gLift", "#gOx", "#gOy", "#gE", "#tuneReset"];
-const MORE = { "card-h-prep": ["#bright", "#contrast", "#bgTol", "#flatten"], "card-h-shade": ["#shadeStyle", "#shadeSp", "#shadeLv"] };
+const MORE = { "card-h-prep": ["#bright", "#contrast", "#bgTol", "#flatten"] };
 const MORE_2D = {};
 const FILLS = ["#showShapes", "#gapClose", "#minShape", "#addPen", "#autoColour"];
 const folded = (page, id) => page.$eval("#" + id, (e) => e.classList.contains("collapsed"));

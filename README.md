@@ -20,11 +20,11 @@ maker's paid slicer (choc OS) for these prints.
 
 **What it does**
 
-- **The Art tab:** everything comes in here as layers: images (photos, drawings, logos), text in single-stroke fonts,
-  geometric patterns made in the app (labyrinths, space-filling curves, spirals, waves and more) and 3D models (STL),
-  each with a pen colour and a place in the art. Art → Trace → 2D or 3D.
-- **Tracing:** centreline or outline tracing with optional hatch, cross-hatch or squiggle shading, then a
-  non-crossing tour of every stroke, fitted with a Fourier series per axis (X, Y and Z).
+- **The Art tab:** everything comes in here, one thing at a time: an image (photo, drawing, logo), text in a
+  single-stroke font, a geometric pattern made in the app (labyrinths, space-filling curves, spirals, waves and more)
+  or a 3D model (STL). Art → Trace → 2D or 3D.
+- **Tracing:** centreline or outline tracing, then a non-crossing tour of every stroke, fitted with a Fourier series
+  per axis (X, Y and Z).
 - **Printing (3D tab):** G-code for the choc mate 2 with needle size, line spacing, layers, infill, supports built
   into the same line, and several copies on one plate, each finished before the next starts.
 - **Drawing (2D tab):** SVG for the AxiDraw through Saxi, or DXF, on standard paper sizes.
@@ -86,11 +86,11 @@ and the slow spots. Anything still open from them is in [`ROADMAP.md`](ROADMAP.m
 
 ## Pipeline
 
-0. **Source**: an image, or typed text laid out in a single-stroke font (letter height in mm, even gaps, minimum readable height of 8–10 stroke widths depending on the font; a stroke is two lines one spacing apart, so 2 × needle + gap).
+0. **Source** (the Art tab): an image (a pattern is drawn as one), or typed text laid out in a single-stroke font (letter height in mm, even gaps, minimum readable height of 8–10 stroke widths depending on the font; a stroke is two lines one spacing apart, so 2 × needle + gap).
 1. **Prep**: brightness, contrast, even-out lighting, plain-background removal.
-2. **Lines**: Centerline (skeleton of strokes; thick shapes are outlined; strokes packed closer than the blur can resolve are split along the light gaps between them) or Outline (Canny edges), plus optional hatch / cross-hatch / squiggle shading in dark areas.
-3. **Edit**: area selection (rectangle / freehand), erase pieces or brush, chosen start point; after the walk is traced
-   (step 4), hand edits to the line itself (Edit line: push, smooth, straighten).
+2. **Lines**: Centerline (skeleton of strokes; thick shapes are outlined; strokes packed closer than the blur can resolve are split along the light gaps between them) or Outline (Canny edges).
+3. **Edit**: area selection (rectangle / freehand), erase pieces or brush, chosen start point. For changes to the line
+   itself, export it as SVG (2D tab), edit it in a drawing app and drop it back in.
 4. **Path**: pixel graph → minimum spanning tree of jumps between parts (small far-away groups dropped, sizeable ones kept) → T-join doubling → a non-crossing tour (closed, or open between the best two ends): at every point only neighbouring strands are joined, and loops are merged by swapping one pair of neighbours, so the line never crosses itself where strokes meet → every point moved onto the middle of its ink stroke (or the peak of its edge), below a pixel.
 5. **No retracing**: the needle can't go back over its own line. A stroke the path travels twice becomes two strands one spacing apart, and every stroke end becomes a keyhole loop (see [Stroke ends](#stroke-ends-the-loop)).
 6. **Fourier, one series per axis**: arc-length resample → one FFT → split into an X series and a Y series → keep the fewest strongest axis terms that stay within 0.35 px of the path for 95% of it (open paths are fitted out-and-back and the outbound half is used). Z is 0 for now (see [X, Y and Z](#x-y-and-z)).
@@ -101,59 +101,27 @@ and the slow spots. Anything still open from them is in [`ROADMAP.md`](ROADMAP.m
 ## The Art tab
 
 Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 3D): **Art → Trace → 2D (plotter) or 3D
-(printers)**. The plan behind it, and what comes next, is in [`docs/ART-PLAN.md`](docs/ART-PLAN.md).
+(printers)**. Its **Input** switch picks one thing at a time (`web-app/js/art.js`):
 
-- **Layers.** The art is a stack of layers, each a source: a **picture** (a sample, an image of yours, or a sketch made
-  with Draw your own), the **text** (one text layer: the Text card's controls), a **pattern** (any number: the styles
-  under [Geometric art](#geometric-art)) or a **3D model** (one). Add them with the Add buttons, or drop a file anywhere
-  on the page (an image goes into the chosen picture layer, an STL into the model layer, a design file opens). Each
-  layer has an eye (shown or hidden), a **pen colour**, up and down arrows and ×. Tap a layer for its own card;
-  **Placement** sizes it and moves it across and down within the art's frame (the bottom shown layer sets the frame;
-  the others are fitted inside it first). `web-app/js/art.js`.
-- **The Art view** (the big view's first tab) shows the shown layers in their pens' colours, the chosen one outlined.
-- **What the Trace tab gets:** a shown 3D model on its own (sliced on the 3D tab; the other layers wait, with a note);
-  the text on its own, unplaced (traced from its font's strokes, as before); otherwise every shown layer drawn as one
-  picture (multiplied together, so pictures don't hide what's under them) and traced into one line. A pattern on its
-  own is traced as drawn and starts at the width where its gap is the line spacing. The Trace tab's first card says what
-  it is tracing, with Edit the art to go back.
-- **Next:** **Trace it** (for the printers: chocolate and clay need one continuous line) or **Plot as drawn**.
-- **Plot as drawn (2D tab):** the 2D tab's **Art as drawn** plots the art's lines exactly as made, without tracing: each
-  shown layer with lines (patterns, the text) on its own pen and Inkscape layer in the SVG, fitted inside the margins
-  (`UNB.exportLayersSVG`). Pictures have no lines until traced, so the page says how many were left out; Traced line
-  plots the Trace tab's line as before (with fill pens). A printer always needs the trace.
-- **3D models** come in as a model layer; **Draw this view** (its card) adds the line drawing of the view as a picture
-  layer and hides the model, so the drawing is what's traced.
-- Undo covers every layer change; a design file keeps the layers, their pens and places, each pattern's settings and
-  each picture. Designs from before the Art tab open as one layer (their picture, a pattern made in v100, the text, or
-  the model). Tests A31 (the Art tab), A24 (one drop area), A07 (design files).
+- **Picture**: a sample, an image of yours (Choose an image…, or drop one anywhere on the page) or a sketch (Draw your
+  own, on the preview).
+- **Text**: lettering in a single-stroke font (the Text card).
+- **Pattern**: a geometric pattern (see [Geometric art](#geometric-art)).
+- **3D model**: an STL (or the sample vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
+  makes its line drawing the picture to trace.
 
-## Edit line
+Each keeps its settings while another is in use, so switching back finds it as it was. The Trace tab's first card says
+what it is tracing (Edit the art goes back). **Next** has **Trace it** (the printers, chocolate and clay, need one
+continuous line) and **Plot as drawn**: a pattern or the text goes to the 2D tab exactly as made, without tracing
+(2D tab, **Art as drawn**, `UNB.exportLayersSVG`); a picture has no lines until it is traced.
 
-**Edit line** (Tools, under the preview) changes the traced line by hand, for the spot the tracer didn't get right: a
-connector that takes an ugly way round, a wobble, a stroke that should be straight. Pick how the brush works and drag on
-the preview; the Size slider sets the brush on screen, so it feels the same at any zoom.
-
-- **Push**: grab the line and drag it to where it should be. It moves all the way where you grab it and less towards
-  the edge of the brush (a smooth bump, (1 + cos πt) / 2), so the line bends rather than kinks. A stroke end moves too,
-  which is how a stroke is made longer or shorter.
-- **Smooth**: brush over a wobbly or jagged stretch. Each point moves toward a Gaussian average of the line around it
-  (over about half the brush each side, the line taken as continuous, the same length each side so nothing slides
-  along it), fully under the middle of the brush and less towards its edge.
-- **Straighten**: brush along a stretch; every part of the line under the brush becomes the straight line between the
-  points just outside it.
-
-Smooth and Straighten leave stroke ends and junctions where they are and work between them, so stroke-end loops and
-the spacing at junctions keep their shape. The edits are made to the walk (`UNB.editWalk`), right after it is traced
-and before the strands, loops and Fourier fit, so the preview, the 2D pen line, the layers and the G-code all follow
-them. Points keep their count and order, so every per-point tag still applies, and both passes of an out-and-back
-stroke share their points and move together. Each edit is kept against the source image, like erasing, so it stays put
-through a re-trace at another threshold or size; the bar's Undo and Restore all, the main Undo and design files cover
-them, and a new picture clears them. While dragging, the edited line is drawn over the old one in the accent colour
-until the new trace arrives. Tests E32, A30.
+**Editing the line by hand** is left to drawing apps: export the SVG from the 2D tab, fix it in Illustrator, Affinity or
+Inkscape, and drop the SVG back in as the picture to trace. Undo and design files keep the input in use and the others'
+settings (the picture too). Designs from before the Art tab open on their own source. Tests A31, A24, A07.
 
 ## Geometric art
 
-**Pattern** layers (Art tab → Add → Pattern) are abstract geometric patterns (`UNB.pattern`,
+**Patterns** (Art tab → Input → Pattern) are abstract geometric patterns (`UNB.pattern`,
 `source/engine/13-patterns.js`; the Pattern card is `web-app/js/patterns.js`). A pattern is drawn as exact lines
 (1600 px on its long side, `UNB.patternLayout`): the Art view and Plot as drawn use those lines, and the Trace tab traces
 them like any picture, so every rule of the line applies. The card's sliders and menus change the chosen pattern layer
@@ -173,7 +141,7 @@ as you go; **Shuffle** makes another random version of the styles that have one.
 | Truchet tiles | Quarter circles on a grid of tiles, joined into loops and curves | Tiles across, Mix, Shape | many pieces |
 
 - **For chocolate:** the one-line styles (the first seven) have an even gap between neighbouring lines and trace as one
-  line with nothing doubled, so they print without out-and-back strokes. A pattern shown on its own sets the Line card
+  line with nothing doubled, so they print without out-and-back strokes. A pattern sets the Line card
   to Closed loop or Open to suit, the trace style to Centerline, and starts the print at the width where the pattern's
   gap is the line spacing (3% over, `startSize` in pipeline.js), so nothing needs pushing apart; the size slider and
   its marks work as for any picture.
@@ -181,7 +149,7 @@ as you go; **Shuffle** makes another random version of the styles that have one.
   joined by connectors) suit it best.
 - **Drawn for the tracer:** strokes a third of the closest gap, never wider than 0.9% of the picture (the centreline
   trace outlines strokes over 1.6% as filled shapes), and a 6% margin. The densest settings keep about 70 gaps across.
-- A design file keeps each pattern layer's settings. Tests E33 (every style keeps its promise and the one-line styles
+- A design file keeps the pattern's settings. Tests E33 (every style keeps its promise and the one-line styles
   trace as one line), A31.
 
 ## Units

@@ -1,15 +1,14 @@
 // Unbroken · web app · tools.js
-// Hand tools on the preview (select area, erase, edit line, set start, draw, crossing areas, connector paths), auto
-// threshold, and drag-and-drop / paste.
+// Hand tools on the preview (select area, erase, set start, draw, crossing areas, connector paths), auto threshold, and
+// drag-and-drop / paste.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
 "use strict";
 
-// ---------- tools: select area, erase, edit line, set start, draw ----------
+// ---------- tools: select area, erase, set start, draw ----------
 const BARS = {
   select: "selbar",
   erase: "erasebar",
-  edit: "editbar",
   start: "startbar",
   draw: "drawbar",
   cross: "paintbar",
@@ -18,7 +17,6 @@ const BARS = {
 const BTNS = {
   select: "selectBtn",
   erase: "eraseBtn",
-  edit: "editBtn",
   start: "startBtn",
   draw: "drawBtn",
   cross: "crossBtn",
@@ -30,7 +28,6 @@ st.strokes = [];
 function updateToolLabels() {
   $("selectBtn").textContent = st.tool === "select" ? "Cancel" : st.sel ? "Edit selection" : "Select area";
   $("eraseBtn").textContent = st.erase && st.erase.length ? `Erase (${st.erase.length})` : "Erase";
-  $("editBtn").textContent = st.edits && st.edits.length ? `Edit line (${st.edits.length})` : "Edit line";
   $("startBtn").textContent = st.start ? "Start set" : "Set start";
   $("crossBtn").textContent = st.zones.cross.length
     ? `Crossing areas (${st.zones.cross.filter((z) => !z.erase).length})`
@@ -220,113 +217,6 @@ $("eraseClear").addEventListener("click", () => {
 });
 $("eraseDone").addEventListener("click", exitTool);
 
-// --- edit line: push, smooth or straighten the traced line by hand (UNB.editWalk, applied to the walk in stageTrace).
-// Each edit is kept against the source image, like erasing, so it stays put through a re-trace at another threshold
-// or resolution. The brush is sized on screen, so it feels the same at any zoom. While dragging, the edited line is
-// drawn over the old one (worked out on the page from the walk on screen); it stays until the new trace arrives.
-st.edits = [];
-const editMode = () => document.querySelector('input[name="editMode"]:checked').value;
-const EDIT_HINTS = {
-  push: "Drag the line to where it should be: it moves most where you grab it.",
-  smooth: "Brush over a wobbly or jagged stretch to even it out. Stroke ends and junctions stay put.",
-  straighten: "Brush along a stretch to make it one straight line between where the brush meets it.",
-};
-const editBrushPx = () => (+$("editBrush").value * (window.devicePixelRatio || 1)) / view().k; // working px
-let editHover = null, // [x, y] working px: the brush under the pointer
-  editGhost = null, // { walk, ver }: the line with the edit being made (or just made) applied
-  editGhostAt = 0;
-function editGhostNow(d) {
-  if (!st.walk || !d) return;
-  const op = { type: d.type, r: d.r, pts: d.pts, to: d.to };
-  editGhost = { walk: UNB.editWalk(st.walk, [op]), ver: st.finalVer };
-  editGhostAt = performance.now();
-}
-function editsChanged() {
-  updateToolLabels();
-  schedule(extract);
-}
-document.querySelectorAll('input[name="editMode"]').forEach((r) =>
-  r.addEventListener("change", () => ($("editHint").textContent = EDIT_HINTS[editMode()]))
-);
-$("editUndo").addEventListener("click", () => {
-  if (st.edits.length) {
-    st.edits.pop();
-    editGhost = null;
-    editsChanged();
-  }
-});
-$("editClear").addEventListener("click", () => {
-  if (st.edits.length) {
-    st.edits = [];
-    editGhost = null;
-    editsChanged();
-  }
-});
-$("editDone").addEventListener("click", exitTool);
-// drawn over the line (preview.js calls it) while the tool is on, or an edit is still being traced: the brush, and the
-// edited line from the moment it's dragged until the new trace arrives
-const editOverlayOn = () => st.tool === "edit" || !!(editGhost && editGhost.ver === st.finalVer);
-function renderEdit({ g, k, ox, oy, dpr }) {
-  const T = (x, y) => [ox + x * k, oy + y * k],
-    d = st.draft,
-    acc = css("--accent");
-  if (editGhost && editGhost.ver === st.finalVer) {
-    const w = editGhost.walk;
-    g.save();
-    g.strokeStyle = acc;
-    g.lineWidth = 2 * dpr;
-    g.lineJoin = g.lineCap = "round";
-    g.beginPath();
-    for (let i = 0; i < w.px.length; i++) {
-      const [x, y] = T(w.px[i], w.py[i]);
-      i ? g.lineTo(x, y) : g.moveTo(x, y);
-    }
-    g.stroke();
-    g.restore();
-  }
-  if (st.tool !== "edit") return;
-  g.save();
-  g.strokeStyle = acc;
-  g.fillStyle = acc;
-  g.lineWidth = 1.5 * dpr;
-  if (d && d.type !== "push") {
-    // the brush's path: a soft band as wide as the brush
-    g.globalAlpha = 0.18;
-    g.lineWidth = 2 * d.r * k;
-    g.lineJoin = g.lineCap = "round";
-    g.beginPath();
-    d.pts.forEach(([x, y], i) => {
-      const [a, b] = T(x, y);
-      i ? g.lineTo(a, b) : g.moveTo(a, b);
-    });
-    if (d.pts.length === 1) g.lineTo(...T(d.pts[0][0] + 0.01, d.pts[0][1]));
-    g.stroke();
-  } else if (d) {
-    // push: where it was grabbed, and where to
-    const [a, b] = T(...d.pts[0]),
-      [c, e] = T(...d.to);
-    g.setLineDash([4 * dpr, 3 * dpr]);
-    g.beginPath();
-    g.arc(a, b, d.r * k, 0, 7);
-    g.stroke();
-    g.setLineDash([]);
-    g.beginPath();
-    g.moveTo(a, b);
-    g.lineTo(c, e);
-    g.stroke();
-    g.beginPath();
-    g.arc(c, e, 3 * dpr, 0, 7);
-    g.fill();
-  } else if (editHover) {
-    const [a, b] = T(...editHover);
-    g.globalAlpha = 0.8;
-    g.beginPath();
-    g.arc(a, b, editBrushPx() * k, 0, 7);
-    g.stroke();
-  }
-  g.restore();
-}
-
 // --- set start
 $("startAuto").addEventListener("click", () => {
   st.start = null;
@@ -420,12 +310,6 @@ view$.addEventListener("pointerdown", (e) => {
   } else if (st.tool === "erase") {
     st.draft = { pts: [workXY(e)], r: +$("brush").value, down: [e.clientX, e.clientY], moved: false };
     render();
-  } else if (st.tool === "edit") {
-    if (!st.walk) return;
-    const p = workXY(e);
-    st.draft = { type: editMode(), pts: [p], to: p, r: editBrushPx(), down: [e.clientX, e.clientY], moved: false };
-    editGhost = null;
-    render();
   } else if (st.tool === "start") st.draft = { p: workXY(e) };
   else if (st.tool === "cross" || st.tool === "lane") {
     st.draft = { pts: [workXY(e)], r: +$("zoneBrush").value, erase: $("zoneErase").checked };
@@ -434,10 +318,6 @@ view$.addEventListener("pointerdown", (e) => {
 });
 view$.addEventListener("pointermove", (e) => {
   const d = st.draft;
-  if (st.tool === "edit" && !d && e.pointerType !== "touch") {
-    editHover = workXY(e); // the brush follows the pointer
-    render();
-  }
   if (!st.tool || !d) return;
   if (st.tool === "select") {
     if (d.type === "rect") d.b = surfUV(e, selView());
@@ -454,12 +334,6 @@ view$.addEventListener("pointermove", (e) => {
     }
   } else if (st.tool === "cross" || st.tool === "lane") {
     d.pts.push(workXY(e));
-    render();
-  } else if (st.tool === "edit") {
-    if (Math.hypot(e.clientX - d.down[0], e.clientY - d.down[1]) > 3) d.moved = true;
-    if (d.type === "push") d.to = workXY(e);
-    else d.pts.push(workXY(e));
-    if (d.moved && performance.now() - editGhostAt > 40) editGhostNow(d); // at most 25 times a second
     render();
   } else if (st.tool === "erase" && brushMode()) {
     if (Math.hypot(e.clientX - d.down[0], e.clientY - d.down[1]) > 3) d.moved = true;
@@ -491,22 +365,6 @@ const endPointer = () => {
     if (brushMode()) st.erase.push({ type: "brush", r: d.r / st.crop.kx, pts: d.pts.map(([x, y]) => fromWork(x, y)) });
     else st.erase.push({ type: "part", p: fromWork(...d.pts[0]) });
     eraseChanged();
-  } else if (st.tool === "edit") {
-    if (d.type === "push" && !d.moved) {
-      // a tap: nothing to push
-      editGhost = null;
-      render();
-      return;
-    }
-    editGhostNow(d);
-    const kx = st.crop.kx;
-    st.edits.push({
-      type: d.type,
-      r: d.r / kx,
-      pts: d.pts.map(([x, y]) => fromWork(x, y)),
-      ...(d.type === "push" ? { to: fromWork(...d.to) } : {}),
-    });
-    editsChanged();
   } else if (st.tool === "start") {
     st.start = fromWork(...d.p);
     updateToolLabels();
@@ -518,12 +376,6 @@ const endPointer = () => {
 };
 view$.addEventListener("pointerup", endPointer);
 view$.addEventListener("pointercancel", endPointer);
-view$.addEventListener("pointerleave", () => {
-  if (st.tool === "edit" && editHover && !st.draft) {
-    editHover = null;
-    render();
-  }
-});
 
 // ---------- auto threshold ----------
 $("autoSens").addEventListener("click", () => {

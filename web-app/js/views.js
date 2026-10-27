@@ -450,24 +450,23 @@ function viewChanged() {
       : $("viewChoc").checked
         ? "choc"
         : "design";
-  // each tab brings its own big view (the Art tab with a 3D model: the Line view, where the model turns); the view tabs
-  // can change it
-  const v = document.body.dataset.view;
-  setStage(v === "art" && isModel() ? "line" : STAGE_FOR_TAB[v]);
+  // each tab brings its own big view (the Art tab: the Line view, where the input shows traced, or a model turns); the
+  // view tabs can change it
+  setStage(STAGE_FOR_TAB[document.body.dataset.view]);
   drawPlate();
   drawMini();
   render(); // the 3D tab shows the filled base layer (or a model's layers)
 }
 document.querySelectorAll('input[name="view"]').forEach((r) => r.addEventListener("change", viewChanged));
 
-// ---------- the big view: Art, Line, 2D page, Plate, 3D layers ----------
-// The settings tabs (Art, Trace, 2D, 3D) are on the side; the Art view shows the layers in their pens' colours; the big view above shows the line, the pen plotter's page (click
+// ---------- the big view: Line, 2D page, Plate, 3D layers ----------
+// The settings tabs (Art, Trace, 2D, 3D) are on the side; the big view above shows the line, the pen plotter's page (click
 // shapes to fill), the plate with every copy, or the layers in 3D (drag to turn). Picking a settings tab brings its
 // view;
 // Play drawing plays whichever view is showing.
 const stageNow = () => document.body.dataset.stage;
-const STAGE_FOR_TAB = { art: "art", design: "line", plot: "page", choc: "layers" },
-  STAGE_IDS = { art: "stArt", line: "stLine", page: "stPage", plate: "stPlate", layers: "stLayers" };
+const STAGE_FOR_TAB = { art: "line", design: "line", plot: "page", choc: "layers" },
+  STAGE_IDS = { line: "stLine", page: "stPage", plate: "stPlate", layers: "stLayers" };
 // the pen line and fills are needed
 const plotWanted = () => document.body.dataset.view === "plot" || stageNow() === "page";
 const layersWanted = () => document.body.dataset.view === "choc" || stageNow() === "plate" || stageNow() === "layers";
@@ -482,8 +481,7 @@ function stageChanged() {
   if (st.playing) stopPlay(0);
   document.body.dataset.stage = v;
   zoomUI(); // zoom.js: this view's own zoom
-  if (v === "art") drawArtView();
-  else if (v === "page") {
+  if (v === "page") {
     plotSoon(0);
     drawPage();
   } else if (v === "plate") drawPlate();
@@ -500,8 +498,7 @@ document.querySelectorAll('input[name="stage"]').forEach((r) => r.addEventListen
 // what the animation redraws: the view that's showing (preview.js runs the clock)
 function redrawStage() {
   const v = stageNow();
-  if (v === "art") drawArtView();
-  else if (v === "page") drawPage();
+  if (v === "page") drawPage();
   else if (v === "layers") drawStack();
   else if (v === "plate") drawPlate();
   else render();
