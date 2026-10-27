@@ -13,6 +13,7 @@ const BARS = {
   draw: "drawbar",
   cross: "paintbar",
   lane: "paintbar",
+  bg: "bgbar",
 };
 const BTNS = {
   select: "selectBtn",
@@ -21,6 +22,7 @@ const BTNS = {
   draw: "drawBtn",
   cross: "crossBtn",
   lane: "laneBtn",
+  bg: "bgPick",
 };
 const DRAW_W = 1000,
   DRAW_H = 750;
@@ -310,7 +312,7 @@ view$.addEventListener("pointerdown", (e) => {
   } else if (st.tool === "erase") {
     st.draft = { pts: [workXY(e)], r: +$("brush").value, down: [e.clientX, e.clientY], moved: false };
     render();
-  } else if (st.tool === "start") st.draft = { p: workXY(e) };
+  } else if (st.tool === "start" || st.tool === "bg") st.draft = { p: workXY(e) };
   else if (st.tool === "cross" || st.tool === "lane") {
     st.draft = { pts: [workXY(e)], r: +$("zoneBrush").value, erase: $("zoneErase").checked };
     render();
@@ -365,7 +367,9 @@ const endPointer = () => {
     if (brushMode()) st.erase.push({ type: "brush", r: d.r / st.crop.kx, pts: d.pts.map(([x, y]) => fromWork(x, y)) });
     else st.erase.push({ type: "part", p: fromWork(...d.pts[0]) });
     eraseChanged();
-  } else if (st.tool === "start") {
+  } else if (st.tool === "bg")
+    bgTapped(fromWork(...d.p)); // levels.js
+  else if (st.tool === "start") {
     st.start = fromWork(...d.p);
     updateToolLabels();
     schedule(extract);

@@ -1,0 +1,57 @@
+const A = require("../lib/app.js"), { check } = require("../lib/check.js"), fs = require("fs");
+const parts = async (page) => +((await page.textContent("#fitinfo")).match(/(\d+) part/) || [0, 0])[1];
+module.exports = {
+  id: "A32", title: "Image prep and plotting: grey levels, the background tapped, a picture turned, and art made for plotting",
+  guards: "grey levels that don't change the trace, a grey set to Skip that is still traced, a tap that doesn't remove the background, a turned picture that doesn't turn, the printing limits holding back art made for plotting, a plotting pattern traced before it's asked for, and any of it lost by a design file",
+  why: "The Image prep card can reduce a picture to a few flat greys and trace the edges of the ones you pick, and remove the background from a point you tap; the Picture card turns and straightens the picture. The Art tab's Made for switch sets whether art is for printing (one line at the needle's spacing) or plotting (much finer patterns, plotted as drawn, traced only when asked).",
+  how: "Opens the app; picks the still-life sample; on the Trace tab sets 5 grey levels, then sets the second grey to Skip; taps the background with the tool; turns the picture right on the Art tab; switches Made for to Plotting, picks Wave rows (from a picture) and sets 200 rows; plots it as drawn; presses Trace it; saves the design and opens it again.",
+  pass: "Grey levels make the trace follow the greys' edges (the line changes) and the card lists 5 greys; Skip changes the line again; the tap sets the background point and some tolerance; the turned picture is as tall as it was wide; Made for Plotting lets Wave rows go to 200 rows (printing stops at 120), leaves the trace alone and makes Plot as drawn the way on; the 2D page shows the rows; Trace it traces them; the reopened design keeps 5 greys, the skipped grey and Made for Plotting; no page errors.",
+  async run(ctx) {
+    const { page, errors, close } = await A.open(ctx, { art: true }), checks = [];
+    await page.selectOption("#sample", "still"); await A.idle(page, 2000);
+    await page.click("label[for=viewDesign]"); await A.idle(page, 800);
+    const plain = await page.evaluate(() => st.walk.px.length);
+    await page.click('[aria-labelledby="h-prep"] .card-toggle');
+    await A.setValue(page, "#levels", 5); await A.idle(page, 3000);
+    const lv = await page.evaluate(() => ({ n: st.walk.px.length, rows: document.querySelectorAll("#levelList .level-row").length, val: $("prepVal").textContent, tones: st.wk.levels && st.wk.levels.tones.length }));
+    checks.push(check("5 grey levels: a row per grey, the prep says so, the line changed", +(lv.rows === 5 && lv.tones === 5 && /5 greys/.test(lv.val) && lv.n !== plain), "==", 1));
+    await page.click("label[for=level1s]"); await A.idle(page, 3000);
+    const sk = await page.evaluate(() => ({ n: st.walk.px.length, m: $("levelModes").value }));
+    checks.push(check("the second grey set to Skip: the line changed again", +(sk.m === "tstts" && sk.n !== lv.n), "==", 1));
+    await page.click("#bgPick"); await A.idle(page, 200);
+    await page.evaluate(() => window.scrollTo(0, 0)); // (the card's controls are further down the page)
+    const box = await page.locator("#view").boundingBox();
+    await page.mouse.click(box.x + box.width * 0.85, box.y + box.height * 0.4); // (the wall, clear of any message at the top) await A.idle(page, 3000);
+    const bg = await page.evaluate(() => ({ at: st.bgAt, tol: +$("bgTol").value }));
+    checks.push(check("Tap the background: the point tapped, with some tolerance", +(!!bg.at && bg.tol > 0), "==", 1));
+    await page.click("#bgDone");
+    // the picture turned
+    await page.click("label[for=viewArt]"); await A.idle(page, 300);
+    const before = await page.evaluate(() => [st.art.picture.canvas.width, st.art.picture.canvas.height]);
+    await page.click("#picRight"); await A.idle(page, 2500);
+    const after = await page.evaluate(() => [st.art.picture.canvas.width, st.art.picture.canvas.height, st.source.width]);
+    checks.push(check("Turn right: the picture as tall as it was wide", +(after[0] === before[1] && after[1] === before[0] && after[2] === before[1]), "==", 1));
+    // made for plotting
+    await page.click("label[for=artForPlot]"); await page.click("label[for=srcPattern]"); await A.idle(page, 1000);
+    await page.selectOption("#artStyle", "wavesTone"); await A.idle(page, 1500);
+    const src = await page.evaluate(() => st.source.__id);
+    await A.setValue(page, "#artP-detail", 200); await A.idle(page, 2500);
+    const pl = await page.evaluate(() => ({ max: +$("artP-detail").max, rows: st.art.pattern.detail, untraced: st.art.untraced, primary: $("goPlot").classList.contains("primary") }));
+    checks.push(check("Plotting: Wave rows go to 200 rows (printing stops at 120)", +(pl.max === 250 && pl.rows === 200), "==", 1),
+      check("… not traced until asked, Plot as drawn the way on", +(pl.untraced && pl.primary && (await page.evaluate(() => st.source.__id)) === src), "==", 1));
+    await page.click("#goPlot"); await A.idle(page, 2000);
+    checks.push(check("2D: the rows as drawn", +/Wave rows \(picture\) exactly as drawn/.test(await page.textContent("#pageHint")), "==", 1));
+    await page.click("label[for=viewArt]"); await page.click("#goTrace"); await A.idle(page, 4000);
+    checks.push(check("Trace it: traced now (parts)", +(!(await page.evaluate(() => st.art.untraced)) && (await page.evaluate(() => st.source.__id)) !== src) * (await parts(page)), ">=", 1));
+    // a design file
+    const [df] = await Promise.all([page.waitForEvent("download"), page.click("#fileMenu summary").then(() => page.click("#saveDesign"))]);
+    const file = await df.path();
+    await page.click("label[for=viewArt]"); await page.click("label[for=artForPrint]"); await A.setValue(page, "#levels", 1); await A.idle(page, 1500);
+    await page.setInputFiles("#designFile", file); await A.idle(page, 3000);
+    const back = await page.evaluate(() => ({ lv: +$("levels").value, m: $("levelModes").value, plot: $("artForPlot").checked }));
+    checks.push(check("design reopened: 5 greys, the skipped grey, Made for Plotting", +(back.lv === 5 && back.m === "tstts" && back.plot), "==", 1));
+    checks.push(check("page errors", errors.length, "==", 0));
+    await close();
+    return { checks, notes: errors.join("  \n") };
+  },
+};

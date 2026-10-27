@@ -92,8 +92,10 @@ function labels() {
     p.contrast && "contrast",
     p.bgTol && "background",
     p.flatten && "lighting",
+    s.levels && `${s.levels.count} greys`,
   ].filter(Boolean);
   $("prepVal").textContent = on.length ? on.join(", ") : "off";
+  if (typeof levelsUI === "function") levelsUI(); // levels.js (loaded after this file): its greys and their shares
 }
 for (const id of ["sens", "blur", "minLen", "far", "bright", "contrast", "bgTol"])
   $(id).addEventListener("input", () => {
@@ -111,6 +113,9 @@ $("prepReset").addEventListener("click", () => {
   $("contrast").value = 0;
   $("bgTol").value = 0;
   $("flatten").checked = false;
+  $("levels").value = 1;
+  st.bgAt = null;
+  levelsUI();
   labels();
   schedule(extract);
 });

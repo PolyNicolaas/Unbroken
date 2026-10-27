@@ -3,6 +3,18 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v105 · 2026-10-27
+
+- **Made for: Printing / Plotting** (Art tab, Input). Plotting lifts the printing limits on the patterns (200 wave rows,
+  200 spiral turns, order 8 curves, 120 labyrinth cells…), shows the pattern on the 2D page as it will be plotted,
+  measures its closest lines against pen 1 instead of the needle, and traces only when you ask.
+- **Grey levels** (Trace tab, Image prep): the picture as 2–6 flat greys, each traced (its edges become the line) or
+  skipped; **Smooth blocks** removes specks and rounds their corners.
+- **Tap the background**: removes the background from the point you tap, through every colour close to it.
+- **Turn and straighten** the picture (Art tab, Picture card).
+- **A still-life sample** in flat greys, for grey levels and the picture patterns.
+- Engine: `UNB.levels`, `UNB.levelEdges`, `UNB.prep`'s `bgAt`, pattern settings' `plotMax`. Tests E34, A32.
+
 ## v104 · 2026-10-27
 
 - **Many more pattern settings.** Every style now has its own settings, and the Pattern card builds them from the

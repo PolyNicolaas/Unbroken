@@ -7,6 +7,89 @@
 
 const isModel = () => $("srcModel").checked; // the source is a 3D model (model.js), not a picture or text
 
+// The still-life sample: a vase, fruit and a cloth on a table in five flat greys, for grey levels and fills (640 × 480)
+function stillLife(g) {
+  const G = ["#2e2e2e", "#6a6a6a", "#9c9c9c", "#cacaca", "#f2f2f2"]; // darkest to lightest
+  const shape = (fill, draw) => {
+    g.fillStyle = fill;
+    g.beginPath();
+    draw();
+    g.fill();
+  };
+  shape(G[4], () => g.rect(0, 0, 640, 480)); // the wall
+  shape(G[3], () => g.rect(0, 330, 640, 150)); // the table top
+  shape(G[1], () => g.rect(0, 448, 640, 32)); // its front edge
+  // a white cloth, draped over the table's front on the right
+  shape(G[4], () => {
+    g.moveTo(330, 345);
+    g.bezierCurveTo(420, 330, 520, 338, 610, 350);
+    g.lineTo(625, 480);
+    g.lineTo(560, 480);
+    g.bezierCurveTo(545, 450, 520, 452, 505, 480);
+    g.lineTo(380, 480);
+    g.bezierCurveTo(360, 430, 345, 390, 330, 345);
+  });
+  shape(G[3], () => {
+    // its folds
+    g.moveTo(455, 352);
+    g.bezierCurveTo(470, 400, 470, 440, 455, 480);
+    g.lineTo(482, 480);
+    g.bezierCurveTo(492, 430, 480, 390, 455, 352);
+  });
+  // shadows on the table
+  shape(G[2], () => g.ellipse(250, 352, 120, 16, 0, 0, 7));
+  shape(G[2], () => g.ellipse(445, 382, 70, 12, 0, 0, 7));
+  // the vase: a body, a neck and a lip, dark, with a lighter side
+  const vase = () => {
+    g.moveTo(205, 350);
+    g.bezierCurveTo(140, 300, 150, 200, 215, 160);
+    g.bezierCurveTo(230, 150, 228, 120, 218, 95);
+    g.lineTo(282, 95);
+    g.bezierCurveTo(272, 120, 270, 150, 285, 160);
+    g.bezierCurveTo(350, 200, 360, 300, 295, 350);
+    g.closePath();
+  };
+  shape(G[0], vase);
+  shape(G[1], () => {
+    g.moveTo(190, 300);
+    g.bezierCurveTo(170, 260, 175, 210, 215, 178);
+    g.bezierCurveTo(200, 220, 198, 265, 215, 330);
+    g.closePath();
+  });
+  shape(G[1], () => g.ellipse(250, 95, 34, 9, 0, 0, 7)); // the lip
+  shape(G[0], () => g.ellipse(250, 95, 22, 5, 0, 0, 7)); // its opening
+  // a round fruit (mid grey, a highlight) and a pear (light, its shaded side mid)
+  shape(G[1], () => g.arc(405, 335, 52, 0, 7));
+  shape(G[2], () => g.ellipse(390, 318, 16, 11, -0.6, 0, 7));
+  shape(G[0], () => g.rect(403, 278, 5, 12)); // its stalk
+  const pear = () => {
+    g.moveTo(500, 382);
+    g.bezierCurveTo(455, 382, 450, 330, 480, 312);
+    g.bezierCurveTo(492, 304, 490, 280, 505, 272);
+    g.bezierCurveTo(522, 280, 518, 304, 530, 312);
+    g.bezierCurveTo(560, 330, 555, 382, 510, 382);
+    g.closePath();
+  };
+  shape(G[3], pear);
+  shape(G[2], () => {
+    g.moveTo(518, 300);
+    g.bezierCurveTo(550, 320, 556, 372, 512, 381);
+    g.bezierCurveTo(535, 360, 538, 330, 518, 300);
+  });
+  shape(G[0], () => {
+    g.moveTo(504, 274);
+    g.lineTo(512, 252);
+    g.lineTo(516, 254);
+    g.lineTo(509, 275);
+  });
+  // a window's light on the wall
+  shape(G[3], () => g.rect(40, 40, 110, 150));
+  shape(G[4], () => g.rect(52, 52, 40, 60));
+  shape(G[4], () => g.rect(98, 52, 40, 60));
+  shape(G[4], () => g.rect(52, 118, 40, 60));
+  shape(G[4], () => g.rect(98, 118, 40, 60));
+}
+
 // ---------- sample images ----------
 function makeSample(kind) {
   const c = document.createElement("canvas");
@@ -53,7 +136,8 @@ function makeSample(kind) {
     g.fill();
     g.fillRect(60, 110, 40, 260);
     g.fillRect(380, 110, 40, 260);
-  } else if (kind === "smiley") {
+  } else if (kind === "still") stillLife(g);
+  else if (kind === "smiley") {
     g.lineWidth = 9;
     g.beginPath();
     g.arc(320, 220, 170, 0, 7);
@@ -137,7 +221,9 @@ function settings() {
       contrast: +$("contrast").value,
       bgTol: +$("bgTol").value,
       flatten: $("flatten").checked,
+      bgAt: st.bgAt || null, // (source-normalised; working() turns it into px)
     },
+    levels: levelSettings(), // levels.js: grey levels, or null
   };
 }
 
@@ -145,6 +231,7 @@ function settings() {
 function resetHandEdits() {
   st.erase = [];
   st.start = null;
+  st.bgAt = null;
   st.zones = { cross: [], lane: [] };
   st.zoneVer = (st.zoneVer || 0) + 1;
   st.zm = {};

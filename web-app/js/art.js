@@ -32,9 +32,10 @@ function patternName(p) {
 let patternCache = null;
 function patternDrawn() {
   const tone = patternTone(),
-    key = JSON.stringify(st.art.pattern) + (tone ? `|${tone.key}` : "");
+    plot = artForPlot(),
+    key = JSON.stringify(st.art.pattern) + (tone ? `|${tone.key}` : "") + (plot ? "|plot" : "");
   if (patternCache && patternCache.key === key) return patternCache;
-  const r = UNB.pattern(st.art.pattern.style, { ...st.art.pattern, tone });
+  const r = UNB.pattern(st.art.pattern.style, { ...st.art.pattern, tone, plot });
   patternCache = { key, r, L: r ? UNB.patternLayout(r, ART_LONG) : null };
   return patternCache;
 }
@@ -128,12 +129,23 @@ function artApplySoon(delay = 250) {
   clearTimeout(applyTimer);
   applyTimer = setTimeout(artApply, delay);
 }
-function artApply() {
+// trace: a pattern made for plotting goes to the trace only when asked (Trace it, or the Trace tab)
+function artApply(trace) {
   clearTimeout(applyTimer);
   const A = st.art;
   $(KIND_RADIO[A.kind]).checked = true;
   document.body.dataset.art = A.kind;
-  if (A.kind === "model") {
+  A.untraced = A.kind === "pattern" && artForPlot() && trace !== true;
+  if (A.untraced) {
+    $("artMsg").textContent = patternDrawn().r
+      ? ""
+      : "Nothing left inside that shape: try more detail or another shape.";
+    // the preview shows it as it will be plotted: the 2D page, the pattern as drawn
+    $("plotArt").checked = true;
+    plotFromUI(); // plot.js
+    if (stageNow() !== "page") setStage("page");
+    else plotSoon(0);
+  } else if (A.kind === "model") {
     if (!st.model) setModel(sampleVase(), "sample vase");
     useSource("model");
   } else if (A.kind === "text") useSource("text");
@@ -177,6 +189,7 @@ const artShowOnly = artUse; // (the name the tests know)
 // (while a pattern drawn from a picture is in use, it stays in use and draws the new picture)
 function artUsePicture(canvas, label, sample) {
   st.art.picture = { canvas: tagged(canvas), label, sample: sample || "user" };
+  $("picAngle").value = 0; // a new picture starts as loaded
   const P = UNB.PATTERNS[st.art.pattern.style];
   artUse(st.art.kind === "pattern" && P && P.tone ? "pattern" : "picture");
 }
@@ -187,9 +200,28 @@ function artSized(W) {
 }
 // the Pattern card's Width (mm) and how far apart its closest lines come, against the needle's line spacing
 function artSizeUI() {
-  if (st.art.kind !== "pattern" || !st.outW) return;
-  const { r } = patternDrawn();
+  if (st.art.kind !== "pattern") return;
+  const { r, L } = patternDrawn();
   if (!r) return;
+  $("artWidth").closest(".inline").hidden = artForPlot();
+  $("artWidthLab").textContent = artForPlot() ? "Size" : "Width (mm)";
+  if (artForPlot()) {
+    // made for plotting: as wide as the 2D tab's page allows (Art as drawn), measured against pen 1
+    const P = paperSize(), // plot.js
+      mg = Math.max(0, +$("paperMargin").value || 0),
+      W = r.box[0] * L.s * Math.min((P.w - 2 * mg) / L.w, (P.h - 2 * mg) / L.h), // (as artOnPage places it)
+      gapMM = (W * r.gap) / r.box[0],
+      pen = Math.max(0.05, +$("penW").value || 0.5),
+      h = $("artGapHint");
+    $("artGapInfo").textContent = `${fmt(W, 0)} mm wide · lines ${fmt(gapMM, 2)} mm apart`;
+    h.className = gapMM < pen ? "hint warn" : "hint";
+    h.textContent =
+      gapMM < pen
+        ? `Closer than pen 1 (${fmt(pen, 2)} mm): neighbouring lines run into each other. Pick less detail, a finer pen, or a bigger page (2D tab).`
+        : `Pen 1 is ${fmt(pen, 2)} mm: every line stays clear of its neighbours. The page size and margin (2D tab) set the width.`;
+    return;
+  }
+  if (!st.outW) return;
   if (document.activeElement !== $("artWidth")) $("artWidth").value = +st.outW.toFixed(1);
   const gapMM = (st.outW * r.gap) / r.box[0],
     sp = st.spacing,
@@ -219,6 +251,9 @@ $("artFit").addEventListener("click", () => {
   st.art.width = null; // follows the needle again (setSize kept it as set by hand)
   artSizeUI();
 });
+// made for plotting, the width follows the 2D tab's page and the closest lines its pen
+for (const id of ["paper", "paperW", "paperH", "paperMargin", "penW", "paperOrient"])
+  $(id).addEventListener(id === "paper" || id === "paperOrient" ? "change" : "input", artSizeUI);
 $("artPicChoose").addEventListener("click", () => $("picFile").click());
 $("artPicFace").addEventListener("click", () => artUsePicture(makeSample("face"), "face sample", "face"));
 // a 3D model loaded (model.js has made it st.model)
@@ -336,6 +371,10 @@ function artUI() {
   if (A.picture) {
     $("sample").value = [...$("sample").options].some((o) => o.value === A.picture.sample) ? A.picture.sample : "user";
     $("picVal").textContent = A.picture.label;
+    const t = A.picture.turn || 0,
+      a = A.picture.angle || 0;
+    $("picAngle").value = a;
+    $("picAngleVal").textContent = `${a > 0 ? "+" : ""}${a}°` + (t ? ` · ${t * 90}° turned` : "");
   }
   patternControls(A.pattern); // patterns.js
   const PT = UNB.PATTERNS[A.pattern.style];
@@ -348,11 +387,60 @@ function artUI() {
     pattern: `The ${patternName(A.pattern)} pattern, traced into one line.`,
     model: "A 3D model: it is sliced on the 3D tab.",
   }[A.kind];
+  // made for plotting: Plot as drawn is the way on (for a pattern or text); printing: Trace it
+  const plot = artForPlot();
+  $("artForVal").textContent = plot ? "plotting" : "printing";
+  $("goPlot").classList.toggle("primary", plot && asDrawnOK());
+  $("goTrace").classList.toggle("primary", !(plot && asDrawnOK()));
   $("goPlot").disabled = !asDrawnOK();
   $("goPlot").title = asDrawnOK()
     ? "Plot it exactly as drawn on the 2D tab, without tracing"
     : "Only a pattern or text can be plotted as drawn: a picture needs tracing, and a model its view drawn";
 }
+// ---------- the picture turned: quarter turns and a few degrees to straighten, from the picture as loaded ----------
+function turnedCanvas(src, deg) {
+  const a = (deg * Math.PI) / 180,
+    c = Math.abs(Math.cos(a)),
+    s = Math.abs(Math.sin(a));
+  const w = Math.round(src.width * c + src.height * s),
+    h = Math.round(src.width * s + src.height * c),
+    out = document.createElement("canvas");
+  out.width = Math.max(1, w);
+  out.height = Math.max(1, h);
+  const g = out.getContext("2d");
+  g.fillStyle = "#ffffff"; // the corners that come in are paper
+  g.fillRect(0, 0, w, h);
+  g.translate(w / 2, h / 2);
+  g.rotate(a);
+  g.drawImage(src, -src.width / 2, -src.height / 2);
+  return out;
+}
+let turnTimer = null;
+function pictureTurn(turn, angle) {
+  const p = st.art.picture;
+  if (!p) return;
+  const orig = p.orig || p.canvas,
+    t = (((turn ?? p.turn ?? 0) % 4) + 4) % 4,
+    a = angle ?? p.angle ?? 0;
+  const c = t || a ? turnedCanvas(orig, t * 90 + a) : orig;
+  st.art.picture = { ...p, canvas: c === orig ? orig : tagged(c), orig, turn: t, angle: a };
+  $("picAngleVal").textContent = `${a > 0 ? "+" : ""}${a}°` + (t ? ` · ${t * 90}° turned` : "");
+  const P = UNB.PATTERNS[st.art.pattern.style];
+  artUse(st.art.kind === "pattern" && P && P.tone ? "pattern" : "picture");
+  recordSoon();
+}
+$("picLeft").addEventListener("click", () => pictureTurn(((st.art.picture && st.art.picture.turn) || 0) + 3));
+$("picRight").addEventListener("click", () => pictureTurn(((st.art.picture && st.art.picture.turn) || 0) + 1));
+$("picUnturn").addEventListener("click", () => {
+  $("picAngle").value = 0;
+  pictureTurn(0, 0);
+});
+$("picAngle").addEventListener("input", () => {
+  $("picAngleVal").textContent = `${+$("picAngle").value > 0 ? "+" : ""}${+$("picAngle").value}°`;
+  clearTimeout(turnTimer);
+  turnTimer = setTimeout(() => pictureTurn(undefined, +$("picAngle").value), 200);
+});
+
 // the picture card
 $("sample").addEventListener("change", () => {
   const v = $("sample").value;
@@ -368,9 +456,22 @@ $("picDraw").addEventListener("click", () => {
   enterTool("draw");
 });
 $("goTrace").addEventListener("click", () => {
+  if (st.art.untraced) artApply(true);
   $("viewDesign").checked = true;
   viewChanged();
 });
+// the Trace tab opened on a pattern made for plotting: trace it now
+$("viewDesign").addEventListener("change", () => {
+  if (st.art.untraced) artApply(true);
+});
+document.querySelectorAll('input[name="artFor"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    patternControls(st.art.pattern); // patterns.js: the ranges for this use
+    patternEdited(patternNow());
+    if (st.art.kind !== "pattern") artUI();
+    recordSoon();
+  })
+);
 $("goPlot").addEventListener("click", () => {
   $("plotArt").checked = true;
   plotFromUI(); // plot.js

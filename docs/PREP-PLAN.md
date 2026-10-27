@@ -16,6 +16,8 @@ show the pattern fills. Answers to the questions that day:
   - **Smooth blocks**: specks removed and each grey block's edges rounded, so its outline traces clean;
   - **Crop and rotate**: straighten and trim an imported photo;
   - **Background removal**: the plain-background flood there is now, plus picking the background colour by tapping it.
+- **Made for: Printing / Plotting** (added the same day, after trying the wave rows): the printing limits (needle
+  spacing, traceable detail) shouldn't hold back art for the plotter. Plotting lifts them and plots as drawn.
 
 ## How it fits the pipeline
 
@@ -31,5 +33,5 @@ show the pattern fills. Answers to the questions that day:
 
 | # | What | Version |
 |---|---|---|
-| 1 | Still life sample; Image prep card: Levels with preview and Trace / Fill / Both / Skip, Smooth blocks, Crop and rotate, background colour by tapping; Trace levels traced | v105 |
-| 2 | Level fills on the 2D tab: hatch, cross-hatch, rings or a pattern per level, one pen per level, walls for Fill-only levels | v106 |
+| 1 | Still life sample; Image prep card: Levels (Trace / Skip), Smooth blocks, background by tapping; turn and straighten (crop stays Select area); Made for Printing / Plotting | v105 ✓ |
+| 2 | Fill and Both per grey; level fills on the 2D tab: hatch, cross-hatch, rings or a pattern per level, one pen per level, walls for Fill-only levels | v106 |

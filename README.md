@@ -104,17 +104,32 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
 (printers)**. Its **Input** switch picks one thing at a time (`web-app/js/art.js`):
 
 - **Picture**: a sample, an image of yours (Choose an image…, or drop one anywhere on the page) or a sketch (Draw your
-  own, on the preview).
+  own, on the preview). **Turn left / Turn right** and **Straighten** (±20°) turn it first; the corners that come in
+  are white. The **still life** sample (flat greys) shows off grey levels and the picture patterns.
 - **Text**: lettering in a single-stroke font (the Text card).
 - **Pattern**: a geometric pattern, or a pattern that draws a picture's light and dark as one line (see
   [Geometric art](#geometric-art)).
 - **3D model**: an STL (or the sample vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
   makes its line drawing the picture to trace.
 
+**Made for** sets what the art is for. **Printing** (the default): one line, every part the needle's line spacing apart,
+so the pattern settings stop at the detail that prints, and Fit the needle sets their width. **Plotting**: the patterns
+go much finer (each dense setting's `plotMax`: 200 wave rows, order 8 curves, 120 labyrinth cells…), the preview is the
+2D page with the pattern as drawn, its size is the page's (inside the margin) and its closest lines are measured against
+pen 1; it is traced only when asked (Trace it, or opening the Trace tab).
+
 Each keeps its settings while another is in use, so switching back finds it as it was. The Trace tab's first card says
 what it is tracing (Edit the art goes back). **Next** has **Trace it** (the printers, chocolate and clay, need one
 continuous line) and **Plot as drawn**: a pattern or the text goes to the 2D tab exactly as made, without tracing
 (2D tab, **Art as drawn**, `UNB.exportLayersSVG`); a picture has no lines until it is traced.
+
+**Image prep** (Trace tab) gets a picture ready before tracing: brightness, contrast, **Remove plain background** (a
+flood from the border through colours close to the border's, or from the point you tap with **Tap the background**),
+**Even out lighting**, and **Grey levels**: the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then
+**Smooth blocks** gives each pixel the grey most of its neighbours have, removing specks and rounding corners). Each grey
+is **Trace** (its edges are lines) or **Skip**; the line map is the edges between greys where either side is traced
+(`UNB.levelEdges`), and the trace style and ink threshold aren't used. Fills per grey come next (docs/PREP-PLAN.md).
+Tests E34, A32.
 
 **Editing the line by hand** is left to drawing apps: export the SVG from the 2D tab, fix it in Illustrator, Affinity or
 Inkscape, and drop the SVG back in as the picture to trace. Undo and design files keep the input in use and the others'

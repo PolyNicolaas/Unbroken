@@ -11,7 +11,16 @@ async function working(res, engine = PIPE) {
   const s = settings(),
     src = st.source;
   if (res === undefined) res = s.res;
-  const key = [src.__id, JSON.stringify(st.sel), res, JSON.stringify(s.prep), s.invert, s.blur].join("|");
+  const lv = s.levels && !st.text ? { count: s.levels.count, smooth: s.levels.smooth } : null;
+  const key = [
+    src.__id,
+    JSON.stringify(st.sel),
+    res,
+    JSON.stringify(s.prep),
+    s.invert,
+    s.blur,
+    JSON.stringify(lv),
+  ].join("|");
   if (st.wk && st.wk.key === key) return st.wk;
   let sx = 0,
     sy = 0,
@@ -48,10 +57,15 @@ async function working(res, engine = PIPE) {
     g.getImageData(0, 0, w, h).data,
     w,
     h,
-    { prep: s.prep, invert: s.invert, blur: s.blur },
+    {
+      prep: { ...s.prep, bgAt: s.prep.bgAt ? toWork(s.prep.bgAt, crop) : null },
+      invert: s.invert,
+      blur: s.blur,
+      levels: lv,
+    },
   ]);
   g.putImageData(new ImageData(r.preview, w, h), 0, 0); // the prepared image as the preview background
-  return (st.wk = { key, w, h, small: c, gray: r.gray, blurred: r.blurred, crop });
+  return (st.wk = { key, w, h, small: c, gray: r.gray, blurred: r.blurred, crop, levels: r.levels });
 }
 
 // line map for one threshold: detection + selection mask + erasing.
@@ -105,6 +119,7 @@ function lineSpec(W, sens, textMask) {
   }
   return {
     blurred: W.blurred,
+    levels: W.levels ? { lab: W.levels.lab, edge: levelEdgeFlags() } : null, // grey levels: their edges (levels.js)
     mode: s.mode,
     sens,
     split: CFG.engine.packedStrokeSplit,
@@ -134,7 +149,7 @@ function traceArgs(W, s, textMask) {
       jumpCost: s.loose,
       lanes: zoneMask("lane", w, h, W.crop),
     },
-    { blurred: W.blurred, edges: !st.text && s.mode === "edges" },
+    { blurred: W.blurred, edges: !st.text && (s.mode === "edges" || !!W.levels) },
   ]; // traced line moved onto the middle of the ink (or the edge), below a pixel
 }
 // the walk for one working image: a pattern drawn as one line is followed exactly (art.js gives its points: crossings

@@ -8,6 +8,9 @@
 // the order listed in index.html.
 "use strict";
 
+// made for plotting (the Art tab's Input card, Made for): the ranges go up to their plotMax, and nothing is traced
+// until asked (art.js)
+const artForPlot = () => $("artForPlot").checked;
 const artStyle = () => UNB.PATTERNS[$("artStyle").value] || UNB.PATTERNS.labyrinth;
 const patternMemory = {}; // this session: each style's last settings, so going back to a style finds them again
 
@@ -33,8 +36,9 @@ const patternMemory = {}; // this session: each style's last settings, so going 
 // one control per setting, ids artP-<key>, built when the style changes
 let paramsFor = null;
 function buildParams(style) {
-  if (paramsFor === style) return;
-  paramsFor = style;
+  const key = style + (artForPlot() ? "|plot" : "");
+  if (paramsFor === key) return;
+  paramsFor = key;
   const box = $("artParams");
   box.textContent = "";
   for (const q of UNB.PATTERNS[style].params) {
@@ -45,7 +49,11 @@ function buildParams(style) {
     if (q.type === "range") {
       wrap.innerHTML = `<div class="lab"><label for="${id}"></label><span class="val"></span></div><input type="range" id="${id}">`;
       wrap.querySelector("label").textContent = q.name;
-      Object.assign(wrap.querySelector("input"), { min: q.min, max: q.max, step: q.step });
+      Object.assign(wrap.querySelector("input"), {
+        min: q.min,
+        max: artForPlot() && q.plotMax ? q.plotMax : q.max,
+        step: q.step,
+      });
     } else if (q.type === "select") {
       wrap.innerHTML = `<label class="field"><span></span><select id="${id}"></select></label>`;
       wrap.querySelector("span").textContent = q.name;
@@ -71,13 +79,13 @@ function patternNow() {
     const el = $(`artP-${q.key}`);
     if (el) o[q.key] = q.type === "range" ? +el.value : q.type === "check" ? el.checked : el.value;
   }
-  return (patternMemory[style] = UNB.patternDefaults(style, o));
+  return (patternMemory[style] = UNB.patternDefaults(style, { ...o, plot: artForPlot() }));
 }
 // show a pattern's settings (art.js)
 function patternControls(p) {
   $("artStyle").value = p.style;
   buildParams(p.style);
-  const v = UNB.patternDefaults(p.style, p);
+  const v = UNB.patternDefaults(p.style, { ...p, plot: artForPlot() });
   for (const q of UNB.PATTERNS[p.style].params) {
     const el = $(`artP-${q.key}`);
     if (q.type === "check") el.checked = v[q.key];
@@ -90,7 +98,7 @@ function patternControls(p) {
 // values beside the sliders, settings shown only with others (when), and what the style suits
 function patternUI() {
   const P = artStyle(),
-    v = UNB.patternDefaults($("artStyle").value, readRaw());
+    v = UNB.patternDefaults($("artStyle").value, { ...readRaw(), plot: artForPlot() });
   for (const q of P.params) {
     const row = $("artParams").querySelector(`[data-key="${q.key}"]`);
     if (!row) continue;
@@ -98,13 +106,15 @@ function patternUI() {
     if (q.type === "range") row.querySelector(".val").textContent = q.say(v[q.key]);
   }
   $("artShuffle").hidden = !P.seed;
-  const suits = P.tone
-    ? "One unbroken line that draws the picture's light and dark: it prints in chocolate, the darkest parts at the line spacing."
-    : P.oneLine
-      ? `One unbroken ${P.line === "open" ? "open " : ""}line with even gaps: on its own it prints without doubled strokes.`
-      : P.crosses
-        ? `One unbroken line that crosses itself: to print it with its crossings, tick Allow overlaps on the Trace tab's Line card (${$("overlaps").checked ? "on now" : "off now: every crossing is undone"}); on the pen plotter it draws as it is.`
-        : "Many separate pieces joined by connectors: best on the pen plotter.";
+  const suits = artForPlot()
+    ? "Made for plotting: drawn as exact lines on the 2D tab (Plot as drawn), as fine as your pen allows."
+    : P.tone
+      ? "One unbroken line that draws the picture's light and dark: it prints in chocolate, the darkest parts at the line spacing."
+      : P.oneLine
+        ? `One unbroken ${P.line === "open" ? "open " : ""}line with even gaps: on its own it prints without doubled strokes.`
+        : P.crosses
+          ? `One unbroken line that crosses itself: to print it with its crossings, tick Allow overlaps on the Trace tab's Line card (${$("overlaps").checked ? "on now" : "off now: every crossing is undone"}); on the pen plotter it draws as it is.`
+          : "Many separate pieces joined by connectors: best on the pen plotter.";
   $("artTip").textContent = `${P.tip}. ${suits}`;
   $("artVal").textContent = P.label;
 }

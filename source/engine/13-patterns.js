@@ -1110,6 +1110,8 @@
   });
   const choiceParam = (key, name, options, value) => ({ key, type: "select", name, options, value });
   const checkParam = (key, name, value) => ({ key, type: "check", name, value: !!value });
+  // (a range's plotMax: how far it goes in art made for plotting, drawn as exact lines and never traced or printed;
+  // max is the limit for printing, where the needle's spacing and the trace set what can be made)
   const pct = (v) => `${v}%`,
     ord = (v) => `order ${v} · ${2 ** v} × ${2 ** v}`,
     off0 = (v) => (v ? `${v}%` : "off");
@@ -1147,7 +1149,7 @@
       label: "Labyrinth",
       tip: "One closed line around a random maze, an even gap everywhere",
       params: [
-        rangeParam("detail", "Cells across", 4, 36, 12, (v) => `${v} cells`),
+        { ...rangeParam("detail", "Cells across", 4, 36, 12, (v) => `${v} cells`), plotMax: 120 },
         rangeParam("twist", "Branching", 0, 100, 30, (v) =>
           v < 15 ? "long corridors" : v > 70 ? "short branches" : `${v}%`
         ),
@@ -1162,7 +1164,7 @@
     moore: {
       label: "Moore loop",
       tip: "A closed space-filling curve: every gap one step",
-      params: [rangeParam("detail", "Order", 2, 6, 4, ord), CORNERS],
+      params: [{ ...rangeParam("detail", "Order", 2, 6, 4, ord), plotMax: 8 }, CORNERS],
       line: "closed",
       oneLine: true,
       evenGap: true,
@@ -1170,7 +1172,7 @@
     hilbert: {
       label: "Hilbert curve",
       tip: "A space-filling curve from one corner to the next",
-      params: [rangeParam("detail", "Order", 1, 6, 4, ord), CORNERS],
+      params: [{ ...rangeParam("detail", "Order", 1, 6, 4, ord), plotMax: 8 }, CORNERS],
       line: "open",
       oneLine: true,
       evenGap: true,
@@ -1178,7 +1180,10 @@
     gosper: {
       label: "Gosper curve",
       tip: "The flowsnake: a space-filling curve on a hexagonal grid",
-      params: [rangeParam("detail", "Order", 1, 3, 3, (v) => `order ${v} · ${7 ** v} steps`), CORNERS],
+      params: [
+        { ...rangeParam("detail", "Order", 1, 3, 3, (v) => `order ${v} · ${7 ** v} steps`), plotMax: 5 },
+        CORNERS,
+      ],
       line: "open",
       oneLine: true,
       evenGap: true,
@@ -1187,7 +1192,7 @@
       label: "Double spiral",
       tip: "Two spiral arms wound into each other: one closed loop, even gaps",
       params: [
-        rangeParam("detail", "Turns", 2, 16, 7, (v) => `${v} turns`),
+        { ...rangeParam("detail", "Turns", 2, 16, 7, (v) => `${v} turns`), plotMax: 80 },
         SIDES,
         rangeParam("twist", "Twist", 0, 100, 0, (v) => (v ? `${v}%` : "none"), 1),
         { ...CORNERS, when: (p) => +p.sides > 0 },
@@ -1200,7 +1205,7 @@
       label: "Whirl",
       tip: "Polygons turning as they shrink, one line spiralling in with an even gap",
       params: [
-        rangeParam("detail", "Rounds", 3, 40, 16, (v) => `up to ${v} rounds`),
+        { ...rangeParam("detail", "Rounds", 3, 40, 16, (v) => `up to ${v} rounds`), plotMax: 200 },
         SIDES,
         rangeParam("twist", "Turn per round", 0, 90, 15, (v) => (v ? `${v}%` : "none")),
         CORNERS,
@@ -1213,7 +1218,7 @@
       label: "Waves",
       tip: "Rows of a shifting wave joined end to end: one line, never touching",
       params: [
-        rangeParam("detail", "Rows", 3, 30, 14, (v) => `${v} rows`),
+        { ...rangeParam("detail", "Rows", 3, 30, 14, (v) => `${v} rows`), plotMax: 200 },
         rangeParam("twist", "Amplitude", 0, 100, 60, (v) => (v ? `${v}%` : "flat")),
         rangeParam("freq", "Waves across", 25, 300, 100, pct, 5),
         checkParam("calm", "Calm ends", true),
@@ -1314,7 +1319,7 @@
       label: "Truchet tiles",
       tip: "Quarter circles on a grid of tiles, joined into loops (many pieces)",
       params: [
-        rangeParam("detail", "Tiles across", 3, 30, 10, (v) => `${v} tiles`),
+        { ...rangeParam("detail", "Tiles across", 3, 30, 10, (v) => `${v} tiles`), plotMax: 120 },
         rangeParam("twist", "Mix", 0, 100, 50, (v) => `${v}% one way`),
         SHAPE,
       ],
@@ -1327,7 +1332,7 @@
       label: "Space-filling curve (picture)",
       tip: "A Hilbert curve that fills in finer where the picture is darker",
       params: [
-        rangeParam("detail", "Finest order", 3, 8, 5, (v) => `order ${v} · ${2 ** v} cells across`),
+        { ...rangeParam("detail", "Finest order", 3, 8, 5, (v) => `order ${v} · ${2 ** v} cells across`), plotMax: 9 },
         rangeParam("range", "Levels", 1, 5, 3, (v) => `${v + 1} cell sizes`),
         CONTRAST,
         INVERT,
@@ -1341,7 +1346,7 @@
       label: "Wave rows (picture)",
       tip: "Rows across the picture, wiggling harder and tighter where it is darker",
       params: [
-        rangeParam("detail", "Rows", 4, 120, 20, (v) => `${v} rows`),
+        { ...rangeParam("detail", "Rows", 4, 120, 20, (v) => `${v} rows`), plotMax: 250 },
         rangeParam("strength", "Wiggle", 10, 100, 100, pct),
         CONTRAST,
         INVERT,
@@ -1355,7 +1360,7 @@
       label: "Vibrating spiral (picture)",
       tip: "One spiral from the middle out, wobbling harder where the picture is darker",
       params: [
-        rangeParam("detail", "Turns", 4, 120, 10, (v) => `${v} turns`),
+        { ...rangeParam("detail", "Turns", 4, 120, 10, (v) => `${v} turns`), plotMax: 200 },
         rangeParam("strength", "Wiggle", 10, 100, 100, pct),
         CONTRAST,
         INVERT,
@@ -1369,7 +1374,7 @@
       label: "Labyrinth (picture)",
       tip: "A maze with smaller cells where the picture is darker, one closed line",
       params: [
-        rangeParam("detail", "Finest order", 3, 7, 4, (v) => `order ${v} · ${2 ** v} cells across`),
+        { ...rangeParam("detail", "Finest order", 3, 7, 4, (v) => `order ${v} · ${2 ** v} cells across`), plotMax: 8 },
         rangeParam("range", "Levels", 1, 4, 3, (v) => `${v + 1} cell sizes`),
         CONTRAST,
         INVERT,
@@ -1382,7 +1387,8 @@
     },
   };
   UNB.PATTERN_SHAPES = SHAPE.options.map(([v]) => v);
-  // a style's settings filled in: each one given (and in range) or its starting value; seed a whole number ≥ 1
+  // a style's settings filled in: each one given (and in range) or its starting value; seed a whole number ≥ 1. o.plot:
+  // made for plotting (ranges go up to their plotMax)
   UNB.patternDefaults = function (style, o) {
     const S = UNB.PATTERNS[style],
       p = { style, seed: Math.max(1, Math.round(+(o && o.seed) || 1)) };
@@ -1390,8 +1396,9 @@
     for (const q of S.params) {
       const v = o ? o[q.key] : undefined;
       if (q.type === "range") {
-        const n = v == null || v === "" || !Number.isFinite(+v) ? q.value : +v;
-        p[q.key] = Math.min(q.max, Math.max(q.min, Math.round(n / q.step) * q.step));
+        const n = v == null || v === "" || !Number.isFinite(+v) ? q.value : +v,
+          max = o && o.plot && q.plotMax ? q.plotMax : q.max;
+        p[q.key] = Math.min(max, Math.max(q.min, Math.round(n / q.step) * q.step));
       } else if (q.type === "select")
         p[q.key] = q.options.some(([x]) => String(x) === String(v))
           ? q.options.find(([x]) => String(x) === String(v))[0]
