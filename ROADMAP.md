@@ -61,6 +61,10 @@ Tests:
 
 ## 3 · Tracing, drawing and lettering
 
+- **Image prep and grey levels** (decided 27 October, [`docs/PREP-PLAN.md`](docs/PREP-PLAN.md)): a still-life sample;
+  the picture reduced to 2–6 flat greys, each traced, filled or both; smooth blocks, crop and rotate, background by
+  tapping (v105); fills per level on the 2D tab, hatch, cross-hatch, rings or a pattern, one pen each (v106).
+
 - **More control in the patterns** (decided 27 October, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)): fitting inside a
   shape (a picture's silhouette, text, an SVG outline) and seeds with a grid of variations: v105. (Patterns from
   pictures and sizes in mm came in v103; deeper settings per style, exact tracing and Allow overlaps in v104.)
