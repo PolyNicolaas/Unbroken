@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v99</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v100</span></p>
 </header>
 
 <div class="wrap">
@@ -100,6 +100,7 @@
         <span class="tools-label">Tools</span>
         <button class="btn" type="button" id="selectBtn" data-tool="select" aria-pressed="false">Select area</button>
         <button class="btn" type="button" id="eraseBtn" data-tool="erase" aria-pressed="false">Erase</button>
+        <button class="btn" type="button" id="editBtn" data-tool="edit" aria-pressed="false" title="Push, smooth or straighten the traced line by hand">Edit line</button>
         <button class="btn" type="button" id="startBtn" data-tool="start" aria-pressed="false">Set start</button>
         <button class="btn" type="button" id="drawBtn" data-tool="draw" aria-pressed="false">Draw</button>
         <button class="btn" type="button" id="crossBtn" data-tool="cross" aria-pressed="false" title="Paint where the line may cross itself">Crossing areas</button>
@@ -115,6 +116,18 @@
         <button class="btn" type="button" id="eraseUndo">Undo</button>
         <button class="btn" type="button" id="eraseClear">Restore all</button>
         <button class="btn primary" type="button" id="eraseDone">Done</button>
+      </div>
+      <div class="selbar" id="editbar" hidden>
+        <div class="seg small" role="radiogroup" aria-label="How the brush changes the line">
+          <input type="radio" name="editMode" id="edPush" value="push" checked><label for="edPush" title="Drag the line to where it should be: it moves most where you grab it, less towards the edge of the brush">Push</label>
+          <input type="radio" name="editMode" id="edSmooth" value="smooth"><label for="edSmooth" title="Brush over a wobbly or jagged stretch to even it out">Smooth</label>
+          <input type="radio" name="editMode" id="edStraight" value="straighten"><label for="edStraight" title="Brush along a stretch to make it one straight line">Straighten</label>
+        </div>
+        <label class="inline-field">Size <input type="range" id="editBrush" min="6" max="90" value="28" aria-label="Brush size"></label>
+        <span class="hint" id="editHint">Drag the line to where it should be: it moves most where you grab it.</span>
+        <button class="btn" type="button" id="editUndo">Undo</button>
+        <button class="btn" type="button" id="editClear">Restore all</button>
+        <button class="btn primary" type="button" id="editDone">Done</button>
       </div>
       <div class="selbar" id="startbar" hidden>
         <span class="hint">Tap the trace where the line should begin.</span>
@@ -374,9 +387,37 @@
           <option value="shapes">Sample: shapes &amp; text</option>
           <option value="smiley">Sample: smiley</option>
           <option value="user" disabled>Your image</option>
+          <option value="pattern" disabled>Geometric art</option>
         </select>
       </div>
-      <p class="hint help img-only">Or try a sample. The tools under the preview select an area, erase stray lines, set the start point or let you draw your own.</p>
+      <p class="hint help img-only">Or try a sample, or make one in the Geometric art card below. The tools under the preview select an area, erase stray lines, edit the traced line by hand, set the start point or let you draw your own.</p>
+    </section>
+
+    <section class="card design-only img-only" aria-labelledby="h-art" data-fold="closed">
+      <h2 id="h-art">Geometric art <span id="artVal">10 styles</span></h2>
+      <label class="field"><span>Style</span><select id="artStyle" aria-describedby="artTip"></select></label>
+      <p class="hint" id="artTip"></p>
+      <div class="row">
+        <div class="lab"><label for="artDetail" id="artDetailLab">Detail</label><span class="val" id="artDetailVal"></span></div>
+        <input type="range" id="artDetail" min="1" max="40" value="12">
+      </div>
+      <div class="row" id="artTwistRow">
+        <div class="lab"><label for="artTwist" id="artTwistLab">Twist</label><span class="val" id="artTwistVal"></span></div>
+        <input type="range" id="artTwist" min="0" max="100" value="30">
+      </div>
+      <div class="two">
+        <label class="field" id="artSidesF"><span>Sides</span>
+          <select id="artSides"><option value="0">Circle</option><option value="3">Triangle</option><option value="4" selected>Square</option><option value="5">Pentagon</option><option value="6">Hexagon</option><option value="8">Octagon</option></select></label>
+        <label class="field" id="artShapeF"><span>Shape</span>
+          <select id="artShape"><option value="square" selected>Square</option><option value="circle">Circle</option><option value="hexagon">Hexagon</option><option value="diamond">Diamond</option><option value="heart">Heart</option><option value="star">Star</option></select></label>
+      </div>
+      <input type="hidden" id="artSeed" value="1">
+      <div class="inline">
+        <button class="btn primary" type="button" id="artMake" title="Draw this pattern and trace it, in place of the picture">Make and trace</button>
+        <button class="btn" type="button" id="artShuffle" title="Another random version of this style">Shuffle</button>
+      </div>
+      <p class="status" id="artMsg" role="status"></p>
+      <p class="hint help">Draws a pattern and traces it like any picture, so it follows every rule of the line. Once it's the picture, the sliders and menus here change it as you go. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print in chocolate without doubled strokes (the Line card's Closed loop or Open is set to suit). Spirograph with loops and Lissajous cross themselves, and Truchet tiles are many pieces joined by connectors: those suit the pen plotter (2D tab). The Edit line tool under the preview fine-tunes any of them.</p>
     </section>
 
     <section class="card design-only img-only" aria-labelledby="h-trace">
@@ -627,6 +668,7 @@
 <script src="10-export.js"></script>
 <script src="11-stages.js"></script>
 <script src="12-models.js"></script>
+<script src="13-patterns.js"></script>
 <script src="core.js"></script>
 <script src="fonts.js"></script>
 <script src="settings.js"></script>
@@ -638,6 +680,7 @@
 <script src="js/pipeline.js"></script>
 <script src="js/preview.js"></script>
 <script src="js/tools.js"></script>
+<script src="js/patterns.js"></script>
 <script src="js/readouts.js"></script>
 <script src="js/controls.js"></script>
 <script src="js/export.js"></script>

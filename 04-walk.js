@@ -1547,4 +1547,188 @@
     }
     return Object.assign({}, walk, { px: x, py: y });
   };
+
+  // Hand edits to the traced line (the Edit line tool), applied to the walk once it is traced, so everything built
+  // from it (the fitted line, the 2D pen line, the layers, G-code) follows them. ops, in working px, in the order made:
+  //  · push { r, pts: [from], to }: points within r of `from` move by to − from, all the way at the centre, easing to
+  //    nothing at r ((1 + cos πt) / 2). Both passes of an out-and-back stroke share their points, so they move together.
+  //  · smooth { r, pts }: points within r of the brush's path move toward the average of their neighbours along the
+  //    line (a Gaussian over about r / 2 of line each side), fully near the brush's middle, easing out at its edge.
+  //  · straighten { r, pts }: each stretch of line under the brush becomes the straight line between the points just
+  //    outside it.
+  // Stroke ends (tip) and junctions (jd = 0) stay put under smooth and straighten and split the stretches, so loops and
+  // junction spacing keep their shape; push moves them too (that's how a stroke end is dragged). Points keep their
+  // count and order, so every per-point tag still applies. Returns a new walk with its bbox brought up to date.
+  UNB.editWalk = function (walk, ops) {
+    const m = walk.px.length;
+    if (!ops || !ops.length || m < 2) return walk;
+    const x = Float64Array.from(walk.px),
+      y = Float64Array.from(walk.py),
+      wrap = !walk.open && m > 2 && x[0] === x[m - 1] && y[0] === y[m - 1],
+      n = wrap ? m - 1 : m; // a closed walk repeats its first point at the end: edit n points, then copy the seam
+    const tip = walk.tip,
+      jd = walk.jd,
+      fixed = (i) => !!((tip && tip[i]) || (jd && jd[i] === 0));
+    const next = (i) => (i + 1 < n ? i + 1 : wrap ? 0 : -1),
+      prev = (i) => (i > 0 ? i - 1 : wrap ? n - 1 : -1);
+    // distance from (px, py) to a brush path (a polyline, or one point)
+    const toPath = (px, py, P) => {
+      if (P.length === 1) return Math.hypot(px - P[0][0], py - P[0][1]);
+      let best = Infinity;
+      for (let k = 0; k + 1 < P.length; k++) {
+        const [ax, ay] = P[k],
+          [bx, by] = P[k + 1],
+          dx = bx - ax,
+          dy = by - ay,
+          L = dx * dx + dy * dy,
+          t = L ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L)) : 0;
+        best = Math.min(best, Math.hypot(px - ax - t * dx, py - ay - t * dy));
+      }
+      return best;
+    };
+    // how strongly each point is under the brush: 1 at its middle, easing to 0 at r (0 outside)
+    const reach = (op) => {
+      const P = op.pts,
+        r = op.r,
+        a = new Float64Array(n);
+      let x0 = Infinity,
+        y0 = Infinity,
+        x1 = -Infinity,
+        y1 = -Infinity;
+      for (const [px, py] of P) {
+        x0 = Math.min(x0, px - r);
+        y0 = Math.min(y0, py - r);
+        x1 = Math.max(x1, px + r);
+        y1 = Math.max(y1, py + r);
+      }
+      for (let i = 0; i < n; i++) {
+        if (x[i] < x0 || x[i] > x1 || y[i] < y0 || y[i] > y1) continue;
+        const t = toPath(x[i], y[i], P) / r;
+        if (t < 1) a[i] = 0.5 + 0.5 * Math.cos(Math.PI * t);
+      }
+      return a;
+    };
+    for (const op of ops) {
+      if (!op || !(op.r > 0) || !op.pts || !op.pts.length) continue;
+      if (op.type === "push" && op.to) {
+        const [fx, fy] = op.pts[0],
+          dx = op.to[0] - fx,
+          dy = op.to[1] - fy,
+          a = reach({ pts: [[fx, fy]], r: op.r });
+        for (let i = 0; i < n; i++)
+          if (a[i]) {
+            x[i] += a[i] * dx;
+            y[i] += a[i] * dy;
+          }
+      } else if (op.type === "smooth") {
+        const a = reach(op),
+          sig = Math.max(1, op.r / 2),
+          span = 3 * sig;
+        for (let pass = 0; pass < 2; pass++) {
+          const sx = Float64Array.from(x),
+            sy = Float64Array.from(y);
+          for (let i = 0; i < n; i++) {
+            if (!a[i] || fixed(i)) continue;
+            // a Gaussian average along the line, the same length of line each side: out to 3 sigma, or as far as the
+            // nearer stroke end, junction or end of the walk (so a point never slides along the line towards one)
+            // The line is treated as continuous (each piece of it weighted by its length), since the points along it
+            // aren't evenly spaced: a long step next to a junction would otherwise count as little as a short one.
+            const side = [next, prev].map((step) => {
+              const seg = []; // [from, to, s at from, length]
+              let j = i,
+                s = 0;
+              for (let k = 0; k < n && s < span; k++) {
+                const q = step(j);
+                if (q < 0 || q === i) break;
+                const l = Math.hypot(sx[q] - sx[j], sy[q] - sy[j]);
+                seg.push([j, q, s, l]);
+                s += l;
+                j = q;
+                if (fixed(q)) break;
+              }
+              return { seg, end: Math.min(s, span) };
+            });
+            const L = Math.min(side[0].end, side[1].end);
+            if (!(L > 0)) continue;
+            let wx = 0,
+              wy = 0,
+              ws = 0;
+            for (const { seg } of side)
+              for (const [j, q, s0, l] of seg) {
+                if (s0 >= L) break;
+                const s1 = Math.min(s0 + l, L),
+                  sm = (s0 + s1) / 2,
+                  t = l > 0 ? (sm - s0) / l : 0,
+                  wt = Math.exp((-0.5 * sm * sm) / (sig * sig)) * (s1 - s0);
+                wx += wt * (sx[j] + t * (sx[q] - sx[j]));
+                wy += wt * (sy[j] + t * (sy[q] - sy[j]));
+                ws += wt;
+              }
+            if (!(ws > 0)) continue;
+            x[i] = sx[i] + a[i] * (wx / ws - sx[i]);
+            y[i] = sy[i] + a[i] * (wy / ws - sy[i]);
+          }
+        }
+      } else if (op.type === "straighten") {
+        const a = reach(op),
+          on = (i) => a[i] > 0.05 && !fixed(i);
+        // each run of points under the brush, between the points just outside it (or the walk's own ends)
+        const seen = new Uint8Array(n);
+        let start = 0;
+        if (wrap) {
+          start = -1;
+          for (let i = 0; i < n; i++)
+            if (!on(i)) {
+              start = i;
+              break;
+            }
+          if (start < 0) continue; // the whole loop under the brush: nothing to anchor a straight line to
+        }
+        for (let c = 0; c < n; c++) {
+          const i = (start + c) % n;
+          if (seen[i] || !on(i)) continue;
+          const run = [];
+          for (let j = i; j >= 0 && on(j) && !seen[j]; j = next(j)) {
+            seen[j] = 1;
+            run.push(j);
+          }
+          const pa = prev(run[0]),
+            pb = next(run[run.length - 1]),
+            A = pa >= 0 ? pa : run[0],
+            B = pb >= 0 ? pb : run[run.length - 1];
+          if (A === B) continue;
+          const chain = [A, ...run.filter((j) => j !== A && j !== B), B],
+            S = [0];
+          for (let k = 1; k < chain.length; k++)
+            S.push(S[k - 1] + Math.hypot(x[chain[k]] - x[chain[k - 1]], y[chain[k]] - y[chain[k - 1]]));
+          const T = S[S.length - 1] || 1,
+            ax = x[A],
+            ay = y[A],
+            bx = x[B],
+            by = y[B];
+          for (let k = 1; k + 1 < chain.length; k++) {
+            const j = chain[k],
+              t = S[k] / T;
+            x[j] = ax + t * (bx - ax);
+            y[j] = ay + t * (by - ay);
+          }
+        }
+      }
+    }
+    if (wrap) {
+      x[m - 1] = x[0];
+      y[m - 1] = y[0];
+    }
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    for (let i = 0; i < m; i++) {
+      minX = Math.min(minX, x[i]);
+      maxX = Math.max(maxX, x[i]);
+      minY = Math.min(minY, y[i]);
+      maxY = Math.max(maxY, y[i]);
+    }
+    return Object.assign({}, walk, { px: x, py: y, bbox: { minX, minY, maxX, maxY }, edited: ops.length });
+  };
 })(typeof window !== "undefined" ? window : globalThis);

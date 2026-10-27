@@ -29,6 +29,7 @@ function piecesKeyNow() {
     st.source && st.source.__id,
     st.sel,
     st.erase,
+    st.edits,
     st.zones,
     s.open,
     s.loose,

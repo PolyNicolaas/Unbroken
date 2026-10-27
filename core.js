@@ -17,7 +17,7 @@
                       corners rounded; out-and-back strokes spread into strands with stroke-end loops.
                       UNB.edt, walkRouter, walkParts, walkGraph, walkPairEnds, walkDouble, walkTour, UNB.buildWalk,
                       UNB.roundCorners, UNB.offsetDoubled, UNB.cutSwallowtails, UNB.mirror,
-                      smoothRun, UNB.snapWalk
+                      smoothRun, UNB.snapWalk, UNB.editWalk
     05-fill.js     4b. Fills — chocolate infill (areas the printed line encloses) and the 2D tab's pen fills.
                       UNB.infill, UNB.penFills
     06-fourier.js  5. Fourier series — path → evenly spaced samples → one series per axis → the curve from chosen terms.
@@ -46,8 +46,14 @@
                       UNB.fillPlan,
                       regionGrid, boxOf, shareIn, UNB.unionOverlaps, UNB.modelOverhang, UNB.modelSupport,
                       UNB.modelStack, UNB.hiddenLines, UNB.chainSegments, UNB.exportLinesSVG
+    13-patterns.js 12. Patterns — geometric abstract art as lines to trace (the Geometric art card): labyrinths,
+                      space-filling curves, spirals, a whirl, waves, harmonic curves, tiles.
+                      seeded, polyInside, largestGroup, roundLoop, labyrinth, lsystem, boxed, moore, hilbert, gosper,
+                      doubleSpiral, whirl, waves, spirograph, lissajous, truchet, UNB.PATTERNS, UNB.PATTERN_SHAPES,
+                      UNB.patternLayout, UNB.pattern
 
-   Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms → synth → stageFinal.
+   Typical run (11-stages.js): stageLines → stageWalk (→ editWalk: hand edits) → stageSignal → sweepSteps + pickTerms
+   → synth → stageFinal.
 
    Loading: the page lists the parts in web-app/index.html (in this order); a Web Worker loads core.js, which loads
    the parts with importScripts; Node requires core.js, which requires them. Test E25 checks the lists agree.
@@ -68,6 +74,7 @@
     "10-export.js",
     "11-stages.js",
     "12-models.js",
+    "13-patterns.js",
   ];
   if (typeof module !== "undefined" && module.exports) {
     // Node

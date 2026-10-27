@@ -92,6 +92,16 @@ function lineSpec(W, sens, textMask) {
             : { type: "part", ...(([x, y]) => ({ x, y }))(toWork(o.p, W.crop)) }
         )
       : null;
+  // hand edits to the line (Edit line tool), in working px; applied to the walk after it is traced (UNB.editWalk)
+  const edits =
+    st.edits && st.edits.length
+      ? st.edits.map((o) => ({
+          type: o.type,
+          r: o.r * kx,
+          pts: o.pts.map((p) => toWork(p, W.crop)),
+          to: o.to ? toWork(o.to, W.crop) : null,
+        }))
+      : null;
   if (st.text) {
     // typed text: the font strokes themselves, no image detection
     const lines = new Uint8Array(w * h),
@@ -101,7 +111,7 @@ function lineSpec(W, sens, textMask) {
     const m = selMask(W);
     if (m) for (let i = 0; i < w * h; i++) if (!m[i]) lines[i] = 0;
     if (erase) UNB.erase(lines, w, h, erase);
-    return { lines };
+    return { lines, edits };
   }
   return {
     blurred: W.blurred,
@@ -111,6 +121,7 @@ function lineSpec(W, sens, textMask) {
     shade: s.shade,
     selMask: selMask(W),
     erase,
+    edits,
   };
 }
 function detect(W, sens) {
@@ -454,6 +465,15 @@ function syncSizeUI() {
     h.textContent = `Smallest that keeps every line ${fmt(st.spacing, 2)} ${u} apart: ${fmt(m.smallest, 1)} ${u}${more ? `; ${more}` : ""}.`;
   }
 }
+// A new picture that knows its own best width (geometric art: where its gaps between neighbouring lines are the line
+// spacing, so nothing needs pushing apart) starts there instead of on the starting mark. Call it right after setSource,
+// before the trace starts. aspect: the drawing's width ÷ height, to keep it on the plate.
+function startSize(W, aspect) {
+  if (!(W > 0)) return;
+  st.outW = limitToPlate() ? Math.min(W, BED.w, BED.h * (aspect || 1)) : W;
+  st.sizeUser = true;
+  $("outW").value = +st.outW.toFixed(1);
+}
 // a new width (slider, a mark, the boxes, or the marks moving): trace again finer if the print got bigger, else lay out
 // the strands again
 function setSize(W, byUser) {
@@ -484,6 +504,7 @@ function marksKeyNow() {
     baseRes(),
     st.sel,
     st.erase,
+    st.edits,
     st.start,
     st.zones,
     st.spacing,

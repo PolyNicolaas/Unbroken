@@ -57,10 +57,12 @@
     return UNB.snapWalk(walk, field, w, h);
   };
 
-  // the whole first stage in one call: line map (or given lines, for text) → walk → subpixel walk
+  // the whole first stage in one call: line map (or given lines, for text) → walk → subpixel walk → hand edits to the
+  // line (src.edits, working px: see UNB.editWalk)
   UNB.stageTrace = function (src, w, h, walkOpt, snap) {
-    const lines = src.lines || UNB.stageLines(src.blurred, w, h, src);
-    return UNB.stageWalk(lines, w, h, walkOpt, snap);
+    const lines = src.lines || UNB.stageLines(src.blurred, w, h, src),
+      walk = UNB.stageWalk(lines, w, h, walkOpt, snap);
+    return walk && src.edits && src.edits.length ? UNB.editWalk(walk, src.edits) : walk;
   };
 
   // A crossing-area mask can't be sent to a worker as a function, so stages take { allowMask, allowW, allowH } and
