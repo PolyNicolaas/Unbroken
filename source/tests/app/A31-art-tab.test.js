@@ -7,8 +7,8 @@ module.exports = {
   id: "A31", title: "The Art tab: one input at a time, traced, or plotted as drawn",
   guards: "an input that doesn't reach the trace, an input that forgets its settings when another is picked, a pattern that loses its one-line promise, art that can't be plotted without a trace, and the input lost by undo or a design file",
   why: "Everything comes in through the Art tab's Input switch, one thing at a time: a picture, the text, a geometric pattern or a 3D model. Each keeps its settings while another is in use. The Trace tab traces the one in use; the 2D tab can plot a pattern or the text exactly as drawn, without tracing.",
-  how: "Opens the app (the Art tab, the sample leaf as the picture); picks Pattern (a Labyrinth), changes it to Waves and shuffles it; types a width of 40 mm, changes the rows, fits the needle; picks the Vibrating spiral (drawn from a picture) and the face sample in the Pattern card; picks Picture and Pattern again; picks Text and 3D model; plots the pattern as drawn on the 2D tab and exports its SVG; checks Plot as drawn is off for a picture; undoes a switch; saves the design and opens it again.",
-  pass: "The app opens on the Art tab with the picture in use; the Labyrinth traces as 1 part, a closed loop with no connectors, no smaller than the smallest mark; Waves as 1 part, an open line; Shuffle re-traces; a typed width is the print's and stays through a change of rows, with a warning when the lines come closer than the spacing, and Fit the needle puts the closest lines at the spacing (up to 5% over); the Vibrating spiral traces as 1 part from the face sample (not the leaf, a line drawing), and a picture chosen there keeps the pattern in use; back on Picture that picture returns, and back on Pattern the Waves; Text and 3D model take over the trace; the 2D tab plots the pattern as drawn in one Inkscape layer; Plot as drawn is off for a picture; undo returns to the previous input; a saved design reopens on the pattern with the leaf still kept; no page errors.",
+  how: "Opens the app (the Art tab, the sample leaf as the picture); picks Pattern (a Labyrinth), changes it to Waves and shuffles it; types a width of 40 mm, changes the rows, fits the needle; picks the Vibrating spiral (drawn from a picture) and the face sample in the Pattern card; picks Picture and Pattern again; picks the Spirograph with Allow overlaps on, turns its second wheel on and off, sets a 60-tooth wheel, then turns Allow overlaps off, then back to Waves; picks Text and 3D model; plots the pattern as drawn on the 2D tab and exports its SVG; checks Plot as drawn is off for a picture; undoes a switch; saves the design and opens it again.",
+  pass: "The app opens on the Art tab with the picture in use; the Labyrinth traces as 1 part, a closed loop with no connectors, no smaller than the smallest mark; Waves as 1 part, an open line; Shuffle re-traces; a typed width is the print's and stays through a change of rows, with a warning when the lines come closer than the spacing, and Fit the needle puts the closest lines at the spacing (up to 5% over); the Vibrating spiral traces as 1 part from the face sample (not the leaf, a line drawing), and a picture chosen there keeps the pattern in use; back on Picture that picture returns, and back on Pattern the Waves; the Spirograph shows its second wheel's settings only with one, is followed exactly as 1 part, keeps its crossings with Allow overlaps and none without, and Waves come back with their rows as left; Text and 3D model take over the trace; the 2D tab plots the pattern as drawn in one Inkscape layer; Plot as drawn is off for a picture; undo returns to the previous input; a saved design reopens on the pattern with the leaf still kept; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { art: true }), checks = [];
     checks.push(check("opens on the Art tab, the picture in use, the Line view showing", +((await page.isChecked("#viewArt")) && (await page.isChecked("#srcImage")) && (await page.isChecked("#stLine")) && (await page.textContent("#inputVal")) === "sample"), "==", 1));
@@ -24,7 +24,7 @@ module.exports = {
     // Width (mm): set by hand, kept through a change of detail; Fit the needle goes back to the line spacing
     await page.fill("#artWidth", "40"); await page.press("#artWidth", "Enter"); await A.idle(page, 1500);
     checks.push(check("Width 40 mm: the print is 40 mm wide, and the card warns the lines are closer than the spacing", +((await page.evaluate(() => Math.round(st.outW))) === 40 && /Closer than the needle's line spacing/.test(await page.textContent("#artGapHint"))), "==", 1));
-    await A.setValue(page, "#artDetail", 10); await A.idle(page, 1500);
+    await A.setValue(page, "#artP-detail", 10); await A.idle(page, 1500);
     checks.push(check("… kept when the rows change", await page.evaluate(() => Math.round(st.outW)), "==", 40));
     await page.click("#artFit"); await A.idle(page, 1500);
     const gap = await page.evaluate(() => { const r = UNB.pattern(st.art.pattern.style, st.art.pattern); return (st.outW * r.gap) / r.box[0] / st.spacing; });
@@ -40,6 +40,21 @@ module.exports = {
     checks.push(check("back on Picture: the face sample chosen last", await page.textContent("#srcinfo"), "==", "face sample"));
     await page.click("label[for=srcPattern]"); await A.idle(page, 1200);
     checks.push(check("back on Pattern: Waves", +((await page.evaluate(() => st.art.pattern.style)) === "waves" && (await page.textContent("#srcinfo")) === "Waves"), "==", 1));
+    // the Spirograph: its own settings (a second wheel's appear when it's on), its exact line, and Allow overlaps
+    // (a 60-tooth wheel in the 96-tooth ring: 5 petals' worth of crossings, quick to size either way)
+    await page.evaluate(() => { $("overlaps").checked = true; $("overlaps").dispatchEvent(new Event("change")); });
+    await page.selectOption("#artStyle", "spirograph");
+    const hid = await page.isHidden("#artP-wheel2Teeth");
+    await page.check("#artP-wheel2");
+    const shown = await page.isVisible("#artP-wheel2Teeth");
+    await page.uncheck("#artP-wheel2"); await A.setValue(page, "#artP-wheelTeeth", 60); await A.idle(page, 2500);
+    checks.push(check("Spirograph: the second wheel's settings show only with a second wheel", +(hid && shown && (await page.isHidden("#artP-wheel2Teeth"))), "==", 1));
+    const sp = await page.evaluate(() => ({ vec: !!(st.walk && st.walk.vector), cross: UNB.findCrossings(st.final.re, st.final.im, !st.open).length, val: $("uncrossVal").textContent }));
+    checks.push(check("… followed exactly as 1 part, and with Allow overlaps its crossings kept (crossings)", +((await parts(page)) === 1 && sp.vec && /kept \(overlaps\)/.test(sp.val)) * sp.cross, ">", 0));
+    await page.evaluate(() => { $("overlaps").checked = false; $("overlaps").dispatchEvent(new Event("change")); }); await A.idle(page, 2500);
+    checks.push(check("… without it, every crossing undone", await page.evaluate(() => UNB.findCrossings(st.final.re, st.final.im, !st.open).length), "==", 0));
+    await page.selectOption("#artStyle", "waves"); await A.idle(page, 1500);
+    checks.push(check("back to Waves: its settings as left (rows)", await page.evaluate(() => st.art.pattern.detail), "==", 10));
     await page.click("label[for=srcText]"); await A.idle(page, 1200);
     checks.push(check("Text: traced from its strokes", +((await page.evaluate(() => document.body.dataset.src)) === "text" && (await page.isVisible("#textIn"))), "==", 1));
     await page.click("label[for=srcModel]"); await A.idle(page, 1200);

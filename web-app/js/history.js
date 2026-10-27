@@ -51,6 +51,7 @@ const DESIGN_IDS = [
   "fillAngle",
   "fillTurn",
   "uncross",
+  "overlaps",
   "smooth",
   "chocolate",
   "copies",

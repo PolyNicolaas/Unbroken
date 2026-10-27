@@ -147,6 +147,7 @@ window.UNB_SETTINGS = {
     lightLinesOnDark: false,          // true for light drawings on a dark background
     imagePrep: { brightness: 0, contrast: 0, backgroundTolerance: 0, evenOutLighting: false },   // -100–100, -80–150, 0–60 %, true/false
     crossings: "remove-all",          // "remove-all", "remove-doubling-back" or "keep"
+    allowOverlaps: false,             // the line may cross itself where the drawing does (spacing kept elsewhere)
 
     // --- Lines and size
     cornerRounding: 0,                // mm: rounds the drawing's sharp corners to at least this radius (0 = off, up to 5)

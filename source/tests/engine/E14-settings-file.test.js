@@ -53,7 +53,7 @@ module.exports = {
       traceStyle: oneOf("centerline", "outline"), path: oneOf("closed", "open"), threshold: rng(-60, 60), smoothing: rng(0, 3), ignoreSpecks: rng(0, 200), dropFarParts: rng(0, 40),
       looseEnds: oneOf("loop-back", "jump-much-shorter", "jump-shorter"), workingResolution: (x) => num(x, 200, 1500), lightLinesOnDark: isBool,
       imagePrep: (x) => x && rng(-100, 100)(x.brightness) && rng(-80, 150)(x.contrast) && rng(0, 60)(x.backgroundTolerance) && isBool(x.evenOutLighting),
-      crossings: oneOf("remove-all", "remove-doubling-back", "keep"),
+      crossings: oneOf("remove-all", "remove-doubling-back", "keep"), allowOverlaps: isBool,
       cornerRounding: rng(0, 5), baseLayers: rng(0, 50), wallLayers: rng(0, 500), baseDensity: rng(0, 100), basePattern: oneOf("rings", "lines"), baseAngle: rng(-90, 90), baseTurn: rng(1, 50), infillDensity: rng(0, 100), infillPattern: oneOf("rings", "lines"), infillAngle: rng(-90, 90), infillTurn: rng(1, 50), baseMinArea: rng(0, 400), infillMinArea: rng(0, 400), size: (x) => oneOf("smallest", "medium", "high")(x) || rng(1, 5000)(x),
       needle: (x) => nIds.has(x), lineWidth: rng(0.05, 5), gapBetweenLines: rng(0, 20), limitToPlate: isBool,
       text: (x) => typeof x === "string", font: (x) => !!FONTS[x], letterHeight: rng(1, 500), letterSpacing: oneOf("font-default", "even", "joined"),

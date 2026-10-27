@@ -377,20 +377,7 @@
         <div class="lab"><span class="name">Picture</span><span class="val" id="artPicName"></span></div>
         <div class="inline"><button class="btn mini" type="button" id="artPicChoose" title="An image whose light and dark the pattern draws (or drop one on the page)">Choose an image…</button><button class="btn mini" type="button" id="artPicFace" title="The face sample: soft greys to try the picture patterns on">Face sample</button></div>
       </div>
-      <div class="row">
-        <div class="lab"><label for="artDetail" id="artDetailLab">Detail</label><span class="val" id="artDetailVal"></span></div>
-        <input type="range" id="artDetail" min="1" max="40" value="12">
-      </div>
-      <div class="row" id="artTwistRow">
-        <div class="lab"><label for="artTwist" id="artTwistLab">Twist</label><span class="val" id="artTwistVal"></span></div>
-        <input type="range" id="artTwist" min="0" max="100" value="30">
-      </div>
-      <div class="two">
-        <label class="field" id="artSidesF"><span>Sides</span>
-          <select id="artSides"><option value="0">Circle</option><option value="3">Triangle</option><option value="4" selected>Square</option><option value="5">Pentagon</option><option value="6">Hexagon</option><option value="8">Octagon</option></select></label>
-        <label class="field" id="artShapeF"><span>Shape</span>
-          <select id="artShape"><option value="square" selected>Square</option><option value="circle">Circle</option><option value="hexagon">Hexagon</option><option value="diamond">Diamond</option><option value="heart">Heart</option><option value="star">Star</option></select></label>
-      </div>
+      <div id="artParams"></div>
       <input type="hidden" id="artSeed" value="1">
       <div class="inline">
         <button class="btn" type="button" id="artShuffle" title="Another random version of this style">Shuffle</button>
@@ -401,7 +388,7 @@
         <p class="hint" id="artGapHint"></p>
       </div>
       <p class="status" id="artMsg" role="status"></p>
-      <p class="hint help">Geometric art drawn as exact lines, then traced. The first group are patterns of their own; the second draw a picture's light and dark (the Picture row picks it), still as one line, so they print in chocolate. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print without doubled strokes (the Line card's Closed loop or Open is set to suit). Width sets the print's size in mm, and says how far apart its closest lines come against the needle's line spacing; Fit the needle picks the width where they are exactly that. Spirograph with loops and Lissajous cross themselves, and Truchet tiles are many pieces: those suit the pen plotter.</p>
+      <p class="hint help">Geometric art drawn as exact lines, then traced. The first group are patterns of their own; the second draw a picture's light and dark (the Picture row picks it), still as one line, so they print in chocolate. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print without doubled strokes (the Line card's Closed loop or Open is set to suit). Width sets the print's size in mm, and says how far apart its closest lines come against the needle's line spacing; Fit the needle picks the width where they are exactly that. Spirograph, Lissajous and Rose are one line that crosses itself: the trace follows their exact line, and with Allow overlaps (the Trace tab's Line card) the needle prints over each crossing; without it every crossing is undone. Truchet tiles are many pieces: those suit the pen plotter. Every style has its own settings below the style; Shuffle gives the random ones another version.</p>
     </section>
 
     <section class="card art-only art-model" aria-labelledby="h-model">
@@ -535,6 +522,8 @@
           <option value="90" selected>Remove all</option>
         </select>
         <p class="hint help">Removing a crossing reverses a short stretch of the line so the strands turn back instead of crossing. "Remove all" also keeps strands slightly apart; the gap between lines sets the real gap.</p>
+        <label class="check" title="The line may cross itself where the drawing does: the needle prints over each crossing. Spacing is still kept everywhere else."><input type="checkbox" id="overlaps"> Allow overlaps</label>
+        <p class="hint help" data-anchor="overlaps">Still one unbroken line, but it may cross itself where the drawing does (a spirograph, a Lissajous figure, a rose): the needle prints straight over the line already there. Round each crossing the strands are let come closer than the spacing, as far as two lines crossing at that angle need; everywhere else the spacing is kept as usual. Off, every crossing is undone as set above. Painted crossing areas work either way.</p>
       </div>
 
     </section>

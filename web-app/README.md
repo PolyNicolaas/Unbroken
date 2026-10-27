@@ -19,7 +19,7 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/pipeline.js` | The trace pipeline: line map → walk → spectrum → series → final line, the smallest-size search and the term chart. |
 | `js/preview.js` | Drawing the preview, in layers (`render`: under the line, the line, marks on it, the turning circles), the size box and the error chart. |
 | `js/tools.js` | Hand tools (select area, erase, set start, draw, crossing areas, connector paths), auto threshold, drag-and-drop and paste. |
-| `js/patterns.js` | The Pattern card on the Art tab: the pattern's settings (a style from `UNB.PATTERNS`), handed back to art.js. |
+| `js/patterns.js` | The Pattern card on the Art tab: the pattern's settings, built from the style's own list (`UNB.PATTERNS[style].params`: sliders, choices, switches), handed back to art.js. |
 | `js/art.js` | The Art tab: the Input switch (`st.art`: a picture, the text, a pattern or a 3D model, one at a time, each keeping its settings), what the trace starts from (`artApply` → `useSource` in source.js), and a pattern's or the text's lines for Plot as drawn (`artVectors`). |
 | `js/readouts.js` | The corner label, error and gap numbers, and the formula panel. |
 | `js/controls.js` | The run scheduler (start, debounce and cancel traces) and the control wiring: sliders, size, line spacing and needles. |

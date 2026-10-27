@@ -62,12 +62,14 @@ Tests:
 ## 3 · Tracing, drawing and lettering
 
 - **More control in the patterns** (decided 27 October, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)): fitting inside a
-  shape (a picture's silhouette, text, an SVG outline), deeper settings per style, and seeds with a grid of variations.
-  v104. (Patterns from pictures and sizes in mm came in v103.)
+  shape (a picture's silhouette, text, an SVG outline) and seeds with a grid of variations: v105. (Patterns from
+  pictures and sizes in mm came in v103; deeper settings per style, exact tracing and Allow overlaps in v104.)
+- **Allow overlaps** (v104): try a spirograph in chocolate with it on, and see whether the bead over a crossing needs
+  less flow there (a G-code change at each crossing) or prints fine as it is.
 
 - Patterns (v100): try them on real prints in the challenges (a labyrinth and a double spiral in chocolate, a whirl and
   Truchet tiles on the plotter). Ideas waiting for a use: more styles (circle packing, Voronoi cells, a Greek-key
-  border, rose curves) and patterns in the 2D tab's fills.
+  border) and patterns in the 2D tab's fills.
 
 - A text's pieces use the automatic term count and aren't shown on the Trace tab (it draws the text joined, as the
   2D tab plots it). If a piece needs looking after on its own, show the pieces there too.

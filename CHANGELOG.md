@@ -3,6 +3,25 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v104 · 2026-10-27
+
+- **Many more pattern settings.** Every style now has its own settings, and the Pattern card builds them from the
+  engine's list (a slider, a choice or a switch; some appear only with others). Going back to a style finds its
+  settings as you left them.
+  - **Spirograph**: the ring can be a circle, oval, stadium or a rounded triangle, square, pentagon or hexagon; ring and
+    wheel teeth; the wheel rolls inside or outside; **Hole** is the pen's distance from the wheel's centre (past 100%
+    it loops); an optional **second wheel** riding on the first (size, hole, direction); rotate.
+  - **Lissajous / harmonograph**: swings across and up-down, phase, drift, damping (spirals in like a harmonograph).
+  - **Rose** (new): petals and divider, or a Maurer rose of straight chords.
+  - Labyrinth: Straight runs. Moore, Hilbert, Gosper, Double spiral, Whirl: Rounded corners. Waves: Waves across, Calm
+    ends. Patterns drawn from a picture: Levels, Wiggle, Invert.
+- **Allow overlaps** (Trace tab, Line card): the line may cross itself where the drawing does, and the needle prints
+  over each crossing; the spacing is still kept everywhere else. Off by default (every crossing undone, as before).
+- **Patterns traced exactly.** A pattern that is one line is followed point for point instead of re-traced from its
+  picture, so a spirograph stays one line through its crossings (a trace would have gone round each crossing twice).
+- Engine: `UNB.stageVector`, `UNB.overlapAllow`, `UNB.patternDefaults`; each style's `params`. Tests E33 (every setting
+  at both ends; crossing styles with and without Allow overlaps), E14, A31.
+
 ## v103 · 2026-10-27
 
 - **Patterns drawn from a picture.** Four new styles in the Pattern card, in a group of their own, draw a picture's

@@ -22,6 +22,8 @@ complicated, the shading didn't work well, and Edit line wasn't very useful. So:
   - **Fit inside a shape**: a circle, heart, star… or a picture's silhouette, text, an SVG outline.
   - **Deeper settings per style**: corner radius, randomness, symmetry, density curves.
   - **Mix and vary**: seeds, a grid of variations to pick from.
+- **Crossing patterns can print** (27 October, v104): a pattern that is one line but crosses itself (spirograph,
+  Lissajous, rose) prints with **Allow overlaps** on: the needle goes over each crossing, spacing kept elsewhere.
 - Kept as they are: Select area, Erase, Set start, Draw, Crossing areas, Connector paths, Optimize tracing, the math
   panel and the circles.
 
@@ -31,7 +33,8 @@ complicated, the shading didn't work well, and Edit line wasn't very useful. So:
 |---|---|---|
 | 1 | One input at a time; Edit line and Shading removed | v102 ✓ |
 | 2 | Patterns from pictures (the four above); sizes in mm | v103 ✓ |
-| 3 | Fit inside a shape; deeper settings per style; mix and vary (seeds, a variation grid) | v104 |
+| 3 | Deeper settings per style (Spirograph wheels and holes, Lissajous / harmonograph, Rose, corners, levels…); patterns traced exactly; Allow overlaps for crossing patterns | v104 ✓ |
+| 4 | Fit inside a shape; mix and vary (a variation grid) | v105 |
 
 ## Earlier: decided 26 October (superseded)
 

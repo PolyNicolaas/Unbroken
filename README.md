@@ -125,34 +125,38 @@ settings (the picture too). Designs from before the Art tab open on their own so
 **Patterns** (Art tab → Input → Pattern) are abstract geometric patterns (`UNB.pattern`,
 `source/engine/13-patterns.js`; the Pattern card is `web-app/js/patterns.js`). A pattern is drawn as exact lines
 (1600 px on its long side, `UNB.patternLayout`): the Art view and Plot as drawn use those lines, and the Trace tab traces
-them like any picture, so every rule of the line applies. The card's sliders and menus change the chosen pattern layer
-as you go; **Shuffle** makes another random version of the styles that have one.
+them like any picture, so every rule of the line applies; a pattern that is one line is followed exactly instead
+(`UNB.stageVector`: its own points, crossings and all, unless a selection or erasing is set). Each style lists its own
+settings in the engine (`params`: sliders, choices and switches, some shown only with others), and the card builds its
+controls from that list; going back to a style finds its settings as you left them (this session). **Shuffle** makes
+another random version of the styles that have one.
 
 | Style | What it is | Controls | The line |
 |---|---|---|---|
-| Labyrinth | One line around a random maze (a random spanning tree drawn on a grid twice as fine, so every corridor and wall is one gap wide; the line round a tree is a single loop) | Cells across, Branching (long corridors ↔ short branches), Shape (square, circle, hexagon, diamond, heart, star) | one closed loop |
-| Moore loop | The closed Hilbert curve | Order (2–6) | one closed loop |
-| Hilbert curve | The space-filling curve | Order (1–6) | one open line |
-| Gosper curve | The flowsnake, on a hexagonal grid | Order (1–3) | one open line |
-| Double spiral | Two spiral arms wound into each other, joined at the centre and by a short step outside | Turns, Twist, Sides (circle, 3–8) | one closed loop |
-| Whirl | Polygons turning as they shrink (twisted squares), each corner the same gap inside the round outside it | Rounds, Turn per round, Sides | one open line |
-| Waves | Rows of a shifting wave joined end to end by half circles, always at least 40% of a row apart | Rows, Amplitude | one open line |
-| Spirograph | A wheel rolling inside a ring | Petals, Pen offset (loops past 40%) | closed; crosses itself when it loops |
-| Lissajous | x = sin(a t + phase), y = sin((a + 1) t) | Lobes, Phase | closed; crosses itself |
+| Labyrinth | One line around a random maze (a random spanning tree drawn on a grid twice as fine, so every corridor and wall is one gap wide; the line round a tree is a single loop) | Cells across, Branching (long corridors ↔ short branches), Straight runs, Shape (square, circle, hexagon, diamond, heart, star) | one closed loop |
+| Moore loop | The closed Hilbert curve | Order (2–6), Rounded corners | one closed loop |
+| Hilbert curve | The space-filling curve | Order (1–6), Rounded corners | one open line |
+| Gosper curve | The flowsnake, on a hexagonal grid | Order (1–3), Rounded corners | one open line |
+| Double spiral | Two spiral arms wound into each other, joined at the centre and by a short step outside | Turns, Sides (circle, 3–8), Twist, Rounded corners (toward a circle) | one closed loop |
+| Whirl | Polygons turning as they shrink (twisted squares), each corner the same gap inside the round outside it | Rounds, Sides, Turn per round, Rounded corners (up to 3 gaps) | one open line |
+| Waves | Rows of a shifting wave joined end to end by half circles, always at least 40% of a row apart | Rows, Amplitude, Waves across, Calm ends | one open line |
+| Spirograph | A toothed wheel rolling round a ring, the pen in one of its holes | Ring (circle, oval, stadium, triangle, square, pentagon, hexagon) with its width or corners, Ring teeth, Wheel teeth, Wheel rolls inside or outside, Hole (% of the wheel's radius; past 100% it loops), a Second wheel riding on the first (its size, hole, direction), Rotate | one closed line that crosses itself |
+| Lissajous / harmonograph | Two swinging pendulums, x = sin(fx t + phase), y = sin(fy t); damped, they spiral in like a harmonograph | Across swings, Up-down swings, Phase, Drift, Damping, Swings | one line that crosses itself (open when damped or drifting) |
+| Rose | r = cos(n/d · θ); or a Maurer rose, straight chords between points of the rose | Petals (n), Divider (d), Maurer rose, Chord angle | one closed line that crosses itself |
 | Truchet tiles | Quarter circles on a grid of tiles, joined into loops and curves | Tiles across, Mix, Shape | many pieces |
 
 **Drawn from a picture** (the second group in the Style menu): the pattern draws a picture's light and dark, still as one
 line, so it prints in chocolate as well as plots. The picture is the Art tab's picture (the Pattern card's **Picture**
 row picks another, or the **Face sample**; with a line-drawing sample as the picture, the face sample is used, since a
 line drawing has no light and dark to draw). It is fitted inside the pattern, and **Contrast** bends its darkness
-(d^γ: 0 keeps only the darkest, 50 as it is, 100 brings out the light greys).
+(d^γ: 0 keeps only the darkest, 50 as it is, 100 brings out the light greys); **Invert** draws the light parts instead.
 
 | Style | What it is | Detail | The line |
 |---|---|---|---|
-| Space-filling curve | A Hilbert curve whose cells are finer where the picture is darker: from three orders coarser in white to the finest order in black; consecutive cells always share an edge, so it stays one line | Finest order (3–8) | one open line |
-| Wave rows | Rows across the picture, wiggling harder and tighter where it is darker (wiggle up to (row spacing − gap) / 2, wavelength at least 4 gaps; the gap is 35% of the row spacing), joined by half circles | Rows | one open line |
-| Vibrating spiral | One spiral from the middle out, wobbling across its path harder and faster where it is darker (the same limits, against the pitch); the picture's middle square fills its circle | Turns | one open line |
-| Labyrinth | A maze on a quadtree of cells, finer where the picture is darker (three orders, neighbours at most one apart): a room in each cell, corridors as wide as the smaller room, the one line round it | Finest order (3–7), Shuffle | one closed loop |
+| Space-filling curve | A Hilbert curve whose cells are finer where the picture is darker: from Levels orders coarser in white to the finest order in black; consecutive cells always share an edge, so it stays one line | Finest order (3–8), Levels | one open line |
+| Wave rows | Rows across the picture, wiggling harder and tighter where it is darker (wiggle up to (row spacing − gap) / 2, wavelength at least 4 gaps; the gap is 35% of the row spacing), joined by half circles | Rows, Wiggle | one open line |
+| Vibrating spiral | One spiral from the middle out, wobbling across its path harder and faster where it is darker (the same limits, against the pitch); the picture's middle square fills its circle | Turns, Wiggle | one open line |
+| Labyrinth | A maze on a quadtree of cells, finer where the picture is darker (Levels orders, neighbours at most one apart): a room in each cell, corridors as wide as the smaller room, the one line round it | Finest order (3–7), Levels, Shuffle | one closed loop |
 
 Their gap is the closest lines, in the darkest parts; light parts have more room. Wave rows and the spiral can put about
 1.8 × as much line in black as in white before their folds would come closer than the gap; the space-filling curve and
@@ -168,12 +172,18 @@ starts. A width set by hand stays when the detail changes; a new style starts fi
   to Closed loop or Open to suit, the trace style to Centerline, and starts the print at the width where the pattern's
   gap is the line spacing (3% over, `startSize` in pipeline.js), so nothing needs pushing apart; the size slider and
   its marks work as for any picture.
-- **For the pen plotter:** everything works on the 2D tab; Spirograph loops, Lissajous and Truchet tiles (many pieces,
-  joined by connectors) suit it best.
+- **Crossing styles in chocolate:** Spirograph, Lissajous and Rose are one line too, but they cross themselves. Tick
+  **Allow overlaps** (Trace tab, Line card, under Crossings) and the needle prints over each crossing: round each one
+  the strands may come as close as two lines crossing at that angle must (`UNB.overlapAllow`: a zone of spacing ÷
+  (2 sin(angle/2)) + spacing, at most 6 spacings), and the spacing is kept everywhere else. Off, every crossing is
+  undone (the line turns back instead), as for any drawing.
+- **For the pen plotter:** everything works on the 2D tab; the crossing styles and Truchet tiles (many pieces, joined by
+  connectors) suit it best.
 - **Drawn for the tracer:** strokes a third of the closest gap, never wider than 0.9% of the picture (the centreline
   trace outlines strokes over 1.6% as filled shapes), and a 6% margin. The densest settings keep about 70 gaps across.
-- A design file keeps the pattern's settings and width. Tests E33 (every style keeps its promise, the ones drawn from a
-  picture put more line in its dark parts, and the one-line styles trace as one line), A31.
+- A design file keeps the pattern's settings and width, and Allow overlaps. Tests E33 (every style keeps its promise at
+  both ends of every setting, the ones drawn from a picture put more line in its dark parts, the one-line styles trace
+  as one line, and the crossing styles keep their crossings with Allow overlaps and the spacing elsewhere), A31.
 
 ## Units
 

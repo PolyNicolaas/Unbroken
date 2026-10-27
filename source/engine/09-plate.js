@@ -14,13 +14,16 @@
   //   · the closest gap anywhere, junctions included, is at least 90% of the spacing, and
   //   · that last step didn't have to move the line: 98% of the final line lies within maxShift × drawing width of the
   //     fitted series and 98% of the series within that of the final line (maxShift is the detail level: ~0.022 low,
-  //     0.013 medium, 0.007 high). Below the smallest fitting size, strands crowd and get pushed out of shape; the
+  //     0.013 medium, 0.007 high), and
+  //   · with Allow overlaps, the crossings aren't crowded: their zones (UNB.overlapAllow) add up to no more than the
+  //     drawing's box. Below the smallest fitting size, strands crowd and get pushed out of shape; the
   //     preview shows where (UNB.drift, run by stageFinal).
   // walk, w, h: as for stageSignal. opt: spacing (mm), bboxW (drawing width, working px), lineRatio (line width ÷
   // spacing),
   // loop (loop radius ÷ spacing), roundMM (corner radius, mm), termTol, minW, maxW, current (start width, mm),
   // maxShift,
-  // maxAngle, minGap, allow. Slow: every try is a full fit (a few seconds on a big drawing).
+  // maxAngle, minGap, allow, overlaps (Allow overlaps: see UNB.overlapAllow). Slow: every try is a full fit (a few
+  // seconds on a big drawing).
   // Brackets on a log scale around the current width, then bisects; yields after every try so a page can stay live.
   UNB.smallestPrintSteps = function* (walk, w, h, opt) {
     const spacing = opt.spacing,
@@ -64,13 +67,16 @@
         unx: opt.maxAngle == null ? 90 : opt.maxAngle,
         minGap: opt.minGap,
         allow: opt.allow,
+        overlaps: opt.overlaps,
       });
-      const gap = UNB.closestGap(u.re, u.im, d * 1.5, closed, opt.allow),
+      const gap = UNB.closestGap(u.re, u.im, d * 1.5, closed, u.allow),
         cell = Math.max(2, 2 * d, 2 * maxShift);
       const moved = nearest98(u.re, u.im, re, im, cell),
         lost = nearest98(re, im, u.re, u.im, cell);
-      const fits = gap >= 0.9 * d && moved <= maxShift && lost <= maxShift;
-      evals.push({ width: W, fits, gap: gap / d, moved, lost, limit: maxShift, terms: N });
+      // (with Allow overlaps, the crossings' zones may not add up to more than the drawing: smaller, it is all overlap)
+      const crowd = (u.allow && u.allow.crowd) || 0,
+        fits = gap >= 0.9 * d && moved <= maxShift && lost <= maxShift && crowd <= 1;
+      evals.push({ width: W, fits, gap: gap / d, moved, lost, limit: maxShift, terms: N, crowd });
       return fits;
     };
     if (!(spacing > 0)) return { width: null, fits: false, evals };

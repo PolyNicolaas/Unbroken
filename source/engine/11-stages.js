@@ -30,7 +30,7 @@
     if (o.mode === "edges") {
       const hi = 150 - o.sens * 1.8;
       lines = UNB.canny(blurred, w, h, hi * 0.4, hi);
-    // o.split: packed-stroke splitting (default 0.1)
+      // o.split: packed-stroke splitting (default 0.1)
     } else lines = UNB.centerline(blurred, w, h, o.sens, undefined, undefined, o.split);
     if (o.selMask) for (let i = 0; i < w * h; i++) if (!o.selMask[i]) lines[i] = 0;
     if (o.erase && o.erase.length) UNB.erase(lines, w, h, o.erase);
@@ -55,6 +55,163 @@
   UNB.stageTrace = function (src, w, h, walkOpt, snap) {
     const lines = src.lines || UNB.stageLines(src.blurred, w, h, src);
     return UNB.stageWalk(lines, w, h, walkOpt, snap);
+  };
+
+  // A walk from one exact path (a pattern drawn as one line) instead of a traced picture: the path's own points, about
+  // 1 px apart, single strokes only (no doubling, no connectors). x, y in working px; closed: a loop (the walk repeats
+  // its first point at the end, as a traced loop does). Its crossings stay crossings: nothing is joined where it
+  // crosses itself (a trace makes a junction there and goes round it twice). opt: startAt ([x, y] px: a loop starts at
+  // its nearest point, an open line at its nearer end).
+  UNB.stageVector = function (x, y, closed, w, h, opt) {
+    const n0 = x.length;
+    if (n0 < 2) return null;
+    const ox = [],
+      oy = [];
+    const m = closed ? n0 : n0 - 1;
+    for (let i = 0; i < m; i++) {
+      const j = (i + 1) % n0,
+        L = Math.hypot(x[j] - x[i], y[j] - y[i]),
+        k = Math.max(1, Math.ceil(L));
+      for (let s = 0; s < k; s++) {
+        ox.push(x[i] + ((x[j] - x[i]) * s) / k);
+        oy.push(y[i] + ((y[j] - y[i]) * s) / k);
+      }
+    }
+    const at = opt && opt.startAt;
+    if (at && closed) {
+      let best = 0,
+        bd = Infinity;
+      for (let i = 0; i < ox.length; i++) {
+        const dd = (ox[i] - at[0]) ** 2 + (oy[i] - at[1]) ** 2;
+        if (dd < bd) {
+          bd = dd;
+          best = i;
+        }
+      }
+      ox.push(...ox.splice(0, best));
+      oy.push(...oy.splice(0, best));
+    }
+    if (closed) {
+      ox.push(ox[0]);
+      oy.push(oy[0]);
+    } else {
+      ox.push(x[n0 - 1]);
+      oy.push(y[n0 - 1]);
+    }
+    if (
+      at &&
+      !closed &&
+      Math.hypot(ox[ox.length - 1] - at[0], oy[oy.length - 1] - at[1]) < Math.hypot(ox[0] - at[0], oy[0] - at[1])
+    ) {
+      ox.reverse();
+      oy.reverse();
+    }
+    const n = ox.length,
+      px = Float64Array.from(ox, (v) => Math.min(w - 1, Math.max(0, v))),
+      py = Float64Array.from(oy, (v) => Math.min(h - 1, Math.max(0, v)));
+    const mask = new Uint8Array(w * h);
+    let minX = Infinity,
+      minY = Infinity,
+      maxX = -Infinity,
+      maxY = -Infinity;
+    for (let i = 0; i < n; i++) {
+      mask[Math.round(py[i]) * w + Math.round(px[i])] = 1;
+      minX = Math.min(minX, px[i]);
+      maxX = Math.max(maxX, px[i]);
+      minY = Math.min(minY, py[i]);
+      maxY = Math.max(maxY, py[i]);
+    }
+    let linePix = 0;
+    for (let i = 0; i < w * h; i++) linePix += mask[i];
+    return {
+      px,
+      py,
+      dbl: new Uint8Array(n),
+      jmp: new Uint8Array(n),
+      side: new Int8Array(n),
+      grp: new Int32Array(n).fill(-1),
+      jid: new Int32Array(n).fill(-1),
+      jd: new Float32Array(n).fill(Infinity),
+      jr: 160,
+      tip: new Uint8Array(n),
+      open: !closed,
+      mask,
+      edt: UNB.edt(mask, w, h),
+      nParts: 1,
+      dropped: 0,
+      jumpLen: 0,
+      doubledFrac: 0,
+      bbox: { minX, minY, maxX, maxY },
+      linePix,
+      vector: true,
+    };
+  };
+
+  // Allow overlaps: the line may cross itself where the fitted curve does. At each crossing the two strands that cross
+  // may come as close as crossing lines must, along each strand as far as they need to come a spacing apart (d / (2
+  // sin(angle / 2)) + d, at most 6 d); any other strand near them is still kept the spacing away, and so is everything
+  // elsewhere. Returns allow(x, y) for the crossings themselves (true within d of one, or in a painted crossing area:
+  // `allow`), with allow.pair(x1, y1, x2, y2) (these two points may be closer than the spacing: on the two strands of
+  // one crossing, or either in a painted area) and allow.zone(x, y) (anywhere round a crossing, for the preview's
+  // too-close marks). The given allow when the curve has no crossings.
+  UNB.overlapAllow = function (re, im, closed, d, allow) {
+    const cr = UNB.findCrossings(re, im, closed);
+    if (!cr.length || !(d > 0)) return allow || null;
+    const n = re.length,
+      Rmax = 6 * d,
+      cell = 0.5 * d, // strands are looked up in cells this size, 3 × 3 round a point (so within 0.5–1.5 d)
+      cx = cr.map((c) => c[3]),
+      cy = cr.map((c) => c[4]),
+      rad = cr.map((c) => Math.min(Rmax, d / (2 * Math.sin((Math.max(c[2], 1) * Math.PI) / 360)) + d)),
+      C = UNB._u.cellGrid(Rmax),
+      cells = new Map(); // cell → the strands through it, each crossing × 2 + strand (0, 1)
+    const key = (gx, gy) => gx * 1e6 + gy;
+    cr.forEach((c, i) => {
+      C.add(cx[i], cy[i], i);
+      [c[0], c[1]].forEach((a, k) => {
+        // the strand's points out from the crossing both ways, as far as its zone reaches
+        for (const dir of [1, -1])
+          for (let st = dir > 0 ? 1 : 0, guard = 0; guard < n; st++, guard++) {
+            let q = a + dir * st;
+            if (closed) q = ((q % n) + n) % n;
+            else if (q < 0 || q >= n) break;
+            if (Math.hypot(re[q] - cx[i], im[q] - cy[i]) > rad[i]) break;
+            const kk = key(Math.floor(re[q] / cell), Math.floor(im[q] / cell));
+            let set = cells.get(kk);
+            if (!set) cells.set(kk, (set = new Set()));
+            set.add(2 * i + k);
+          }
+      });
+    });
+    const around = (x, y, fn) => {
+      const gx = Math.floor(x / cell),
+        gy = Math.floor(y / cell);
+      for (let ox = -1; ox <= 1; ox++)
+        for (let oy = -1; oy <= 1; oy++) {
+          const set = cells.get(key(gx + ox, gy + oy));
+          if (set) for (const t of set) if (fn(t)) return true;
+        }
+      return false;
+    };
+    const within = (x, y, r) => {
+      let hit = false;
+      C.near(x, y, (i) => {
+        if (!hit && Math.hypot(x - cx[i], y - cy[i]) <= r(i)) hit = true;
+      });
+      return hit;
+    };
+    const f = (x, y) => (allow && allow(x, y)) || within(x, y, () => d);
+    // how crowded the crossings are: their zones' total area ÷ the drawing's box (over 1, they'd cover it all)
+    const b = bbox(re, im);
+    f.crowd = rad.reduce((a, r) => a + Math.PI * r * r, 0) / Math.max(1, (b.x1 - b.x0) * (b.y1 - b.y0));
+    f.zone = (x, y) => (allow && allow(x, y)) || within(x, y, (i) => rad[i]);
+    f.pair = (x1, y1, x2, y2) => {
+      if (allow && (allow(x1, y1) || allow(x2, y2))) return true;
+      const a = new Set();
+      around(x1, y1, (t) => void a.add(t));
+      return a.size > 0 && around(x2, y2, (t) => a.has(t ^ 1)); // the other strand of the same crossing
+    };
+    return f;
   };
 
   // A crossing-area mask can't be sent to a worker as a function, so stages take { allowMask, allowW, allowH } and
@@ -210,7 +367,7 @@
   UNB.shapeLine = function (re, im, closed, o) {
     const d = o.d || 0,
       unx = o.unx || 0,
-      allow = o.allow || null;
+      allow = o.overlaps ? UNB.overlapAllow(re, im, closed, d, o.allow) : o.allow || null;
     if (unx > 0) {
       const u = UNB.untangle(re, im, closed, {
         maxAngle: unx,
@@ -219,30 +376,32 @@
         allow,
         tags: o.tags,
       });
-      return { re: u.re, im: u.im, carry: u.carry, tags: u.tags, before: u.before };
+      return { re: u.re, im: u.im, carry: u.carry, tags: u.tags, before: u.before, allow };
     }
     const sp = d > 0 ? UNB.enforceSpacing(re, im, d, 120, closed, allow) : { re, im };
-    return { re: sp.re, im: sp.im, carry: o.carry || [], tags: o.tags || null, before: null };
+    return { re: sp.re, im: sp.im, carry: o.carry || [], tags: o.tags || null, before: null, allow };
   };
 
   // fitted curve → the line that is drawn: untangling / spacing (shapeLine), then every measurement the preview shows.
-  // o: closed, d (spacing px), unx, minGap, allow, tags, jumps (connector flags per point), pad (half the line width,
+  // o: closed, d (spacing px), unx, minGap, allow, overlaps (keep the curve's own crossings: UNB.overlapAllow), tags,
+  // jumps (connector flags per point), pad (half the line width,
   // for
   // minBox), driftTol, path (stageSignal's: what the series was fitted to, for the error readout; else walk, its centre
   // line). Returns final, jumpF, before / after / inArea (crossings), fb (bounds),
   // mbox, err, gap, gapProbe, problems (crossings, tight, drift, driftShare).
   UNB.stageFinal = function (re, im, o) {
     const closed = o.closed,
-      d = o.d || 0,
-      allow = o.allow || null;
+      d = o.d || 0;
     const cur = UNB.shapeLine(re, im, closed, {
       d,
       unx: o.unx,
       minGap: o.minGap,
-      allow,
+      allow: o.allow || null,
+      overlaps: o.overlaps,
       carry: [o.jumps],
       tags: o.tags,
     });
+    const allow = cur.allow; // (with Allow overlaps, the zones round the curve's own crossings too)
     const fre = cur.re,
       fim = cur.im,
       jf = cur.carry[0],
@@ -255,7 +414,7 @@
     const problems = UNB.problemSpots(fre, fim, d, closed);
     if (allow) {
       problems.crossings = problems.crossings.filter(([x, y]) => !allow(x, y));
-      problems.tight = problems.tight.filter(([x, y]) => !allow(x, y));
+      problems.tight = problems.tight.filter(([x, y]) => !(allow.zone || allow)(x, y));
     }
     const dr = UNB.drift(re, im, fre, fim, closed, o.driftTol || 0); // where the line was pushed away from the drawing
     problems.drift = dr.spans;
@@ -302,6 +461,7 @@
       unx: o.unx == null ? 90 : o.unx,
       minGap: o.minGap || 0,
       allow: o.allow || null,
+      overlaps: o.overlaps,
       tags: { group: null, jid: sg.tagS.jid.slice(0, n0), jd: sg.tagS.jd.slice(0, n0) },
       jumps: sg.jumpS.slice(0, n0),
       pad: 0,

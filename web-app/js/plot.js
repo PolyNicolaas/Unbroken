@@ -47,7 +47,7 @@ function paperSize() {
 }
 async function penLine() {
   const walk = st.walk,
-    key = JSON.stringify([cornerMM(), +$("uncross").value, st.zones, st.outW, st.simplify]);
+    key = JSON.stringify([cornerMM(), +$("uncross").value, $("overlaps").checked, st.zones, st.outW, st.simplify]);
   let m = penCache.get(walk);
   if (!m) penCache.set(walk, (m = new Map()));
   if (m.has(key)) return m.get(key);

@@ -30,6 +30,7 @@ function layerSigNow() {
     st.outW,
     cornerMM(),
     +$("uncross").value,
+    $("overlaps").checked,
     lineWidthMM(),
     spacingMM(),
     M ? [M.id, M.turns, M.heightMM, M.cut] : null,

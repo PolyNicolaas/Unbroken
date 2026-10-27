@@ -137,12 +137,27 @@ function traceArgs(W, s, textMask) {
     { blurred: W.blurred, edges: !st.text && s.mode === "edges" },
   ]; // traced line moved onto the middle of the ink (or the edge), below a pixel
 }
+// the walk for one working image: a pattern drawn as one line is followed exactly (art.js gives its points: crossings
+// stay crossings, nothing is doubled); anything else, or a pattern with a selection or erasing, is traced
+function traceWalk(W, s, engine = PIPE) {
+  const v = st.source && st.source.__vector;
+  if (!v || st.text || st.sel || (st.erase && st.erase.length)) return engine.call("stageTrace", traceArgs(W, s));
+  const { sx, sy, kx, ky } = W.crop;
+  return engine.call("stageVector", [
+    Float64Array.from(v.x, (x) => (x - sx) * kx),
+    Float64Array.from(v.y, (y) => (y - sy) * ky),
+    v.closed,
+    W.w,
+    W.h,
+    { startAt: st.start ? toWork(st.start, W.crop) : null },
+  ]);
+}
 async function extract(g, P = Object.create(st), again = false) {
   const s = settings(),
     W = await working();
   guard(g);
   const { w, h } = W;
-  const walk = await PIPE.call("stageTrace", traceArgs(W, s));
+  const walk = await traceWalk(W, s);
   guard(g);
   Object.assign(P, {
     w,
@@ -302,7 +317,7 @@ function infillUI() {
 // line width ÷ spacing (needle ÷ needle + gap)
 const lineRatio = () => (spacingMM() > 0 ? Math.min(1, lineWidthMM() / spacingMM()) : 0.6);
 function allowSpec(w, h, crop = st.crop) {
-  return { allowMask: zoneMask("cross", w, h, crop), allowW: w, allowH: h };
+  return { allowMask: zoneMask("cross", w, h, crop), allowW: w, allowH: h, overlaps: $("overlaps").checked };
 }
 
 async function signal(g, P = Object.create(st)) {
@@ -500,6 +515,7 @@ function marksKeyNow() {
     CFG.engine.loopRadius,
     CFG.engine.sizeDetail,
     +$("uncross").value,
+    $("overlaps").checked,
     cornerMM(),
     BED.w,
   ]); // BED.w: the search goes up to 1.5 × the plate
@@ -532,12 +548,11 @@ async function sizeMarks(g) {
     // the print is traced finer than the base: trace the base for the marks
     const keepWk = st.wk,
       s = settings(),
-      W = await working(baseRes()),
-      args = traceArgs(W, s);
+      W = await working(baseRes());
     guard(g);
     allow = allowSpec(W.w, W.h, W.crop); // crossing areas drawn at the base resolution
     st.wk = keepWk; // the working image on screen stays the cached one
-    walk = await PIPE.call("stageTrace", args);
+    walk = await traceWalk(W, s);
     guard(g);
     w = W.w;
     h = W.h;
@@ -671,7 +686,9 @@ async function finalize(g, P = Object.create(st), newSignal = false) {
   buildEpicycles();
   labels(); // labels: image-side sliders show mm at this size
   $("uncrossVal").textContent =
-    (unx > 0 ? `${r.before} → ${r.after}` : `${r.after}`) + (r.inArea ? ` · ${r.inArea} in crossing areas` : "");
+    r.inArea && $("overlaps").checked
+      ? `${r.inArea} kept (overlaps)` + (r.after ? ` · ${r.after} left` : "") // (the rest were undone)
+      : (unx > 0 ? `${r.before} → ${r.after}` : `${r.after}`) + (r.inArea ? ` · ${r.inArea} in crossing areas` : "");
   finalizeReadout();
   const pc = st.problems.crossings.length,
     pt = st.problems.tight.length;
