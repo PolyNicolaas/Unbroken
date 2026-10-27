@@ -26,23 +26,18 @@ const PRESETS = Object.fromEntries(
     },
   ])
 );
-function applyPreset(key) {
+// quiet: only set the controls (the caller starts the trace)
+function applyPreset(key, quiet) {
   if (key === "lettering") {
     const t = (CFG.raw && CFG.raw.defaults) || {}; // lettering starts from the text defaults in settings.js
     $("font").value = UNB_FONTS[t.font] ? t.font : "sans";
     $("txtSpacing").value = MAP.letterSpacing[t.letterSpacing] || "auto";
     $({ left: "alLeft", right: "alRight" }[t.align] || "alCenter").checked = true;
-    if (!textMode()) {
-      $("srcText").checked = true;
-      srcTypeChanged();
-    } else textChanged();
+    if (!textMode()) artOnly("text"); // art.js: the art becomes the text alone
+    else textChanged();
     return;
   }
   const p = PRESETS[key];
-  if (textMode()) {
-    $("srcImage").checked = true;
-    srcTypeChanged();
-  }
   (p.mode === "edges" ? $("modeOutline") : $("modeCenter")).checked = true;
   $("blur").value = p.blur;
   $("minLen").value = p.minLen;
@@ -55,6 +50,7 @@ function applyPreset(key) {
   $("shadeStyle").value = "off";
   $("uncross").value = "90";
   labels();
+  if (quiet) return;
   st.autoPending = true;
   schedule(extract);
 }

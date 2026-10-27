@@ -162,6 +162,25 @@
     return out + "</svg>\n";
   };
 
+  // A page of separate strokes for a pen plotter, one Inkscape layer per pen: the Art tab's layers plotted as drawn,
+  // without tracing. layers: [{ label, color, width (mm), strokes: [[x, y, …] page mm] }]; o: paperW, paperH (mm).
+  UNB.exportLayersSVG = function (layers, o) {
+    const esc = (t) => String(t).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/"/g, "&quot;"),
+      X = (v) => f3(v),
+      used = layers.filter((L) => L.strokes && L.strokes.length);
+    let out =
+      `<?xml version="1.0" encoding="UTF-8"?>\n<!-- Unbroken: art for a pen plotter, as drawn (not traced), ${f3(o.paperW)} x ${f3(o.paperH)} mm page, ${used.length} pen${used.length === 1 ? "" : "s"} (one layer each) -->\n` +
+      `<svg xmlns="http://www.w3.org/2000/svg" xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape" width="${f3(o.paperW)}mm" height="${f3(o.paperH)}mm" viewBox="0 0 ${f3(o.paperW)} ${f3(o.paperH)}">\n`;
+    used.forEach((L, i) => {
+      const attrs = `fill="none" stroke="${L.color}" stroke-width="${f3(L.width)}"`;
+      out +=
+        `<g id="pen${i + 1}" inkscape:groupmode="layer" inkscape:label="${esc(L.label || `${i + 1}`)}" ${attrs} stroke-linejoin="round" stroke-linecap="round">\n` +
+        svgPolylines(L.strokes, X, X, 400, attrs) +
+        "</g>\n";
+    });
+    return out + "</svg>\n";
+  };
+
   // G-code for the chocolate printer. paths: [{ x, y, z?, e? }] in bed mm, y up, one per copy, each printed start to
   // end
   // (a closed lap repeats its first point at the end, as UNB.layerStack writes it). Bed position = (g.ox + x, g.oy +

@@ -63,7 +63,7 @@ module.exports = {
       check("changed defaults: working resolution", await pd.evaluate(() => CFG.baseResolution), "==", 720), check("changed defaults: simplify slider (0.1 mm)", await v("simplify"), "==", "20"),
       check("changed defaults: lasso selection", +(await c("selLasso")), "==", 1), check("changed defaults: font", await v("font"), "==", "script"),
       check("changed defaults: app traces", await A.terms(pd), ">", 10), check("changed defaults: nothing reported wrong", +(await pd.isHidden("#settingsNote")), "==", 1), check("changed defaults: page errors", errsD.length, "==", 0));
-    await pd.click("label[for=srcText]"); await pd.fill("#textIn", "a\nb\nc\nd\ne"); await pd.dispatchEvent("#textIn", "input"); await A.idle(pd, 800);
+    await A.source(pd, "text"); await pd.fill("#textIn", "a\nb\nc\nd\ne"); await pd.dispatchEvent("#textIn", "input"); await A.idle(pd, 800);
     checks.push(check("changed rules: text limited to 3 lines", (await pd.inputValue("#textIn")).split("\n").length, "<=", 3));
     await ctxD.close();
     return { checks };

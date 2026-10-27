@@ -23,9 +23,9 @@ module.exports = {
       checks.push(check(`${w} px Trace: main controls visible`, await count(page, MAIN), "==", MAIN.length));
       if (w > 1000) {
         checks.push(check("Trace: no px anywhere on the panel (readouts in mm)", +!/\d\s?px\b/.test(await page.evaluate(() => document.querySelector(".panel").innerText + document.getElementById("chip").innerText)), "==", 1));
-        const order = ["label[for=srcImage]", "#dropZone", "label[for=modeCenter]", "#sens", "#blur", "#lineW", "label[for=loopOpen]", "#sizeSlider", "#terms", "#optBtn"];
+        const order = ["#toArt", "label[for=modeCenter]", "#sens", "#blur", "#lineW", "label[for=loopOpen]", "#sizeSlider", "#terms", "#optBtn"];
         const tops = []; for (const s of order) tops.push(await page.$eval(s, (e) => e.getBoundingClientRect().top));
-        checks.push(check("Trace tab in order: Input, Tracing, Line, Size, Fit", +tops.every((t, i) => i === 0 || t > tops[i - 1]), "==", 1));
+        checks.push(check("Trace tab in order: From the Art tab, Tracing, Line, Size, Fit", +tops.every((t, i) => i === 0 || t > tops[i - 1]), "==", 1));
         checks.push(check("explanations behind ⓘ on the Trace tab", await page.$$eval(".card.design-only button.info", (els) => els.filter((e) => e.getBoundingClientRect().height > 0).length), ">", 3));
         checks.push(check("Save / Open folded into the File menu", +!(await visible(page, "#saveDesign")) + +(await visible(page, "#fileMenu summary")), "==", 2));
         await page.click("#fileMenu summary"); await page.waitForTimeout(100);
@@ -34,11 +34,11 @@ module.exports = {
         checks.push(check("opening View closes File", +!(await page.$eval("#fileMenu", (e) => e.open)), "==", 1));
         await page.keyboard.press("Escape"); await page.click("#fileMenu summary"); await page.keyboard.press("Escape"); await page.waitForTimeout(100);
         checks.push(check("Esc closes File", +!(await page.$eval("#fileMenu", (e) => e.open)), "==", 1));
-        await page.click("label[for=srcText]"); await A.idle(page, 800);
+        await A.source(page, "text"); await A.idle(page, 800);
         checks.push(check("text: no Tracing card (style, threshold); letter height and editable size in the Size card", +!(await visible(page, "#modeCenter")) + +!(await visible(page, "#sens")) + +(await visible(page, "#capH")) + +!(await page.$eval("#outW", (e) => e.readOnly)), "==", 4));
         checks.push(check("text: readout counts the connectors", +/\d+ terms · error [\d.]+ mm · \d+ connectors?/.test(await page.textContent("#chip")), "==", 1));
         checks.push(check("text: readout tip says connectors are always drawn", +/always drawn/i.test(await page.$eval("#chip", (e) => e.title)), "==", 1));
-        await page.click("label[for=srcImage]"); await A.idle(page, 800);
+        await A.source(page, "picture"); await A.idle(page, 800);
         checks.push(check("leaf: no connectors, none mentioned", +!/connector/.test(await page.textContent("#chip")), "==", 1));
         await page.$eval("#spacingHint", (e) => { e.className = "hint warn"; e.textContent = "test warning"; });
         checks.push(check("warnings visible", +(await visible(page, "#spacingHint")), "==", 1));

@@ -19,9 +19,9 @@ module.exports = {
     const fImg = await save(), before = await state();
     await page.evaluate(() => applyPreset("photo")); await A.idle(page, 800);
     await page.setInputFiles("#designFile", fImg); await A.idle(page, 1200); checks.push(check("image design reopened identically", +((await state()) === before), "==", 1));
-    await page.click("label[for=srcText]"); await page.fill("#textIn", "Choco\nlove"); await page.dispatchEvent("#textIn", "input"); await A.idle(page, 1200);
+    await A.source(page, "text"); await page.fill("#textIn", "Choco\nlove"); await page.dispatchEvent("#textIn", "input"); await A.idle(page, 1200);
     const tState = await state(), fTxt = await save();
-    await page.click("label[for=srcImage]"); await A.idle(page, 1000); const imgState = await state();
+    await A.source(page, "picture"); await A.idle(page, 1000); const imgState = await state();
     await page.setInputFiles("#anyFile", fTxt); await A.idle(page, 1200);
     checks.push(check("text design reopened identically", +((await state()) === tState && (await page.inputValue("#textIn")) === "Choco\nlove"), "==", 1));
     await page.mouse.click(5, 5); await page.keyboard.press("Control+z"); await A.idle(page, 1200);

@@ -20,8 +20,9 @@ maker's paid slicer (choc OS) for these prints.
 
 **What it does**
 
-- **Sources:** images (photos, drawings, logos), text in single-stroke fonts, 3D models (STL) sliced into layers, and
-  geometric art made in the app (labyrinths, space-filling curves, spirals, waves and more).
+- **The Art tab:** everything comes in here as layers: images (photos, drawings, logos), text in single-stroke fonts,
+  geometric patterns made in the app (labyrinths, space-filling curves, spirals, waves and more) and 3D models (STL),
+  each with a pen colour and a place in the art. Art → Trace → 2D or 3D.
 - **Tracing:** centreline or outline tracing with optional hatch, cross-hatch or squiggle shading, then a
   non-crossing tour of every stroke, fitted with a Fourier series per axis (X, Y and Z).
 - **Printing (3D tab):** G-code for the choc mate 2 with needle size, line spacing, layers, infill, supports built
@@ -97,6 +98,35 @@ and the slow spots. Anything still open from them is in [`ROADMAP.md`](ROADMAP.m
 8. **Score**: error = ½ (stray + missing), measured against the traced path, shown in mm.
 9. **Output**: the 2D tab (a pen plotter: SVG for Saxi, flat DXF) or the 3D tab (a printer: G-code). See [Outputs](#outputs-2d-and-3d). The line is always continuous: the chocolate printer can't stop the flow, so connectors are drawn, never lifted.
 
+## The Art tab
+
+Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 3D): **Art → Trace → 2D (plotter) or 3D
+(printers)**. The plan behind it, and what comes next, is in [`docs/ART-PLAN.md`](docs/ART-PLAN.md).
+
+- **Layers.** The art is a stack of layers, each a source: a **picture** (a sample, an image of yours, or a sketch made
+  with Draw your own), the **text** (one text layer: the Text card's controls), a **pattern** (any number: the styles
+  under [Geometric art](#geometric-art)) or a **3D model** (one). Add them with the Add buttons, or drop a file anywhere
+  on the page (an image goes into the chosen picture layer, an STL into the model layer, a design file opens). Each
+  layer has an eye (shown or hidden), a **pen colour**, up and down arrows and ×. Tap a layer for its own card;
+  **Placement** sizes it and moves it across and down within the art's frame (the bottom shown layer sets the frame;
+  the others are fitted inside it first). `web-app/js/art.js`.
+- **The Art view** (the big view's first tab) shows the shown layers in their pens' colours, the chosen one outlined.
+- **What the Trace tab gets:** a shown 3D model on its own (sliced on the 3D tab; the other layers wait, with a note);
+  the text on its own, unplaced (traced from its font's strokes, as before); otherwise every shown layer drawn as one
+  picture (multiplied together, so pictures don't hide what's under them) and traced into one line. A pattern on its
+  own is traced as drawn and starts at the width where its gap is the line spacing. The Trace tab's first card says what
+  it is tracing, with Edit the art to go back.
+- **Next:** **Trace it** (for the printers: chocolate and clay need one continuous line) or **Plot as drawn**.
+- **Plot as drawn (2D tab):** the 2D tab's **Art as drawn** plots the art's lines exactly as made, without tracing: each
+  shown layer with lines (patterns, the text) on its own pen and Inkscape layer in the SVG, fitted inside the margins
+  (`UNB.exportLayersSVG`). Pictures have no lines until traced, so the page says how many were left out; Traced line
+  plots the Trace tab's line as before (with fill pens). A printer always needs the trace.
+- **3D models** come in as a model layer; **Draw this view** (its card) adds the line drawing of the view as a picture
+  layer and hides the model, so the drawing is what's traced.
+- Undo covers every layer change; a design file keeps the layers, their pens and places, each pattern's settings and
+  each picture. Designs from before the Art tab open as one layer (their picture, a pattern made in v100, the text, or
+  the model). Tests A31 (the Art tab), A24 (one drop area), A07 (design files).
+
 ## Edit line
 
 **Edit line** (Tools, under the preview) changes the traced line by hand, for the spot the tracer didn't get right: a
@@ -123,11 +153,11 @@ until the new trace arrives. Tests E32, A30.
 
 ## Geometric art
 
-The **Geometric art** card (Trace tab, under Input) makes abstract geometric patterns to trace (`UNB.pattern`,
-`source/engine/13-patterns.js`; `web-app/js/patterns.js`). **Make and trace** draws the pattern as a picture
-(1600 px on its long side, `UNB.patternLayout`) and traces it like any other, so every rule of the line applies. Once a
-pattern is the picture, the card's sliders and menus change it as you go; with a picture of your own on screen they
-wait for Make and trace. **Shuffle** makes another random version of the styles that have one.
+**Pattern** layers (Art tab → Add → Pattern) are abstract geometric patterns (`UNB.pattern`,
+`source/engine/13-patterns.js`; the Pattern card is `web-app/js/patterns.js`). A pattern is drawn as exact lines
+(1600 px on its long side, `UNB.patternLayout`): the Art view and Plot as drawn use those lines, and the Trace tab traces
+them like any picture, so every rule of the line applies. The card's sliders and menus change the chosen pattern layer
+as you go; **Shuffle** makes another random version of the styles that have one.
 
 | Style | What it is | Controls | The line |
 |---|---|---|---|
@@ -143,16 +173,16 @@ wait for Make and trace. **Shuffle** makes another random version of the styles 
 | Truchet tiles | Quarter circles on a grid of tiles, joined into loops and curves | Tiles across, Mix, Shape | many pieces |
 
 - **For chocolate:** the one-line styles (the first seven) have an even gap between neighbouring lines and trace as one
-  line with nothing doubled, so they print without out-and-back strokes. Make and trace sets the Line card to Closed
-  loop or Open to suit, the trace style to Centerline, and starts the print at the width where the pattern's gap is
-  the line spacing (3% over, `startSize` in pipeline.js), so nothing needs pushing apart; the size slider and its marks
-  work as for any picture.
+  line with nothing doubled, so they print without out-and-back strokes. A pattern shown on its own sets the Line card
+  to Closed loop or Open to suit, the trace style to Centerline, and starts the print at the width where the pattern's
+  gap is the line spacing (3% over, `startSize` in pipeline.js), so nothing needs pushing apart; the size slider and
+  its marks work as for any picture.
 - **For the pen plotter:** everything works on the 2D tab; Spirograph loops, Lissajous and Truchet tiles (many pieces,
   joined by connectors) suit it best.
 - **Drawn for the tracer:** strokes a third of the closest gap, never wider than 0.9% of the picture (the centreline
   trace outlines strokes over 1.6% as filled shapes), and a 6% margin. The densest settings keep about 70 gaps across.
-- A design file keeps the picture and what it was made from, so the card goes on following a reopened pattern. Tests
-  E33 (every style keeps its promise and the one-line styles trace as one line), A30.
+- A design file keeps each pattern layer's settings. Tests E33 (every style keeps its promise and the one-line styles
+  trace as one line), A31.
 
 ## Units
 

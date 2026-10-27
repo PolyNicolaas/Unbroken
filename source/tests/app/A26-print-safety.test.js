@@ -8,10 +8,10 @@ module.exports = {
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
     const idle = () => A.idle(page, 300);
-    await page.click("label[for=srcModel]"); await idle();
+    await A.source(page, "model"); await idle();
     await page.click("label[for=viewChoc]"); await idle();
     const modelH = +(await page.inputValue("#printHeightMM"));
-    await page.click("label[for=viewDesign]"); await page.click("label[for=srcImage]"); await idle();
+    await page.click("label[for=viewDesign]"); await A.source(page, "picture"); await idle();
     await page.click("label[for=viewChoc]"); await idle();
     await page.selectOption("#chocolate", { index: 1 }); await idle();
     checks.push(check(`after a ${modelH} mm model: the drawing's layers`, await page.evaluate(() => st.layers.S.N + st.layers.S.M), "==", 1),

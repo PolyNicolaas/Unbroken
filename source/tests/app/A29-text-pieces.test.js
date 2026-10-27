@@ -7,7 +7,7 @@ module.exports = {
   pass: "The Plate card offers Lines of text with A piece for each line chosen; three pieces named after the lines, each traced on its own (no connector between lines), different widths; all three on the plate, none overlapping; the G-code has three copies, each one continuous line (no travel inside) printed inside its own footprint; the Trace tab's line is unchanged; 2 copies of each line gives six pieces; One copy shows the piece picked; One piece goes back to one copy of the joined text; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
-    await page.click("label[for=srcText]"); await A.idle(page);
+    await A.source(page, "text"); await A.idle(page);
     await page.fill("#textIn", "Anna\nBen\nChloe"); await A.idle(page); await A.idle(page);
     const trace0 = await page.evaluate(() => ({ n: st.final.re.length, N: st.N, ver: st.finalVer }));
     await page.click("label[for=viewChoc]"); await A.idle(page);

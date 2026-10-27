@@ -21,6 +21,8 @@ async function open(ctx, opts = {}) {
   if (opts.freezeProbe) await page.addInitScript(() => { window.__gaps = []; let last = performance.now(); setInterval(() => { const n = performance.now(); window.__gaps.push(n - last); last = n; }, 10); });
   await page.goto(opts.url || ctx.url);
   await idle(page, 300);
+  // the app opens on the Art tab; most tests work on the Trace tab, so they start there (opts.art: stay on Art)
+  if (!opts.art && (await page.$("label[for=viewDesign]"))) { await page.click("label[for=viewDesign]"); await idle(page, 100); }
   return { page, errors, close: () => context.close() };
 }
 // Wait until the app has finished: no debounce pending and no background job, three checks in a row 50 ms apart
@@ -47,4 +49,10 @@ const terms = async (page) => +((await chip(page)).match(/(\d+) terms/) || [0, 0
 const errorMM = async (page) => +((await chip(page)).match(/error ([\d.]+) mm/) || [0, NaN])[1];
 async function setValue(page, sel, value, ev = "input") { await page.$eval(sel, (e, [v, t]) => { e.value = v; e.dispatchEvent(new Event(t, { bubbles: true })); }, [String(value), ev]); }
 async function longestFreeze(page, fn) { await page.evaluate(() => { window.__gaps = []; }); await fn(); return page.evaluate(() => Math.round(Math.max(0, ...window.__gaps))); }
-module.exports = { SETTLE, open, idle, chip, terms, errorMM, setValue, longestFreeze };
+// what was the Trace tab's Image / Text / 3D model switch: show only the picture, text or model layers (art.js); text
+// and models open the Art tab, where their controls are
+async function source(page, kind) {
+  await page.evaluate((k) => artShowOnly(k), kind);
+  if (kind !== "picture") { await page.click("label[for=viewArt]"); await page.waitForTimeout(100); }
+}
+module.exports = { SETTLE, open, idle, source, chip, terms, errorMM, setValue, longestFreeze };

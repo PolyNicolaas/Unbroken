@@ -26,8 +26,8 @@ module.exports = {
     });
     await A.idle(page, 2500);
     checks.push(check("sweep then new image: committed trace is the new one (height ÷ width)", await page.evaluate(() => st.h / st.w), ">", 2.5));
-    await page.click("label[for=srcText]"); await A.idle(page, 800);
-    await page.evaluate(() => { const t = $("textIn"); t.value = "Hello there"; t.dispatchEvent(new Event("input", { bubbles: true })); $("srcImage").checked = true; srcTypeChanged(); });
+    await A.source(page, "text"); await A.idle(page, 800);
+    await page.evaluate(() => { const t = $("textIn"); t.value = "Hello there"; t.dispatchEvent(new Event("input", { bubbles: true })); artShowOnly("picture"); });
     await A.idle(page, 1500);
     checks.push(check("text then Image at once: the source stays the image", +(await page.evaluate(() => document.body.dataset.src === "image" && !st.text)), "==", 1));
     await page.click("label[for=view2D]"); await A.idle(page, 2500);

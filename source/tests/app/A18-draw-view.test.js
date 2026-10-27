@@ -9,7 +9,7 @@ module.exports = {
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
     const ink = () => page.$eval("#view", (c) => { const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 3; i < d.length; i += 4) if (d[i] > 0) n++; return n; });
-    await page.click("label[for=srcModel]"); await page.waitForTimeout(1200);
+    await A.source(page, "model"); await page.waitForTimeout(1200);
     await page.check("#hlPreview"); await A.setValue(page, "#crease", 60); await page.waitForTimeout(400);
     const at60 = await ink();
     await A.setValue(page, "#crease", 1); await page.waitForTimeout(400);
@@ -30,10 +30,10 @@ module.exports = {
     await page.click("label[for=view2D]"); await page.waitForTimeout(500); await A.idle(page, 800);
     for (let i = 0; i < 40 && !/mm on/.test(await page.textContent("#plotInfo")); i++) await page.waitForTimeout(500);
     checks.push(check("2D tab: the pen line is on the page", +/mm on/.test(await page.textContent("#plotInfo")), "==", 1));
-    await page.click("label[for=viewDesign]"); await page.click("label[for=srcModel]"); await page.waitForTimeout(1000);
+    await page.click("label[for=viewDesign]"); await A.source(page, "model"); await page.waitForTimeout(1000);
     checks.push(check("3D model: the vase is back", +/^sample vase · /.test(await page.textContent("#chip")), "==", 1));
-    await page.click("label[for=srcImage]"); await A.idle(page, 1500);
-    checks.push(check("Image: the drawing is back", +((await page.textContent("#srcinfo")) === "sample vase · drawing"), "==", 1));
+    await A.source(page, "picture"); await A.idle(page, 1500);
+    checks.push(check("pictures shown again: the drawing is one of them", +(await page.textContent("#srcinfo")).includes("sample vase · drawing"), "==", 1));
     checks.push(check("page errors", errors.length, "==", 0));
     await close(); return { checks, notes: `preview ink: ${at1} px at 1°, ${at60} px at 60°` };
   },

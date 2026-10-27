@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="css/app.css">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
-<body data-view="design" data-stage="line" data-copies="one">
+<body data-view="art" data-stage="art" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
@@ -21,13 +21,15 @@
   <div class="left">
     <div class="stage">
       <div class="seg small stage-tabs" role="radiogroup" aria-label="What the big view shows">
-        <input type="radio" name="stage" id="stLine" value="line" checked><label for="stLine">Line</label>
+        <input type="radio" name="stage" id="stArt" value="art" checked><label for="stArt">Art</label>
+        <input type="radio" name="stage" id="stLine" value="line"><label for="stLine">Line</label>
         <input type="radio" name="stage" id="stPage" value="page"><label for="stPage">2D page</label>
         <input type="radio" name="stage" id="stPlate" value="plate"><label for="stPlate">Plate</label>
         <input type="radio" name="stage" id="stLayers" value="layers"><label for="stLayers">3D layers</label>
       </div>
       <div class="canvas-box" id="box">
         <canvas id="view" aria-label="Traced line preview"></canvas>
+        <div class="stage-pane" id="paneArt"><canvas class="page" id="artView" aria-label="The art: every shown layer in its pen's colour"></canvas></div>
         <div class="stage-pane" id="panePage"><canvas class="page" id="pageView" aria-label="The drawing on the paper. Click a shape to fill it with the chosen pen."></canvas></div>
         <div class="stage-pane" id="panePlate"><canvas class="plate" id="plate" aria-label="The drawing placed on the 340 by 232 mm print plate"></canvas></div>
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
@@ -171,7 +173,8 @@
 
   <div class="panel">
     <div class="seg view-tabs" role="radiogroup" aria-label="View">
-      <input type="radio" name="view" id="viewDesign" value="design" checked><label for="viewDesign">Trace<small>trace and shape the line</small></label>
+      <input type="radio" name="view" id="viewArt" value="art" checked><label for="viewArt">Art<small>layers: every source</small></label>
+      <input type="radio" name="view" id="viewDesign" value="design"><label for="viewDesign">Trace<small>trace and shape the line</small></label>
       <input type="radio" name="view" id="view2D" value="plot"><label for="view2D">2D<small>pen plotter, flat files</small></label>
       <input type="radio" name="view" id="viewChoc" value="choc"><label for="viewChoc">3D<small>printers, layers, G-code</small></label>
     </div>
@@ -324,42 +327,46 @@
       <div class="inline"><span class="spacer" style="flex:1"></span><button class="btn" type="button" id="dxfBtn" title="The printed line as one closed curve, flat, for choc OS's 2D curve upload (a fallback)">DXF for choc OS</button><button class="btn primary" type="button" id="gcodeBtn">Export G-code</button></div>
       <p class="status" id="gcodeMsg" role="status"></p>
     </section>
-    <section class="card design-only" aria-labelledby="h-src">
-      <h2 id="h-src">Input <span id="srcinfo"></span></h2>
-      <div class="seg" role="radiogroup" aria-label="Source type">
-        <input type="radio" name="srcType" id="srcImage" value="image" checked><label for="srcImage">Image<small>trace a picture</small></label>
-        <input type="radio" name="srcType" id="srcText" value="text"><label for="srcText">Text<small>type words</small></label>
-        <input type="radio" name="srcType" id="srcModel" value="model"><label for="srcModel">3D model<small>slice an STL</small></label>
-      </div>
+    <section class="card art-only" aria-labelledby="h-layers">
+      <h2 id="h-layers">Layers <span id="layersVal"></span></h2>
       <div class="dropzone" id="dropZone" role="button" tabindex="0" aria-label="Choose or drop a file: an image, an STL model or a saved design">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="dz-main">Drop a file here, or click to choose</span>
         <span class="dz-sub">Image (PNG, JPG, SVG) · 3D model (STL) · saved design (.unbroken.json) · or paste an image</span>
       </div>
       <input type="file" id="anyFile" accept="image/*,.stl,model/stl,application/sla,.json,application/json" hidden>
-      <div class="model-only row" id="modelBox">
-        <div class="inline">
-          <span class="val" id="modelInfo"></span>
-        </div>
-        <div class="lab"><span class="name">Which way up it prints</span></div>
-        <div class="inline">
-          <button class="btn mini" type="button" id="turnX" title="Tip it a quarter turn forward (about the left–right axis)">Tip forward</button>
-          <button class="btn mini" type="button" id="turnY" title="Tip it a quarter turn sideways (about the front–back axis)">Tip sideways</button>
-          <button class="btn mini" type="button" id="turnZ" title="Turn it a quarter turn on the plate">Turn</button>
-          <button class="btn mini" type="button" id="turnReset">As loaded</button>
-        </div>
-        <p class="hint help"><span class="slow">Big models (hundreds of thousands of triangles) load, turn and slice slowly.</span> Drag the preview to look around it. The 3D tab slices it into layers and fits each one with a Fourier series; set its height there. The line spacing below is the wall's.</p>
-        <div class="row" id="drawViewRow">
-          <div class="lab"><span class="name">Line drawing of this view</span><span class="val" id="creaseVal">folds over 20°</span></div>
-          <label class="check"><input type="checkbox" id="hlPreview"> <span>Show the preview as a drawing</span></label>
-          <div class="lab"><label for="crease">Draw folds sharper than</label></div>
-          <input type="range" id="crease" min="1" max="90" value="20" aria-describedby="drawViewHint">
-          <div class="inline"><button class="btn" type="button" id="drawView">Draw this view</button><button class="btn" type="button" id="drawSvg" title="The line drawing of this view as vectors, before any tracing: every visible edge, pieces that meet joined into strokes, at the model's size in mm">Export SVG</button></div>
-          <p class="status" id="drawMsg" role="status"></p>
-          <p class="hint help" id="drawViewHint">Outlines and folds as seen from the preview's angle, hidden lines removed (like plotter.vision). At the far left every edge between faces that aren't flat together is drawn, a wireframe (the plotter.vision look); further right only sharper folds and the outline. Export SVG saves the drawing itself as vectors (every visible edge, at the model's size). Draw this view makes it the picture to trace, for chocolate or the 2D tab; a dense wireframe is more than one line can follow, so keep the angle up for tracing. Pick 3D model again to change the angle. <span class="slow">Drawing or exporting a view takes a few seconds; a wireframe (far left) takes longest.</span></p>
-        </div>
+      <ol class="layer-list" id="layerList" aria-label="Layers, top first"></ol>
+      <div class="inline add-layer"><span class="add-lab">Add</span>
+        <button class="btn mini" type="button" id="addPicture" title="A picture to trace: a sample, your own image, or one you draw">Picture</button>
+        <button class="btn mini" type="button" id="addText" title="Lettering in a single-stroke font (one text layer)">Text</button>
+        <button class="btn mini" type="button" id="addPattern" title="Geometric art: labyrinths, space-filling curves, spirals, waves and more">Pattern</button>
+        <button class="btn mini" type="button" id="addModel" title="A 3D model (STL): printed by slicing, or drawn as a line drawing of a view (one model layer)">3D model</button>
       </div>
-      <div class="text-only row" id="textBox">
+      <p class="status" id="layerMsg" role="status"></p>
+      <p class="hint help">Everything starts here. Each layer is a source: a picture, text, a pattern or a 3D model, drawn in its pen's colour. Tap a layer to change it; the eye shows or hides it; the arrows move it up or down. Together the shown layers make the art: the Trace tab traces it into one line for a printer, and the 2D tab can plot it straight from here. A shown 3D model prints on its own (sliced on the 3D tab); hide it to trace the other layers, or use Draw this view to add its drawing as a picture.</p>
+      <div hidden>
+        <input type="radio" name="srcType" id="srcImage" value="image" checked>
+        <input type="radio" name="srcType" id="srcText" value="text">
+        <input type="radio" name="srcType" id="srcModel" value="model">
+      </div>
+    </section>
+
+    <section class="card art-only lay-picture" aria-labelledby="h-pic">
+      <h2 id="h-pic">Picture <span id="picVal"></span></h2>
+      <select id="sample" aria-label="Sample image">
+        <option value="leaf">Sample: leaf</option>
+        <option value="shapes">Sample: shapes &amp; text</option>
+        <option value="smiley">Sample: smiley</option>
+        <option value="user" disabled>Your image</option>
+      </select>
+      <div class="inline"><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
+      <input type="file" id="picFile" accept="image/*" hidden>
+      <p class="hint help">A sample, an image of yours (or drop one anywhere on the page) or a sketch: it replaces this layer's picture. Use Add → Picture for another picture on top.</p>
+    </section>
+
+    <section class="card art-only lay-text" aria-labelledby="h-text">
+      <h2 id="h-text">Text</h2>
+      <div class="row" id="textBox">
         <textarea id="textIn" rows="3" spellcheck="false" aria-label="Text to trace (up to 5 lines)">Happy Birthday</textarea>
         <span class="val" id="lineCount" style="justify-self:end">1 of 5 lines</span>
         <label class="field"><span>Font</span><select id="font"></select></label>
@@ -381,20 +388,10 @@
         </div>
         <p class="hint help" id="textHint">Single-stroke lettering: every letter is drawn with the same stroke at the same height. Even gaps keep the closest point between neighbouring letters at exactly the letter gap.</p>
       </div>
-      <div class="img-only">
-        <select id="sample" aria-label="Sample image">
-          <option value="leaf">Sample: leaf</option>
-          <option value="shapes">Sample: shapes &amp; text</option>
-          <option value="smiley">Sample: smiley</option>
-          <option value="user" disabled>Your image</option>
-          <option value="pattern" disabled>Geometric art</option>
-        </select>
-      </div>
-      <p class="hint help img-only">Or try a sample, or make one in the Geometric art card below. The tools under the preview select an area, erase stray lines, edit the traced line by hand, set the start point or let you draw your own.</p>
     </section>
 
-    <section class="card design-only img-only" aria-labelledby="h-art" data-fold="closed">
-      <h2 id="h-art">Geometric art <span id="artVal">10 styles</span></h2>
+    <section class="card art-only lay-pattern" aria-labelledby="h-art">
+      <h2 id="h-art">Pattern <span id="artVal"></span></h2>
       <label class="field"><span>Style</span><select id="artStyle" aria-describedby="artTip"></select></label>
       <p class="hint" id="artTip"></p>
       <div class="row">
@@ -413,11 +410,59 @@
       </div>
       <input type="hidden" id="artSeed" value="1">
       <div class="inline">
-        <button class="btn primary" type="button" id="artMake" title="Draw this pattern and trace it, in place of the picture">Make and trace</button>
         <button class="btn" type="button" id="artShuffle" title="Another random version of this style">Shuffle</button>
       </div>
       <p class="status" id="artMsg" role="status"></p>
-      <p class="hint help">Draws a pattern and traces it like any picture, so it follows every rule of the line. Once it's the picture, the sliders and menus here change it as you go. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print in chocolate without doubled strokes (the Line card's Closed loop or Open is set to suit). Spirograph with loops and Lissajous cross themselves, and Truchet tiles are many pieces joined by connectors: those suit the pen plotter (2D tab). The Edit line tool under the preview fine-tunes any of them.</p>
+      <p class="hint help">Geometric art drawn as exact lines. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: traced on their own they print without doubled strokes (the Line card's Closed loop or Open is set to suit, and the print starts at the width where the gap is the line spacing). Spirograph with loops and Lissajous cross themselves, and Truchet tiles are many pieces: those suit the pen plotter.</p>
+    </section>
+
+    <section class="card art-only lay-model" aria-labelledby="h-model">
+      <h2 id="h-model">3D model</h2>
+      <div class="row" id="modelBox">
+        <div class="inline">
+          <span class="val" id="modelInfo"></span>
+        </div>
+        <div class="lab"><span class="name">Which way up it prints</span></div>
+        <div class="inline">
+          <button class="btn mini" type="button" id="turnX" title="Tip it a quarter turn forward (about the left–right axis)">Tip forward</button>
+          <button class="btn mini" type="button" id="turnY" title="Tip it a quarter turn sideways (about the front–back axis)">Tip sideways</button>
+          <button class="btn mini" type="button" id="turnZ" title="Turn it a quarter turn on the plate">Turn</button>
+          <button class="btn mini" type="button" id="turnReset">As loaded</button>
+        </div>
+        <p class="hint help"><span class="slow">Big models (hundreds of thousands of triangles) load, turn and slice slowly.</span> Drag the preview to look around it. The 3D tab slices it into layers and fits each one with a Fourier series; set its height there. The Trace tab's line spacing is the wall's.</p>
+        <div class="row" id="drawViewRow">
+          <div class="lab"><span class="name">Line drawing of this view</span><span class="val" id="creaseVal">folds over 20°</span></div>
+          <label class="check"><input type="checkbox" id="hlPreview"> <span>Show the preview as a drawing</span></label>
+          <div class="lab"><label for="crease">Draw folds sharper than</label></div>
+          <input type="range" id="crease" min="1" max="90" value="20" aria-describedby="drawViewHint">
+          <div class="inline"><button class="btn" type="button" id="drawView">Draw this view</button><button class="btn" type="button" id="drawSvg" title="The line drawing of this view as vectors, before any tracing: every visible edge, pieces that meet joined into strokes, at the model's size in mm">Export SVG</button></div>
+          <p class="status" id="drawMsg" role="status"></p>
+          <p class="hint help" id="drawViewHint">Outlines and folds as seen from the preview's angle, hidden lines removed (like plotter.vision). At the far left every edge between faces that aren't flat together is drawn, a wireframe (the plotter.vision look); further right only sharper folds and the outline. Export SVG saves the drawing itself as vectors (every visible edge, at the model's size). Draw this view adds it to the art as a picture layer (and hides the model), to trace for a printer or the 2D tab; a dense wireframe is more than one line can follow, so keep the angle up for tracing. Show the model layer again to change the angle. <span class="slow">Drawing or exporting a view takes a few seconds; a wireframe (far left) takes longest.</span></p>
+        </div>
+      </div>
+    </section>
+
+    <section class="card art-only lay-placed" aria-labelledby="h-place" data-fold="closed">
+      <h2 id="h-place">Placement <span id="placeVal">as drawn</span></h2>
+      <div class="row"><div class="lab"><label for="placeSize">Size</label><span class="val" id="placeSizeVal"></span></div><input type="range" id="placeSize" min="10" max="200" value="100"></div>
+      <div class="row"><div class="lab"><label for="placeX">Across</label><span class="val" id="placeXVal"></span></div><input type="range" id="placeX" min="-50" max="50" value="0"></div>
+      <div class="row"><div class="lab"><label for="placeY">Down</label><span class="val" id="placeYVal"></span></div><input type="range" id="placeY" min="-50" max="50" value="0"></div>
+      <div class="inline"><button class="btn mini" type="button" id="placeReset">Reset</button></div>
+      <p class="hint help">Where the chosen layer sits in the art: its size and how far it moves across and down, as a share of the art's frame. The bottom layer sets the frame; every other layer is fitted inside it first.</p>
+    </section>
+
+    <section class="card art-only" aria-labelledby="h-next">
+      <h2 id="h-next">Next</h2>
+      <div class="inline">
+        <button class="btn primary" type="button" id="goTrace" title="Trace the art into one continuous line: needed for the 3D printers">Trace it</button>
+        <button class="btn" type="button" id="goPlot" title="Plot the art exactly as drawn on the 2D tab, without tracing">Plot as drawn</button>
+      </div>
+      <p class="hint" id="nextHint">Trace it for a printer (chocolate, clay): they need one continuous line. The pen plotter can take the art as drawn.</p>
+    </section>
+
+    <section class="card design-only" aria-labelledby="h-src">
+      <h2 id="h-src">From the Art tab <span id="srcinfo"></span></h2>
+      <div class="inline"><span class="hint" id="fromArt"></span><button class="btn mini" type="button" id="toArt">Edit the art</button></div>
     </section>
 
     <section class="card design-only img-only" aria-labelledby="h-trace">
@@ -573,7 +618,11 @@
 
     <section class="card plot-only" aria-labelledby="h-plot">
       <h2 id="h-plot">2D plot <span id="plotInfo"></span></h2>
-      <p class="hint help">For a pen plotter (the AxiDraw, through Saxi) and flat files. The pen can lift and go over a line twice, so this is the traced drawing itself: one stroke per line, no doubled strands or stroke-end loops, still one continuous line.</p>
+      <div class="seg" role="radiogroup" aria-label="What is plotted">
+        <input type="radio" name="plotFrom" id="plotTraced" value="traced" checked><label for="plotTraced">Traced line<small>from the Trace tab</small></label>
+        <input type="radio" name="plotFrom" id="plotArt" value="art"><label for="plotArt">Art as drawn<small>exact lines, no trace</small></label>
+      </div>
+      <p class="hint help">For a pen plotter (the AxiDraw, through Saxi) and flat files. Traced line: the traced drawing itself (the pen can lift and go over a line twice, so one stroke per line, no doubled strands or stroke-end loops, still one continuous line). Art as drawn: the Art tab's lines exactly as made, each layer on its own pen, fitted inside the margins; pictures need tracing first, and a printer always needs the traced line.</p>
       <div class="three">
         <label class="field"><span>Paper</span><select id="paper"><optgroup label="ISO"><option value="a6">A6 · 105 × 148</option><option value="a5">A5 · 148 × 210</option><option value="a4" selected>A4 · 210 × 297</option><option value="a3">A3 · 297 × 420</option><option value="a2">A2 · 420 × 594</option><option value="a1">A1 · 594 × 841</option></optgroup><optgroup label="US"><option value="letter">Letter · 8.5 × 11 in</option><option value="legal">Legal · 8.5 × 14 in</option><option value="tabloid">Tabloid · 11 × 17 in</option></optgroup><optgroup label="Drawing pads"><option value="6x8">6 × 8 in</option><option value="9x12">9 × 12 in</option><option value="11x14">11 × 14 in</option><option value="18x24">18 × 24 in</option></optgroup><optgroup label="Other"><option value="plate">Printer plate</option><option value="custom">Custom</option></optgroup></select></label>
         <label class="field"><span>Orientation</span><select id="paperOrient"><option value="landscape" selected>Landscape</option><option value="portrait">Portrait</option></select></label>
@@ -681,6 +730,7 @@
 <script src="js/preview.js"></script>
 <script src="js/tools.js"></script>
 <script src="js/patterns.js"></script>
+<script src="js/art.js"></script>
 <script src="js/readouts.js"></script>
 <script src="js/controls.js"></script>
 <script src="js/export.js"></script>

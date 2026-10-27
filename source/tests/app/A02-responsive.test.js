@@ -8,8 +8,8 @@ module.exports = {
   slow: true,
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { freezeProbe: true }), checks = [];
-    for (const p of ["photo", "drawing", "lettering"]) checks.push(check(`${p === "lettering" ? "Text switch" : p + " preset"}: longest freeze (ms)`, await A.longestFreeze(page, async () => { if (p === "lettering") await page.click("label[for=srcText]"); else await page.evaluate((k) => applyPreset(k), p); await A.idle(page, 500); }), "<=", 200));
-    await page.click("label[for=srcImage]"); await page.evaluate(() => applyPreset("drawing")); await A.idle(page, 500);
+    for (const p of ["photo", "drawing", "lettering"]) checks.push(check(`${p === "lettering" ? "Text switch" : p + " preset"}: longest freeze (ms)`, await A.longestFreeze(page, async () => { if (p === "lettering") await A.source(page, "text"); else await page.evaluate((k) => applyPreset(k), p); await A.idle(page, 500); }), "<=", 200));
+    await A.source(page, "picture"); await page.evaluate(() => applyPreset("drawing")); await A.idle(page, 500);
     checks.push(check("threshold slider drag: longest freeze (ms)", await A.longestFreeze(page, async () => { for (let v = -40; v <= 40; v += 5) { await A.setValue(page, "#sens", v); await page.waitForTimeout(40); } await A.idle(page, 500); }), "<=", 200));
     checks.push(check("still working afterwards", +(await page.$eval("#chip", (e) => e.classList.contains("busy"))), "==", 0), check("page errors", errors.length, "==", 0));
     await close(); return { checks };

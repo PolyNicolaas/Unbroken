@@ -7,7 +7,7 @@ module.exports = {
   pass: "Off: the ready list warns of an overhang over 1 mm at the cap and the box shows auto 0.28 (a third of the 0.84 mm line); each support: the ready list names it and the warning is gone, both lines are longer than with none; 2 mm a layer: no overhang warning; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
-    await page.click("label[for=srcModel]"); await A.idle(page);
+    await A.source(page, "model"); await A.idle(page);
     await page.setInputFiles("#anyFile", { name: "mushroom.stl", mimeType: "model/stl", buffer: Buffer.from(M.stl(M.mushroom())) }); await A.idle(page, 1000);
     await page.click("label[for=viewChoc]"); await page.fill("#printHeightMM", "22"); await page.press("#printHeightMM", "Tab"); await A.idle(page);
     const ready = () => page.$$eval("#readyList li", (l) => l.map((x) => x.textContent).join(" · ")), len = () => page.evaluate(() => st.layers.stack.laps.reduce((a, q) => a + q.length, 0));

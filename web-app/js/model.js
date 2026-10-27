@@ -121,11 +121,8 @@ function modelChanged(record) {
 async function loadModelFile(file) {
   try {
     const mesh = UNB.parseSTL(new Uint8Array(await file.arrayBuffer()));
-    if (!$("srcModel").checked) {
-      $("srcModel").checked = true;
-      srcTypeChanged();
-    }
     setModel(mesh, file.name.replace(/\.stl$/i, ""));
+    artModel(st.model.name); // art.js: the model layer, shown
   } catch (e) {
     toast(`Couldn't read ${file.name}: ${(e && e.message) || "not an STL file"}`, true);
   }
@@ -514,12 +511,9 @@ $("drawView").addEventListener("click", async () => {
       { yaw: M.yaw, pitch: M.pitch, size: 1400, crease: creaseDeg() },
     ]);
     const c = hlCanvas(r, 3);
-    st.imageSource = null; // the drawing is now the image; going back to the model keeps it
-    $("srcImage").checked = true;
-    document.body.dataset.src = "image";
-    applyPreset("drawing"); // first, so setSource's trace already uses it (one trace, not two)
-    setSource(c, `${M.name} · drawing`);
-    toast("Drawing made: tracing it as a line drawing");
+    applyPreset("drawing", true); // first, so the trace already uses it (one trace, not two)
+    artModelDrawing(c, `${M.name} · drawing`); // art.js: a picture layer; the model layer is hidden
+    toast("Drawing added to the art as a picture layer, and traced as a line drawing");
   } catch (e) {
     if (e !== CANCELLED) toast(`Couldn't draw the view: ${(e && e.message) || "error"}`, true);
   } finally {

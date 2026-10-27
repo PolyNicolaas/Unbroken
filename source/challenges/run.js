@@ -49,12 +49,13 @@ function checkGcode(text, app) {
         const svg = fs.readFileSync(file, "utf8"), [, w, h] = svg.match(/width="(\d+)" height="(\d+)"/), p = await browser.newPage({ viewport: { width: +w, height: +h } });
         await p.setContent(`<body style="margin:0">${svg}</body>`); file = path.join(OUT, j.name + "-source.png"); await p.screenshot({ path: file }); await p.close();
       }
-      if (model) { await page.click("label[for=srcModel]"); await A.idle(page); }
+      if (model) { await A.source(page, "model"); await A.idle(page); }   // the Art tab: a model layer, or the text alone
       if (j.text) {                                          // typed text: the Text source, its words and font
-        await page.click("label[for=srcText]"); await A.idle(page);
+        await A.source(page, "text"); await A.idle(page);
         if (j.text.font) await page.selectOption("#font", j.text.font);
         await page.fill("#textIn", j.text.value); await page.dispatchEvent("#textIn", "input"); await A.idle(page, 1500);
       } else { await page.setInputFiles("#anyFile", file); await A.idle(page, 1500); }
+      await page.click("label[for=viewDesign]"); await A.idle(page);   // the tracing settings are on the Trace tab
       for (const [sel, v] of j.trace || []) {                // a radio or checkbox is clicked (by its label), anything else set
         if (await page.$eval(sel, (e) => e.type === "radio" || e.type === "checkbox")) { if (!!(await page.$eval(sel, (e) => e.checked)) !== !!v) await page.click(`label[for=${sel.slice(1)}]`); }
         else await A.setValue(page, sel, v);

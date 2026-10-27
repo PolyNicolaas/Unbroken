@@ -8,7 +8,7 @@ module.exports = {
   slow: true,
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
-    await page.click("label[for=srcText]"); await A.idle(page, 800);
+    await A.source(page, "text"); await A.idle(page, 800);
     await page.fill("#textIn", "one\ntwo\nthree\nfour\nfive\nsix"); await page.dispatchEvent("#textIn", "input"); await A.idle(page, 800);
     checks.push(check("lines kept", (await page.inputValue("#textIn")).split("\n").length, "<=", 5));
     await page.fill("#textIn", "Choco\nlove"); await page.dispatchEvent("#textIn", "input");

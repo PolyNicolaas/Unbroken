@@ -65,7 +65,9 @@ section.card.collapsed .card-toggle .t::before { transform: rotate(0deg); }
 section.card.collapsed { gap: 0; }
 section.card.collapsed > .card-body { display: none; }
 .card-body { display: grid; gap: calc(12px * var(--space)); min-width: 0; }
-body:not([data-view="design"]) .design-only, body:not([data-view="choc"]) .choc-only, body:not([data-view="plot"]) .plot-only { display: none !important; }
+body:not([data-view="design"]) .design-only, body:not([data-view="choc"]) .choc-only, body:not([data-view="plot"]) .plot-only, body:not([data-view="art"]) .art-only { display: none !important; }
+/* the Art tab: the chosen layer's own card (art.js sets data-layer) */
+body:not([data-layer="picture"]) .lay-picture, body:not([data-layer="text"]) .lay-text, body:not([data-layer="pattern"]) .lay-pattern, body:not([data-layer="model"]) .lay-model, body[data-layer="model"] .lay-placed { display: none !important; }
 canvas.page { display: block; border-radius: calc(6px * var(--corner)); background: var(--paper); }
 canvas.page.picking { cursor: pointer; }
 .pens { display: grid; gap: calc(6px * var(--space)); }
@@ -90,7 +92,7 @@ canvas.plate { display: block; border-radius: calc(6px * var(--corner)); }
 /* the big view's other panes: the 2D page, the plate and the 3D layers, each over the line view */
 .stage-tabs { margin: calc(8px * var(--space)); }
 .stage-pane { position: absolute; inset: 0; display: none; place-items: center; padding: calc(10px * var(--space)); background: var(--surface); container-type: size; }
-body[data-stage="page"] #panePage, body[data-stage="plate"] #panePlate, body[data-stage="layers"] #paneLayers { display: grid; }
+body[data-stage="art"] #paneArt, body[data-stage="page"] #panePage, body[data-stage="plate"] #panePlate, body[data-stage="layers"] #paneLayers { display: grid; }
 .stage-pane :is(canvas.page, canvas.plate) { --ar: 1.414; width: min(100cqw, 100cqh * var(--ar)); height: auto; aspect-ratio: var(--ar); }   /* --ar: width ÷ height, set by the code (paper, plate) */
 .pane-tip { position: absolute; right: 12px; bottom: 10px; font: 500 calc(10.5px * var(--text))/1 var(--font-mono); color: var(--muted); pointer-events: none; }
 body:not([data-stage="line"]) :is(#minimap, .toolbar.tools, #chip) { display: none !important; }
@@ -282,3 +284,19 @@ p.hint.help { border-left: 2px solid var(--rule); padding-left: 0.6em; }
 .ready li.bad button { color: var(--warn); font-weight: 600; }
 .card-toggle .hval.ok { color: var(--good); }
 .card-toggle .hval.warn, .card-toggle .hval.bad { color: var(--warn); }
+
+/* the Art tab's layer list (top first) */
+.layer-list { list-style: none; margin: 0; padding: 0; display: grid; gap: calc(4px * var(--space)); }
+.layer-list .layer { display: flex; align-items: center; gap: calc(6px * var(--space)); padding: calc(4px * var(--space)); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); background: var(--paper); min-width: 0; }
+.layer-list .layer.sel { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.layer-list .layer.off .lay-name { opacity: .5; }
+.layer-list .lay-eye { flex: none; width: 28px; height: 28px; display: grid; place-items: center; border: 0; background: none; color: var(--muted); cursor: pointer; border-radius: calc(6px * var(--corner)); }
+.layer-list .lay-eye svg { width: 18px; height: 18px; }
+.layer-list .lay-eye[aria-pressed="true"] { color: var(--ink); }
+.layer-list .lay-pen { flex: none; width: 24px; height: 24px; padding: 0; border: 1px solid var(--rule); border-radius: 50%; background: none; cursor: pointer; }
+.layer-list .lay-pen::-webkit-color-swatch-wrapper { padding: 0; } .layer-list .lay-pen::-webkit-color-swatch { border: 0; border-radius: 50%; }
+.layer-list .lay-name { flex: 1 1 auto; min-width: 0; text-align: left; border: 0; background: none; color: var(--ink); font: inherit; cursor: pointer; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; padding: calc(2px * var(--space)) 0; }
+.layer-list .lay-name small { display: block; color: var(--muted); font-size: .8em; }
+.layer-list .btn.mini { flex: none; padding-inline: calc(7px * var(--space)); }
+.add-layer { flex-wrap: wrap; }
+.add-lab { color: var(--muted); font-size: calc(12.5px * var(--text)); }

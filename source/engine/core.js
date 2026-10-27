@@ -33,7 +33,7 @@
                       UNB.smallestPrintSteps, UNB.minBox, UNB.plateLayout, UNB.plateLocal, UNB.layerStack, UNB.lapFeeds,
                       UNB.testStrips
     10-export.js   9. Export — the files the app offers: plotter-page SVG, flat DXF, G-code, ZIP.
-                      bezierRaw, svgPathD, dxfDoc, UNB.toBezier, UNB.exportDXF, UNB.exportPlotSVG, UNB.exportGcode,
+                      bezierRaw, svgPathD, dxfDoc, UNB.toBezier, UNB.exportDXF, UNB.exportPlotSVG, UNB.exportLayersSVG, UNB.exportGcode,
                       UNB.readGcode, CRC,
                       UNB.zip
     11-stages.js  10. Pipeline stages — what the app calls, in order; pure data in and out (Web Worker or page).

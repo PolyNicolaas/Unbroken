@@ -9,16 +9,16 @@ module.exports = {
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
     const waitLayers = async () => { await A.idle(page, 300); if (!/layers ·/.test(await page.textContent("#layerInfo"))) throw new Error("the layers never finished: " + (await page.textContent("#layerInfo"))); };
-    await page.click("label[for=srcModel]"); await page.waitForTimeout(1200);
+    await A.source(page, "model"); await page.waitForTimeout(1200);
     checks.push(check("sample vase: size in the readout", +/sample vase · 29\.1 × 29\.1 × 40(\.0)? mm/.test(await page.textContent("#chip")), "==", 1));
-    checks.push(check("tracing controls hidden, model controls shown", +!(await page.isVisible("#sens")) + +(await page.isVisible("#dropZone")), "==", 2));
+    checks.push(check("tracing controls hidden, model controls shown", +!(await page.isVisible("#sens")) + +/3D model/.test(await page.textContent("#fromArt")), "==", 2));
     await page.setInputFiles("#anyFile", { name: "posts.stl", mimeType: "model/stl", buffer: Buffer.from(M.stl([...M.cylinder(5, 10, -10, 0), ...M.cylinder(5, 10, 10, 0)])) });
     await page.waitForTimeout(1200);
     checks.push(check("posts: 768 triangles, 30 × 10 × 10 mm", +/^768 triangles · 30(\.0)? × 10(\.0)? × 10(\.0)? mm/.test(await page.textContent("#modelInfo")), "==", 1));
     await page.click("label[for=viewChoc]"); await waitLayers();
     checks.push(check("3D tab: sliced (layers in the readout)", +/^\d+ layers ·/.test(await page.textContent("#layerInfo")), "==", 1));
     checks.push(check("one layer's line reaches both posts (spans over 25 mm)", await page.evaluate(() => { const L = st.layers.wall, sp = (a) => Math.max(...a) - Math.min(...a); return +(Math.max(sp(L.x), sp(L.y)) > 25); }), "==", 1));
-    await page.click("label[for=viewDesign]"); await page.click("#turnY"); await page.waitForTimeout(800);
+    await page.click("label[for=viewArt]"); await page.click("#turnY"); await page.waitForTimeout(800);
     checks.push(check("tipped sideways: 30 mm tall", +/× 30(\.0)? mm$/.test(await page.textContent("#modelInfo")), "==", 1));
     await page.click("label[for=viewChoc]"); await page.waitForTimeout(300); await waitLayers();
     checks.push(check("Height field shows the model's 30 mm", +(await page.inputValue("#printHeightMM")), "==", 30));
@@ -44,10 +44,10 @@ module.exports = {
     await page.click("label[for=viewDesign]"); await page.mouse.click(5, 5);
     for (let i = 0; i < 8 && !/× 10(\.0)? mm$/.test(await page.textContent("#modelInfo")); i++) { await page.keyboard.press("Control+z"); await page.waitForTimeout(700); }
     checks.push(check("undo back past the turn: posts 10 mm tall again", +/× 10(\.0)? mm$/.test(await page.textContent("#modelInfo")), "==", 1));
-    await page.click("label[for=srcImage]"); await A.idle(page, 1500);
+    await A.source(page, "picture"); await A.idle(page, 1500);
     checks.push(check("back to Image: the leaf is traced (terms)", await A.terms(page), ">", 10));
     // cutting the model: the 10 mm posts cut 2 mm from the top and 1 mm from the bottom print the 7 mm between
-    await page.click("label[for=viewDesign]"); await page.click("label[for=srcModel]"); await A.idle(page); await page.click("label[for=viewChoc]"); await waitLayers();
+    await page.click("label[for=viewDesign]"); await A.source(page, "model"); await A.idle(page); await page.click("label[for=viewChoc]"); await waitLayers();
     await page.fill("#cutTop", "2"); await page.press("#cutTop", "Tab"); await page.fill("#cutBottom", "1"); await page.press("#cutBottom", "Tab"); await A.idle(page);
     const cutInfo = await page.textContent("#cutInfo"); await page.click("label[for=viewChoc]"); await waitLayers();
     checks.push(check(`cut 1 + 2 mm off the 10 mm posts: Height shows what's left (${cutInfo})`, +(await page.inputValue("#printHeightMM")), "==", 7),

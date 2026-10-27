@@ -151,10 +151,6 @@ function loadFile(f, label) {
     setChip("That file isn't an image. Try a PNG, JPG or SVG.");
     return;
   } // checked first, so a wrong file changes nothing
-  if (isModel()) {
-    $("srcImage").checked = true;
-    document.body.dataset.src = "image";
-  } // an image replaces the model as the source (setSource does the rest)
   const url = URL.createObjectURL(f),
     img = new Image();
   img.onload = () => {
@@ -166,9 +162,8 @@ function loadFile(f, label) {
     g.fillRect(0, 0, c.width, c.height);
     g.drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(url);
-    $("sample").value = "user";
     const name = label || f.name || "image";
-    setSource(c, name.length > 22 ? name.slice(0, 20) + "…" : name);
+    artUsePicture(c, name.length > 22 ? name.slice(0, 20) + "…" : name); // art.js: into the chosen picture layer
     $("selectBtn").textContent = "Select area";
   };
   img.onerror = () => {
@@ -177,10 +172,6 @@ function loadFile(f, label) {
   };
   img.src = url;
 }
-$("sample").addEventListener("change", () => {
-  const v = $("sample").value;
-  if (v !== "user" && v !== "pattern") setSource(makeSample(v), "sample"); // (those two are picked by what they are)
-});
 
 // size + units
 function syncHeight() {

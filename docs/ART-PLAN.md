@@ -1,7 +1,7 @@
 # The Art tab · plan, decided 26 October 2026
 
-Worked out with Nicolaas, question by question, after v100 (Edit line, the Geometric art card). Nothing here is built
-yet; the phases at the end are the order of work, each published as its own version.
+Worked out with Nicolaas, question by question, after v100 (Edit line, the Geometric art card). The phases at the end
+are the order of work, each published as its own version. **Phase 1 is done (v101).**
 
 ## The flow
 
@@ -64,7 +64,7 @@ how big it must be and where detail is lost, so a full print is a judgement made
 
 | # | What | Done when |
 |---|---|---|
-| 1 | The Art tab: layers and pens; sources moved in (picture, text, 3D model, the ten styles); the Trace tab reads the art; Art straight to 2D with the "printing needs a trace" note | Everything that worked in v100 works through Art |
+| 1 ✓ v101 | The Art tab: layers and pens; sources moved in (picture, text, 3D model, the ten styles); the Trace tab reads the art; Art straight to 2D with the "printing needs a trace" note | Everything that worked in v100 works through Art |
 | 2 | Lines and areas: shapes from every source, area and line styles, per layer with taps to override, nesting; the 2D fill pens moved in | A labyrinth fills a letter and a wave runs along a leaf's outline, each on its own pen |
 | 3 | Trace modes: single line (merge all or pick a layer) and multi-line (cleanup, or picture trace); 3D takes single lines only; printer / material wording | Art reaches 2D three ways and the printer one way |
 | 4 | The image generators, in the order above | Each draws a test portrait and a topo map |
@@ -72,5 +72,10 @@ how big it must be and where detail is lost, so a full print is a judgement made
 
 **Design files:** a file saved before the Art tab opens as an art of one layer (its picture or text), so old designs
 keep working.
+
+**Phase 1 as built (v101), and what it leaves for later:** one text layer and one model layer (their controls are
+single cards); pens are a colour per layer (the 2D tab's pen width applies to all; the fill pens still live on the 2D
+tab until phase 2); Placement is size and move (rotation, symmetry and repeat are phase 5's transforms); a 3D model
+prints on its own, and its view comes in as a picture via Draw this view (models as vector art: phase 5).
 
 **Open later:** a variation gallery (a grid of random versions to pick from).

@@ -17,7 +17,7 @@ module.exports = {
     const settings = async () => Promise.all(["#sens", "#blur", "#minLen", "#loose"].map((s) => page.inputValue(s))).then((v) => v.join(","));
     const s0 = await settings();
     for (const [label, prep] of [["leaf, 18G needle", null], ["lettering", "lettering"]]) {
-      if (prep) { await page.click("label[for=srcText]"); await A.idle(page, 1000); }
+      if (prep) { await A.source(page, "text"); await A.idle(page, 1000); }
       const msg = await optimize(page), m = msg.match(/Closer to the image: ([\d.]+) → ([\d.]+) mm/);
       checks.push(check(`${label}: finished with a result`, +(!!m || /already the best/.test(msg)), "==", 1));
       if (m) checks.push(check(`${label}: got closer (px)`, +m[2], "<=", +m[1], 2));

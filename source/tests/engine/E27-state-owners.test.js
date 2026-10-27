@@ -15,6 +15,8 @@ const OWNERS = {
   sel: ["tools.js", "source.js"], erase: ["tools.js", "source.js"], edits: ["tools.js", "source.js"], start: ["tools.js", "source.js"], zones: ["pipeline.js", "source.js"],
   zoneVer: ["pipeline.js", "source.js", "tools.js"], zm: ["pipeline.js", "source.js", "tools.js"], tool: ["tools.js"], draft: ["tools.js"],
   pendingSel: ["tools.js"], strokes: ["tools.js"],
+  // the art (art.js): the layers every source comes in as
+  art: ["art.js"],
   // the views
   playing: ["preview.js"], t: ["preview.js"], epi: ["preview.js"], bgCache: ["preview.js", "main.js"], layers: ["layers.js"], pieces: ["pieces.js"],
   plot: ["plot.js"], pfill: ["plot.js"], penFill: ["plot.js", "source.js"],

@@ -63,8 +63,9 @@ Tests:
 
 - **The Art tab** (planned 26 October, [`docs/ART-PLAN.md`](docs/ART-PLAN.md)): every source comes in through a new Art
   tab (pictures, text, 3D models, generators, image-driven generators), dressed with line and area styles on layers and
-  pens, then Art → Trace (single line for the printers, multi-line for the plotter) → 2D or 3D. Five phases; the
-  Geometric art card and the 2D tab's fill pens move into it.
+  pens, then Art → Trace (single line for the printers, multi-line for the plotter) → 2D or 3D. Five phases; phase 1
+  (the tab, layers, pens, Plot as drawn) is done in v101. Next: phase 2, line and area styles (the 2D tab's fill pens
+  move in).
 
 - Edit line and Geometric art (v100, 26 October): try them on real prints in the challenges (a labyrinth and a double
   spiral in chocolate, a whirl and Truchet tiles on the plotter), and collect what's missing in the Suggestion box.

@@ -19,7 +19,8 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/pipeline.js` | The trace pipeline: line map → walk → spectrum → series → final line, the smallest-size search and the term chart. |
 | `js/preview.js` | Drawing the preview, in layers (`render`: under the line, the line, marks on it, the turning circles), the size box and the error chart. |
 | `js/tools.js` | Hand tools (select area, erase, edit line, set start, draw, crossing areas, connector paths), auto threshold, drag-and-drop and paste. Edit line keeps its edits in `st.edits` (against the source image); `lineSpec` in pipeline.js hands them to the trace. |
-| `js/patterns.js` | The Geometric art card: a pattern from the engine (`UNB.pattern`) drawn as a picture and traced; follows its controls while a pattern is the picture. |
+| `js/patterns.js` | The Pattern card on the Art tab: the chosen pattern layer's settings (a style from `UNB.PATTERNS`), handed back to art.js. |
+| `js/art.js` | The Art tab: the layers (`st.art`: pictures, the text, patterns, a 3D model, each with a pen and a place), the layer list, the Art view, what the trace starts from (`artApply` → `useSource` in source.js: a model alone, the text alone, or the layers drawn as one picture), and the art's lines for Plot as drawn (`artVectors`). |
 | `js/readouts.js` | The corner label, error and gap numbers, and the formula panel. |
 | `js/controls.js` | The run scheduler (start, debounce and cancel traces) and the control wiring: sliders, size, line spacing and needles. |
 | `js/export.js` | The Export buttons: 2D files (through `plot.js`) and the 3D file (G-code) for every copy on the plate. |
@@ -58,10 +59,11 @@ function like `setModelHeight`) to do it.
 
 ## One interface
 
-**The big view** (left) has four tabs: **Line** (the traced line, the tools and the plate mini-map), **2D page** (the
-pen plotter's paper; click shapes to fill), **Plate** (every copy on the printer's plate) and **3D layers** (drag to
-turn, double-click to go back). The **settings tabs** (right) are Trace, 2D and 3D; picking one brings its view (Trace:
-Line, 2D: 2D page, 3D: 3D layers), and the view tabs can change it. **Play drawing** plays whichever view is showing:
+**The big view** (left) has five tabs: **Art** (the art's layers in their pens' colours), **Line** (the traced line,
+the tools and the plate mini-map), **2D page** (the pen plotter's paper; click shapes to fill), **Plate** (every copy on
+the printer's plate) and **3D layers** (drag to turn, double-click to go back). The **settings tabs** (right) are Art,
+Trace, 2D and 3D; picking one brings its view (Art: Art, or Line for a 3D model, which turns there; Trace: Line, 2D: 2D
+page, 3D: 3D layers), and the view tabs can change it. **Play drawing** plays whichever view is showing:
 the circles drawing the line, the pen drawing the page and then its fills, or the needle stacking the layers
 (`redrawStage` in views.js; preview.js runs the clock). Every view zooms, from 25% to 3000% (− / + / Fit at the top right; pinch or Ctrl / ⌘ +
 scroll about the pointer; scroll, Space + drag or the middle button to pan, once zoomed in), each keeping its own zoom
@@ -72,7 +74,9 @@ plate** (every copy where it prints: the 3D view then draws the print from its o
 Purge & wipes on and off. **Solid (as printed)** in the 3D layers view draws each line as its chocolate bead (the needle's
 width, one layer tall, true height).
 
-The **Trace tab** is in cards: **Input** (image, text or 3D model) · **Tracing** (images only: start from, style,
+The **Art tab** (it opens first) is in cards: **Layers** (the drop area, the layer list and Add), the chosen layer's
+own card (**Picture**, **Text**, **Pattern** or **3D model**), **Placement** and **Next** (Trace it, Plot as drawn). The
+**Trace tab** is in cards: **From the Art tab** (what it traces) · **Tracing** (images only: start from, style,
 threshold, smoothing, more tracing settings, image prep, shading) · **Line** (line width + gap, closed or open, loose
 ends, round corners, more line settings) · **Size** (slider, width and height, fit inside a box; for text the letter
 height, linked to the size) · **Fit** (terms, the error chart, Optimize tracing).

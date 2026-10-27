@@ -3,6 +3,24 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v101 · 2026-10-27
+
+The Art tab, phase 1 of the plan in [`docs/ART-PLAN.md`](docs/ART-PLAN.md): **Art → Trace → 2D or 3D**.
+- **Everything comes in through the Art tab**, now the first tab. The art is a stack of **layers**: pictures (a sample,
+  your image, a sketch), the text, any number of **patterns** (the ten geometric styles, moved here from the Trace tab)
+  and a 3D model. Each has an eye, a **pen colour**, up / down and remove; tap one for its own card, and **Placement**
+  sizes it and moves it within the art. The big view's new **Art** view shows the layers in their pens' colours. A
+  dropped image goes into the chosen picture layer, an STL into the model layer.
+- **The Trace tab traces the art:** the shown layers drawn as one picture and traced into one line (the text on its own,
+  and a pattern on its own, are traced as before, the pattern starting at the width where its gap is the line
+  spacing). A shown 3D model is sliced on its own and the other layers wait; Draw this view adds the model's drawing as
+  a picture layer. The Trace tab's first card says what it is tracing.
+- **Plot as drawn:** the 2D tab can plot the art's lines exactly as made, without tracing (**Art as drawn**): each layer
+  with lines on its own pen, a layer each in the SVG for Saxi (`UNB.exportLayersSVG`). Pictures still need the trace,
+  and so does every printer: the page says so. **Traced line** works as before.
+- Undo and design files keep the layers, pens, places, patterns and pictures; older designs open as one layer.
+  Tests A31 (new), A24, A07; the app tests now start on the Trace tab where they need it.
+
 ## v100 · 2026-10-26
 
 - **Edit line: fix the traced line by hand.** A new tool under the preview (Tools → Edit line) with three brushes:
