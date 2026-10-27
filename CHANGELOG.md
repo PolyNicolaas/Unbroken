@@ -3,6 +3,27 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v100 · 2026-10-26
+
+- **Edit line: fix the traced line by hand.** A new tool under the preview (Tools → Edit line) with three brushes:
+  **Push** (grab the line and drag it where it should be; it bends rather than kinks, and a stroke end can be dragged
+  longer or shorter), **Smooth** (brush over a wobble or a jagged connector to even it out) and **Straighten** (brush
+  along a stretch to make it one straight line). Smooth and Straighten leave stroke ends and junctions where they are,
+  so loops and the spacing at junctions keep their shape. The edits go into the traced path before the strands, loops
+  and Fourier fit (`UNB.editWalk`, applied in `stageTrace`), so the preview, the 2D pen line, the layers and the G-code
+  all follow them; they are kept against the picture like erasing, so they stay put when the threshold or the size
+  changes, and they undo, save and open with the design. The edited line shows while you drag. Tests E32, A30.
+- **Geometric art: patterns to trace, made in the app.** A new card under Input with ten styles: **Labyrinth** (one
+  line round a random maze, in a square, circle, hexagon, diamond, heart or star), **Moore loop**, **Hilbert curve**,
+  **Gosper curve**, **Double spiral** (round or polygon, with twist), **Whirl** (twisted polygons), **Waves**,
+  **Spirograph**, **Lissajous** and **Truchet tiles**. Make and trace draws the pattern and traces it; the sliders then
+  change it as you go, and Shuffle makes another random version. The first seven are one unbroken line with an even
+  gap between neighbouring lines, so they trace with nothing doubled and print in chocolate as drawn: Make and trace
+  sets the Line card's Closed loop or Open to suit, and starts the print at the width where the pattern's gap is the
+  line spacing. Spirograph loops, Lissajous and Truchet tiles suit the pen plotter. Design files keep what a pattern
+  was made from. Engine: `source/engine/13-patterns.js` (`UNB.pattern`, `UNB.patternLayout`); app:
+  `web-app/js/patterns.js`. Tests E33, A30.
+
 ## v99 · 2026-10-19
 
 - **The 4000-term limit is gone.** A line can now use as many terms as its samples allow (up to 16,384; filled areas

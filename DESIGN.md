@@ -57,6 +57,9 @@ In practice:
     don't grow it.
   - **Extras with a narrow use:** shading (hatch / squiggle), connector-path painting, the sketch pad, the circles
     animation and the math panel. You chose to keep them; each should still earn its place over time.
+  - **New in v100:** Edit line's three brushes and the ten Geometric art styles. Both keep their logic in the engine
+    (`UNB.editWalk`, `13-patterns.js`) with the page only reading controls and drawing; watch which brushes and styles
+    get used and move the rest to "Maybe later".
 
 ### Badly engineered (the real risks left)
 

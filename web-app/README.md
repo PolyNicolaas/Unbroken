@@ -18,7 +18,8 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/source.js` | Which source is in use (`isModel`, `textMode`), built-in samples, reading the settings, setting the source image, and the Text source. |
 | `js/pipeline.js` | The trace pipeline: line map → walk → spectrum → series → final line, the smallest-size search and the term chart. |
 | `js/preview.js` | Drawing the preview, in layers (`render`: under the line, the line, marks on it, the turning circles), the size box and the error chart. |
-| `js/tools.js` | Hand tools (select area, erase, set start, draw, crossing areas, connector paths), auto threshold, drag-and-drop and paste. |
+| `js/tools.js` | Hand tools (select area, erase, edit line, set start, draw, crossing areas, connector paths), auto threshold, drag-and-drop and paste. Edit line keeps its edits in `st.edits` (against the source image); `lineSpec` in pipeline.js hands them to the trace. |
+| `js/patterns.js` | The Geometric art card: a pattern from the engine (`UNB.pattern`) drawn as a picture and traced; follows its controls while a pattern is the picture. |
 | `js/readouts.js` | The corner label, error and gap numbers, and the formula panel. |
 | `js/controls.js` | The run scheduler (start, debounce and cancel traces) and the control wiring: sliders, size, line spacing and needles. |
 | `js/export.js` | The Export buttons: 2D files (through `plot.js`) and the 3D file (G-code) for every copy on the plate. |
@@ -41,7 +42,7 @@ anything from an earlier file at load time, and anything from any file inside fu
 
 The files share one state object, `st` (`js/state.js`). Each field has an owner, the only file that sets it: the trace
 results (`pipeline.js`, committed in one step when a run finishes), the source (`source.js`), the model (`model.js`),
-line settings (`controls.js`), hand edits (`tools.js`), and each view its own (`preview.js`, `layers.js`, `plot.js`); a text's pieces belong to `pieces.js`.
+line settings (`controls.js`), hand edits (`tools.js`: the selection, erasing, edits to the line, the start point), and each view its own (`preview.js`, `layers.js`, `plot.js`); a text's pieces belong to `pieces.js`.
 `config.js` may also set starting values and `history.js` puts a whole design back. The full table is at the top of
 test E27, which fails when a file sets a field it doesn't own: change the table on purpose, or ask the owner (a small
 function like `setModelHeight`) to do it.
@@ -154,4 +155,4 @@ Package this so it drops into any website:
 
 ## Design files
 
-**File ▾ → Save design** downloads one `.unbroken.json` file holding the image (PNG, or JPEG for large photos) or the typed text, every design setting, the selection, erasing, start point and painted areas, and the plate, layer and paper settings and the fill pens with the areas they fill. **File ▾ → Open design…** (or dropping the file on the page) restores it exactly. View options (line view, box, mini-map, …) are not saved. Undo / redo (Ctrl/⌘ Z, Shift Ctrl/⌘ Z) steps through the same design state, up to 100 steps.
+**File ▾ → Save design** downloads one `.unbroken.json` file holding the image (PNG, or JPEG for large photos) or the typed text, every design setting, the selection, erasing, hand edits to the line, start point and painted areas, what a geometric pattern was made from, and the plate, layer and paper settings and the fill pens with the areas they fill. **File ▾ → Open design…** (or dropping the file on the page) restores it exactly. View options (line view, box, mini-map, …) are not saved. Undo / redo (Ctrl/⌘ Z, Shift Ctrl/⌘ Z) steps through the same design state, up to 100 steps.

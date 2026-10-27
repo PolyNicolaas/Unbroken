@@ -20,7 +20,8 @@ maker's paid slicer (choc OS) for these prints.
 
 **What it does**
 
-- **Sources:** images (photos, drawings, logos), text in single-stroke fonts, and 3D models (STL) sliced into layers.
+- **Sources:** images (photos, drawings, logos), text in single-stroke fonts, 3D models (STL) sliced into layers, and
+  geometric art made in the app (labyrinths, space-filling curves, spirals, waves and more).
 - **Tracing:** centreline or outline tracing with optional hatch, cross-hatch or squiggle shading, then a
   non-crossing tour of every stroke, fitted with a Fourier series per axis (X, Y and Z).
 - **Printing (3D tab):** G-code for the choc mate 2 with needle size, line spacing, layers, infill, supports built
@@ -87,13 +88,71 @@ and the slow spots. Anything still open from them is in [`ROADMAP.md`](ROADMAP.m
 0. **Source**: an image, or typed text laid out in a single-stroke font (letter height in mm, even gaps, minimum readable height of 8–10 stroke widths depending on the font; a stroke is two lines one spacing apart, so 2 × needle + gap).
 1. **Prep**: brightness, contrast, even-out lighting, plain-background removal.
 2. **Lines**: Centerline (skeleton of strokes; thick shapes are outlined; strokes packed closer than the blur can resolve are split along the light gaps between them) or Outline (Canny edges), plus optional hatch / cross-hatch / squiggle shading in dark areas.
-3. **Edit**: area selection (rectangle / freehand), erase pieces or brush, chosen start point.
+3. **Edit**: area selection (rectangle / freehand), erase pieces or brush, chosen start point; after the walk is traced
+   (step 4), hand edits to the line itself (Edit line: push, smooth, straighten).
 4. **Path**: pixel graph → minimum spanning tree of jumps between parts (small far-away groups dropped, sizeable ones kept) → T-join doubling → a non-crossing tour (closed, or open between the best two ends): at every point only neighbouring strands are joined, and loops are merged by swapping one pair of neighbours, so the line never crosses itself where strokes meet → every point moved onto the middle of its ink stroke (or the peak of its edge), below a pixel.
 5. **No retracing**: the needle can't go back over its own line. A stroke the path travels twice becomes two strands one spacing apart, and every stroke end becomes a keyhole loop (see [Stroke ends](#stroke-ends-the-loop)).
 6. **Fourier, one series per axis**: arc-length resample → one FFT → split into an X series and a Y series → keep the fewest strongest axis terms that stay within 0.35 px of the path for 95% of it (open paths are fitted out-and-back and the outbound half is used). Z is 0 for now (see [X, Y and Z](#x-y-and-z)).
 7. **Untangle and spacing**: crossings removed (the tour leaves almost none), then a relaxation pass enforces a minimum gap.
 8. **Score**: error = ½ (stray + missing), measured against the traced path, shown in mm.
 9. **Output**: the 2D tab (a pen plotter: SVG for Saxi, flat DXF) or the 3D tab (a printer: G-code). See [Outputs](#outputs-2d-and-3d). The line is always continuous: the chocolate printer can't stop the flow, so connectors are drawn, never lifted.
+
+## Edit line
+
+**Edit line** (Tools, under the preview) changes the traced line by hand, for the spot the tracer didn't get right: a
+connector that takes an ugly way round, a wobble, a stroke that should be straight. Pick how the brush works and drag on
+the preview; the Size slider sets the brush on screen, so it feels the same at any zoom.
+
+- **Push**: grab the line and drag it to where it should be. It moves all the way where you grab it and less towards
+  the edge of the brush (a smooth bump, (1 + cos πt) / 2), so the line bends rather than kinks. A stroke end moves too,
+  which is how a stroke is made longer or shorter.
+- **Smooth**: brush over a wobbly or jagged stretch. Each point moves toward a Gaussian average of the line around it
+  (over about half the brush each side, the line taken as continuous, the same length each side so nothing slides
+  along it), fully under the middle of the brush and less towards its edge.
+- **Straighten**: brush along a stretch; every part of the line under the brush becomes the straight line between the
+  points just outside it.
+
+Smooth and Straighten leave stroke ends and junctions where they are and work between them, so stroke-end loops and
+the spacing at junctions keep their shape. The edits are made to the walk (`UNB.editWalk`), right after it is traced
+and before the strands, loops and Fourier fit, so the preview, the 2D pen line, the layers and the G-code all follow
+them. Points keep their count and order, so every per-point tag still applies, and both passes of an out-and-back
+stroke share their points and move together. Each edit is kept against the source image, like erasing, so it stays put
+through a re-trace at another threshold or size; the bar's Undo and Restore all, the main Undo and design files cover
+them, and a new picture clears them. While dragging, the edited line is drawn over the old one in the accent colour
+until the new trace arrives. Tests E32, A30.
+
+## Geometric art
+
+The **Geometric art** card (Trace tab, under Input) makes abstract geometric patterns to trace (`UNB.pattern`,
+`source/engine/13-patterns.js`; `web-app/js/patterns.js`). **Make and trace** draws the pattern as a picture
+(1600 px on its long side, `UNB.patternLayout`) and traces it like any other, so every rule of the line applies. Once a
+pattern is the picture, the card's sliders and menus change it as you go; with a picture of your own on screen they
+wait for Make and trace. **Shuffle** makes another random version of the styles that have one.
+
+| Style | What it is | Controls | The line |
+|---|---|---|---|
+| Labyrinth | One line around a random maze (a random spanning tree drawn on a grid twice as fine, so every corridor and wall is one gap wide; the line round a tree is a single loop) | Cells across, Branching (long corridors ↔ short branches), Shape (square, circle, hexagon, diamond, heart, star) | one closed loop |
+| Moore loop | The closed Hilbert curve | Order (2–6) | one closed loop |
+| Hilbert curve | The space-filling curve | Order (1–6) | one open line |
+| Gosper curve | The flowsnake, on a hexagonal grid | Order (1–3) | one open line |
+| Double spiral | Two spiral arms wound into each other, joined at the centre and by a short step outside | Turns, Twist, Sides (circle, 3–8) | one closed loop |
+| Whirl | Polygons turning as they shrink (twisted squares), each corner the same gap inside the round outside it | Rounds, Turn per round, Sides | one open line |
+| Waves | Rows of a shifting wave joined end to end by half circles, always at least 40% of a row apart | Rows, Amplitude | one open line |
+| Spirograph | A wheel rolling inside a ring | Petals, Pen offset (loops past 40%) | closed; crosses itself when it loops |
+| Lissajous | x = sin(a t + phase), y = sin((a + 1) t) | Lobes, Phase | closed; crosses itself |
+| Truchet tiles | Quarter circles on a grid of tiles, joined into loops and curves | Tiles across, Mix, Shape | many pieces |
+
+- **For chocolate:** the one-line styles (the first seven) have an even gap between neighbouring lines and trace as one
+  line with nothing doubled, so they print without out-and-back strokes. Make and trace sets the Line card to Closed
+  loop or Open to suit, the trace style to Centerline, and starts the print at the width where the pattern's gap is
+  the line spacing (3% over, `startSize` in pipeline.js), so nothing needs pushing apart; the size slider and its marks
+  work as for any picture.
+- **For the pen plotter:** everything works on the 2D tab; Spirograph loops, Lissajous and Truchet tiles (many pieces,
+  joined by connectors) suit it best.
+- **Drawn for the tracer:** strokes a third of the closest gap, never wider than 0.9% of the picture (the centreline
+  trace outlines strokes over 1.6% as filled shapes), and a 6% margin. The densest settings keep about 70 gaps across.
+- A design file keeps the picture and what it was made from, so the card goes on following a reopened pattern. Tests
+  E33 (every style keeps its promise and the one-line styles trace as one line), A30.
 
 ## Units
 

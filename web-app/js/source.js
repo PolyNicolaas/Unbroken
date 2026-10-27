@@ -111,6 +111,7 @@ function settings() {
 // a new source: forget what was painted, erased or placed by hand on the old one
 function resetHandEdits() {
   st.erase = [];
+  st.edits = [];
   st.start = null;
   st.zones = { cross: [], lane: [] };
   st.zoneVer = (st.zoneVer || 0) + 1;

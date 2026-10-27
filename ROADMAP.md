@@ -61,6 +61,12 @@ Tests:
 
 ## 3 · Tracing, drawing and lettering
 
+- Edit line and Geometric art (v100, 26 October): try them on real prints in the challenges (a labyrinth and a double
+  spiral in chocolate, a whirl and Truchet tiles on the plotter), and collect what's missing in the Suggestion box.
+  Ideas that came up while building them, each waiting for a use: an Edit line brush that **reroutes** a connector
+  along a path you draw; more styles (circle packing, Voronoi cells, a Greek-key border, rose curves); a labyrinth
+  inside your own picture's outline; and Geometric art in the 2D tab's fills.
+
 - A text's pieces use the automatic term count and aren't shown on the Trace tab (it draws the text joined, as the
   2D tab plots it). If a piece needs looking after on its own, show the pieces there too.
 - More fonts for lettering (raised 18 October; Chocolate and Dune Rise came in v98).
@@ -89,7 +95,8 @@ design, never G-code: the owner makes the G-code with his own printer and chocol
 - Publish GitHub Pages automatically on every push to `main` (a GitHub Action, after the tests pass); for now each
   update is built and published by hand.
 
-Done since the last sort: the desktop app taken out for now (19 October, see Removed); the 4000-term limit lifted to
+Done since the last sort: Edit line (push, smooth, straighten the traced line by hand) and the Geometric art card
+(v100, 26 October); the desktop app taken out for now (19 October, see Removed); the 4000-term limit lifted to
 what the samples allow (v99, 19 October); the move to GitHub and the GitHub Pages site (19 October); v92's review
 fixes (painted areas after a re-trace, cancelling stale layer runs, a saved model design matched by its model, the
 ready list from the 3D tab, the test print's range, travel speed without retraction, the spectrum sort), sparse Lines

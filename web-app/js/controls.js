@@ -179,7 +179,7 @@ function loadFile(f, label) {
 }
 $("sample").addEventListener("change", () => {
   const v = $("sample").value;
-  if (v !== "user") setSource(makeSample(v), "sample");
+  if (v !== "user" && v !== "pattern") setSource(makeSample(v), "sample"); // (those two are picked by what they are)
 });
 
 // size + units

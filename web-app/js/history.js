@@ -84,6 +84,12 @@ const DESIGN_IDS = [
   "gapClose",
   "minShape",
   "drawBridges",
+  "artStyle",
+  "artDetail",
+  "artTwist",
+  "artSides",
+  "artShape",
+  "artSeed",
 ];
 const DESIGN_SET = new Set(DESIGN_IDS);
 // A model is recognised by what it is, not by its id: the id is a counter that starts again every session, so a saved
@@ -122,6 +128,7 @@ function designState() {
       N: st.N,
       sel: st.sel || null,
       erase: st.erase || [],
+      edits: st.edits || [],
       start: st.start || null,
       zones: st.zones,
       penFill: structuredClone(st.penFill),
@@ -203,6 +210,7 @@ function syncDesignUI() {
   syncSpacingUI();
   labels();
   updateToolLabels();
+  artUI();
 }
 // Returns a note when part of the design couldn't come back (a 3D model that isn't the one loaded), else "".
 function applyDesign(d, src, imageSource) {
@@ -214,6 +222,7 @@ function applyDesign(d, src, imageSource) {
     stopOptimize();
     if (st.tool) exitTool();
     const s = d.s || {};
+    if (d.v && d.v.artStyle) artRanges(d.v.artStyle); // patterns.js: the sliders' ranges first, so the values fit
     for (let [id, val] of Object.entries(d.v || {})) {
       const el = $(id);
       if (!el) continue;
@@ -235,6 +244,7 @@ function applyDesign(d, src, imageSource) {
     } // older design files could be in pixels; everything is mm now
     st.sel = structuredClone(s.sel || null);
     st.erase = structuredClone(s.erase || []);
+    st.edits = structuredClone(s.edits || []);
     st.start = structuredClone(s.start || null);
     st.zones = structuredClone(s.zones || { cross: [], lane: [] });
     st.zoneVer = (st.zoneVer || 0) + 1;
@@ -353,6 +363,7 @@ async function saveDesign() {
     design: d,
     image: sourceImageURL(imgCanvas),
     imageLabel: st.text ? (st.imageSource && st.imageSource.label) || null : st.srcLabel,
+    pattern: (imgCanvas && imgCanvas.__pattern) || null, // geometric art: what it was made from (patterns.js)
   };
   const name = `${designSlug(40)}.unbroken.json`,
     data = JSON.stringify(file);
@@ -390,11 +401,12 @@ async function openDesign(f) {
     if (file.image) {
       canvas = await loadImageURL(file.image);
       canvas.__id = ++srcCounter;
+      if (file.pattern) canvas.__pattern = file.pattern; // so the Geometric art card can go on changing it
     }
     const d = file.design,
       text = !!d.v.srcText;
     if (!text && !canvas) throw new Error("the file has no image");
-    if (d.s) d.s.sample = "user";
+    if (d.s) d.s.sample = file.pattern ? "pattern" : "user";
     if (recTimer) record(); // keep the state before opening as its own undo step
     const note = applyDesign(
       d,

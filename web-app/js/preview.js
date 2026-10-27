@@ -180,6 +180,7 @@ function render() {
   if (!st.final) return;
   const r = renderLine(v);
   renderMarks(v, r);
+  if (!r.animating && editOverlayOn()) renderEdit(v); // tools.js: the Edit line brush and the edited line
   if (r.animating && $("circles").checked && st.epi) renderCircles(v, r);
 }
 // under the line: the background (source, detected lines or nothing), a freehand selection, painted areas, the brush
