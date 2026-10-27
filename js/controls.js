@@ -92,7 +92,6 @@ function labels() {
     p.contrast && "contrast",
     p.bgTol && "background",
     p.flatten && "lighting",
-    s.levels && `${s.levels.count} greys`,
   ].filter(Boolean);
   $("prepVal").textContent = on.length ? on.join(", ") : "off";
   if (typeof levelsUI === "function") levelsUI(); // levels.js (loaded after this file): its greys and their shares
@@ -246,7 +245,8 @@ function spacingChanged() {
 }
 function lineUI() {
   // the spacing (st.spacing, owned here) and the needle's look and hint
-  const w = lineWidthMM(),
+  // made for plotting (Art tab): pen 1's width (2D tab) instead of the needle's
+  const w = artForPlot() ? Math.max(0.05, +$("penW").value || 0.5) : lineWidthMM(),
     g = Math.max(0, +$("lineGapMM").value || 0);
   st.spacing = w + g;
   const o = [...$("needle").options].find((x) => x.value !== "custom" && Math.abs(+x.value - w) < 0.005);
@@ -260,7 +260,9 @@ function lineUI() {
   if (!$("spacingHint").classList.contains("warn")) $("spacingHint").textContent = spacingText();
 }
 const spacingText = () =>
-  `Lines ${fmt(st.spacing, 2)} mm apart, centre to centre; stroke ends loop back ${fmt(lineWidthMM() + st.spacing, 2)} mm wide.`;
+  artForPlot()
+    ? `Made for plotting: pen 1 (${fmt(+$("penW").value || 0.5, 2)} mm, 2D tab) + the gap, lines ${fmt(st.spacing, 2)} mm apart, centre to centre.`
+    : `Lines ${fmt(st.spacing, 2)} mm apart, centre to centre; stroke ends loop back ${fmt(lineWidthMM() + st.spacing, 2)} mm wide.`;
 function lineChanged() {
   lineUI();
   spacingChanged();
@@ -271,6 +273,16 @@ $("needle").addEventListener("change", () => {
   lineChanged();
 });
 for (const id of ["lineW", "lineGapMM"]) $(id).addEventListener("input", lineChanged);
+// made for plotting, pen 1 is the line; Made for switched: the spacing and the size follow (pipeline.js pageFit)
+$("penW").addEventListener("input", () => {
+  if (artForPlot()) lineChanged();
+});
+document.querySelectorAll('input[name="artFor"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    lineChanged();
+    fitPageSoon();
+  })
+);
 $("simplify").addEventListener("input", () => {
   st.simplify = (+$("simplify").value / 100) * 0.5;
   syncSpacingUI();

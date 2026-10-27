@@ -26,6 +26,13 @@ function toast(t, bad) {
   clearTimeout(toastTimer);
   toastTimer = setTimeout(() => (el.hidden = true), bad ? 5000 : 1600);
 }
+// a message is about what was on screen: it goes with a click on it, or when another tab is opened
+function hideToast() {
+  clearTimeout(toastTimer);
+  $("toast").hidden = true;
+}
+$("toast").addEventListener("click", hideToast);
+document.querySelectorAll('input[name="view"]').forEach((r) => r.addEventListener("change", hideToast));
 
 // a status line under a button: kind "ok", "bad", "busy" or "" (plain)
 function setStatus(el, kind, text) {

@@ -853,7 +853,8 @@ function drawPage() {
   const h = $("pageHint");
   h.className = fits ? "hint" : "hint warn";
   h.textContent = fits
-    ? `Centred on ${name} ${$("paperOrient").value} (${fmt(P.w, 0)} × ${fmt(P.h, 0)} mm) with ${fmt(mg, 0)} mm margins. The size comes from the Trace tab.`
+    ? `Centred on ${name} ${$("paperOrient").value} (${fmt(P.w, 0)} × ${fmt(P.h, 0)} mm) with ${fmt(mg, 0)} mm margins. ` +
+      (pageFitW() ? "Made for plotting: it fills the page." : "The size comes from the Trace tab.")
     : `Too big for ${name} ${$("paperOrient").value} with ${fmt(mg, 0)} mm margins (room for ${fmt(P.w - 2 * mg, 0)} × ${fmt(P.h - 2 * mg, 0)} mm). It shows hanging over the paper's edge: make it smaller in the Trace tab, or pick bigger paper or smaller margins.`;
   if (F && st.penFill.areas.length) {
     // a saved fill whose spot is no longer inside an area (the drawing changed)
@@ -878,6 +879,25 @@ $("penW").addEventListener("input", () => {
 }); // the outline's width sets where fills stop
 new ResizeObserver(() => drawPage()).observe($("pageView"));
 
+// Made for plotting: a traced drawing fills the page inside its margins, unless a size was set by hand on the Trace tab
+// (st.pageFit false; Fit the page sets it again). The width (mm) that does, or null.
+function pageFitW() {
+  if (!artForPlot() || st.pageFit === false || st.text || isModel() || !(st.bw > 0 && st.bh > 0)) return null;
+  const P = paperSize(),
+    mg = Math.max(0, +$("paperMargin").value || 0);
+  return Math.max(5, Math.min(P.w - 2 * mg, ((P.h - 2 * mg) * st.bw) / st.bh));
+}
+let pageFitTimer = null;
+function fitPageSoon() {
+  clearTimeout(pageFitTimer);
+  pageFitTimer = setTimeout(() => {
+    const W = pageFitW();
+    if (W && st.walk && Math.abs(W - st.outW) / W > 0.003) setSize(W, false);
+  }, 300);
+}
+for (const id of ["paper", "paperOrient", "paperMargin", "paperW", "paperH"])
+  $(id).addEventListener(id === "paper" || id === "paperOrient" ? "change" : "input", fitPageSoon);
+
 // the file: the SVG page for Saxi (one layer per pen); Saxi sets the pen speeds
 async function plotFile() {
   if (plotFromArt()) {
@@ -885,7 +905,8 @@ async function plotFile() {
     if (!A || !A.layers.length) throw new Error("only a pattern or text can be plotted as drawn: pick Traced line");
     const w = +$("penW").value || 0.5;
     return {
-      name: designSlug() + "-art.svg",
+      // (a pattern made for plotting isn't the traced source)
+      name: designSlug(20, st.art.kind === "pattern" ? patternName(st.art.pattern) : null) + "-art.svg",
       data: UNB.exportLayersSVG(
         A.layers.map((l, i) => ({ label: `${i + 1} ${l.name}`, color: l.pen, width: w, strokes: l.strokes })),
         { paperW: A.P.w, paperH: A.P.h }

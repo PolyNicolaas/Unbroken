@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v105</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v106</span></p>
 </header>
 
 <div class="wrap">
@@ -238,7 +238,7 @@
       <p class="hint" id="cartHint" hidden></p>
     </section>
 
-    <section class="card choc-only" aria-labelledby="h-base">
+    <section class="card choc-only" aria-labelledby="h-base" data-fold="closed">
       <h2 id="h-base">Base <span id="infillVal">none</span></h2>
       <div class="two">
         <label class="field" title="Filled layers at the bottom (0: no base)"><span>Base layers</span><input type="number" id="baseLayers" min="0" max="50" step="1" value="0"></label>
@@ -259,7 +259,7 @@
       <p class="hint help" id="infillHint">Fills every area the line encloses with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
     </section>
 
-    <section class="card choc-only" aria-labelledby="h-infill">
+    <section class="card choc-only" aria-labelledby="h-infill" data-fold="closed">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>
       <div class="row">
         <div class="lab"><label for="fillDensity">Density</label><span class="val" id="fillDensityVal">0% · hollow</span></div>
@@ -453,14 +453,15 @@
 
     <section class="card design-only img-only" aria-labelledby="h-trace">
       <h2 id="h-trace">Tracing</h2>
-      <div class="row">
+      <p class="hint" id="levelsOnHint" hidden>Grey levels are on (the card below): the line follows the edges between the greys, so the trace style and the ink threshold aren't used.</p>
+      <div class="row" id="modeRow">
         <div class="lab"><span class="name" title="Centerline suits drawings and lettering; Outline suits photos.">Trace style</span></div>
         <div class="seg" role="radiogroup" aria-label="Trace style">
           <input type="radio" name="mode" id="modeCenter" value="centerline" checked><label for="modeCenter">Centerline<small>one line per stroke</small></label>
           <input type="radio" name="mode" id="modeOutline" value="edges"><label for="modeOutline">Outline<small>double line along edges</small></label>
         </div>
       </div>
-      <div class="row">
+      <div class="row" id="sensRow">
         <div class="lab"><label for="sens" id="sensLabel">Ink threshold</label><span class="lab-r"><span class="val" id="sensVal"></span><button class="btn mini" type="button" id="autoSens" title="Try a range of thresholds and keep the cleanest (a few seconds on a big image)">Auto</button></span></div>
         <input type="range" id="sens" min="-60" max="60" value="0">
       </div>
@@ -483,6 +484,21 @@
     </section>
 
 
+    <section class="card design-only img-only" aria-labelledby="h-levels">
+      <h2 id="h-levels">Grey levels <span id="levelsCardVal">off</span></h2>
+      <div class="row" id="levelsRow">
+        <div class="lab"><label for="levels">Greys</label><span class="val" id="levelsVal">off</span></div>
+        <input type="range" id="levels" min="1" max="6" value="1" aria-describedby="levelsHint">
+        <div id="levelsBox" hidden>
+          <div class="row"><div class="lab"><label for="levelSmooth">Smooth blocks</label><span class="val" id="levelSmoothVal"></span></div>
+          <input type="range" id="levelSmooth" min="0" max="10" value="2"></div>
+          <div id="levelList" class="level-list" role="group" aria-label="What each grey does"></div>
+          <input type="hidden" id="levelModes" value="">
+        </div>
+        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. The still-life sample (Art tab, Picture) shows them well.</p>
+      </div>
+    </section>
+
     <section class="card design-only img-only" aria-labelledby="h-prep" data-fold="closed">
       <h2 id="h-prep">Image prep <span id="prepVal">off</span></h2>
           <div class="row"><div class="lab"><label for="bright">Brightness</label><span class="val" id="brightVal"></span></div><input type="range" id="bright" min="-100" max="100" value="0"></div>
@@ -493,17 +509,6 @@
           <div class="inline" style="justify-content:space-between">
             <label class="check"><input type="checkbox" id="flatten"> Even out lighting</label>
             <button class="btn mini" type="button" id="prepReset">Reset</button>
-          </div>
-          <div class="row" id="levelsRow">
-            <div class="lab"><label for="levels">Grey levels</label><span class="val" id="levelsVal">off</span></div>
-            <input type="range" id="levels" min="1" max="6" value="1" aria-describedby="levelsHint">
-            <div id="levelsBox" hidden>
-              <div class="row"><div class="lab"><label for="levelSmooth">Smooth blocks</label><span class="val" id="levelSmoothVal"></span></div>
-              <input type="range" id="levelSmooth" min="0" max="10" value="2"></div>
-              <div id="levelList" class="level-list" role="group" aria-label="What each grey does"></div>
-              <input type="hidden" id="levelModes" value="">
-            </div>
-            <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the trace style and ink threshold are not used. A still-life sample (Art tab, Picture) shows them well.</p>
           </div>
 
     </section>
@@ -580,13 +585,13 @@
       <p class="hint text-only" id="capHint"></p>
       <div class="row" id="fitBoxRow">
         <div class="lab"><span class="name">Fit inside a box</span></div>
-        <div class="inline"><input type="number" id="fitW" min="1" step="any" placeholder="width" aria-label="Box width (mm)"><span>×</span><input type="number" id="fitH" min="1" step="any" placeholder="height" aria-label="Box height (mm)"><span>mm</span><button class="btn" type="button" id="fitBtn">Fit</button></div>
+        <div class="inline"><input type="number" id="fitW" min="1" step="any" placeholder="width" aria-label="Box width (mm)"><span>×</span><input type="number" id="fitH" min="1" step="any" placeholder="height" aria-label="Box height (mm)"><span>mm</span><button class="btn" type="button" id="fitBtn">Fit</button><button class="btn" type="button" id="fitPage" title="Made for plotting: fill the 2D tab's page inside its margins" hidden>Fit the page</button></div>
       </div>
       <p class="hint warn" id="driftHint" hidden></p>
       <p class="hint" id="sizeHint">Drag to scale the print, type a width or height, or fit it inside a box. It can't go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. Aspect ratio stays locked.</p>
     </section>
 
-    <section class="card design-only" aria-labelledby="h-fit">
+    <section class="card design-only" aria-labelledby="h-fit" data-fold="closed">
       <h2 id="h-fit">Fit <span id="fitinfo"></span></h2>
       <div class="row">
         <div class="lab"><label for="terms">Complexity (terms)</label><span class="val" id="termsVal"></span></div>
@@ -659,7 +664,7 @@
       <p class="status" id="exportMsg" role="status"></p>
     </section>
 
-    <section class="card notes" aria-labelledby="h-notes">
+    <section class="card notes" aria-labelledby="h-notes" data-fold="closed">
       <h2 id="h-notes">Suggestion box <span class="hval" id="notesCount"></span></h2>
       <form class="note-form" id="noteForm" autocomplete="off">
         <input type="text" id="noteIn" maxlength="500" aria-label="Suggestion" placeholder="An idea, a bug, anything to improve… (Enter to save)" aria-describedby="noteHelp">

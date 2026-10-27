@@ -1,5 +1,5 @@
-Unbroken · web app build v105
-Built:  2026-10-27T16:23:35.463Z
+Unbroken · web app build v106
+Built:  2026-10-27T17:43:54.752Z
 Tests:  64 of 64 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
@@ -22,30 +22,30 @@ Files (sha1, first 12):
   d76569f8d3e5  css/app.css
   7efa0c130b02  css/theme.css
   666f911d2119  fonts.js
-  3fb1e8c5df1d  index.html
-  39540521eb08  js/art.js
+  8e16f62801fc  index.html
+  7525ad3a46e5  js/art.js
   cc338cd5a339  js/config.js
-  80cd2546cc70  js/controls.js
+  ad1b62cd00a7  js/controls.js
   1b7b18d51a47  js/engine-bridge.js
-  7f7a2abc4aa4  js/export.js
+  e0a3055dd6c5  js/export.js
   943d1d2167f9  js/history.js
   282a67c9225f  js/layers.js
-  e0dc293af130  js/levels.js
+  b4e70645970d  js/levels.js
   0268e1ab91bd  js/main.js
   29f041a9b488  js/model.js
   26b7659e5ebe  js/notes.js
   911e52e413f3  js/optimize.js
   58fdd1836272  js/patterns.js
   21a8f0ca8b37  js/pieces.js
-  ffc2ebe9a59f  js/pipeline.js
-  7bfcb51aeb0a  js/plot.js
+  71228ef0dd95  js/pipeline.js
+  57fcbe695967  js/plot.js
   98bc484bb1b4  js/preview.js
   d61b587f3303  js/readouts.js
   ea3d565b7cdf  js/source.js
   78f5450a22d9  js/state.js
   347002262ce1  js/testprint.js
   b22c4183d365  js/tools.js
-  5c8562531de3  js/ui.js
+  e651a30c34d9  js/ui.js
   c0bf468e1779  js/views.js
   c7e8ce426229  js/zoom.js
   8c1e4e3be548  settings.js
