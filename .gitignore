@@ -8,3 +8,4 @@ source/bench/images/
 source/bench/out/
 source/tests/results/
 source/tests/node_modules
+source/tests/package-lock.json
