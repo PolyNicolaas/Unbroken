@@ -545,7 +545,8 @@ $("toArt").addEventListener("click", () => {
 // the shown layers in their pens' colours on white, the chosen one outlined; a 3D model shows in the Line view
 function drawArtView() {
   const cv = $("artView");
-  if (stageNow() !== "art" || typeof zoomOn !== "function") return; // (zoom.js loads after this file)
+  // (views.js and zoom.js load after this file: a resize can come before them)
+  if (typeof stageNow !== "function" || typeof zoomOn !== "function" || stageNow() !== "art") return;
   const layers = shownLayers(),
     F = artFrame(layers) || { W: 400, H: 300 };
   cv.style.aspectRatio = `${F.W} / ${F.H}`;
