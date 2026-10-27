@@ -102,10 +102,92 @@ function placeOnPage(L) {
   const F = { x0, y0, w: Math.max(P.w, ox + L.W + pad) - x0, h: Math.max(P.h, oy + L.H + pad) - y0 };
   return { P, mg, fits, ox, oy, F };
 }
+// ---------- the art as drawn (Art as drawn): its lines straight from the Art tab, no trace ----------
+const plotFromArt = () => $("plotArt").checked;
+// the art's lines fitted inside the margins, each shown layer on its own pen (mm, page coordinates)
+function artOnPage() {
+  const V = artVectors(); // art.js
+  if (!V) return null;
+  const P = paperSize(),
+    mg = Math.max(0, +$("paperMargin").value || 0),
+    k = Math.max(1e-6, Math.min((P.w - 2 * mg) / V.W, (P.h - 2 * mg) / V.H)),
+    ox = (P.w - V.W * k) / 2,
+    oy = (P.h - V.H * k) / 2;
+  const layers = V.layers.map((l) => ({
+    ...l,
+    strokes: l.strokes.map((s) => s.map((v, i) => (i % 2 ? oy + v * k : ox + v * k))),
+  }));
+  return { P, mg, W: V.W * k, H: V.H * k, layers, pictures: V.pictures };
+}
+function drawArtPage() {
+  const cv = $("pageView"),
+    A = artOnPage(),
+    P = A ? A.P : paperSize(),
+    mg = A ? A.mg : 0,
+    pen = Math.max(0.05, +$("penW").value || 0.5);
+  cv.style.aspectRatio = `${P.w} / ${P.h}`;
+  cv.style.setProperty("--ar", P.w / P.h);
+  const fit = fitCanvas(cv);
+  if (fit) {
+    const g = cv.getContext("2d"),
+      s = cv.width / P.w;
+    let dpr = fit.dpr;
+    g.setTransform(1, 0, 0, 1, 0, 0);
+    g.fillStyle = css("--paper");
+    g.fillRect(0, 0, cv.width, cv.height);
+    dpr /= zoomOn(g, "page", cv).z;
+    g.fillStyle = "#ffffff";
+    g.fillRect(0, 0, P.w * s, P.h * s);
+    g.strokeStyle = "#9aa3ad";
+    g.lineWidth = dpr;
+    g.strokeRect(0, 0, P.w * s, P.h * s);
+    g.setLineDash([4 * dpr, 4 * dpr]);
+    g.strokeRect(mg * s, mg * s, (P.w - 2 * mg) * s, (P.h - 2 * mg) * s);
+    g.setLineDash([]);
+    g.lineJoin = g.lineCap = "round";
+    for (const L of A ? A.layers : []) {
+      g.strokeStyle = L.pen;
+      g.lineWidth = Math.max(0.6 * dpr, pen * s);
+      g.beginPath();
+      for (const q of L.strokes) {
+        g.moveTo(q[0] * s, q[1] * s);
+        for (let i = 2; i + 1 < q.length; i += 2) g.lineTo(q[i] * s, q[i + 1] * s);
+      }
+      g.stroke();
+    }
+    g.setTransform(1, 0, 0, 1, 0, 0);
+  }
+  const name = $("paper").selectedOptions[0].textContent.split(" ·")[0],
+    n = A ? A.layers.length : 0,
+    h = $("pageHint");
+  $("plotInfo").textContent = A && n ? `art as drawn · ${n} pen${n === 1 ? "" : "s"}` : "art as drawn";
+  h.className = A && A.pictures ? "hint warn" : "hint";
+  h.textContent = !A
+    ? "Nothing shown in the Art tab."
+    : `The art exactly as drawn, not traced: ${n} layer${n === 1 ? "" : "s"} of lines, each on its own pen, ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}.` +
+      (A.pictures
+        ? ` ${A.pictures} picture layer${A.pictures === 1 ? " has" : "s have"} no lines until traced: pick Traced line for ${A.pictures === 1 ? "it" : "them"}.`
+        : "") +
+      " For a printer, trace it on the Trace tab.";
+}
+// the art as drawn has a pen per layer (their colours are set in the Art tab) and no fills (fill pens fill the traced
+// drawing's shapes)
+function plotFromUI() {
+  $("card-h-fills").hidden = plotFromArt();
+  $("penColor").closest("label").hidden = plotFromArt();
+}
+document.querySelectorAll('input[name="plotFrom"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    plotFromUI();
+    if (plotFromArt()) drawPage();
+    else plotSoon(0);
+  })
+);
 function plotSoon(delay = 150) {
   clearTimeout(plotTimer);
   plotTimer = setTimeout(async () => {
     if (!plotWanted()) return;
+    if (plotFromArt()) return drawPage();
     if (isModel()) {
       $("plotInfo").textContent = "3D model";
       $("pageHint").className = "hint";
@@ -735,6 +817,7 @@ function paintPage(cv, dpr, L, P, mg, fits, ox, oy, pen, F, progress, B) {
 function drawPage() {
   const L = st.plot,
     cv = $("pageView");
+  if (plotFromArt()) return drawArtPage();
   if (isModel()) {
     // a 3D model: no drawing on the page until Draw this view traces one
     const fit = fitCanvas(cv);
@@ -802,6 +885,19 @@ new ResizeObserver(() => drawPage()).observe($("pageView"));
 
 // the file: the SVG page for Saxi (one layer per pen); Saxi sets the pen speeds
 async function plotFile() {
+  if (plotFromArt()) {
+    const A = artOnPage();
+    if (!A || !A.layers.length) throw new Error("the art has no lines to plot as drawn (pictures need tracing)");
+    const w = +$("penW").value || 0.5;
+    return {
+      name: designSlug() + "-art.svg",
+      data: UNB.exportLayersSVG(
+        A.layers.map((l, i) => ({ label: `${i + 1} ${l.name}`, color: l.pen, width: w, strokes: l.strokes })),
+        { paperW: A.P.w, paperH: A.P.h }
+      ),
+      info: `the art as drawn, ${A.layers.length} pen${A.layers.length === 1 ? "" : "s"}, ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm on a ${fmt(A.P.w, 0)} × ${fmt(A.P.h, 0)} mm page`,
+    };
+  }
   const L = await penLine();
   st.plot = L;
   const F = await computeFills();

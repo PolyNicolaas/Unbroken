@@ -370,11 +370,12 @@ async function exportAs(fmtName, msg) {
     setStatus(msg, "bad", "Load a model first.");
     return;
   }
-  if (isModel() && fmtName === "svg") {
+  const asDrawn = fmtName === "svg" && plotFromArt(); // plot.js: the art's lines as drawn, no trace needed
+  if (isModel() && fmtName === "svg" && !asDrawn) {
     setStatus(
       msg,
       "bad",
-      "For 2D files of a model, use Draw this view in Trace first (it makes a line drawing of the view to trace). The 3D tab exports the layers."
+      "For 2D files of a model, use Draw this view on the Art tab first (it adds a line drawing of the view to the art). The 3D tab exports the layers."
     );
     return;
   }
@@ -382,7 +383,7 @@ async function exportAs(fmtName, msg) {
     setStatus(msg, "bad", "A DXF for choc OS is one flat curve; a model prints from its G-code.");
     return;
   }
-  if (!st.final && !isModel() && fmtName !== "viewsvg") {
+  if (!st.final && !isModel() && fmtName !== "viewsvg" && !asDrawn) {
     setStatus(msg, "bad", "Nothing to export yet. Load an image with visible lines first.");
     return;
   }

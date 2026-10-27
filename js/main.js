@@ -48,18 +48,16 @@ labels();
 syncSpacingUI();
 infillUI();
 lineUI(); // the spacing from line width + gap, and the needle shown
+// the art starts as one layer: the sample picture, or the text (art.js)
 const start = CFG.defaults.startFrom;
 if (start === "lettering")
-  applyPreset("lettering"); // starts in Text mode
-else if (CFG.defaults.source === "text") {
-  $("srcImage").checked = true;
-  $("srcText").checked = true;
-  srcTypeChanged();
-} else {
-  if (start) applyPreset(start);
-  $("srcImage").checked = true;
-  setSource(makeSample(CFG.defaults.sample), "sample");
+  applyPreset("lettering"); // starts with a text layer
+else if (CFG.defaults.source === "text") artOnly("text");
+else {
+  if (start) applyPreset(start, true);
+  artOnly("picture", { name: "sample", picture: { canvas: makeSample(CFG.defaults.sample), sample: CFG.defaults.sample } });
 }
+viewChanged(); // the tab that opens (Art) brings its view
 showE();
 tuneUI();
 showHeight(); // E per mm, the Fine-tuning markers and the layer count, from the starting settings

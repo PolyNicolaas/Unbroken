@@ -84,12 +84,8 @@ const DESIGN_IDS = [
   "gapClose",
   "minShape",
   "drawBridges",
-  "artStyle",
-  "artDetail",
-  "artTwist",
-  "artSides",
-  "artShape",
-  "artSeed",
+  "plotTraced",
+  "plotArt",
 ];
 const DESIGN_SET = new Set(DESIGN_IDS);
 // A model is recognised by what it is, not by its id: the id is a counter that starts again every session, so a saved
@@ -142,6 +138,7 @@ function designState() {
           }
         : null,
       srcLabel: st.srcLabel,
+      art: artSaved(), // art.js: the layers (their pictures are kept apart)
       feedUnit: "mm/s",
       sample: $("sample").value,
       posManual,
@@ -155,6 +152,7 @@ function snapshot() {
     d,
     src: st.text ? null : st.source,
     imageSource: st.text ? st.imageSource : null,
+    pics: artCanvases(), // art.js: each picture layer's canvas, by layer id
     key: stateKey(d, st.text ? null : st.source),
   };
 }
@@ -210,10 +208,11 @@ function syncDesignUI() {
   syncSpacingUI();
   labels();
   updateToolLabels();
-  artUI();
+  plotFromUI(); // plot.js: Traced line or Art as drawn
+  artUI(); // art.js: the layer list and the chosen layer's cards
 }
 // Returns a note when part of the design couldn't come back (a 3D model that isn't the one loaded), else "".
-function applyDesign(d, src, imageSource) {
+function applyDesign(d, src, imageSource, pics) {
   let note = "";
   restoring = true;
   try {
@@ -222,7 +221,6 @@ function applyDesign(d, src, imageSource) {
     stopOptimize();
     if (st.tool) exitTool();
     const s = d.s || {};
-    if (d.v && d.v.artStyle) artRanges(d.v.artStyle); // patterns.js: the sliders' ranges first, so the values fit
     for (let [id, val] of Object.entries(d.v || {})) {
       const el = $(id);
       if (!el) continue;
@@ -253,6 +251,9 @@ function applyDesign(d, src, imageSource) {
     posManual = !!s.posManual;
     st.penFill = s.penFill ? structuredClone(s.penFill) : defaultPenFill();
     st.pfill = null; // older design files: no fill pens
+    // the art's layers (art.js); a design from before the Art tab becomes one layer, as its source was
+    if (s.art) artRestore(s.art, pics || new Map());
+    else artFromOld($("srcModel").checked ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
     if (s.sample && [...$("sample").options].some((o) => o.value === s.sample)) $("sample").value = s.sample;
     if ($("srcModel").checked) {
       // a 3D model: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
@@ -309,7 +310,7 @@ function undo() {
   if (hi <= 0) return;
   hi--;
   const h = hist[hi];
-  const note = applyDesign(h.d, h.src, h.imageSource);
+  const note = applyDesign(h.d, h.src, h.imageSource, h.pics);
   histButtons();
   toast(note ? `Undone · ${note}` : "Undone", !!note);
 }
@@ -318,7 +319,7 @@ function redo() {
   if (hi >= hist.length - 1) return;
   hi++;
   const h = hist[hi];
-  const note = applyDesign(h.d, h.src, h.imageSource);
+  const note = applyDesign(h.d, h.src, h.imageSource, h.pics);
   histButtons();
   toast(note ? `Redone · ${note}` : "Redone", !!note);
 }
@@ -355,7 +356,10 @@ async function saveDesign() {
   if (!st.source) return;
   if (recTimer) record();
   const d = designState(),
-    imgCanvas = st.text ? st.imageSource && st.imageSource.canvas : st.source;
+    imgCanvas = st.text ? st.imageSource && st.imageSource.canvas : st.source,
+    artImages = {}; // each picture layer's image (or "source": the same as the picture traced)
+  for (const l of st.art.layers)
+    if (l.picture) artImages[l.id] = l.picture.canvas === st.source ? "source" : sourceImageURL(l.picture.canvas);
   const file = {
     app: DESIGN_APP,
     version: 1,
@@ -363,7 +367,7 @@ async function saveDesign() {
     design: d,
     image: sourceImageURL(imgCanvas),
     imageLabel: st.text ? (st.imageSource && st.imageSource.label) || null : st.srcLabel,
-    pattern: (imgCanvas && imgCanvas.__pattern) || null, // geometric art: what it was made from (patterns.js)
+    artImages,
   };
   const name = `${designSlug(40)}.unbroken.json`,
     data = JSON.stringify(file);
@@ -401,17 +405,23 @@ async function openDesign(f) {
     if (file.image) {
       canvas = await loadImageURL(file.image);
       canvas.__id = ++srcCounter;
-      if (file.pattern) canvas.__pattern = file.pattern; // so the Geometric art card can go on changing it
     }
     const d = file.design,
       text = !!d.v.srcText;
     if (!text && !canvas) throw new Error("the file has no image");
-    if (d.s) d.s.sample = file.pattern ? "pattern" : "user";
+    if (d.s) {
+      d.s.sample = "user";
+      if (!d.s.art && file.pattern) d.s.pattern = file.pattern; // v100: a pattern made on the Trace tab
+    }
+    const pics = new Map(); // the art's pictures (art.js), by layer id
+    for (const [id, url] of Object.entries(file.artImages || {}))
+      pics.set(+id, url === "source" ? canvas : await loadImageURL(url));
     if (recTimer) record(); // keep the state before opening as its own undo step
     const note = applyDesign(
       d,
       text ? null : canvas,
-      text && canvas ? { canvas, label: file.imageLabel || "image" } : null
+      text && canvas ? { canvas, label: file.imageLabel || "image" } : null,
+      pics
     );
     record(); // opening is one undoable step
     toast(note ? `Opened ${f.name} · ${note}` : `Opened ${f.name}`, !!note);

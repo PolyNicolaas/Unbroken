@@ -1,6 +1,6 @@
 // Unbroken · web app · source.js
-// Picture source: built-in samples, reading the settings, setting the source image, and the Text source (fonts, layout,
-// line limits).
+// The source the trace starts from, as the Art tab hands it over (useSource): built-in samples, reading the settings,
+// setting the source image, and the Text source (fonts, layout, line limits).
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
 "use strict";
@@ -251,7 +251,7 @@ let textTimer = null;
 function textChanged() {
   clearTimeout(textTimer);
   textTimer = setTimeout(() => {
-    if (!textMode()) return; // switched away from Text meanwhile
+    if (!textMode()) return artTextChanged(); // art.js: the text is one of several layers, drawn into the art
     const c = buildText();
     if (!c) return;
     c.__id = ++srcCounter;
@@ -264,36 +264,52 @@ function textChanged() {
     schedule(extract);
   }, 150);
 }
-function srcTypeChanged() {
+// What the trace starts from, as the Art tab decides it (art.js): "picture" (the art drawn as one picture), "text" (a
+// text layer on its own, traced from its font strokes) or "model" (a 3D model, sliced on the 3D tab)
+function useSource(kind, canvas, label) {
   clearTimeout(textTimer);
-  stopOptimize(); // a text change still waiting would bring the text back
-  if ($("srcModel").checked) {
-    // model.js: a 3D model; the traced image waits until you come back
-    if (document.body.dataset.src === "image")
-      // only an image is kept (not the text canvas)
-      st.imageSource = st.imageSource || { canvas: st.source, label: st.srcLabel };
-    if (st.tool) exitTool(); // the image tools don't apply to a model
+  stopOptimize(); // a text change or an Optimize run still going is for the old source
+  if (st.tool) exitTool();
+  if (kind === "model") {
+    $("srcModel").checked = true;
     document.body.dataset.src = "model";
     st.text = null;
+    textSizeUI(false);
     enterModel();
     return;
   }
-  const t = textMode();
-  document.body.dataset.src = t ? "text" : "image";
-  if (t) {
-    st.imageSource = st.imageSource || { canvas: st.source, label: st.srcLabel };
-    resetHandEdits();
+  if (kind === "text") {
+    const was = textMode();
+    $("srcText").checked = true;
+    document.body.dataset.src = "text";
+    if (!was) resetHandEdits();
+    textSizeUI(true);
     textChanged();
-  } else {
-    st.text = null;
-    const back = st.imageSource;
-    st.imageSource = null;
-    setSource(back && back.canvas ? back.canvas : makeSample("leaf"), back ? back.label : "sample");
+    return;
   }
-  textSizeUI(t);
-  if (!t) syncSizeUI();
+  $("srcImage").checked = true;
+  document.body.dataset.src = "image";
+  st.text = null;
+  textSizeUI(false);
+  setSource(canvas, label);
+  syncSizeUI();
 }
-document.querySelectorAll('input[name="srcType"]').forEach((r) => r.addEventListener("change", srcTypeChanged));
+// The text layer drawn as a picture, for art that has other layers too: the canvas, and its strokes in canvas px (for
+// plotting the art as drawn). The text on screen (st.text) is left as it was.
+function textPicture() {
+  const keep = st.text,
+    c = buildText(),
+    T = st.text;
+  st.text = keep;
+  if (!c || !T) return null;
+  const k = T.ppm,
+    m = T.margin;
+  return {
+    canvas: c,
+    strokes: T.layout.strokes.map((s2) => s2.map((v) => (v + m) * k)),
+    lw: Math.max(1.5, 0.8 * (spacingMM() || 1) * k), // as buildText draws them
+  };
+}
 const MAX_LINES = CFG.rules.maxTextLines;
 function limitLines() {
   // text is limited to 5 lines; extra line breaks are dropped

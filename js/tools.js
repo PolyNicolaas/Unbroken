@@ -397,8 +397,8 @@ $("drawDone").addEventListener("click", () => {
   }
   $("modeCenter").checked = true;
   labels();
-  $("sample").value = "user";
-  setSource(c, "your drawing");
+  exitTool();
+  artUsePicture(c, "your drawing"); // art.js: into the chosen picture layer
 });
 
 // --- pointer handling for all tools (a 3D model's orbit has its own handlers in model.js; the two never act at
