@@ -20,9 +20,15 @@
     return (s, fn) => G.near(re[s], im[s], fn);
   }
 
+  // may points s and t be closer than the spacing? skip(x, y): either is in an area where that's allowed; or, when it
+  // has one, skip.pair(x1, y1, x2, y2) decides for the two together (Allow overlaps: UNB.overlapAllow)
+  function skipPair(skip, re, im, s, t) {
+    return skip.pair ? skip.pair(re[s], im[s], re[t], im[t]) : skip(re[s], im[s]) || skip(re[t], im[t]);
+  }
+
   // Minimum spacing: push non-neighbouring parts of the line (more than ~3d apart along it) at least d apart, up to
   // `iters` rounds, with light smoothing so pushed parts don't kink. skip(x, y): leave points there alone (areas
-  // where crossings are allowed). Returns { re, im }.
+  // where crossings are allowed; with skip.pair, pairs of points: see skipPair). Returns { re, im }.
   UNB.enforceSpacing = function (re0, im0, d, iters, closed, skip) {
     closed = closed !== false;
     const S = re0.length,
@@ -32,7 +38,8 @@
     const step = arcSteps(re, im, closed) || 1,
       win = Math.ceil((3 * d) / step) + 2;
     const dxA = new Float64Array(S),
-      dyA = new Float64Array(S);
+      dyA = new Float64Array(S),
+      memo = new Map();
     for (let it = 0; it < (iters || 120); it++) {
       const near = pointGrid(re, im, d * 1.05);
       dxA.fill(0);
@@ -47,7 +54,13 @@
             dy = im[t] - im[s];
           const dd = Math.hypot(dx, dy);
           if (dd >= d) return;
-          if (skip && (skip(re[s], im[s]) || skip(re[t], im[t]))) return;
+          if (skip) {
+            // (a pair's answer is kept for the rounds that follow: excused pairs hardly move)
+            const key = s * S + t;
+            let ok = memo.get(key);
+            if (ok === undefined) memo.set(key, (ok = skipPair(skip, re, im, s, t)));
+            if (ok) return;
+          }
           viol++;
           if (dd < 1e-6) {
             dx = 1;
@@ -94,7 +107,7 @@
         if (t <= s) return;
         const sep = closed ? Math.min(t - s, S - (t - s)) : t - s;
         if (sep <= win) return;
-        if (skip && (skip(re[s], im[s]) || skip(re[t], im[t]))) return;
+        if (skip && skipPair(skip, re, im, s, t)) return;
         const dd = Math.hypot(re[t] - re[s], im[t] - im[s]);
         if (dd < best) best = dd;
       });

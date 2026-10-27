@@ -20,7 +20,8 @@ function setBusy(on) {
     busyTimer = setTimeout(() => {
       busyFor("trace", true);
       $("box").classList.add("working");
-    }, 120); // no flicker on quick runs
+    }, 120);
+  // no flicker on quick runs
   else {
     busyFor("trace", false);
     $("box").classList.remove("working");
@@ -128,7 +129,9 @@ $("showDrift").addEventListener("change", () => {
 });
 $("lineView").addEventListener("change", render);
 $("dims").addEventListener("change", render);
-$("uncross").addEventListener("change", () => schedule(fit)); // fit: lays out the line again and checks the size marks
+$("uncross").addEventListener("change", () => schedule(fit));
+// Allow overlaps: the same // fit: lays out the line again and checks the size marks
+$("overlaps").addEventListener("change", () => schedule(fit));
 $("invert").addEventListener("change", () => schedule(extract));
 document.querySelectorAll('input[name="mode"], input[name="loop"]').forEach((r) =>
   r.addEventListener("change", () => {

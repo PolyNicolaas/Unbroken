@@ -129,8 +129,10 @@
       seen = new Uint8Array(n * n),
       mark = (c) => (occ[(2 * ((c / n) | 0) + 1) * F + 2 * (c % n) + 1] = 1);
     const branch = (o.twist || 0) / 100,
+      straight = (o.straight || 0) / 100, // how often a corridor carries on the way it was going
       start = cells[Math.floor(rnd() * cells.length)],
-      active = [start];
+      active = [start],
+      cameBy = new Int8Array(n * n).fill(-1); // the direction each cell was reached by (index into the four)
     seen[start] = 1;
     mark(start);
     while (active.length) {
@@ -139,23 +141,25 @@
         i = c % n,
         j = (c / n) | 0,
         free = [];
-      for (const [di, dj] of [
+      [
         [1, 0],
         [-1, 0],
         [0, 1],
         [0, -1],
-      ]) {
+      ].forEach(([di, dj], dir) => {
         const a = i + di,
           b = j + dj,
           q = b * n + a;
-        if (a >= 0 && b >= 0 && a < n && b < n && keep[q] && !seen[q]) free.push([q, di, dj]);
-      }
+        if (a >= 0 && b >= 0 && a < n && b < n && keep[q] && !seen[q]) free.push([q, di, dj, dir]);
+      });
       if (!free.length) {
         active.splice(k, 1);
         continue;
       }
-      const [q, di, dj] = free[Math.floor(rnd() * free.length)];
+      const on = straight && rnd() < straight ? free.find((f) => f[3] === cameBy[c]) : null,
+        [q, di, dj, dir] = on || free[Math.floor(rnd() * free.length)];
       seen[q] = 1;
+      cameBy[q] = dir;
       mark(q);
       occ[(2 * j + 1 + dj) * F + 2 * i + 1 + di] = 1; // the passage between the two cells
       active.push(q);
@@ -188,6 +192,49 @@
       return (p[0] - a[0]) * (b[1] - p[1]) - (p[1] - a[1]) * (b[0] - p[0]) !== 0;
     });
     return { paths: [roundLoop(V, 0.45, 6)], closed: [true], box: [F, F], gap: 1 };
+  }
+
+  // Corners of an open polyline rounded the same way, its ends kept
+  function roundOpen(V, rho, steps) {
+    const out = [...V[0]],
+      m = V.length;
+    for (let i = 1; i + 1 < m; i++) {
+      const P = V[i - 1],
+        C = V[i],
+        N = V[i + 1];
+      const la = Math.hypot(C[0] - P[0], C[1] - P[1]),
+        lb = Math.hypot(N[0] - C[0], N[1] - C[1]),
+        r = Math.min(rho, 0.5 * la, 0.5 * lb);
+      if (!(r > 0)) {
+        out.push(...C);
+        continue;
+      }
+      const A = [C[0] + ((P[0] - C[0]) * r) / la, C[1] + ((P[1] - C[1]) * r) / la],
+        B = [C[0] + ((N[0] - C[0]) * r) / lb, C[1] + ((N[1] - C[1]) * r) / lb];
+      for (let k = 0; k <= steps; k++) {
+        const t = k / steps,
+          a = (1 - t) * (1 - t),
+          b = 2 * t * (1 - t),
+          c = t * t;
+        out.push(a * A[0] + b * C[0] + c * B[0], a * A[1] + b * C[1] + c * B[1]);
+      }
+    }
+    out.push(...V[m - 1]);
+    return out;
+  }
+  // a flat [x, y, …] with its corners (not its straight-through points) rounded to rho
+  function roundPts(pts, closed, rho) {
+    if (!(rho > 0)) return pts;
+    const V = [];
+    for (let i = 0; i < pts.length; i += 2) V.push([pts[i], pts[i + 1]]);
+    const m = V.length,
+      C = V.filter((p, i) => {
+        if (!closed && (i === 0 || i === m - 1)) return true;
+        const a = V[(i + m - 1) % m],
+          b = V[(i + 1) % m];
+        return Math.abs((p[0] - a[0]) * (b[1] - p[1]) - (p[1] - a[1]) * (b[0] - p[0])) > 1e-9;
+      });
+    return closed ? roundLoop(C, rho, 8) : roundOpen(C, rho, 8);
   }
 
   // Turtle drawing of an L-system: F (and any letter in `draw`) steps forward one unit, + and − turn by `angle`
@@ -229,16 +276,28 @@
   // Moore loop: the closed version of the Hilbert curve, 2^order cells across, every gap one step
   function moore(o) {
     // it ends one step from where it started: the loop closes there
-    const pts = lsystem("LFL+F+LFL", { L: "-RF+LFL+FR-", R: "+LF-RFR-FL+" }, o.detail - 1, Math.PI / 2);
+    const pts = roundPts(
+      lsystem("LFL+F+LFL", { L: "-RF+LFL+FR-", R: "+LF-RFR-FL+" }, o.detail - 1, Math.PI / 2),
+      true,
+      ((o.round || 0) / 100) * 0.5
+    );
     return { paths: [pts], closed: [true], box: boxed(pts), gap: 1 };
   }
   function hilbert(o) {
-    const pts = lsystem("A", { A: "+BF-AFA-FB+", B: "-AF+BFB+FA-" }, o.detail, Math.PI / 2);
+    const pts = roundPts(
+      lsystem("A", { A: "+BF-AFA-FB+", B: "-AF+BFB+FA-" }, o.detail, Math.PI / 2),
+      false,
+      ((o.round || 0) / 100) * 0.5
+    );
     return { paths: [pts], closed: [false], box: boxed(pts), gap: 1 };
   }
   // Gosper curve (flowsnake) on the hexagonal grid: its closest neighbouring steps are √3 / 2 apart
   function gosper(o) {
-    const pts = lsystem("A", { A: "A-B--B+A++AA+B-", B: "+A-BB--B-A++A+B" }, o.detail, Math.PI / 3, "AB");
+    const pts = roundPts(
+      lsystem("A", { A: "A-B--B+A++AA+B-", B: "+A-BB--B-A++A+B" }, o.detail, Math.PI / 3, "AB"),
+      false,
+      ((o.round || 0) / 100) * 0.5
+    );
     return { paths: [pts], closed: [false], box: boxed(pts), gap: Math.sqrt(3) / 2 };
   }
 
@@ -259,8 +318,9 @@
       T = TAU * o.detail,
       c = 1 / (T + Math.PI),
       tw = n ? ((o.twist || 0) / 100) * 0.5 : 0; // radians over the whole radius; more and the turns would cross
+    const q = n ? ((o.round || 0) / 100) * 0.8 : 0; // rounded polygons: part way to a circle
     const P = (a, r) => {
-      const f = r * polyR(a + tw * r, n);
+      const f = r * ((1 - q) * polyR(a + tw * r, n) + q);
       return [f * Math.cos(a), f * Math.sin(a)];
     };
     const pts = [],
@@ -277,7 +337,7 @@
       paths: [pts],
       closed: [true],
       box: boxed(pts),
-      gap: c * Math.PI * (n ? Math.cos(Math.PI / n) : 1) * (tw ? 0.7 : 1),
+      gap: c * Math.PI * (n ? (1 - q) * Math.cos(Math.PI / n) + q : 1) * (tw ? 0.7 : 1),
     };
   }
 
@@ -341,11 +401,16 @@
     };
     for (let j = n + 1; j < pts.length / 2; j++)
       gap = Math.min(gap, seg(pts[2 * j], pts[2 * j + 1], j - n), seg(pts[2 * j], pts[2 * j + 1], j - n - 1));
+    // Rounded corners: a radius up to 3 gaps (each corner as wide as its edges allow). Every round is rounded by the
+    // same
+    // radius, so neighbouring rounds stay at least the gap apart (measured: the gap only grows)
+    const G = Number.isFinite(gap) ? gap : g,
+      out = roundPts(pts, false, ((o.round || 0) / 100) * 3 * G);
     return {
-      paths: [pts],
+      paths: [out],
       closed: [false],
-      box: boxed(pts),
-      gap: Number.isFinite(gap) ? gap : g,
+      box: boxed(out),
+      gap: G,
       rounds: Math.floor(pts.length / 2 / n),
     };
   }
@@ -358,13 +423,15 @@
       sp = 1 / rows,
       W = 1.6,
       M = 240,
+      fq = (o.freq || 100) / 100, // Waves across: how many swings a row makes
       K = [0, 1, 2].map((k) => ({
-        f: (1 + rnd() * 2.5) * (k + 1) * 0.7,
+        f: (1 + rnd() * 2.5) * (k + 1) * 0.7 * fq,
         p: rnd() * TAU,
         d: (0.15 + rnd() * 0.35) * (rnd() < 0.5 ? -1 : 1),
         a: 1 / (k + 1),
       }));
-    const env = (x) => 0.2 + 0.8 * Math.exp(-(((x / W - 0.5) / 0.3) ** 2));
+    // Calm ends: the rows settle down towards the sides (off: the same swing all the way across)
+    const env = o.calm === false ? () => 1 : (x) => 0.2 + 0.8 * Math.exp(-(((x / W - 0.5) / 0.3) ** 2));
     const g = (x, r) => env(x) * K.reduce((s, k) => s + k.a * Math.sin((TAU * k.f * x) / W + k.p + r * k.d), 0);
     const X = Array.from({ length: M + 1 }, (_, i) => (W * i) / M);
     // the closest two neighbouring rows come at amplitude amp (measured across, not just straight down)
@@ -407,32 +474,212 @@
     return { paths: [pts], closed: [false], box: boxed(pts), gap: rows > 1 ? gap : sp };
   }
 
-  // Spirograph: a hypotrochoid, the pen d from the centre of a wheel rolling inside a ring Petals times its size.
-  // Pen offset under the wheel's own radius gives rounded petals and no crossings; past it the petals loop.
+  // ---------- gears and pendulums: one closed line that crosses itself ----------
+  const gcd = (a, b) => (b ? gcd(b, a % b) : a);
+  // A ring's track for the Spirograph: a closed curve, counter-clockwise (y up), its length the ring's teeth, densely
+  // sampled with the arc length s, the direction th of travel and the inward normal at each point.
+  // shape: circle, oval (aspect: the short side ÷ the long, 0.3–1), triangle, square, pentagon, hexagon (rounded
+  // corners: corner radius ÷ the shape's size, at least the wheel's radius + 2% when rolling inside), stadium.
+  function ringTrack(shape, teeth, aspect, corner, minCorner) {
+    const pts = [],
+      N = 2400;
+    if (shape === "oval") {
+      const b = Math.max(0.3, Math.min(1, aspect));
+      for (let i = 0; i < N; i++) pts.push([Math.cos((TAU * i) / N), b * Math.sin((TAU * i) / N)]);
+    } else if (shape === "stadium") {
+      // two half circles of radius 1 joined by straights 2 (1 − aspect) / aspect long
+      const L = (2 * (1 - Math.max(0.3, Math.min(1, aspect)))) / Math.max(0.3, aspect) + 1e-6,
+        per = 2 * L + TAU;
+      for (let i = 0; i < N; i++) {
+        let u = (per * i) / N;
+        if (u < L) pts.push([L / 2 - u, -1]);
+        else if ((u -= L) < Math.PI) pts.push([-L / 2 - Math.sin(u), -Math.cos(u)]);
+        else if ((u -= Math.PI) < L) pts.push([-L / 2 + u, 1]);
+        else ((u -= L), pts.push([L / 2 + Math.sin(u), Math.cos(u)]));
+      }
+      pts.reverse(); // counter-clockwise
+    } else if (shape !== "circle") {
+      // a rounded regular polygon, flat side down, inside the unit circle: corner circles of radius rc centred on the
+      // corners of the polygon inset by rc, joined by the sides pushed back out by rc
+      const n = { triangle: 3, square: 4, pentagon: 5, hexagon: 6 }[shape] || 4,
+        c = Math.cos(Math.PI / n),
+        poly = (rc) => {
+          const Rin = 1 - rc / c,
+            side = 2 * Rin * Math.sin(Math.PI / n);
+          return { Rin, side, per: n * side + TAU * rc };
+        };
+      let rc = Math.max(0.02, Math.min(0.9, corner)) * c;
+      // rolling inside, the corners must be at least the wheel's radius (scaled to the teeth), or it can't get round
+      for (let k = 0; minCorner && k < 60 && (rc * teeth) / poly(rc).per < minCorner * 1.02; k++)
+        rc = Math.min(0.98 * c, rc * 1.08 + 0.005);
+      const { Rin, side, per } = poly(rc),
+        ang = (k) => -Math.PI / 2 - Math.PI / n + (TAU * k) / n, // corner k of the inset polygon
+        C = Array.from({ length: n }, (_, k) => [Rin * Math.cos(ang(k)), Rin * Math.sin(ang(k))]);
+      for (let i = 0; i < N; i++) {
+        let u = (per * i) / N;
+        for (let k = 0; k < n; k++) {
+          const arc = (TAU / n) * rc,
+            a0 = ang(k) - Math.PI / n; // the arc round corner k, from the side before's normal to the side after's
+          if (u < arc) {
+            const a = a0 + u / rc;
+            pts.push([C[k][0] + rc * Math.cos(a), C[k][1] + rc * Math.sin(a)]);
+            break;
+          }
+          u -= arc;
+          if (u < side) {
+            const a = a0 + TAU / n,
+              Q = C[(k + 1) % n];
+            pts.push([
+              C[k][0] + rc * Math.cos(a) + ((Q[0] - C[k][0]) * u) / side,
+              C[k][1] + rc * Math.sin(a) + ((Q[1] - C[k][1]) * u) / side,
+            ]);
+            break;
+          }
+          u -= side;
+        }
+      }
+    } else for (let i = 0; i < N; i++) pts.push([Math.cos((TAU * i) / N), Math.sin((TAU * i) / N)]);
+    // scale to the teeth, then arc length, direction and inward normal at each point
+    let per = 0;
+    for (let i = 0; i < N; i++) per += Math.hypot(pts[(i + 1) % N][0] - pts[i][0], pts[(i + 1) % N][1] - pts[i][1]);
+    const k = teeth / per,
+      P = pts.map(([x, y]) => [x * k, y * k]),
+      S = [0];
+    for (let i = 1; i <= N; i++) S.push(S[i - 1] + Math.hypot(P[i % N][0] - P[i - 1][0], P[i % N][1] - P[i - 1][1]));
+    const L = S[N];
+    const at = (s) => {
+      s = ((s % L) + L) % L;
+      let lo = 0,
+        hi = N;
+      while (hi - lo > 1) {
+        const m = (lo + hi) >> 1;
+        if (S[m] <= s) lo = m;
+        else hi = m;
+      }
+      const A = P[lo],
+        B = P[(lo + 1) % N],
+        t = (s - S[lo]) / (S[lo + 1] - S[lo] || 1),
+        th = Math.atan2(B[1] - A[1], B[0] - A[0]);
+      return { x: A[0] + t * (B[0] - A[0]), y: A[1] + t * (B[1] - A[1]), th };
+    };
+    // the direction unwrapped along the track: the angle turned since s = 0 (a full 2π each time round)
+    const thS = [at(0).th];
+    for (let i = 1; i <= N; i++) {
+      let d = at(S[i] - 1e-9).th - thS[i - 1];
+      d -= TAU * Math.round(d / TAU);
+      thS.push(thS[i - 1] + d);
+    }
+    const thAt = (s) => {
+      const lap = Math.floor(s / L),
+        u = s - lap * L,
+        i = Math.min(N - 1, Math.max(0, Math.floor((u / L) * N)));
+      let lo = Math.max(0, i - 2);
+      while (lo < N - 1 && S[lo + 1] <= u) lo++;
+      while (lo > 0 && S[lo] > u) lo--;
+      const t = (u - S[lo]) / (S[lo + 1] - S[lo] || 1);
+      return thS[lo] + t * (thS[lo + 1] - thS[lo]) + lap * TAU;
+    };
+    return { L, at, thAt };
+  }
+  // Spirograph: a toothed wheel rolling round a ring (inside or outside), the pen in one of its holes. The ring is a
+  // circle, an oval, a stadium or a rounded polygon; its teeth and the wheel's set how many times the wheel goes round
+  // before the line closes (wheel teeth ÷ their greatest common divisor). Hole: the pen's distance from the wheel's
+  // centre, as a share of its radius (past 100% the pen reaches outside the wheel: loops). Second wheel: a smaller
+  // wheel carried on the first at the hole, turning as the gear ratio says, the pen in its own hole. One closed line,
+  // crossing itself.
   function spirograph(o) {
-    const P = o.detail,
-      d = 0.2 + ((o.twist || 0) / 100) * 2,
-      k = P - 1,
-      M = Math.max(600, 90 * P),
+    const ringT = o.ringTeeth,
+      wheelT = o.wheelTeeth === o.ringTeeth ? o.wheelTeeth - 1 : o.wheelTeeth,
+      inside = o.side !== "outside",
+      r = wheelT / TAU,
+      d = (o.hole / 100) * r,
+      track = ringTrack(o.ring, ringT, (o.oval || 70) / 100, (o.corner || 40) / 100, inside ? r : 0),
+      L = track.L;
+    let laps = wheelT / gcd(ringT, wheelT);
+    const w2 = !!o.wheel2,
+      r2 = w2 ? Math.max(0.1, (o.wheel2Teeth / 100) * r) : 0,
+      d2 = w2 ? (o.hole2 / 100) * r2 : 0,
+      m2 = w2 ? -(r / r2) * (o.wheel2Dir === "same" ? -1 : 1) : 0; // the second wheel turns this many times per turn
+    // closing with a second wheel: the first wheel turns a whole number of times; the second must too
+    if (w2) {
+      const q = Math.max(1, o.wheel2Teeth),
+        p = 100;
+      laps *= q / gcd(p, q);
+    }
+    laps = Math.min(laps, 400);
+    const rot = ((o.rotate || 0) * Math.PI) / 180,
+      cr = Math.cos(rot),
+      sr = Math.sin(rot),
+      steps = Math.min(60000, Math.max(800, Math.round(laps * Math.max(360, (L / Math.max(r, 0.5)) * 24)))),
       pts = [];
-    for (let i = 0; i < M; i++) {
-      const t = (TAU * i) / M;
-      pts.push(k * Math.cos(t) + d * Math.cos(k * t), k * Math.sin(t) - d * Math.sin(k * t));
+    for (let i = 0; i < steps; i++) {
+      const s = (laps * L * i) / steps,
+        P = track.at(s),
+        th = track.thAt(s),
+        nx = -Math.sin(th),
+        ny = Math.cos(th), // inward normal (left of travel, counter-clockwise)
+        sg = inside ? 1 : -1,
+        cx = P.x + sg * r * nx,
+        cy = P.y + sg * r * ny,
+        phi = th - sg * (s / r); // the wheel's turn: rolling without slipping
+      let x = cx + d * Math.cos(phi),
+        y = cy + d * Math.sin(phi);
+      if (w2) {
+        const phi2 = phi * (1 + m2);
+        x += d2 * Math.cos(phi2);
+        y += d2 * Math.sin(phi2);
+      }
+      pts.push(x * cr - y * sr, -(x * sr + y * cr)); // y down for the page
     }
     const box = boxed(pts);
-    return { paths: [pts], closed: [true], box, gap: Math.max(box[0], box[1]) / 120, crosses: d > 1 };
+    return { paths: [pts], closed: [true], box, gap: Math.max(box[0], box[1]) / 150, crosses: true, laps };
   }
 
-  // Lissajous: x = sin(a t + phase), y = sin((a + 1) t), one closed curve that crosses itself
+  // Lissajous / harmonograph: two swinging pendulums, x = sin(a t + phase), y = sin(b t). Whole-number ratios close
+  // in one swing; Drift detunes a, so the figure turns slowly; Damping lets the swings die away over Swings, spiralling
+  // in (an open line). One line that crosses itself.
   function lissajous(o) {
-    const a = o.detail,
-      b = a + 1,
-      ph = ((o.twist || 0) / 100) * (Math.PI / 2),
-      M = 400 * b,
+    const a = o.fx + (o.drift || 0) / 1000,
+      b = o.fy,
+      ph = ((o.phase || 0) * Math.PI) / 180,
+      damp = Math.min(0.97, (o.damping || 0) / 100),
+      open = damp > 0 || (o.drift || 0) > 0,
+      swings = open ? o.swings : 1,
+      T = TAU * swings,
+      dl = damp > 0 ? -Math.log(1 - damp) / T : 0,
+      M = Math.min(60000, Math.round(160 * Math.max(a, b) * swings + 400)),
       pts = [];
-    for (let i = 0; i < M; i++) {
-      const t = (TAU * i) / M;
-      pts.push(Math.sin(a * t + ph), Math.sin(b * t));
+    for (let i = 0; i < M + (open ? 1 : 0); i++) {
+      const t = (T * i) / M,
+        e = Math.exp(-dl * t);
+      pts.push(e * Math.sin(a * t + ph), e * Math.sin(b * t));
+    }
+    return { paths: [pts], closed: [!open], box: boxed(pts), gap: 1 / 60, crosses: true };
+  }
+
+  // Rose: r = cos(k θ), k = n / d, one closed line through the middle (n petals for odd n, 2n for even, d = 1). Maurer
+  // rose: the points of a rose a fixed angle apart, joined by straight lines (360 of them): a star of crossing chords.
+  function rose(o) {
+    const pts = [];
+    if (o.maurer) {
+      const st = (o.step * Math.PI) / 180;
+      for (let i = 0; i < 360; i++) {
+        const th = i * st,
+          r = Math.sin(o.n * th);
+        pts.push(r * Math.cos(th), r * Math.sin(th));
+      }
+    } else {
+      const n = o.n,
+        dd = o.d,
+        g = gcd(n, dd),
+        k = n / g / (dd / g),
+        turns = (dd / g) * ((n / g) % 2 && (dd / g) % 2 ? 1 : 2),
+        M = 720 * turns;
+      for (let i = 0; i < M; i++) {
+        const th = (Math.PI * turns * i) / M,
+          r = Math.cos(k * th);
+        pts.push(r * Math.cos(th), r * Math.sin(th));
+      }
     }
     return { paths: [pts], closed: [true], box: boxed(pts), gap: 1 / 60, crosses: true };
   }
@@ -585,7 +832,8 @@
   // by half circles into one open line. The wiggle is held to (row spacing − gap) / 2 and its wavelength to at least 4
   // gaps, so neighbouring rows, and the folds of one row, stay at least a gap (35% of the row spacing) apart.
   function wavesTone(o, rnd, T) {
-    const A = T.w / T.h,
+    const str = (o.strength == null ? 100 : o.strength) / 100, // Wiggle: how hard the darkest parts wiggle
+      A = T.w / T.h,
       rows = o.detail,
       sp = 1 / rows,
       gap = 0.35 * sp,
@@ -602,7 +850,7 @@
       let ph = 0;
       const row = [];
       for (let x = 0; x <= A + 1e-9; x += dx) {
-        const t = easeOut(Math.pow(f(x / A, yc), g)),
+        const t = easeOut(Math.pow(f(x / A, yc), g)) * str,
           lam = lmax - (lmax - lmin) * t;
         row.push([x, yc + amax * t * Math.sin(ph)]);
         ph += (2 * Math.PI * dx) / lam;
@@ -630,7 +878,8 @@
   // picture is darker, as one open line. The picture fills the spiral's circle (its middle square shows; the corners
   // are cut). Held like the waves: wobble ≤ (pitch − gap) / 2, wavelength ≥ 4 gaps, gap 35% of the pitch.
   function spiralTone(o, rnd, T) {
-    const turns = o.detail,
+    const str = (o.strength == null ? 100 : o.strength) / 100,
+      turns = o.detail,
       R = 1,
       p = R / (turns + 0.5),
       gap = 0.35 * p,
@@ -655,7 +904,7 @@
       if (r > R - p / 2) break;
       const x = r * Math.cos(th),
         y = r * Math.sin(th),
-        t = easeOut(Math.pow(fill(x, y), g)),
+        t = easeOut(Math.pow(fill(x, y), g)) * str,
         lam = lmax - (lmax - lmin) * t,
         w = amax * t * Math.sin(ph);
       pts.push(x + w * Math.cos(th), y + w * Math.sin(th));
@@ -795,7 +1044,7 @@
     const out = new Uint8Array(occ.length),
       q = [];
     for (let i = 0; i < F; i++)
-      for (const c of [i, (F - 1) * F + i, i * F, i * F + F - 1]) if (!occ[c] && !out[c]) (out[c] = 1), q.push(c);
+      for (const c of [i, (F - 1) * F + i, i * F, i * F + F - 1]) if (!occ[c] && !out[c]) ((out[c] = 1), q.push(c));
     while (q.length) {
       const c = q.pop(),
         x = c % F,
@@ -807,7 +1056,7 @@
         [x, y - 1],
       ]) {
         const e = Y * F + X;
-        if (X >= 0 && Y >= 0 && X < F && Y < F && !occ[e] && !out[e]) (out[e] = 1), q.push(e);
+        if (X >= 0 && Y >= 0 && X < F && Y < F && !occ[e] && !out[e]) ((out[e] = 1), q.push(e));
       }
     }
     for (let i = 0; i < occ.length; i++) if (!out[i]) occ[i] = 1;
@@ -841,25 +1090,70 @@
     return { paths: [roundLoop(V, rho, 6)], closed: [true], box: [F, F] };
   }
 
-  // What each style is and which controls it uses, for the app's Geometric art card. detail and twist: the two
-  // sliders (name, range, starting value, and how to say a value); sides: the Sides menu; shape: the Shape menu;
-  // seed: a Shuffle button; line: which Line setting traces it as drawn (closed: a loop; open: from end to end);
-  // oneLine: already one unbroken line; evenGap: its gap is the spacing between neighbouring lines all over (the app
-  // starts it at the width where that gap is the line spacing); crosses: it crosses itself.
-  const ord = (v) => `order ${v} · ${2 ** v} × ${2 ** v}`;
+  // ---------- the styles and their settings ----------
+  // Each style's settings, in the order the Pattern card shows them: R (a slider: key, name, min, max, starting value,
+  // how to say a value, step), C (a menu: key, name, [[value, label]], starting value), B (a switch). when(p): shown
+  // only when it's true for the settings p. The keys are what UNB.pattern reads (o.detail …) and what a design file
+  // keeps. A style also says: tip; seed (a Shuffle button); line (which Line setting traces it as drawn: closed, a
+  // loop, or open); oneLine (already one unbroken line); evenGap (its gap is the spacing between neighbouring lines all
+  // over: the app starts it at the width where that gap is the line spacing); crosses (it crosses itself); tone (drawn
+  // from a picture).
+  const rangeParam = (key, name, min, max, value, say, step) => ({
+    key,
+    type: "range",
+    name,
+    min,
+    max,
+    value,
+    say: say || ((v) => `${v}`),
+    step: step || 1,
+  });
+  const choiceParam = (key, name, options, value) => ({ key, type: "select", name, options, value });
+  const checkParam = (key, name, value) => ({ key, type: "check", name, value: !!value });
+  const pct = (v) => `${v}%`,
+    ord = (v) => `order ${v} · ${2 ** v} × ${2 ** v}`,
+    off0 = (v) => (v ? `${v}%` : "off");
+  const SHAPE = choiceParam(
+      "shape",
+      "Shape",
+      [
+        ["square", "Square"],
+        ["circle", "Circle"],
+        ["hexagon", "Hexagon"],
+        ["diamond", "Diamond"],
+        ["heart", "Heart"],
+        ["star", "Star"],
+      ],
+      "square"
+    ),
+    SIDES = choiceParam(
+      "sides",
+      "Sides",
+      [
+        [0, "Circle"],
+        [3, "Triangle"],
+        [4, "Square"],
+        [5, "Pentagon"],
+        [6, "Hexagon"],
+        [8, "Octagon"],
+      ],
+      4
+    ),
+    CORNERS = rangeParam("round", "Rounded corners", 0, 100, 0, off0),
+    CONTRAST = rangeParam("twist", "Contrast", 0, 100, 50, pct),
+    INVERT = checkParam("invert", "Invert (light parts get the line)", false);
   UNB.PATTERNS = {
     labyrinth: {
       label: "Labyrinth",
       tip: "One closed line around a random maze, an even gap everywhere",
-      detail: { name: "Cells across", min: 4, max: 36, value: 12, say: (v) => `${v} cells` },
-      twist: {
-        name: "Branching",
-        min: 0,
-        max: 100,
-        value: 30,
-        say: (v) => (v < 15 ? "long corridors" : v > 70 ? "short branches" : `${v}%`),
-      },
-      shape: true,
+      params: [
+        rangeParam("detail", "Cells across", 4, 36, 12, (v) => `${v} cells`),
+        rangeParam("twist", "Branching", 0, 100, 30, (v) =>
+          v < 15 ? "long corridors" : v > 70 ? "short branches" : `${v}%`
+        ),
+        rangeParam("straight", "Straight runs", 0, 100, 0, off0),
+        SHAPE,
+      ],
       seed: true,
       line: "closed",
       oneLine: true,
@@ -868,7 +1162,7 @@
     moore: {
       label: "Moore loop",
       tip: "A closed space-filling curve: every gap one step",
-      detail: { name: "Order", min: 2, max: 6, value: 4, say: ord },
+      params: [rangeParam("detail", "Order", 2, 6, 4, ord), CORNERS],
       line: "closed",
       oneLine: true,
       evenGap: true,
@@ -876,7 +1170,7 @@
     hilbert: {
       label: "Hilbert curve",
       tip: "A space-filling curve from one corner to the next",
-      detail: { name: "Order", min: 1, max: 6, value: 4, say: ord },
+      params: [rangeParam("detail", "Order", 1, 6, 4, ord), CORNERS],
       line: "open",
       oneLine: true,
       evenGap: true,
@@ -884,7 +1178,7 @@
     gosper: {
       label: "Gosper curve",
       tip: "The flowsnake: a space-filling curve on a hexagonal grid",
-      detail: { name: "Order", min: 1, max: 3, value: 3, say: (v) => `order ${v} · ${7 ** v} steps` },
+      params: [rangeParam("detail", "Order", 1, 3, 3, (v) => `order ${v} · ${7 ** v} steps`), CORNERS],
       line: "open",
       oneLine: true,
       evenGap: true,
@@ -892,9 +1186,12 @@
     spiral: {
       label: "Double spiral",
       tip: "Two spiral arms wound into each other: one closed loop, even gaps",
-      detail: { name: "Turns", min: 2, max: 16, value: 7, say: (v) => `${v} turns` },
-      twist: { name: "Twist", min: 0, max: 100, value: 0, say: (v) => (v ? `${v}%` : "none") },
-      sides: true,
+      params: [
+        rangeParam("detail", "Turns", 2, 16, 7, (v) => `${v} turns`),
+        SIDES,
+        rangeParam("twist", "Twist", 0, 100, 0, (v) => (v ? `${v}%` : "none"), 1),
+        { ...CORNERS, when: (p) => +p.sides > 0 },
+      ],
       line: "closed",
       oneLine: true,
       evenGap: true,
@@ -902,9 +1199,12 @@
     whirl: {
       label: "Whirl",
       tip: "Polygons turning as they shrink, one line spiralling in with an even gap",
-      detail: { name: "Rounds", min: 3, max: 40, value: 16, say: (v) => `up to ${v} rounds` },
-      twist: { name: "Turn per round", min: 0, max: 90, value: 15, say: (v) => (v ? `${v}%` : "none") },
-      sides: true,
+      params: [
+        rangeParam("detail", "Rounds", 3, 40, 16, (v) => `up to ${v} rounds`),
+        SIDES,
+        rangeParam("twist", "Turn per round", 0, 90, 15, (v) => (v ? `${v}%` : "none")),
+        CORNERS,
+      ],
       line: "open",
       oneLine: true,
       evenGap: true,
@@ -912,8 +1212,12 @@
     waves: {
       label: "Waves",
       tip: "Rows of a shifting wave joined end to end: one line, never touching",
-      detail: { name: "Rows", min: 3, max: 30, value: 14, say: (v) => `${v} rows` },
-      twist: { name: "Amplitude", min: 0, max: 100, value: 60, say: (v) => (v ? `${v}%` : "flat") },
+      params: [
+        rangeParam("detail", "Rows", 3, 30, 14, (v) => `${v} rows`),
+        rangeParam("twist", "Amplitude", 0, 100, 60, (v) => (v ? `${v}%` : "flat")),
+        rangeParam("freq", "Waves across", 25, 300, 100, pct, 5),
+        checkParam("calm", "Calm ends", true),
+      ],
       seed: true,
       line: "open",
       oneLine: true,
@@ -921,45 +1225,113 @@
     },
     spirograph: {
       label: "Spirograph",
-      tip: "A wheel rolling inside a ring: rounded petals, looping (and crossing) past a 40% pen offset",
-      detail: { name: "Petals", min: 3, max: 24, value: 7, say: (v) => `${v} petals` },
-      twist: {
-        name: "Pen offset",
-        min: 0,
-        max: 100,
-        value: 30,
-        say: (v) => (0.2 + v / 50 > 1 ? `${v}% · loops` : `${v}%`),
-      },
+      tip: "A toothed wheel rolling round a ring, the pen in one of its holes",
+      params: [
+        choiceParam(
+          "ring",
+          "Ring",
+          [
+            ["circle", "Circle"],
+            ["oval", "Oval"],
+            ["stadium", "Stadium"],
+            ["triangle", "Triangle"],
+            ["square", "Square"],
+            ["pentagon", "Pentagon"],
+            ["hexagon", "Hexagon"],
+          ],
+          "circle"
+        ),
+        {
+          ...rangeParam("oval", "Ring width", 30, 100, 70, pct),
+          when: (p) => p.ring === "oval" || p.ring === "stadium",
+        },
+        {
+          ...rangeParam("corner", "Ring corners", 5, 90, 40, pct),
+          when: (p) => !["circle", "oval", "stadium"].includes(p.ring),
+        },
+        rangeParam("ringTeeth", "Ring teeth", 24, 160, 96, (v) => `${v} teeth`),
+        rangeParam("wheelTeeth", "Wheel teeth", 6, 150, 52, (v) => `${v} teeth`),
+        choiceParam(
+          "side",
+          "Wheel rolls",
+          [
+            ["inside", "Inside the ring"],
+            ["outside", "Outside the ring"],
+          ],
+          "inside"
+        ),
+        rangeParam("hole", "Hole", 0, 140, 70, (v) => `${v}% of the wheel's radius${v > 100 ? " · loops" : ""}`),
+        checkParam("wheel2", "Second wheel", false),
+        {
+          ...rangeParam("wheel2Teeth", "Second wheel's size", 10, 90, 40, (v) => `${v}% of the first`),
+          when: (p) => p.wheel2,
+        },
+        { ...rangeParam("hole2", "Its hole", 0, 140, 60, pct), when: (p) => p.wheel2 },
+        {
+          ...choiceParam(
+            "wheel2Dir",
+            "It turns",
+            [
+              ["against", "Against the first"],
+              ["same", "With the first"],
+            ],
+            "against"
+          ),
+          when: (p) => p.wheel2,
+        },
+        rangeParam("rotate", "Rotate", 0, 359, 0, (v) => `${v}°`),
+      ],
       line: "closed",
       crosses: true,
     },
     lissajous: {
-      label: "Lissajous",
-      tip: "Two swinging pendulums at a ratio of a : a + 1; crosses itself",
-      detail: { name: "Lobes", min: 1, max: 8, value: 3, say: (v) => `${v} : ${v + 1}` },
-      twist: { name: "Phase", min: 0, max: 100, value: 50, say: (v) => `${Math.round(v * 0.9)}°` },
+      label: "Lissajous / harmonograph",
+      tip: "Two swinging pendulums; damped, they spiral in like a harmonograph",
+      params: [
+        rangeParam("fx", "Across swings", 1, 12, 3),
+        rangeParam("fy", "Up-down swings", 1, 12, 4),
+        rangeParam("phase", "Phase", 0, 180, 45, (v) => `${v}°`),
+        rangeParam("drift", "Drift", 0, 100, 0, (v) => (v ? `${v}` : "none")),
+        rangeParam("damping", "Damping", 0, 95, 0, off0),
+        { ...rangeParam("swings", "Swings", 2, 120, 30), when: (p) => p.damping > 0 || p.drift > 0 },
+      ],
+      line: "closed",
+      crosses: true,
+    },
+    rose: {
+      label: "Rose",
+      tip: "Petals round the middle, r = cos(n/d · θ); or a Maurer rose of crossing chords",
+      params: [
+        rangeParam("n", "Petals (n)", 1, 12, 5),
+        { ...rangeParam("d", "Divider (d)", 1, 12, 1), when: (p) => !p.maurer },
+        checkParam("maurer", "Maurer rose (straight chords)", false),
+        { ...rangeParam("step", "Chord angle", 1, 179, 71, (v) => `${v}°`), when: (p) => p.maurer },
+      ],
       line: "closed",
       crosses: true,
     },
     truchet: {
       label: "Truchet tiles",
       tip: "Quarter circles on a grid of tiles, joined into loops (many pieces)",
-      detail: { name: "Tiles across", min: 3, max: 30, value: 10, say: (v) => `${v} tiles` },
-      twist: { name: "Mix", min: 0, max: 100, value: 50, say: (v) => `${v}% one way` },
-      shape: true,
+      params: [
+        rangeParam("detail", "Tiles across", 3, 30, 10, (v) => `${v} tiles`),
+        rangeParam("twist", "Mix", 0, 100, 50, (v) => `${v}% one way`),
+        SHAPE,
+      ],
       seed: true,
       line: "closed",
       evenGap: true,
     },
-  };
-  // patterns drawn from a picture (o.tone: { w, h, d }); detail and twist as above. evenGap: their gap is the finest
-  // one (in the darkest parts), so the app starts them where that is the line spacing
-  Object.assign(UNB.PATTERNS, {
+    // drawn from a picture (o.tone: { w, h, d }): their gap is the finest one, in the darkest parts
     hilbertTone: {
       label: "Space-filling curve (picture)",
       tip: "A Hilbert curve that fills in finer where the picture is darker",
-      detail: { name: "Finest order", min: 3, max: 8, value: 5, say: (v) => `order ${v} · ${2 ** v} cells across` },
-      twist: { name: "Contrast", min: 0, max: 100, value: 50, say: (v) => `${v}%` },
+      params: [
+        rangeParam("detail", "Finest order", 3, 8, 5, (v) => `order ${v} · ${2 ** v} cells across`),
+        rangeParam("range", "Levels", 1, 5, 3, (v) => `${v + 1} cell sizes`),
+        CONTRAST,
+        INVERT,
+      ],
       tone: true,
       line: "open",
       oneLine: true,
@@ -968,8 +1340,12 @@
     wavesTone: {
       label: "Wave rows (picture)",
       tip: "Rows across the picture, wiggling harder and tighter where it is darker",
-      detail: { name: "Rows", min: 4, max: 120, value: 20, say: (v) => `${v} rows` },
-      twist: { name: "Contrast", min: 0, max: 100, value: 50, say: (v) => `${v}%` },
+      params: [
+        rangeParam("detail", "Rows", 4, 120, 20, (v) => `${v} rows`),
+        rangeParam("strength", "Wiggle", 10, 100, 100, pct),
+        CONTRAST,
+        INVERT,
+      ],
       tone: true,
       line: "open",
       oneLine: true,
@@ -978,8 +1354,12 @@
     spiralTone: {
       label: "Vibrating spiral (picture)",
       tip: "One spiral from the middle out, wobbling harder where the picture is darker",
-      detail: { name: "Turns", min: 4, max: 120, value: 10, say: (v) => `${v} turns` },
-      twist: { name: "Contrast", min: 0, max: 100, value: 50, say: (v) => `${v}%` },
+      params: [
+        rangeParam("detail", "Turns", 4, 120, 10, (v) => `${v} turns`),
+        rangeParam("strength", "Wiggle", 10, 100, 100, pct),
+        CONTRAST,
+        INVERT,
+      ],
       tone: true,
       line: "open",
       oneLine: true,
@@ -988,16 +1368,38 @@
     labyrinthTone: {
       label: "Labyrinth (picture)",
       tip: "A maze with smaller cells where the picture is darker, one closed line",
-      detail: { name: "Finest order", min: 3, max: 7, value: 4, say: (v) => `order ${v} · ${2 ** v} cells across` },
-      twist: { name: "Contrast", min: 0, max: 100, value: 50, say: (v) => `${v}%` },
+      params: [
+        rangeParam("detail", "Finest order", 3, 7, 4, (v) => `order ${v} · ${2 ** v} cells across`),
+        rangeParam("range", "Levels", 1, 4, 3, (v) => `${v + 1} cell sizes`),
+        CONTRAST,
+        INVERT,
+      ],
       seed: true,
       tone: true,
       line: "closed",
       oneLine: true,
       evenGap: true,
     },
-  });
-  UNB.PATTERN_SHAPES = ["square", "circle", "hexagon", "diamond", "heart", "star"];
+  };
+  UNB.PATTERN_SHAPES = SHAPE.options.map(([v]) => v);
+  // a style's settings filled in: each one given (and in range) or its starting value; seed a whole number ≥ 1
+  UNB.patternDefaults = function (style, o) {
+    const S = UNB.PATTERNS[style],
+      p = { style, seed: Math.max(1, Math.round(+(o && o.seed) || 1)) };
+    if (!S) return p;
+    for (const q of S.params) {
+      const v = o ? o[q.key] : undefined;
+      if (q.type === "range") {
+        const n = v == null || v === "" || !Number.isFinite(+v) ? q.value : +v;
+        p[q.key] = Math.min(q.max, Math.max(q.min, Math.round(n / q.step) * q.step));
+      } else if (q.type === "select")
+        p[q.key] = q.options.some(([x]) => String(x) === String(v))
+          ? q.options.find(([x]) => String(x) === String(v))[0]
+          : q.value;
+      else p[q.key] = v == null ? q.value : !!v;
+    }
+    return p;
+  };
 
   // How a pattern is drawn as a picture to trace, long px on its long side: a margin of 6% all round, and strokes a
   // third of the closest gap between neighbouring lines (a 200th of the size for patterns that cross themselves), never
@@ -1028,14 +1430,15 @@
     spirograph,
     lissajous,
     truchet,
+    rose,
     hilbertTone,
     wavesTone,
     spiralTone,
     labyrinthTone,
   };
 
-  // One pattern. style: a key of UNB.PATTERNS; o: { detail, twist, sides (0: circle, 3–8), shape, seed, tone (the
-  // picture, for the styles drawn from one: { w, h, d }) }.
+  // One pattern. style: a key of UNB.PATTERNS; o: its settings (keys as in its params; anything missing or out of
+  // range gets the starting value), seed, and tone (the picture, for the styles drawn from one: { w, h, d }).
   // Returns { paths: [[x, y, …]], closed: [bool], box: [w, h], gap, crosses } in the pattern's own units (y down): gap
   // is the closest any two neighbouring lines come (the app draws the strokes a third of that wide). null when the
   // style is unknown or nothing is left inside the shape.
@@ -1043,12 +1446,11 @@
     const S = UNB.PATTERNS[style],
       make = MAKE[style];
     if (!S || !make) return null;
-    const p = Object.assign({}, o || {}),
-      clampTo = (v, spec) => Math.round(Math.min(spec.max, Math.max(spec.min, v == null ? spec.value : +v)));
-    p.detail = clampTo(p.detail, S.detail);
-    if (S.twist) p.twist = clampTo(p.twist, S.twist);
-    if (S.tone && !(p.tone && p.tone.w > 1 && p.tone.h > 1)) return null; // drawn from a picture: needs one
-    const r = make(p, seeded(p.seed || 1), p.tone);
+    const p = UNB.patternDefaults(style, o);
+    let tone = o && o.tone;
+    if (S.tone && !(tone && tone.w > 1 && tone.h > 1)) return null; // drawn from a picture: needs one
+    if (tone && p.invert) tone = { ...tone, d: Float32Array.from(tone.d, (v) => 1 - v) };
+    const r = make(p, seeded(p.seed), tone);
     if (!r) return null;
     r.crosses = !!r.crosses;
     return r;

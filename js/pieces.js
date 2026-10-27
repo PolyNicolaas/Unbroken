@@ -36,6 +36,7 @@ function piecesKeyNow() {
     lineWidthMM(),
     cornerMM(),
     +$("uncross").value,
+    $("overlaps").checked,
     CFG.engine.loopRadius,
     CFG.engine.termTolerance,
     st.text && st.text.ppm,

@@ -9,13 +9,14 @@
 
 // st.art = { kind: "picture" | "text" | "pattern" | "model",
 //            picture: { canvas, label, sample } (the last picture: a sample, an image of yours, a sketch, a model's
-//              drawing; the patterns drawn from a picture use it too), pattern: { style, detail, twist, sides, shape,
-//              seed }, width: the pattern's print width in mm, or null for the width that fits the needle }
+//              drawing; the patterns drawn from a picture use it too), pattern: { style, seed, and
+// the style's own settings, keyed as in its UNB.PATTERNS params }, width: the pattern's print width in mm, or null for
+// the width that fits the needle }
 // The text's settings are the Text card's controls, the model is st.model (model.js).
 st.art = {
   kind: "picture",
   picture: null,
-  pattern: { style: "labyrinth", detail: 12, twist: 30, sides: 4, shape: "square", seed: 1 },
+  pattern: UNB.patternDefaults("labyrinth"),
   width: null,
 };
 const ART_LONG = 1600; // px: the long side a pattern is drawn at (UNB.patternLayout)
@@ -99,6 +100,18 @@ function patternPicture() {
     if (r.closed[i]) g.closePath();
     g.stroke();
   });
+  // one line: its exact points go to the trace too (pipeline.js traces them as drawn, crossings and all)
+  if (r.paths.length === 1) {
+    const p = r.paths[0],
+      n = p.length / 2,
+      x = new Float64Array(n),
+      y = new Float64Array(n);
+    for (let j = 0; j < n; j++) {
+      x[j] = (p[2 * j] + L.m) * L.s;
+      y[j] = (p[2 * j + 1] + L.m) * L.s;
+    }
+    c.__vector = { x, y, closed: !!r.closed[0] };
+  }
   return c;
 }
 const tagged = (c) => {
@@ -281,10 +294,8 @@ function artRestore(a, pic) {
   }
   st.art = {
     kind: a.kind || "picture",
-    pattern: Object.assign(
-      { style: "labyrinth", detail: 12, twist: 30, sides: 4, shape: "square", seed: 1 },
-      a.pattern
-    ),
+    // (a design saved before v104 keeps its detail, twist, sides and shape: the keys are the same)
+    pattern: UNB.patternDefaults(a.pattern && UNB.PATTERNS[a.pattern.style] ? a.pattern.style : "labyrinth", a.pattern),
     width: a.width || null,
     picture: pic
       ? {

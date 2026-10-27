@@ -25,7 +25,7 @@
     07-measure.js  6. Measuring — how far a curve is from the traced line (error, stray, missing).
                       rasterize, UNB.chamfer, segGrid, distTo, UNB.pathError
     08-shape.js    7. Shaping the drawn line — no crossings, minimum spacing, problem spots, simplification.
-                      arcSteps, pointGrid, UNB.enforceSpacing, UNB.closestGap, UNB.drift, UNB.problemSpots,
+                      arcSteps, pointGrid, skipPair, UNB.enforceSpacing, UNB.closestGap, UNB.drift, UNB.problemSpots,
                       UNB.findCrossings,
                       UNB.uncross, UNB.resampleCurve, UNB.untangle, UNB.simplify
     09-plate.js    8. Size, plate and layers — smallest size that keeps the spacing, the box round a design, copies on
@@ -37,7 +37,8 @@
                       UNB.readGcode, CRC,
                       UNB.zip
     11-stages.js  10. Pipeline stages — what the app calls, in order; pure data in and out (Web Worker or page).
-                      UNB.stagePrep, UNB.stageLines, UNB.stageWalk, UNB.stageTrace, UNB.allowFromMask, UNB.decodeArgs,
+                      UNB.stagePrep, UNB.stageLines, UNB.stageWalk, UNB.stageTrace, UNB.stageVector, UNB.overlapAllow,
+                      UNB.allowFromMask, UNB.decodeArgs,
                       UNB.stageSignal,
                       UNB.sweepSteps, UNB.pickTerms, UNB.TERM_TOL, UNB.autoTerms, UNB.shapeLine, UNB.stageFinal,
                       UNB.stagePrint, UNB.scoreLines
@@ -49,11 +50,11 @@
     13-patterns.js 12. Patterns — geometric abstract art as lines to trace (the Art tab's Pattern): labyrinths,
                       space-filling curves, spirals, a whirl, waves, harmonic curves, tiles; and patterns that draw a
                       picture's light and dark as one line.
-                      seeded, polyInside, largestGroup, roundLoop, labyrinth, lsystem, boxed, moore, hilbert, gosper,
-                      doubleSpiral, whirl, waves, spirograph, lissajous, truchet, gammaOf, easeOut, toneIn, toneGrid,
-                      hilbertTone, wavesTone, spiralTone, labyrinthTone, closeGaps, outlineLoop, UNB.PATTERNS,
-                      UNB.PATTERN_SHAPES,
-                      UNB.patternLayout, UNB.pattern
+                      seeded, polyInside, largestGroup, roundLoop, roundOpen, roundPts, gcd, ringTrack, labyrinth,
+                      lsystem, boxed, moore, hilbert, gosper, doubleSpiral, whirl, waves, spirograph, lissajous, rose,
+                      truchet, gammaOf, easeOut, toneIn, toneGrid, hilbertTone, wavesTone, spiralTone, labyrinthTone,
+                      closeGaps, outlineLoop, rangeParam, choiceParam, checkParam, pct, ord, off0, SHAPE, SIDES, CORNERS, CONTRAST, INVERT,
+                      UNB.PATTERNS, UNB.PATTERN_SHAPES, UNB.patternDefaults, UNB.patternLayout, UNB.pattern
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.

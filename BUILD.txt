@@ -1,6 +1,6 @@
-Unbroken · web app build v103
-Built:  2026-10-27T14:18:36.761Z
-Tests:  50 of 50 tests passed (quick run)
+Unbroken · web app build v104
+Built:  2026-10-27T15:31:35.552Z
+Tests:  62 of 62 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
@@ -12,32 +12,32 @@ Files (sha1, first 12):
   c434fcb30c2d  05-fill.js
   340aeaecfe87  06-fourier.js
   e88cd163925f  07-measure.js
-  7e9bd7ea561b  08-shape.js
-  e4d4bce6607a  09-plate.js
+  d0cc374de0d6  08-shape.js
+  322bde11c0c0  09-plate.js
   c390f7b99aa7  10-export.js
-  1311de362831  11-stages.js
+  2f10a1d06552  11-stages.js
   59aaa64e2642  12-models.js
-  976b824bfe2c  13-patterns.js
-  1ba1dbb7be2a  core.js
+  9c4e1d0addb6  13-patterns.js
+  692b71050839  core.js
   c9df82f5ef31  css/app.css
   7efa0c130b02  css/theme.css
   4a04df3953af  fonts.js
-  70aae2d9746f  index.html
-  f7d9c5e9186c  js/art.js
-  1c0577a2d077  js/config.js
-  2b9fcfb8d36e  js/controls.js
+  dc69dacfee60  index.html
+  699861cf6d05  js/art.js
+  cc338cd5a339  js/config.js
+  2b85f47fddf5  js/controls.js
   1b7b18d51a47  js/engine-bridge.js
   7f7a2abc4aa4  js/export.js
-  4bba0b035c1a  js/history.js
-  192eecdaddd9  js/layers.js
+  9de81df5095e  js/history.js
+  282a67c9225f  js/layers.js
   0268e1ab91bd  js/main.js
   29f041a9b488  js/model.js
   26b7659e5ebe  js/notes.js
   5075a0426bb9  js/optimize.js
-  f6b512252472  js/patterns.js
-  d0c26df92071  js/pieces.js
-  5ba2d8d27be6  js/pipeline.js
-  756051052ea1  js/plot.js
+  73ab50219cb3  js/patterns.js
+  21a8f0ca8b37  js/pieces.js
+  3a52a5b6fb5e  js/pipeline.js
+  7bfcb51aeb0a  js/plot.js
   fc4489e24a60  js/preview.js
   d61b587f3303  js/readouts.js
   8994780613da  js/source.js
@@ -47,5 +47,5 @@ Files (sha1, first 12):
   5c8562531de3  js/ui.js
   c0bf468e1779  js/views.js
   c7e8ce426229  js/zoom.js
-  fa55fd94630a  settings.js
+  8c1e4e3be548  settings.js
   85d8193792d8  worker.js
