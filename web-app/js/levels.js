@@ -1,5 +1,6 @@
 // Unbroken · web app · levels.js
-// The Image prep card's grey levels and background tap. Grey levels turn the picture into 2–6 flat greys (the engine's
+// The Grey levels card (Trace tab) and the Image prep card's background tap. Grey levels turn the picture into 2–6 flat
+// greys (the engine's
 // UNB.levels, run in the prep: pipeline.js working()); each grey's edges are traced or skipped (UNB.levelEdges, via
 // lineSpec). Tap the background (a tool, like Set start) removes the background from the point tapped.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
@@ -30,8 +31,11 @@ const levelEdgeFlags = () => [...levelModes()].map((c) => c === "t");
 let levelListKey = null;
 function levelsUI() {
   const n = levelCount();
-  $("levelsVal").textContent = n ? `${n} greys` : "off";
+  $("levelsVal").textContent = $("levelsCardVal").textContent = n ? `${n} greys` : "off";
   $("levelsBox").hidden = !n;
+  // the line follows the greys' edges: the trace style and ink threshold don't apply
+  $("levelsOnHint").hidden = !n;
+  $("modeRow").hidden = $("sensRow").hidden = !!n;
   const sm = +$("levelSmooth").value;
   $("levelSmoothVal").textContent = sm ? mmAtSize(sm) : "off";
   $("bgPickInfo").textContent = st.bgAt ? "from the point you tapped" : "";

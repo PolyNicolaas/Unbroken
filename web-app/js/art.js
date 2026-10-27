@@ -26,7 +26,8 @@ let artSeq = 0; // tags each picture canvas, so undo can tell a new picture from
 
 function patternName(p) {
   const P = UNB.PATTERNS[p.style];
-  return P ? P.label + (P.shape && p.shape && p.shape !== "square" ? ` · ${p.shape}` : "") : "Pattern";
+  const shaped = P && P.params.some((q) => q.key === "shape");
+  return P ? P.label + (shaped && p.shape && p.shape !== "square" ? ` · ${p.shape}` : "") : "Pattern";
 }
 // the pattern drawn as exact lines (cached for the same settings): { r (UNB.pattern), L (UNB.patternLayout) }
 let patternCache = null;
@@ -153,6 +154,15 @@ function artApply(trace) {
     const c = patternPicture(),
       P = UNB.PATTERNS[A.pattern.style];
     if (c) {
+      // a pattern that crosses itself, for printing: Allow overlaps on (once per style, so unticking it sticks), or
+      // every crossing is undone, which is slow and bends the pattern out of shape
+      let note = "";
+      if (P.crosses && !$("overlaps").checked && A.overlapsFor !== A.pattern.style) {
+        $("overlaps").checked = true;
+        note =
+          "Allow overlaps is on now (Trace tab, Line card): the needle prints over each crossing. Untick it to undo every crossing instead (slow, and the pattern bends).";
+      }
+      if (P.crosses) A.overlapsFor = A.pattern.style;
       // traced as drawn: centreline, and the closed or open line it is
       $("modeCenter").checked = true;
       $("invert").checked = false;
@@ -164,7 +174,7 @@ function artApply(trace) {
       const { r } = patternDrawn(),
         W = A.width || patternFitWidth();
       if (W) startSize(W, r.box[0] / Math.max(1e-9, r.box[1]));
-      $("artMsg").textContent = "";
+      $("artMsg").textContent = note;
     } else $("artMsg").textContent = "Nothing left inside that shape: try more detail or another shape.";
   } else {
     if (!A.picture) A.picture = samplePicture();

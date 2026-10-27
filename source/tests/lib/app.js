@@ -3,26 +3,72 @@
 // asks its background engines whether a job is running, so a test can wait until the app has finished its work
 // instead of sleeping for a guessed time. window.__settled() is true when nothing is pending.
 const SETTLE = () => {
-  const live = new Set(), st0 = window.setTimeout, ct0 = window.clearTimeout;
+  const live = new Set(),
+    st0 = window.setTimeout,
+    ct0 = window.clearTimeout;
   window.setTimeout = function (fn, ms, ...a) {
-    const id = st0.call(window, function () { live.delete(id); return typeof fn === "function" ? fn.apply(this, arguments) : undefined; }, ms, ...a);
+    const id = st0.call(
+      window,
+      function () {
+        live.delete(id);
+        return typeof fn === "function" ? fn.apply(this, arguments) : undefined;
+      },
+      ms,
+      ...a
+    );
     if (!(ms > 1500)) live.add(id);
     return id;
   };
-  window.clearTimeout = function (id) { live.delete(id); return ct0.call(window, id); };
-  const busy = (n) => { try { return !!(0, eval)(n).busy; } catch { return false; } };
+  window.clearTimeout = function (id) {
+    live.delete(id);
+    return ct0.call(window, id);
+  };
+  const busy = (n) => {
+    try {
+      return !!(0, eval)(n).busy;
+    } catch {
+      return false;
+    }
+  };
   window.__settled = () => live.size === 0 && !["PIPE", "LAY", "AUX", "OPT"].some(busy);
 };
 async function open(ctx, opts = {}) {
-  const context = await ctx.browser.newContext({ viewport: opts.viewport || { width: 1300, height: 1000 }, acceptDownloads: true });
-  const page = await context.newPage(), errors = [];
+  const context = await ctx.browser.newContext({
+    viewport: opts.viewport || { width: 1300, height: 1000 },
+    acceptDownloads: true,
+  });
+  const page = await context.newPage(),
+    errors = [];
   page.on("pageerror", (e) => errors.push(e.message + (process.env.STACK ? " " + e.stack : "")));
-  page.on("console", (m) => { if (m.type() === "error") errors.push("console: " + m.text()); });
-  if (opts.freezeProbe) await page.addInitScript(() => { window.__gaps = []; let last = performance.now(); setInterval(() => { const n = performance.now(); window.__gaps.push(n - last); last = n; }, 10); });
+  page.on("console", (m) => {
+    if (m.type() === "error") errors.push("console: " + m.text());
+  });
+  if (opts.freezeProbe)
+    await page.addInitScript(() => {
+      window.__gaps = [];
+      let last = performance.now();
+      setInterval(() => {
+        const n = performance.now();
+        window.__gaps.push(n - last);
+        last = n;
+      }, 10);
+    });
   await page.goto(opts.url || ctx.url);
   await idle(page, 300);
+  // cards folded for a first visit since v105.1 (Fit, Base, Infill, the suggestion box) open, as the tests written
+  // before expect; opts.folded keeps them folded
+  if (!opts.folded)
+    await page.evaluate(() =>
+      ["h-fit", "h-base", "h-infill", "h-notes"].forEach((h) => {
+        const b = document.querySelector(`#card-${h}.collapsed .card-toggle`);
+        if (b) b.click();
+      })
+    );
   // the app opens on the Art tab; most tests work on the Trace tab, so they start there (opts.art: stay on Art)
-  if (!opts.art && (await page.$("label[for=viewDesign]"))) { await page.click("label[for=viewDesign]"); await idle(page, 100); }
+  if (!opts.art && (await page.$("label[for=viewDesign]"))) {
+    await page.click("label[for=viewDesign]");
+    await idle(page, 100);
+  }
   return { page, errors, close: () => context.close() };
 }
 // Wait until the app has finished: no debounce pending and no background job, three checks in a row 50 ms apart
@@ -32,27 +78,51 @@ async function idle(page, first = 300) {
   await page.waitForTimeout(Math.min(first, 300));
   if (await page.evaluate(() => typeof window.__settled === "function")) {
     const t0 = Date.now();
-    for (let calm = 0; calm < 3;) {
+    for (let calm = 0; calm < 3; ) {
       if (Date.now() - t0 > 120000) throw new Error("the app never settled (120 s): a job or timer kept running");
-      calm = (await page.evaluate(() => window.__settled())) ? calm + 1 : 0; await page.waitForTimeout(50);
+      calm = (await page.evaluate(() => window.__settled())) ? calm + 1 : 0;
+      await page.waitForTimeout(50);
     }
     return;
   }
-  let calm = 0;                                              // a page without SETTLE: the old "busy class stays off" check
+  let calm = 0; // a page without SETTLE: the old "busy class stays off" check
   for (let i = 0; i < 400 && calm < 4; i++) {
-    const busy = await page.evaluate(() => document.getElementById("chip").classList.contains("busy") || document.getElementById("box").classList.contains("working"));
-    calm = busy ? 0 : calm + 1; await page.waitForTimeout(150);
+    const busy = await page.evaluate(
+      () =>
+        document.getElementById("chip").classList.contains("busy") ||
+        document.getElementById("box").classList.contains("working")
+    );
+    calm = busy ? 0 : calm + 1;
+    await page.waitForTimeout(150);
   }
 }
 const chip = (page) => page.textContent("#chip");
 const terms = async (page) => +((await chip(page)).match(/(\d+) terms/) || [0, 0])[1];
 const errorMM = async (page) => +((await chip(page)).match(/error ([\d.]+) mm/) || [0, NaN])[1];
-async function setValue(page, sel, value, ev = "input") { await page.$eval(sel, (e, [v, t]) => { e.value = v; e.dispatchEvent(new Event(t, { bubbles: true })); }, [String(value), ev]); }
-async function longestFreeze(page, fn) { await page.evaluate(() => { window.__gaps = []; }); await fn(); return page.evaluate(() => Math.round(Math.max(0, ...window.__gaps))); }
+async function setValue(page, sel, value, ev = "input") {
+  await page.$eval(
+    sel,
+    (e, [v, t]) => {
+      e.value = v;
+      e.dispatchEvent(new Event(t, { bubbles: true }));
+    },
+    [String(value), ev]
+  );
+}
+async function longestFreeze(page, fn) {
+  await page.evaluate(() => {
+    window.__gaps = [];
+  });
+  await fn();
+  return page.evaluate(() => Math.round(Math.max(0, ...window.__gaps)));
+}
 // what was the Trace tab's Image / Text / 3D model switch: show only the picture, text or model layers (art.js); text
 // and models open the Art tab, where their controls are
 async function source(page, kind) {
   await page.evaluate((k) => artShowOnly(k), kind);
-  if (kind !== "picture") { await page.click("label[for=viewArt]"); await page.waitForTimeout(100); }
+  if (kind !== "picture") {
+    await page.click("label[for=viewArt]");
+    await page.waitForTimeout(100);
+  }
 }
 module.exports = { SETTLE, open, idle, source, chip, terms, errorMM, setValue, longestFreeze };

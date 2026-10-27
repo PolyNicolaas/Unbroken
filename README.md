@@ -116,7 +116,10 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
 so the pattern settings stop at the detail that prints, and Fit the needle sets their width. **Plotting**: the patterns
 go much finer (each dense setting's `plotMax`: 200 wave rows, order 8 curves, 120 labyrinth cells…), the preview is the
 2D page with the pattern as drawn, its size is the page's (inside the margin) and its closest lines are measured against
-pen 1; it is traced only when asked (Trace it, or opening the Trace tab).
+pen 1; it is traced only when asked (Trace it, or opening the Trace tab). A traced picture made for plotting fills the
+page too (`pageFitW` in plot.js; a size set by hand stops that until **Fit the page**), and its lines are pen 1's width
+plus the gap apart instead of the needle's spacing. In Printing, a pattern that crosses itself turns **Allow overlaps**
+on (once per style).
 
 Each keeps its settings while another is in use, so switching back finds it as it was. The Trace tab's first card says
 what it is tracing (Edit the art goes back). **Next** has **Trace it** (the printers, chocolate and clay, need one
@@ -125,10 +128,10 @@ continuous line) and **Plot as drawn**: a pattern or the text goes to the 2D tab
 
 **Image prep** (Trace tab) gets a picture ready before tracing: brightness, contrast, **Remove plain background** (a
 flood from the border through colours close to the border's, or from the point you tap with **Tap the background**),
-**Even out lighting**, and **Grey levels**: the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then
+**Even out lighting**. **Grey levels** (their own card, after Tracing): the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then
 **Smooth blocks** gives each pixel the grey most of its neighbours have, removing specks and rounding corners). Each grey
 is **Trace** (its edges are lines) or **Skip**; the line map is the edges between greys where either side is traced
-(`UNB.levelEdges`), and the trace style and ink threshold aren't used. Fills per grey come next (docs/PREP-PLAN.md).
+(`UNB.levelEdges`), and the trace style and ink threshold are hidden. Fills per grey come next (docs/PREP-PLAN.md).
 Tests E34, A32.
 
 **Editing the line by hand** is left to drawing apps: export the SVG from the 2D tab, fix it in Illustrator, Affinity or

@@ -128,8 +128,9 @@ function gcodeSettings() {
 // File names say what's in them: the design's name, and for G-code the needle and the copies, e.g.
 // welcome_084_2x-gcode.zip (0.84 mm needle, 2 copies). Letters, numbers and dashes only, for printer screens and USB
 // sticks. A project number joins them once designs are kept in a database (ROADMAP.md, Later).
-function designSlug(max = 20) {
-  const raw = st.text ? $("textIn").value.split("\n")[0] || "text" : st.srcLabel || "design";
+// name: what to name it after instead of the traced source (the art plotted as drawn)
+function designSlug(max = 20, name) {
+  const raw = name || (st.text ? $("textIn").value.split("\n")[0] || "text" : st.srcLabel || "design");
   return (
     raw
       .replace(/\.[a-z0-9]+$/i, "")

@@ -439,6 +439,7 @@ function wFromSlider(p) {
 }
 function syncSizeUI() {
   if (st.text) return;
+  $("fitPage").hidden = !artForPlot() || isModel();
   $("sizeSlider").value = Math.round(1000 * sliderFromW(st.outW));
   const box = $("sizeMarks"),
     a = sizeAnchors(),
@@ -457,11 +458,22 @@ function syncSizeUI() {
     if (box.children.length % 2) el.classList.add("up"); // every other mark above the track, so labels don't collide
     box.appendChild(el);
   };
+  // marks at (nearly) the same width share one label ("smallest · high"), so their labels don't print over each other
+  const list = [];
   if (m && m.fits)
     for (const [k, name] of SIZE_MARKS)
       if (a.some(([w]) => w === m[k]))
-        mark(m[k], k, `${name[0].toUpperCase() + name.slice(1)}: ${fmt(m[k], 1)} mm wide`);
-  mark(plateW(), "plate", `Widest that fits on the ${BED.w} × ${BED.h} mm plate`);
+        list.push([m[k], k, `${name[0].toUpperCase() + name.slice(1)}: ${fmt(m[k], 1)} mm wide`]);
+  list.push([plateW(), "plate", `Widest that fits on the ${BED.w} × ${BED.h} mm plate`]);
+  const merged = [];
+  for (const it of list) {
+    const same = merged.find((o) => Math.abs(o[0] - it[0]) / Math.max(o[0], it[0]) < 0.015);
+    if (same) {
+      same[1] += ` · ${it[1]}`;
+      same[2] += `\n${it[2]}`;
+    } else merged.push([...it]);
+  }
+  for (const [W, label, tip] of merged) mark(W, label, tip);
   box.parentElement.classList.toggle("has-up", !!box.querySelector(".up"));
   const h = $("sizeHint"),
     u = "mm";
@@ -502,6 +514,7 @@ function setSize(W, byUser) {
   st.outW = W;
   if (byUser) {
     st.sizeUser = true;
+    if (artForPlot()) st.pageFit = false; // a size set by hand: no longer fitted to the page (Fit the page)
     recordSoon();
     artSized(W); // art.js: a pattern keeps the width set by hand
   } // an undo step even when nothing needs tracing again
@@ -636,6 +649,8 @@ function placeSize() {
     first = !st.sizeUser;
   let target = first && m.fits && typeof pref === "string" ? m[pref] : st.outW;
   if (!Number.isFinite(target)) target = st.outW;
+  const page = pageFitW(); // plot.js: made for plotting, it fills the page
+  if (page) target = page;
   if (first && m.fits) st.sizeUser = true; // placed once: the size is yours now
   syncSizeUI();
   const grow = !first && m.fits && m.smallest > st.outW * 1.003;
@@ -647,6 +662,11 @@ function placeSize() {
   if (Math.abs(Math.max(target, m.fits ? m.smallest : 0) - st.outW) / st.outW > 0.003) setSize(target, false);
   else finalizeReadout();
 }
+$("fitPage").addEventListener("click", () => {
+  st.pageFit = true;
+  const W = pageFitW();
+  if (W) setSize(W, false);
+});
 $("sizeSlider").addEventListener("input", () => setSize(wFromSlider(+$("sizeSlider").value / 1000), true));
 $("sizeMarks").addEventListener("click", (e) => {
   const el = e.target.closest("span");

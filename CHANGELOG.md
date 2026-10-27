@@ -3,6 +3,22 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v106 · 2026-10-27
+
+Usability fixes from a walkthrough of v105:
+- **Made for Plotting now covers traced pictures too.** A traced drawing fills the 2D tab's page (inside the margins;
+  **Fit the page** on the Size card puts it back after a size set by hand), and its lines are pen 1 + the gap apart
+  instead of the needle's spacing.
+- **A pattern that crosses itself, for printing, turns Allow overlaps on** (once per style, and the card says so): undoing
+  every crossing was slow (47 s for the default Spirograph) and bent the pattern.
+- **Grey levels have their own card** on the Trace tab, open; while they're on, the trace style and ink threshold (which
+  they replace) are hidden.
+- Size marks at the same width share one label ("smallest · medium · high") instead of printing over each other.
+- Messages close when another tab opens, or on a click.
+- A pattern plotted as drawn exports as e.g. `wave-rows-picture-art.svg`, not under the last traced picture's name.
+- Base, Infill, Fit and the suggestion box start folded on a first visit (their headers still show what's set).
+- Tests: A32 (page fit and pen spacing, the SVG name, overlaps for a crossing pattern).
+
 ## v105 · 2026-10-27
 
 - **Made for: Printing / Plotting** (Art tab, Input). Plotting lifts the printing limits on the patterns (200 wave rows,
