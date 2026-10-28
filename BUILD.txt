@@ -1,6 +1,6 @@
-Unbroken · web app build v109
-Built:  2026-10-28T16:40:59.865Z
-Tests:  69 of 69 tests passed
+Unbroken · web app build v110
+Built:  2026-10-28T21:19:59.929Z
+Tests:  71 of 71 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
@@ -18,12 +18,14 @@ Files (sha1, first 12):
   2189b17474c4  11-stages.js
   59aaa64e2642  12-models.js
   135d6e45a412  13-patterns.js
-  9aa6ddb92d1b  core.js
-  348beb34c377  css/app.css
+  bf10b0415df9  14-photo.js
+  0217db449ac4  core.js
+  c780e57c17bf  css/app.css
   0be9d7ad7cf8  css/theme.css
   666f911d2119  fonts.js
-  68d2ee2d671a  index.html
-  4af67c503aef  js/art.js
+  9d33d7779eef  index.html
+  98b36dd7cdba  js/art.js
+  bfc4304b0058  js/camera.js
   9f7ab1ddf14c  js/config.js
   4b8afd365d63  js/controls.js
   e666f8bf0b57  js/engine-bridge.js

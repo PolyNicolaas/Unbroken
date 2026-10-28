@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v109</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v110</span></p>
 </header>
 
 <div class="wrap">
@@ -33,8 +33,28 @@
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
         <div class="chip" id="chip">loading…</div>
+        <div class="camera" id="camera" data-mode="live" hidden role="dialog" aria-modal="true" aria-label="Take a picture">
+          <video id="camVideo" playsinline muted autoplay></video>
+          <canvas id="camStill" aria-label="The photo taken: drag its corners onto the page's corners"></canvas>
+          <svg id="camQuad" aria-hidden="true"><polygon id="camPoly"></polygon><g id="camHandles"></g></svg>
+          <p class="cam-msg" id="camMsg" role="status">Starting the camera…</p>
+          <div class="cam-bar cam-live">
+            <button class="btn" type="button" id="camCancel">Cancel</button>
+            <button class="cam-shutter" type="button" id="camTake" aria-label="Take the picture"><span></span></button>
+            <button class="btn" type="button" id="camFlip" title="Use the other camera">Switch camera</button>
+          </div>
+          <div class="cam-bar cam-edit">
+            <div class="seg small" role="radiogroup" aria-label="What the photo is of">
+              <input type="radio" name="camKind" id="camKdrawing" value="drawing" checked><label for="camKdrawing">Drawing</label>
+              <input type="radio" name="camKind" id="camKprint" value="print"><label for="camKprint">Printed</label>
+              <input type="radio" name="camKind" id="camKobject" value="object"><label for="camKobject">Object</label>
+            </div>
+            <span class="cam-btns"><button class="btn" type="button" id="camRetake">Retake</button><button class="btn" type="button" id="camWhole" title="Use the whole photo, nothing straightened">Whole photo</button><button class="btn primary" type="button" id="camUse">Use it</button></span>
+          </div>
+        </div>
         <div class="empty-state" id="emptyState" hidden>
           <p class="es-title">Start with a picture, text, a pattern or a 3D model</p>
+          <p class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
           <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>. Or try an example:</p>
           <div class="chips" data-examples></div>
         </div>
@@ -354,15 +374,37 @@
 
     <section class="card art-only art-picture" aria-labelledby="h-pic">
       <h2 id="h-pic">Picture <span id="picVal"></span></h2>
-      <div class="inline"><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
+      <div class="inline"><button class="btn primary" type="button" id="picCamera" title="A drawing, a print or anything else, with the camera: the page is found and straightened">Take a picture</button><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
       <input type="file" id="picFile" accept="image/*" hidden>
+      <input type="file" id="camFile" accept="image/*" capture="environment" hidden>
       <div class="row" id="picTurnRow">
         <div class="lab"><label for="picAngle">Straighten</label><span class="val" id="picAngleVal">0°</span></div>
         <input type="range" id="picAngle" min="-20" max="20" step="0.5" value="0">
         <div class="inline"><button class="btn mini" type="button" id="picLeft" title="Turn the picture a quarter turn to the left">Turn left</button><button class="btn mini" type="button" id="picRight" title="Turn the picture a quarter turn to the right">Turn right</button><button class="btn mini" type="button" id="picUnturn">As loaded</button></div>
         <p class="hint help">Turns the picture before anything else: a quarter turn at a time, or a few degrees to straighten a photo (the corners that come in are white, the paper). To crop, use Select area on the Line step: the trace keeps to the selection and gets the full resolution there.</p>
       </div>
-      <p class="hint help">A sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. To edit a traced line by hand, export it as SVG from the Plot step, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
+      <p class="hint help">A photo taken with the camera, a sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. A photo of a page is cleaned up for the line (the Photo card); Clean up as a photo does the same to an image you chose. To edit a traced line by hand, export it as SVG from the Plot step, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
+    </section>
+
+    <section class="card art-only art-picture" aria-labelledby="h-photo" id="photoCard">
+      <h2 id="h-photo">Photo <span id="photoVal"></span></h2>
+      <div class="row" id="photoRows">
+        <div class="seg four small" role="radiogroup" aria-label="What the photo is of">
+          <input type="radio" name="photoKind" id="phKdrawing" value="drawing" checked><label for="phKdrawing">Drawing</label>
+          <input type="radio" name="photoKind" id="phKprint" value="print"><label for="phKprint">Printed</label>
+          <input type="radio" name="photoKind" id="phKobject" value="object"><label for="phKobject">Object</label>
+          <input type="radio" name="photoKind" id="phKnone" value="none"><label for="phKnone">As taken</label>
+        </div>
+        <div class="lab"><label for="phLight">Even out the light</label><span class="val" id="phLightVal"></span></div>
+        <input type="range" id="phLight" min="0" max="100" step="5" value="100">
+        <div class="lab"><label for="phInk">Darken faint lines</label><span class="val" id="phInkVal"></span></div>
+        <input type="range" id="phInk" min="0" max="100" step="5" value="50">
+        <div class="lab"><label for="phSpecks">Remove specks</label><span class="val" id="phSpecksVal"></span></div>
+        <input type="range" id="phSpecks" min="0" max="10" step="1" value="3">
+        <div class="inline"><button class="btn mini" type="button" id="phCorners" title="Drag the page's corners on the photo">Page corners…</button><button class="btn mini" type="button" id="phRetake">Take another</button></div>
+      </div>
+      <div class="inline" id="photoOff"><button class="btn mini" type="button" id="picPhoto" title="Find the page in this picture, straighten it and clean the paper to white">Clean up as a photo</button></div>
+      <p class="hint help">A photo of a page is straightened (its four corners pulled to a rectangle) and cleaned for the line. Drawing: the paper's light is evened out (shadows and a lamp's falloff go), the paper made white and the ink black; faint pencil is darkened. Printed: the same, gentler, keeping the greys (try Grey levels on the Line step). Object: no page; its colours are balanced and stretched (tap its background in Image prep to remove it). As taken: only straightened. The photo itself stays with the picture until another picture is used; a saved design keeps the cleaned picture.</p>
     </section>
 
     <section class="card art-only art-text" aria-labelledby="h-text">
@@ -726,6 +768,7 @@
 <script src="11-stages.js"></script>
 <script src="12-models.js"></script>
 <script src="13-patterns.js"></script>
+<script src="14-photo.js"></script>
 <script src="core.js"></script>
 <script src="fonts.js"></script>
 <script src="settings.js"></script>
@@ -752,6 +795,7 @@
 <script src="js/plot.js"></script>
 <script src="js/workflow.js"></script>
 <script src="js/examples.js"></script>
+<script src="js/camera.js"></script>
 <script src="js/steppers.js"></script>
 <script src="js/scroll.js"></script>
 <script src="js/model.js"></script>
