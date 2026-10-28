@@ -116,6 +116,12 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
 The preview follows the step: the art or the line on Art and Line (the page for as drawn), the page on Plot, the plate or
 the layers on Print. **Next** at the end of each step goes on. Test A33.
 
+**Touch and scrolling** (`steppers.js`, `scroll.js`): every number box has − and + (finger-sized on touch screens;
+holding repeats). The preview stays in view while the settings scroll: a sticky column on wide screens, a compact
+pinned preview on phones (**Bigger** / **Smaller**). With the **Wheel** on (next to Collapse all), when scrolling stops
+the card that reached the top opens and the others fold to their headers, and cards further away tip back a little.
+Test A34.
+
 ## The Art tab
 
 Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 3D): **Art → Trace → 2D (plotter) or 3D
@@ -149,7 +155,10 @@ flood from the border through colours close to the border's, or from the point y
 **Even out lighting**. **Grey levels** (their own card, after Tracing): the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then
 **Smooth blocks** gives each pixel the grey most of its neighbours have, removing specks and rounding corners). Each grey
 is **Trace** (its edges are lines) or **Skip**; the line map is the edges between greys where either side is traced
-(`UNB.levelEdges`), and the trace style and ink threshold are hidden. Fills per grey come next (docs/PREP-PLAN.md).
+(`UNB.levelEdges`), and the trace style and ink threshold are hidden. Making it for a pen plotter, a grey can also be
+**Fill** or **Both**: its blocks filled with its own style (hatch, cross-hatch, rings, or the Pattern card's pattern),
+spacing, angle and pen, on its own layer (`UNB.levelFills`; the blocks are the grey's own pixels, so a fill stops at
+its edges whether or not they're traced). Fills draw with Separate strokes. Tests E36, A34.
 Tests E34, A32.
 
 **Editing the line by hand** is left to drawing apps: export the SVG from the 2D tab, fix it in Illustrator, Affinity or

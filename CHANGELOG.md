@@ -3,6 +3,21 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v108 · 2026-10-28
+
+- **Fills per grey** (Line step, Grey levels, making it for a pen plotter): a grey can be **Fill** (its blocks filled)
+  or **Both** (traced and filled) as well as Trace or Skip. Each filled grey has its own style (hatch, cross-hatch,
+  rings stepping in, or the Pattern card's pattern cut to the blocks), spacing (mm), angle and pen colour, and plots on
+  its own pen, its own layer in the SVG. Darker greys start denser, neighbours at different angles. A grey that's filled
+  but not traced still stops its fill at its edges. Fills draw with Separate strokes.
+- **− and + on every number box**, finger-sized on touch screens; holding one repeats.
+- **The preview stays in view** while the settings scroll: a sticky column on wide screens; on phones a compact preview
+  pinned to the top (a third of the screen), with **Bigger** to see it in full with its tools.
+- **The Wheel**: the settings turn like a drum. When scrolling stops, the card that reached the top opens and the others
+  fold to their headers (with their readouts); cards further away tip back. The card stays where it landed. The Wheel
+  switch (next to Collapse all) turns it off and puts the cards back as you left them.
+- Engine: `UNB.levelFills`. Tests E36, A34.
+
 ## v107 · 2026-10-27
 
 A simpler workflow (decided with Nicolaas, [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)):

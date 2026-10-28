@@ -7,18 +7,55 @@
 // the order listed in index.html.
 "use strict";
 
-// what each grey does, one letter per grey, darkest first: t trace (its edges are lines), s skip
+// what each grey does, one letter per grey, darkest first: t trace (its edges are lines), f fill (its blocks filled
+// with its own pen), b both, s skip. Fill and Both are for a pen plotter (a printer traces or skips).
 const LEVEL_MODES = [
   ["t", "Trace", "Its edges are lines"],
+  ["f", "Fill", "Its blocks are filled with its own pen (pen plotter)"],
+  ["b", "Both", "Its edges are lines and its blocks are filled (pen plotter)"],
   ["s", "Skip", "Its edges are left out (unless the grey next to it is traced)"],
 ];
+// a grey's fill: style, spacing between strokes (mm), angle (degrees), pen colour. Darker greys start denser, and
+// neighbouring greys at different angles.
+const FILL_STYLES = [
+  ["hatch", "Hatch"],
+  ["cross", "Cross-hatch"],
+  ["rings", "Rings"],
+  ["pattern", "The pattern"],
+];
+function defaultFill(j, n) {
+  const pen = Math.max(0.05, +$("penW").value || 0.5);
+  return {
+    style: j === 0 ? "cross" : "hatch",
+    spacing: +(pen * (1.6 + (3 * j) / Math.max(1, n - 1))).toFixed(2),
+    angle: [45, -45, 0, 90, 30, -30][j % 6],
+    color: "#111111",
+  };
+}
+function levelFillSpecs() {
+  const n = levelCount();
+  let saved = [];
+  try {
+    saved = JSON.parse($("levelFills").value || "[]");
+  } catch {}
+  return Array.from({ length: n }, (_, j) => ({ ...defaultFill(j, n), ...(saved[j] || {}) }));
+}
+function setLevelFill(j, patch) {
+  const all = levelFillSpecs();
+  all[j] = { ...all[j], ...patch };
+  $("levelFills").value = JSON.stringify(all);
+  recordSoon();
+  schedule(extract);
+}
 const levelCount = () => (+$("levels").value >= 2 ? +$("levels").value : 0);
 // every grey traced but the lightest (the paper)
 const defaultModes = (n) => (n ? "t".repeat(n - 1) + "s" : "");
 function levelModes() {
   const n = levelCount(),
     m = $("levelModes").value;
-  return m.length === n && /^[ts]*$/.test(m) ? m : defaultModes(n);
+  const ok = m.length === n && /^[tfbs]*$/.test(m) ? m : defaultModes(n);
+  // a printer has no fills: Fill is skipped, Both traced
+  return artForPlot() ? ok : ok.replace(/f/g, "s").replace(/b/g, "t");
 }
 // the settings the prep and the trace need (settings() in source.js), or null when off
 function levelSettings() {
@@ -26,7 +63,12 @@ function levelSettings() {
   return n ? { count: n, smooth: +$("levelSmooth").value, modes: levelModes() } : null;
 }
 // which greys' edges are lines (lineSpec in pipeline.js)
-const levelEdgeFlags = () => [...levelModes()].map((c) => c === "t");
+const levelEdgeFlags = () => [...levelModes()].map((c) => c === "t" || c === "b");
+// the greys filled (Fill or Both), with their fills: [{ level, style, spacing, angle, color }]
+const levelFillList = () => {
+  const specs = levelFillSpecs();
+  return [...levelModes()].flatMap((c, j) => (c === "f" || c === "b" ? [{ level: j, ...specs[j] }] : []));
+};
 
 let levelListKey = null;
 function levelsUI() {
@@ -40,12 +82,15 @@ function levelsUI() {
   $("levelSmoothVal").textContent = sm ? mmAtSize(sm) : "off";
   $("bgPickInfo").textContent = st.bgAt ? "from the point you tapped" : "";
   if (!n) return (levelListKey = null);
-  const modes = levelModes();
-  $("levelModes").value = modes;
+  const modes = levelModes(),
+    plot = artForPlot(),
+    specs = levelFillSpecs();
+  if (plot) $("levelModes").value = modes; // (a printer's view of the modes doesn't overwrite the plotter's)
+  $("levelFillNote").hidden = !(plot && /[fb]/.test(modes) && lineModeNow() !== "strokes");
   // each grey's tone and share, from the last prep (st.wk.levels); until then, evenly spread greys
   const L = st.wk && st.wk.levels && st.wk.levels.tones.length === n ? st.wk.levels : null,
     total = L ? L.count.reduce((a, b) => a + b, 0) : 0;
-  const key = JSON.stringify([n, modes, L && L.tones, L && L.count]);
+  const key = JSON.stringify([n, modes, plot, specs, L && L.tones, L && L.count]);
   if (key === levelListKey) return;
   levelListKey = key;
   const box = $("levelList");
@@ -64,7 +109,7 @@ function levelsUI() {
     seg.className = "seg mini";
     seg.setAttribute("role", "radiogroup");
     seg.setAttribute("aria-label", `Grey ${j + 1}`);
-    for (const [v, label, tip] of LEVEL_MODES) {
+    for (const [v, label, tip] of LEVEL_MODES.filter(([v]) => plot || v === "t" || v === "s")) {
       const id = `level${j}${v}`,
         r = document.createElement("input");
       Object.assign(r, { type: "radio", name: `level${j}`, id, value: v, checked: modes[j] === v });
@@ -84,7 +129,44 @@ function levelsUI() {
     }
     row.append(sw, name, seg);
     box.appendChild(row);
+    if (modes[j] === "f" || modes[j] === "b") box.appendChild(fillRow(j, specs[j]));
   }
+}
+// a filled grey's own settings, under its row: style, spacing (mm), angle, pen colour
+function fillRow(j, f) {
+  const row = document.createElement("div");
+  row.className = "level-fill";
+  const field = (label, el) => {
+    const l = document.createElement("label");
+    l.className = "field";
+    const t = document.createElement("span");
+    t.textContent = label;
+    l.append(t, el);
+    return l;
+  };
+  const style = document.createElement("select");
+  style.setAttribute("aria-label", `Grey ${j + 1} fill style`);
+  for (const [v, name] of FILL_STYLES) style.add(new Option(name, v, false, v === f.style));
+  style.addEventListener("change", () => setLevelFill(j, { style: style.value }));
+  const num = (key, label, min, max, step) => {
+    const i = document.createElement("input");
+    Object.assign(i, { type: "number", min, max, step, value: f[key] });
+    i.setAttribute("aria-label", `Grey ${j + 1} ${label}`);
+    i.addEventListener("change", () => {
+      const v = +i.value;
+      if (Number.isFinite(v)) setLevelFill(j, { [key]: Math.min(max, Math.max(min, v)) });
+    });
+    return field(label, i);
+  };
+  const color = document.createElement("input");
+  Object.assign(color, { type: "color", value: f.color });
+  color.setAttribute("aria-label", `Grey ${j + 1} pen colour`);
+  color.addEventListener("change", () => setLevelFill(j, { color: color.value }));
+  const sp = num("spacing", "Spacing mm", 0.1, 20, 0.1),
+    an = num("angle", "Angle °", -90, 90, 5);
+  an.hidden = f.style === "rings" || f.style === "pattern";
+  row.append(field("Fill", style), field("Pen", color), sp, an);
+  return row;
 }
 $("levels").addEventListener("input", () => {
   $("levelModes").value = defaultModes(levelCount()); // a new number of greys starts from the default again

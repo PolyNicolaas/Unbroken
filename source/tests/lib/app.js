@@ -55,6 +55,9 @@ async function open(ctx, opts = {}) {
     });
   await page.goto(opts.url || ctx.url);
   await idle(page, 300);
+  // the Wheel (v108) folds every card but the one scrolled to: the tests written before it expect cards to stay as they
+  // set them, so it's off unless opts.wheel
+  if (!opts.wheel) await page.evaluate(() => { const w = document.getElementById("wheel"); if (w && w.checked) { w.checked = false; w.dispatchEvent(new Event("change")); } });
   // cards folded for a first visit since v105.1 (Fit, Base, Infill, the suggestion box) open, as the tests written
   // before expect; opts.folded keeps them folded
   if (!opts.folded)

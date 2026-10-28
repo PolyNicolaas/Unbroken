@@ -19,7 +19,7 @@
                       UNB.roundCorners, UNB.offsetDoubled, UNB.cutSwallowtails, UNB.mirror,
                       smoothRun, UNB.snapWalk
     05-fill.js     4b. Fills — chocolate infill (areas the printed line encloses) and the 2D tab's pen fills.
-                      UNB.infill, UNB.penFills
+                      UNB.infill, UNB.penFills, UNB.levelFills
     06-fourier.js  5. Fourier series — path → evenly spaced samples → one series per axis → the curve from chosen terms.
                       UNB.resample, UNB.fft, UNB.spectrum, UNB.termOf, UNB.synth
     07-measure.js  6. Measuring — how far a curve is from the traced line (error, stray, missing).

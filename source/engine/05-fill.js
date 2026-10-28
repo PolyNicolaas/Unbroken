@@ -33,7 +33,8 @@
     if (!(d > 0) || n < 4) return Object.assign({ areas: 0 }, path);
     // the joins (bridges, splice) are this wide: one line spacing, even when sparse rows are further apart
     const bw = Math.min(d, o.bridge || d);
-    // row / ring spacing, and the first ring's distance from the line. Rings step in a row spacing at a time. Lines keep
+    // row / ring spacing, and the first ring's distance from the line. Rings step in a row spacing at a time. Lines
+    // keep
     // their one ring a line spacing in, as at 100%, whatever the density: the ring is the fill's edge, and a sparse
     // fill starting a whole row spacing in (and its rows another row spacing inside that) left a small part with a
     // ring and no rows.
@@ -877,5 +878,133 @@
       fills.push(order(strokes));
     }
     return { g, ox, oy, w, h, lab, outside: lab[0], count, shapes: shapes.size, bridges, seedAreas, fills };
+  };
+
+  // Fills per grey level (the Plot step, Grey levels set to Fill or Both): each level's blocks filled with its own pen.
+  // lab: level per pixel (UNB.levels), w, h. fills: [{ level, style ("hatch" | "cross" | "rings" | "pattern"), spacing
+  // (px between strokes), angle (degrees), inset (px: strokes keep this far inside the block, half the pen), pattern
+  // ({ paths, closed, box }: a pattern to clip, for style "pattern") }]. The blocks are exactly the level's pixels, so
+  // a
+  // level that isn't traced still stops its fill at its edges. Returns, per fill, strokes as [x, y, …] in px, in an
+  // order that keeps the pen's travel short.
+  UNB.levelFills = function (lab, w, h, fills) {
+    return fills.map((F) => {
+      const N = w * h,
+        out = new Uint8Array(N);
+      let any = false;
+      for (let i = 0; i < N; i++) {
+        out[i] = lab[i] === F.level ? 0 : 1;
+        if (!out[i]) any = true;
+      }
+      if (!any) return [];
+      // distance from each pixel of the level to the nearest pixel outside it
+      const dist = UNB.edt(out, w, h).dist,
+        inset = Math.max(0.5, F.inset || 0.5),
+        ok = (x, y) => {
+          const X = Math.round(x),
+            Y = Math.round(y);
+          return X >= 0 && Y >= 0 && X < w && Y < h && !out[Y * w + X] && dist[Y * w + X] >= inset;
+        };
+      const sp = Math.max(1, F.spacing || 4);
+      // a polyline cut to the parts inside the level (sampled every half pixel), pieces under 2 px dropped
+      const clip = (pts, closed, into) => {
+        const n = pts.length / 2,
+          m = closed ? n : n - 1;
+        let run = null;
+        const flush = () => {
+          if (run && run.length >= 4) {
+            let L = 0;
+            for (let k = 2; k < run.length; k += 2) L += Math.hypot(run[k] - run[k - 2], run[k + 1] - run[k - 1]);
+            if (L >= 2) into.push(run);
+          }
+          run = null;
+        };
+        for (let i = 0; i < m; i++) {
+          const j = (i + 1) % n,
+            ax = pts[2 * i],
+            ay = pts[2 * i + 1],
+            bx = pts[2 * j],
+            by = pts[2 * j + 1],
+            k = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) * 2));
+          for (let t = i === 0 ? 0 : 1; t <= k; t++) {
+            const x = ax + ((bx - ax) * t) / k,
+              y = ay + ((by - ay) * t) / k;
+            if (ok(x, y)) {
+              if (!run) run = [x, y];
+              else if (t === k || t % 4 === 0) run.push(x, y);
+            } else flush();
+          }
+        }
+        flush();
+      };
+      const strokes = [];
+      const hatch = (deg) => {
+        const a = (deg * Math.PI) / 180,
+          ux = Math.cos(a),
+          uy = Math.sin(a),
+          nx = -uy,
+          ny = ux,
+          R = Math.hypot(w, h),
+          cx = w / 2,
+          cy = h / 2;
+        let flip = false;
+        for (let t = -R / 2; t <= R / 2; t += sp) {
+          const px = cx + nx * t,
+            py = cy + ny * t,
+            row = [];
+          clip([px - ux * R, py - uy * R, px + ux * R, py + uy * R], false, row);
+          if (flip)
+            row.reverse().forEach((r) => {
+              const q = [];
+              for (let k = r.length - 2; k >= 0; k -= 2) q.push(r[k], r[k + 1]);
+              strokes.push(q);
+            });
+          else strokes.push(...row);
+          if (row.length) flip = !flip; // back and forth, row after row
+        }
+      };
+      if (F.style === "rings") {
+        // contours stepping in from the edge, every spacing
+        const lab1 = new Int32Array(N);
+        for (let i = 0; i < N; i++) lab1[i] = out[i] ? -1 : 0;
+        const box = { x0: [0], y0: [0], x1: [w - 1], y1: [h - 1] };
+        for (let L = inset; L < 1e5; L += sp) {
+          const loops = isoContours(dist, lab1, 0, L, w, h, box, 0, 0, 1);
+          if (!loops.length) break;
+          for (const p of loops) {
+            if (p.length < 3) continue;
+            const flat = [];
+            for (const [x, y] of p) flat.push(x, y);
+            flat.push(p[0][0], p[0][1]);
+            strokes.push(flat);
+          }
+        }
+      } else if (F.style === "pattern" && F.pattern) {
+        // the pattern over the level's blocks (as big as their box), cut to them
+        let x0 = w,
+          y0 = h,
+          x1 = 0,
+          y1 = 0;
+        for (let i = 0; i < N; i++)
+          if (!out[i]) {
+            const x = i % w,
+              y = (i / w) | 0;
+            if (x < x0) x0 = x;
+            if (x > x1) x1 = x;
+            if (y < y0) y0 = y;
+            if (y > y1) y1 = y;
+          }
+        const P = F.pattern,
+          k = Math.max((x1 - x0 + 1) / P.box[0], (y1 - y0 + 1) / P.box[1]);
+        P.paths.forEach((path, i) => {
+          const q = path.map((v, j) => (j % 2 ? y0 + v * k : x0 + v * k));
+          clip(q, !!P.closed[i], strokes);
+        });
+      } else {
+        hatch(F.angle || 0);
+        if (F.style === "cross") hatch((F.angle || 0) + 90);
+      }
+      return strokes;
+    });
   };
 })(typeof window !== "undefined" ? window : globalThis);

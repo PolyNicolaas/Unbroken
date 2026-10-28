@@ -34,4 +34,4 @@ show the pattern fills. Answers to the questions that day:
 | # | What | Version |
 |---|---|---|
 | 1 | Still life sample; Image prep card: Levels (Trace / Skip), Smooth blocks, background by tapping; turn and straighten (crop stays Select area); Made for Printing / Plotting | v105 ✓ |
-| 2 | Fill and Both per grey; level fills on the 2D tab: hatch, cross-hatch, rings or a pattern per level, one pen per level, walls for Fill-only levels | v108 |
+| 2 | Fill and Both per grey; level fills on the 2D tab: hatch, cross-hatch, rings or a pattern per level, one pen per level, walls for Fill-only levels | v108 ✓ |

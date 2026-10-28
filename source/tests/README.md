@@ -102,6 +102,7 @@ report.
 | [E33](#e33) | Geometric art: every style draws the line it promises, and the one-line styles trace as one line | a pattern that crosses itself or touches where it promises an even gap, a closed style that doesn't close, a seed that doesn't give the same pattern again, and a one-line pattern the tracer breaks up or doubles | – |
 | [E34](#e34) | Grey levels: a picture as a few flat greys, their edges as lines, and the background removed from a tap | levels that miss a grey the picture has, specks that survive Smooth blocks, edges drawn where nothing is traced or missing round a traced block, a tapped background that isn't removed, and patterns made for plotting that break the printing limits or take too long | – |
 | [E35](#e35) | Separate strokes: a line map as strokes the pen draws one by one | strokes broken up along a plain line, a junction that isn't split, a closed ring drawn as an open stroke, specks kept, strokes in an order that sends the pen back and forth, and points off the drawn line | – |
+| [E36](#e36) | Fills per grey: each grey level's blocks filled with its own style, inside its edges | a fill that strays outside its grey or onto the grey's edge, hatch rows at the wrong spacing or angle, cross-hatch without its second direction, rings that don't step in, a pattern that isn't cut to the grey, and a grey with no pixels that still draws | – |
 
 ### App tests
 
@@ -138,7 +139,8 @@ report.
 | [A29](#a29) | A text of several lines prints a piece for each line, all on one plate, in one G-code file | lines of a text joined by a connector strand when they should print apart, a line left off the plate or out of the file, pieces laid over each other, a piece that isn't one continuous line, and the Trace tab's drawing changing because of how the 3D tab prints it | – |
 | [A31](#a31) | The Art tab: one input at a time, traced, or plotted as drawn | an input that doesn't reach the trace, an input that forgets its settings when another is picked, a pattern that loses its one-line promise, art that can't be plotted without a trace, and the input lost by undo or a design file | – |
 | [A32](#a32) | Image prep and plotting: grey levels, the background tapped, a picture turned, and art made for plotting | grey levels that don't change the trace, a grey set to Skip that is still traced, a tap that doesn't remove the background, a turned picture that doesn't turn, the printing limits holding back art made for plotting, a plotting pattern traced before it's asked for, and any of it lost by a design file | – |
-| [A33](#a33) | The workflow: made for a printer or a pen plotter, Art → Line → Print or Plot, one switch for the line | both last steps showing (or the wrong one), the line switch offering a printer something it can't make, a picture offered As drawn, a picture on the plotter traced into one joined line instead of strokes, a pattern traced when it's plotted as drawn, the preview not following the step, and the Next buttons going nowhere | 31.1 s |
+| [A33](#a33) | The workflow: made for a printer or a pen plotter, Art → Line → Print or Plot, one switch for the line | both last steps showing (or the wrong one), the line switch offering a printer something it can't make, a picture offered As drawn, a picture on the plotter traced into one joined line instead of strokes, a pattern traced when it's plotted as drawn, the preview not following the step, and the Next buttons going nowhere | – |
+| [A34](#a34) | Touch and scrolling: number steppers, the preview in view, the settings wheel; fills per grey | a number box without − and +, a stepper that skips its step or limits or doesn't reach the app, the preview scrolling away with the settings, a phone's pinned preview taking the screen or not growing, the wheel leaving several cards open or opening the wrong one, a card jumping away when the others fold, the wheel's off switch not putting the cards back, and filled greys missing from the page or the SVG | 50.6 s |
 
 #### E01
 
@@ -412,6 +414,14 @@ report.
 - **How:** Draws a line map with a ring, a T (three strokes meeting), a 3-pixel speck and a slanting line; traces it into strokes with a minimum length of 8 px; checks the count, the ring, every point against the line map, and the pen's travel against the same strokes in reverse order.
 - **Pass when:** 5 strokes: the ring as one closed stroke, the T as three, the slanting line as one; the speck dropped; every stroke point within 1.5 px of the line map; the strokes drawn add up to the line map's pixel count within −15% … +25% (smoothing cuts the pixel steps short); the travel between them is no more than in the reverse order.
 
+#### E36
+
+**Fills per grey: each grey level's blocks filled with its own style, inside its edges** · `engine/E36-level-fills.test.js`
+
+- **Why:** Making it for a pen plotter, a grey level set to Fill or Both has its blocks filled with its own pen (UNB.levelFills): hatch, cross-hatch, rings stepping in from the edge, or the Pattern card's pattern cut to the blocks. The blocks are exactly the grey's pixels, so a grey that isn't traced still stops its fill at its edges.
+- **How:** Makes a label map with a disc, a band and the paper; fills the disc with hatch (5 px, 0°), cross-hatch, rings (4 px) and a Labyrinth pattern, and the band with hatch at 90°; fills a level that has no pixels; checks every stroke point against the label map and the inset, the hatch rows' spacing and direction, the cross-hatch's two directions, the rings' count against the disc's radius.
+- **Pass when:** Every point of every fill lies on its own grey, at least the inset (1 px) inside its edge; the hatch's rows run at 0° (or 90°), 5 px apart (±0.6 px); cross-hatch has rows both ways; the rings step in about radius ÷ spacing times (±2); the pattern's strokes all lie on the disc and there are more than 5 (one closed maze cut by the disc); an empty grey draws nothing.
+
 #### A01
 
 **The app opens and traces the sample** · `app/A01-loads-and-traces.test.js`
@@ -667,6 +677,14 @@ report.
 - **Why:** What the art is made for comes first (a printer or a pen plotter, at the top) and decides the last step: Art → Line → Print, or Art → Line → Plot. The Line step has the one switch for how the art becomes lines: One continuous line (the Fourier trace, the only one a printer can make), Separate strokes (traced, the pen lifting between them) or As drawn (a pattern's or text's own lines, nothing traced). The preview follows the step.
 - **How:** Opens the app (a printer, the leaf); checks the steps, the line switch and the preview's tabs on Art, Line and Print; makes it for a pen plotter; checks the Plot step replaces Print, the leaf becomes separate strokes, the page plots them and the SVG has a path per stroke; picks a pattern (As drawn, nothing traced) and then One continuous line (traced); follows Next from Art to Line to Plot; goes back to a printer.
 - **Pass when:** For a printer: steps Art, Line, Print (no Plot), only One continuous line offered, no preview tabs on Art or Line, Plate and 3D layers on Print. For a pen plotter: Plot replaces Print; the leaf is separate strokes (more than 5, the readout counts the pen lifts) shown on the line view and plotted on the page, its SVG a path per stroke; As drawn is off for a picture; a pattern starts As drawn with the page as its preview and isn't traced; One continuous line traces it (1 part); Next goes Art → Line → Plot; back to a printer, One continuous line and the Print step; no page errors.
+
+#### A34
+
+**Touch and scrolling: number steppers, the preview in view, the settings wheel; fills per grey** · `app/A34-touch-wheel-fills.test.js`
+
+- **Why:** On touch screens a number is easier to nudge than to type, so every number box has − and + (finger-sized on touch screens). The preview stays in view while the settings scroll: a sticky column on wide screens, a compact pinned preview on phones (Bigger shows it in full). The Wheel turns the settings like a drum: when the scrolling stops, the card that reached the top opens and the others fold. Making it for a pen plotter, grey levels can be filled (Fill, or Both with their edges traced), each with its own pen.
+- **How:** Opens the app on a laptop-sized window with the wheel on; checks every visible number box has its buttons; presses + on Copies (Print step) and holds − on the margin; scrolls the settings and checks the preview stays put; scrolls to the Plate card and checks it alone is open and stays where it landed; turns the wheel off. Then a phone-sized window: the pinned preview's height, Bigger and Smaller. Then fills per grey: a pen plotter, the still-life sample, 5 greys, the darkest two Both and Fill; the page and the SVG.
+- **Pass when:** Every number box on the Print step has − and +; + makes Copies 2 and the plate shows two copies; holding − on the margin steps it down more than once and never below its minimum; after scrolling 600 px the preview's top hasn't moved; the wheel lands on the Plate card, which is the only one open and within 40 px of where it landed; the wheel off puts back the cards it folded; on a phone the pinned preview is under 40% of the screen and Bigger makes it taller; the two filled greys plot as their own layers (3 in the SVG: strokes and two fills); no page errors.
 
 <!-- catalogue:end -->
 

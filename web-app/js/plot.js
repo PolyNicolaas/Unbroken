@@ -174,7 +174,11 @@ function drawArtPage() {
         ? "No strokes yet: the Line step traces them (or lower the threshold or the speck filter there)."
         : "Only a pattern or text can be plotted as drawn: a picture has no lines until it is traced (the Line step: separate strokes or one continuous line), and a 3D model needs Draw this view."
       : strokes
-        ? `${A.layers[0].strokes.length} separate strokes, the pen lifting between them: ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}.`
+        ? `${A.layers[0].name === "strokes" ? A.layers[0].strokes.length : 0} separate strokes, the pen lifting between them` +
+          (n > 1 || A.layers[0].name !== "strokes"
+            ? `, and ${A.layers.filter((l) => l.name !== "strokes").length} filled grey${A.layers.length === 2 ? "" : "s"}, each on its own pen (layer)`
+            : "") +
+          `: ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}.`
         : `The ${A.layers[0].name} exactly as drawn, not traced: ${fmt(A.W, 1)} × ${fmt(A.H, 1)} mm, fitted inside the margins of ${name} ${$("paperOrient").value}.`;
 }
 // the art as drawn has no fills (fill pens fill the traced drawing's shapes)
