@@ -132,7 +132,7 @@ window.UNB_SETTINGS = {
   defaults: {
     // --- Source
     source: "image",                  // "image" or "text"
-    sample: "leaf",                   // the picture shown at start: "leaf", "shapes" or "smiley"
+    sample: "none",                   // the picture at start: "none" (a clean start, examples one tap away), "leaf", "shapes", "smiley", "face" or "still"
     startFrom: "",                    // a starting point applied at start: "", "drawing", "photo", "logo" or "lettering" (see presets below)
 
     // --- Tracing

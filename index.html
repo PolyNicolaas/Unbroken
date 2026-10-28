@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v108</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v109</span></p>
 </header>
 
 <div class="wrap">
@@ -33,6 +33,11 @@
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
         <div class="chip" id="chip">loading…</div>
+        <div class="empty-state" id="emptyState" hidden>
+          <p class="es-title">Start with a picture, text, a pattern or a 3D model</p>
+          <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>. Or try an example:</p>
+          <div class="chips" data-examples></div>
+        </div>
         <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
         <div class="pathbar" role="group" aria-label="What the view shows">
           <label class="check pv-3d" title="Each line as the chocolate bead it prints: the needle's width, one layer tall, at true height"><input type="checkbox" id="pvSolid" checked> <span>Solid (as printed)</span></label>
@@ -334,6 +339,10 @@
         <input type="radio" name="srcType" id="srcPattern" value="pattern"><label for="srcPattern">Pattern<small>geometric art</small></label>
         <input type="radio" name="srcType" id="srcModel" value="model"><label for="srcModel">3D model<small>an STL</small></label>
       </div>
+      <div class="examples" role="group" aria-label="Examples" id="examplesRow">
+        <span class="name">Or start from an example</span>
+        <div class="chips" data-examples></div>
+      </div>
       <div class="dropzone" id="dropZone" role="button" tabindex="0" aria-label="Choose or drop a file: an image, an STL model or a saved design">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
         <span class="dz-main">Drop a file here, or click to choose</span>
@@ -345,14 +354,6 @@
 
     <section class="card art-only art-picture" aria-labelledby="h-pic">
       <h2 id="h-pic">Picture <span id="picVal"></span></h2>
-      <select id="sample" aria-label="Sample image">
-        <option value="leaf">Sample: leaf</option>
-        <option value="shapes">Sample: shapes &amp; text</option>
-        <option value="smiley">Sample: smiley</option>
-        <option value="face">Sample: face (light and dark, for picture patterns)</option>
-        <option value="still">Sample: still life (flat greys, for grey levels and fills)</option>
-        <option value="user" disabled>Your image</option>
-      </select>
       <div class="inline"><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
       <input type="file" id="picFile" accept="image/*" hidden>
       <div class="row" id="picTurnRow">
@@ -750,6 +751,7 @@
 <script src="js/testprint.js"></script>
 <script src="js/plot.js"></script>
 <script src="js/workflow.js"></script>
+<script src="js/examples.js"></script>
 <script src="js/steppers.js"></script>
 <script src="js/scroll.js"></script>
 <script src="js/model.js"></script>
