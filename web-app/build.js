@@ -108,7 +108,7 @@ async function smokeTest(dir) {
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("console", (m) => { if (m.type() === "error") errors.push(m.text()); });
     page.on("response", (r) => { if (r.status() === 404) missing.push(r.url()); });
-    await page.goto(`http://127.0.0.1:${srv.address().port}/index.html`);
+    await page.goto(`http://127.0.0.1:${srv.address().port}/index.html?example=leaf`); // (the app opens empty since v109: start on the leaf)
     let chip = "";
     // wait until the trace is finished: the readout shows terms and the "working" note stays off for 600 ms (max 60 s)
     for (let i = 0, calm = 0; i < 400 && calm < 4; i++) {
