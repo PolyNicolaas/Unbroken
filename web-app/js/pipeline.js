@@ -168,7 +168,9 @@ function traceWalk(W, s, engine = PIPE) {
   ]);
 }
 async function extract(g, P = Object.create(st), again = false) {
-  if (lineModeNow() === "drawn") return plotSoon(0); // workflow.js: As drawn, nothing to trace (the page redrawn)
+  // workflow.js: Trace off, as drawn: nothing to trace (the page redrawn)
+  if (lineModeNow() === "drawn") return plotSoon(0);
+  if (lineModeNow() === "none") return render(); // workflow.js: Trace off, a picture: the picture as it is
   if (lineModeNow() === "strokes") return traceStrokes(g); // workflow.js: the Line step's Separate strokes
   const s = settings(),
     W = await working();

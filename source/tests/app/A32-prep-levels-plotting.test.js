@@ -43,7 +43,7 @@ module.exports = {
     checks.push(check("2D: the rows as drawn", +/Wave rows \(picture\) exactly as drawn/.test(await page.textContent("#pageHint")), "==", 1));
     const [sv] = await Promise.all([page.waitForEvent("download"), page.click("#exportBtn")]);
     checks.push(check("… its SVG named after the pattern", sv.suggestedFilename(), "==", "wave-rows-picture-art.svg"));
-    await page.click("label[for=viewDesign]"); await page.click("label[for=lineOne]"); await A.idle(page, 4000);
+    await page.click("label[for=viewDesign]"); await page.click(".trace-switch"); await page.click("label[for=lineOne]"); await A.idle(page, 4000);
     checks.push(check("One continuous line: traced now (parts)", +(!(await page.evaluate(() => st.art.untraced)) && (await page.evaluate(() => st.source.__id)) !== src) * (await parts(page)), ">=", 1));
     // made for plotting, a traced drawing fills the page, its lines pen 1 + the gap apart
     const fit = await page.evaluate(() => ({ w: st.outW, page: pageFitW(), sp: st.spacing, pen: +$("penW").value + +$("lineGapMM").value }));

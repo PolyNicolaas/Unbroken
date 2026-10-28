@@ -453,6 +453,7 @@ function viewChanged() {
   // each tab brings its own big view (the Art step: the Line view, where the input shows traced, or a model turns); the
   // view tabs can change it
   setStage(stageFor(document.body.dataset.view)); // workflow.js: the preview follows the step
+  traceNeededUI(); // workflow.js: Print (or Plot a picture) with Trace off says to turn it on
   drawPlate();
   drawMini();
   render(); // the Print step shows the filled base layer (or a model's layers)

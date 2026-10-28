@@ -52,6 +52,10 @@
             <span class="cam-btns"><button class="btn" type="button" id="camRetake">Retake</button><button class="btn" type="button" id="camWhole" title="Use the whole photo, nothing straightened">Whole photo</button><button class="btn primary" type="button" id="camUse">Use it</button></span>
           </div>
         </div>
+        <div class="trace-needed" id="traceNeeded" hidden>
+          <p id="traceNeededMsg">Trace is off.</p>
+          <button class="btn primary" type="button" id="traceNeededOn">Turn Trace on</button>
+        </div>
         <div class="empty-state" id="emptyState" hidden>
           <p class="es-title">Start with a picture, text, a pattern or a 3D model</p>
           <p class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
@@ -79,6 +83,7 @@
         <button class="minimap design-only" id="minimap" type="button" title="The drawing on the 340 × 232 mm plate. Click for the Print step"><canvas id="miniPlate"></canvas><span id="miniInfo"></span></button>
       </div>
       <div class="toolbar">
+        <label class="trace-switch" title="Trace on: the art becomes the line (Line step: one continuous line or separate strokes). Off: the art as it is, nothing traced: a pattern or text plots as its exact lines; a picture shows as the picture"><input type="checkbox" role="switch" id="traceOn" checked><span class="ts-track" aria-hidden="true"></span><span>Trace</span></label>
         <button class="btn primary" id="play" type="button" title="Watch it being drawn: the circles drawing the line, the pen drawing the page, or the layers stacking up">Play drawing</button>
         <select id="speed" aria-label="Animation speed">
           <option value="24">Slow</option>
@@ -486,19 +491,19 @@
       <div class="inline">
         <button class="btn primary" type="button" id="goTrace">Next: the line →</button>
       </div>
-      <p class="hint" id="nextHint">The Line step turns the art into lines: one continuous line for a printer; for a pen plotter also separate strokes, or a pattern or text exactly as drawn.</p>
+      <p class="hint" id="nextHint">The Line step turns the art into lines: one continuous line for a printer; for a pen plotter also separate strokes. With Trace off (under the preview) a pattern or text plots exactly as drawn.</p>
     </section>
 
     <section class="card design-only" aria-labelledby="h-src">
       <h2 id="h-src">The line <span id="srcinfo"></span></h2>
+      <p class="hint trace-off-note" id="traceOffNote">Trace is off (the switch under the preview): <span id="traceOffWhat"></span></p>
       <div class="seg line-modes" role="radiogroup" aria-label="How the art becomes lines">
         <input type="radio" name="lineMode" id="lineOne" value="one" checked><label for="lineOne">One continuous line<small>traced · prints, plots without lifting</small></label>
         <input type="radio" name="lineMode" id="lineStrokes" value="strokes"><label for="lineStrokes">Separate strokes<small>traced · the pen lifts between</small></label>
-        <input type="radio" name="lineMode" id="lineDrawn" value="drawn"><label for="lineDrawn">As drawn<small>no trace · a pattern's or text's own lines</small></label>
       </div>
       <p class="hint" id="lineModeHint"></p>
       <div class="inline"><span class="hint" id="fromArt" hidden></span><button class="btn mini" type="button" id="toArt">← Edit the art</button></div>
-      <p class="hint help">Everything the Line step does follows this switch. One continuous line is the Fourier trace, the only line a printer can make, and a plotter can draw it without lifting the pen. Separate strokes traces the art into strokes the pen draws one by one, lifting between them: closer to the drawing, nothing joined or doubled. As drawn skips tracing: a pattern's or the text's exact lines go to the page (a picture has no lines until it is traced).</p>
+      <p class="hint help">Everything the Line step does follows this switch. One continuous line is the Fourier trace, the only line a printer can make, and a plotter can draw it without lifting the pen. Separate strokes traces the art into strokes the pen draws one by one, lifting between them: closer to the drawing, nothing joined or doubled. With Trace off (the switch under the preview) nothing is traced: a pattern's or the text's exact lines go to the page, and a picture shows as it is (it has no lines until it is traced), so nothing re-traces while you adjust the art.</p>
     </section>
 
     <section class="card design-only img-only" aria-labelledby="h-trace">

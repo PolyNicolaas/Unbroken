@@ -107,12 +107,15 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
 - **Art**: what to start from (below). The app opens empty; the examples (pictures, patterns, lettering, the vase) are
   chips on the empty preview and in the Input card (`web-app/js/examples.js`; `?example=leaf` in the address, or
   `defaults.sample` in settings.js, starts on one). Test A35.
-- **Line**: how the art becomes lines, the one switch for tracing. **One continuous line** is the Fourier trace, the
+- **Trace** (the switch under the preview, on every step): on, the art becomes the line the Line step picks; off,
+  the art stays as it is: a pattern or text plots as its exact lines (as drawn), a picture shows as the picture and
+  nothing is traced. Print, or plotting a picture, asks for Trace on. A 3D model is always sliced. Test A37.
+- **Line**: how the art becomes lines when traced. **One continuous line** is the Fourier trace, the
   only line a printer can make (a plotter draws it without lifting the pen). **Separate strokes** traces the art into
   strokes the pen draws one by one, lifting between them (`UNB.lineStrokes`: the line map split at ends and junctions,
-  smoothed, put in an order that keeps the pen's travel short); it's traced at the page's size. **As drawn** traces
-  nothing: a pattern's or the text's own lines go to the page. On a plotter a pattern or text starts as drawn and a
-  picture as separate strokes, until you pick one. The cards a line doesn't use are hidden.
+  smoothed, put in an order that keeps the pen's travel short); it's traced at the page's size. With **Trace off**
+  nothing is traced: a pattern's or the text's own lines go to the page. On a plotter a pattern or text starts with
+  Trace off and a picture as separate strokes, until you pick. The cards a line doesn't use are hidden.
 - **Print** (plate, layers, G-code) or **Plot** (the page, pens, SVG for Saxi).
 
 The preview follows the step: the art or the line on Art and Line (the page for as drawn), the page on Plot, the plate or

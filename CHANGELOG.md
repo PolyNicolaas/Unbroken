@@ -3,6 +3,16 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v112 · 2026-10-28
+
+- **The Trace switch**, under the preview on every step: tracing on and off in one place. On, the art becomes the line
+  the Line step picks (one continuous line, or separate strokes on a pen plotter). Off, the art is left as it is: a
+  pattern or text plots as its exact lines (the Line card's As drawn is gone: it's Trace off now), and a picture shows
+  as the picture, so nothing re-traces while you adjust it. The Print step, or plotting a picture, needs the line: with
+  Trace off they say so, with a Turn Trace on button. On a plotter a pattern or text still starts with Trace off. A 3D
+  model is always sliced (the switch stays on). Designs saved As drawn open with Trace off.
+- Tests: A37; A31, A32 and A33 follow the switch.
+
 ## v111 · 2026-10-28
 
 - **Page corners fixed on touch screens.** The photo now sits clear of the message and the buttons, so a corner on the

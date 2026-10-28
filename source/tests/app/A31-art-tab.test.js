@@ -74,7 +74,7 @@ module.exports = {
     const svg = fs.readFileSync(await dl.path(), "utf8");
     checks.push(check("SVG: one Inkscape layer of the pattern's lines, named as art", +((svg.match(/inkscape:groupmode="layer"/g) || []).length === 1 && /-art\.svg$/.test(dl.suggestedFilename())), "==", 1));
     await page.click("label[for=viewArt]"); await page.click("label[for=srcImage]"); await A.idle(page, 1200);
-    checks.push(check("As drawn is off for a picture (it gets separate strokes)", +((await page.isDisabled("#lineDrawn")) && (await page.evaluate(() => lineModeNow())) === "strokes"), "==", 1));
+    checks.push(check("a picture starts traced (Trace on), as separate strokes", +((await page.isChecked("#traceOn")) && (await page.evaluate(() => lineModeNow())) === "strokes"), "==", 1));
     await page.click("label[for=artForPrint]"); await A.idle(page, 1200);
     // a design file: the pattern in use, the leaf kept
     await page.click("label[for=srcPattern]"); await A.idle(page, 1200);

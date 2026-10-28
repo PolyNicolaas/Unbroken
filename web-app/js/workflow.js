@@ -4,18 +4,21 @@
 //   one      One continuous line: the Fourier trace (pipeline.js); the only line a printer can make.
 //   strokes  Separate strokes: the art traced into strokes, the pen lifting between them (UNB.stageStrokes, here;
 //            st.sepStrokes).
-//   drawn    As drawn: a pattern's or the text's own lines, nothing traced (art.js artVectors).
+//   drawn    Trace off, a pattern or text: its own lines, nothing traced (art.js artVectors).
+//   none     Trace off, a picture: the picture as it is (preview.js renderPictureOnly); nothing to plot or print.
+// The Trace switch under the preview turns tracing on and off on every step (As drawn is Trace off).
 // The preview follows the step: the art or the line on Art and Line, the page on Plot, the plate or layers on Print.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
 "use strict";
 
-// the line in use: a printer always takes one line; As drawn needs a pattern or text (a picture has no lines until
-// traced: it gets separate strokes); a model is sliced, one line per layer
+// the line in use: a model is always sliced (one line per layer); with Trace off, a pattern's or text's own lines
+// (drawn) or the picture itself (none); traced, a printer takes one line, a plotter one line or separate strokes
 function lineModeNow() {
-  if (!artForPlot() || st.art.kind === "model") return "one";
-  const m = document.querySelector('input[name="lineMode"]:checked').value;
-  return m === "drawn" && !asDrawnOK() ? "strokes" : m;
+  if (st.art.kind === "model") return "one";
+  if (!$("traceOn").checked) return asDrawnOK() ? "drawn" : "none";
+  if (!artForPlot()) return "one";
+  return document.querySelector('input[name="lineMode"]:checked').value;
 }
 // the big view for a step
 function stageFor(view) {
@@ -23,7 +26,12 @@ function stageFor(view) {
   if (view === "choc") return stageNow() === "plate" ? "plate" : "layers";
   return lineModeNow() === "drawn" ? "page" : "line";
 }
-const LINE_SUB = { one: "traced into one line", strokes: "traced into strokes", drawn: "as drawn, no trace" };
+const LINE_SUB = {
+  one: "traced into one line",
+  strokes: "traced into strokes",
+  drawn: "trace off: as drawn",
+  none: "trace off",
+};
 function workflowUI() {
   const plot = artForPlot(),
     mode = lineModeNow(),
@@ -33,8 +41,19 @@ function workflowUI() {
   // the last step is Plot or Print, not both
   if (plot && $("viewChoc").checked) $("view2D").checked = true;
   if (!plot && $("view2D").checked) $("viewChoc").checked = true;
-  $("lineStrokes").disabled = $("lineDrawn").disabled = !plot;
-  $("lineDrawn").disabled = !plot || !asDrawnOK();
+  $("lineStrokes").disabled = !plot;
+  const model = st.art.kind === "model";
+  $("traceOn").disabled = model; // (a model is sliced)
+  const sw = $("traceOn").closest(".trace-switch");
+  sw.dataset.tip = sw.dataset.tip || sw.title;
+  sw.title = model ? "A 3D model is always sliced into its layers' lines" : sw.dataset.tip;
+  const off = mode === "drawn" || mode === "none";
+  $("traceOffNote").hidden = !off;
+  $("traceOffWhat").textContent =
+    mode === "drawn"
+      ? `the ${st.art.kind === "text" ? "text's" : "pattern's"} own lines, exactly as drawn.` +
+        (plot ? "" : " A printer needs it traced: turn Trace on to print.")
+      : "the picture as it is. Turn Trace on to make it into lines.";
   $("stepLineSub").textContent = LINE_SUB[mode];
   $("goOut").textContent = plot ? "Next: plot it →" : "Next: print it →";
   const kind = { picture: "picture", text: "text", pattern: "pattern", model: "model" }[st.art.kind];
@@ -42,11 +61,10 @@ function workflowUI() {
     ? "A printer makes one continuous line. (Making it for a pen plotter, at the top, also offers separate strokes and as drawn.)"
     : st.art.kind === "model"
       ? "A 3D model is sliced on the Print step. For the plotter, draw a view of it on the Art step: that becomes a picture to trace."
-      : mode === "drawn"
-        ? `The ${kind}'s own lines go to the page, nothing traced.`
+      : mode === "drawn" || mode === "none"
+        ? "Turn Trace on to choose how it's traced."
         : mode === "strokes"
-          ? `The ${kind} traced into strokes; the pen lifts between them.` +
-            ($("lineDrawn").checked && !asDrawnOK() ? " (As drawn needs a pattern or text.)" : "")
+          ? `The ${kind} traced into strokes; the pen lifts between them.`
           : `The ${kind} traced into one continuous line: the pen never lifts.`;
   // what the page plots follows the line (the 2D card's own switch is hidden)
   const art = mode !== "one";
@@ -58,9 +76,26 @@ function workflowUI() {
     setChip(`${st.art.kind === "text" ? "The text" : patternName(st.art.pattern)} as drawn: exact lines, no trace`);
     $("fitinfo").textContent = "as drawn";
   }
+  if (mode === "none") {
+    setChip(st.art.picture ? "Trace off: the picture as it is" : "Trace off");
+    $("fitinfo").textContent = "trace off";
+  }
+  traceNeededUI();
   // on Art and Line the preview shows what the line will be: the page for as drawn, else the line
   const v = document.body.dataset.view;
   if ((v === "art" || v === "design") && stageFor(v) !== stageNow()) setStage(stageFor(v));
+}
+// Print, or plot a picture, with Trace off: the step needs the line, so the preview says so (with the switch)
+function traceNeededUI() {
+  const mode = lineModeNow(),
+    v = document.body.dataset.view,
+    need = (v === "choc" && (mode === "drawn" || mode === "none")) || (v === "plot" && mode === "none");
+  $("traceNeeded").hidden = !need || !!document.body.dataset.empty;
+  if (need)
+    $("traceNeededMsg").textContent =
+      v === "choc"
+        ? "Trace is off. A printer prints one traced line: turn Trace on to print."
+        : "Trace is off, and a picture has no lines until it's traced: turn Trace on to plot it.";
 }
 // the step's view, after a change of output or line
 function followStep() {
@@ -72,7 +107,10 @@ function followStep() {
 st.lineChosen = false;
 function lineDefault() {
   if (!artForPlot()) $("lineOne").checked = true;
-  else if (!st.lineChosen) $(asDrawnOK() ? "lineDrawn" : "lineStrokes").checked = true;
+  else if (!st.lineChosen && asDrawnOK())
+    $("traceOn").checked = false; // a pattern or text: as drawn
+  else if (!st.lineChosen) $("lineStrokes").checked = true;
+  if (!st.lineChosen && (!artForPlot() || !asDrawnOK())) $("traceOn").checked = true;
 }
 document.querySelectorAll('input[name="artFor"]').forEach((r) =>
   r.addEventListener("change", () => {
@@ -81,7 +119,12 @@ document.querySelectorAll('input[name="artFor"]').forEach((r) =>
     lineModeChanged();
   })
 );
-document.querySelectorAll('input[name="lineMode"]').forEach((r) =>
+for (const id of ["traceNeededOn"])
+  $(id).addEventListener("click", () => {
+    $("traceOn").checked = true;
+    $("traceOn").dispatchEvent(new Event("change", { bubbles: true }));
+  });
+document.querySelectorAll('input[name="lineMode"], #traceOn').forEach((r) =>
   r.addEventListener("change", () => {
     st.lineChosen = true;
     lineModeChanged();

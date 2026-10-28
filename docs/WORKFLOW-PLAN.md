@@ -19,3 +19,10 @@ without a visible step, and there were two rows of tabs (Art / Trace / 2D / 3D a
   Traced line / Art as drawn switch: the Line step's switch is the one place.
 
 Version v107 ✓ (27 October); fills per grey move to v108 (docs/PREP-PLAN.md).
+
+## The Trace switch (28 October, v112)
+
+Nicolaas: "I still think we need a trace button, to turn trace on and off." Decided: one switch under the preview, on
+every step (beside Play drawing). Off leaves the art as it is: As drawn merges into it (a pattern or text plots as its
+exact lines), a picture shows as the picture, and nothing re-traces. Printing, or plotting a picture, asks for Trace on.
+The Line card keeps how it's traced: one continuous line, or separate strokes on a plotter.
