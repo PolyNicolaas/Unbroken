@@ -398,7 +398,9 @@ body[data-empty="1"] .pv-size { display: none; }
 .camera[data-mode="edit"] #camQuad { pointer-events: auto; }
 #camPoly { fill: color-mix(in srgb, var(--accent) 16%, transparent); stroke: var(--accent); stroke-width: 3; stroke-linejoin: round; }
 #camPoly:not([data-on="1"]) { display: none; }
-.cam-handle { fill: color-mix(in srgb, var(--accent) 35%, transparent); stroke: #fff; stroke-width: 3; cursor: grab; touch-action: none; }
+.cam-hit { fill: transparent; stroke: none; cursor: grab; touch-action: none; }
+.cam-bar, .cam-msg { pointer-events: none; } .cam-bar > * { pointer-events: auto; }
+.cam-handle { pointer-events: none; fill: color-mix(in srgb, var(--accent) 35%, transparent); stroke: #fff; stroke-width: 3; cursor: grab; touch-action: none; }
 .cam-handle:focus-visible { outline: none; stroke: var(--accent); stroke-width: 5; }
 .cam-msg { grid-area: 1 / 1; z-index: 1; justify-self: center; margin: calc(10px * var(--space)); padding: calc(6px * var(--space)) calc(12px * var(--space)); border-radius: 999px; background: rgb(0 0 0 / .6); font-size: calc(13px * var(--text)); text-align: center; }
 .cam-bar { grid-area: 3 / 1; z-index: 1; display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) calc(12px * var(--space)) max(calc(10px * var(--space)), env(safe-area-inset-bottom)); background: linear-gradient(transparent, rgb(0 0 0 / .65) 40%); }
