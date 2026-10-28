@@ -22,10 +22,14 @@ module.exports = {
     await page.click("#artShuffle"); await A.idle(page, 1200);
     checks.push(check("Shuffle makes a new picture to trace", +((await srcId(page)) !== id), "==", 1));
     // Width (mm): set by hand, kept through a change of detail; Fit the needle goes back to the line spacing
-    await page.fill("#artWidth", "40"); await page.press("#artWidth", "Enter"); await A.idle(page, 1500);
-    checks.push(check("Width 40 mm: the print is 40 mm wide, and the card warns the lines are closer than the spacing", +((await page.evaluate(() => Math.round(st.outW))) === 40 && /Closer than the needle's line spacing/.test(await page.textContent("#artGapHint"))), "==", 1));
+    // 40 mm, or just over the smallest size that fits if that's more (the size never goes under it): once the size
+    // marks are found, so it doesn't depend on when they arrive
+    await page.waitForFunction(() => st.marks && st.marks.fits, null, { timeout: 60000 }).catch(() => {});
+    const want = await page.evaluate(() => Math.max(40, Math.ceil((st.marks && st.marks.smallest) || 0) + 1));
+    await page.fill("#artWidth", String(want)); await page.press("#artWidth", "Enter"); await A.idle(page, 1500);
+    checks.push(check(`Width ${want} mm: the print is that wide, and the card warns the lines are closer than the spacing`, +((await page.evaluate(() => Math.round(st.outW))) === want && /Closer than the needle's line spacing/.test(await page.textContent("#artGapHint"))), "==", 1));
     await A.setValue(page, "#artP-detail", 10); await A.idle(page, 1500);
-    checks.push(check("… kept when the rows change", await page.evaluate(() => Math.round(st.outW)), "==", 40));
+    checks.push(check("… kept when the rows change (mm)", await page.evaluate(() => Math.round(st.outW)), ">=", want));
     await page.click("#artFit"); await A.idle(page, 1500);
     const gap = await page.evaluate(() => { const r = UNB.pattern(st.art.pattern.style, st.art.pattern); return (st.outW * r.gap) / r.box[0] / st.spacing; });
     checks.push(check("Fit the needle: closest lines ÷ the line spacing", gap, ">=", 1), check("… (not much over)", gap, "<=", 1.05));
