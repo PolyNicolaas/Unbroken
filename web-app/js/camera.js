@@ -75,12 +75,28 @@ function cameraClose() {
 }
 
 // ---------- the live view: the page found, outlined ----------
-// where a frame of fw × fh px sits in an element of the size given (object-fit: contain)
-function fitIn(el, fw, fh) {
+// where a frame of fw × fh px sits in an element of the size given (object-fit: contain), inside an inset
+// ({ t, r, b, l } px) if one is given
+function fitIn(el, fw, fh, inset) {
   const W = el.clientWidth,
     H = el.clientHeight,
-    k = Math.min(W / fw, H / fh);
-  return { k, x: (W - fw * k) / 2, y: (H - fh * k) / 2, W, H };
+    i = inset || { t: 0, r: 0, b: 0, l: 0 },
+    k = Math.max(0.01, Math.min((W - i.l - i.r) / fw, (H - i.t - i.b) / fh));
+  return { k, x: i.l + (W - i.l - i.r - fw * k) / 2, y: i.t + (H - i.t - i.b - fh * k) / 2, W, H };
+}
+// the photo being edited sits clear of the message and the buttons, with room round it, so a corner on the photo's
+// edge (no page found, the whole photo) is never under them and can be grabbed
+function stillFit() {
+  const box = $("camera").getBoundingClientRect(),
+    msg = $("camMsg").getBoundingClientRect(),
+    bar = document.querySelector(".cam-edit").getBoundingClientRect();
+  const inset = {
+    t: Math.max(24, msg.bottom - box.top + 10),
+    b: Math.max(24, box.bottom - bar.top + 10),
+    l: 26,
+    r: 26,
+  };
+  return fitIn($("camQuad"), cam.still.width, cam.still.height, inset);
 }
 const looker = document.createElement("canvas");
 function cameraLook() {
@@ -111,7 +127,7 @@ function cameraLook() {
 // the outline (and, editing, the corner handles) over the video or the photo
 function cameraDrawQuad(q, fw, fh, handles) {
   const svg = $("camQuad"),
-    F = fitIn(svg, fw, fh);
+    F = handles ? stillFit() : fitIn(svg, fw, fh);
   svg.setAttribute("viewBox", `0 0 ${F.W} ${F.H}`);
   const pts = q ? q.map(([x, y]) => [F.x + x * F.k, F.y + y * F.k]) : [];
   $("camPoly").setAttribute("points", pts.map((p) => p.join(",")).join(" "));
@@ -121,29 +137,39 @@ function cameraDrawQuad(q, fw, fh, handles) {
     g.replaceChildren();
     return;
   }
-  if (g.children.length !== 4) {
+  // each corner: a ring to see and a bigger, invisible circle to grab (a fingertip is wider than the ring)
+  if (g.children.length !== 8) {
     g.replaceChildren();
     ["top left", "top right", "bottom right", "bottom left"].forEach((name, i) => {
-      const c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      const hit = document.createElementNS("http://www.w3.org/2000/svg", "circle"),
+        c = document.createElementNS("http://www.w3.org/2000/svg", "circle");
+      hit.setAttribute("r", 34);
+      hit.setAttribute("class", "cam-hit");
+      hit.dataset.i = i;
       c.setAttribute("r", 18);
       c.setAttribute("class", "cam-handle");
       c.setAttribute("tabindex", "0");
       c.setAttribute("role", "slider");
       c.setAttribute("aria-label", `The page's ${name} corner (arrow keys move it)`);
       c.dataset.i = i;
-      g.appendChild(c);
+      g.append(hit, c);
     });
   }
   pts.forEach(([x, y], i) => {
-    g.children[i].setAttribute("cx", x);
-    g.children[i].setAttribute("cy", y);
+    for (const el of [g.children[2 * i], g.children[2 * i + 1]]) {
+      el.setAttribute("cx", x);
+      el.setAttribute("cy", y);
+    }
   });
 }
 
 // ---------- the photo taken: its corners ----------
 function cameraTake() {
   const v = $("camVideo");
-  if (!v.videoWidth) return;
+  if (!v.videoWidth) {
+    $("camMsg").textContent = "The camera is still starting: try again in a moment";
+    return;
+  }
   const k = Math.min(1, CAM_MAX / Math.max(v.videoWidth, v.videoHeight)),
     c = document.createElement("canvas");
   c.width = Math.round(v.videoWidth * k);
@@ -190,31 +216,58 @@ function cameraDrawStill() {
   if (!s) return;
   c.width = Math.round(c.clientWidth * dpr);
   c.height = Math.round(c.clientHeight * dpr);
-  const F = fitIn(c, s.width, s.height),
+  const F = stillFit(),
     g = c.getContext("2d");
   g.setTransform(dpr, 0, 0, dpr, 0, 0);
   g.clearRect(0, 0, F.W, F.H);
   g.drawImage(s, F.x, F.y, s.width * F.k, s.height * F.k);
   cameraDrawQuad(cam.corners, s.width, s.height, true);
 }
-// dragging a corner (finger, pen or mouse); arrow keys move a focused one
+// dragging a corner (finger, pen or mouse): grabbed on its ring, or the nearest corner within reach of a touch; it
+// keeps its distance from the finger (so the finger doesn't cover it by jumping under it); arrow keys move a focused
+// one
 let camDrag = null;
+const camAt = (e) => {
+  const r = $("camQuad").getBoundingClientRect(),
+    F = stillFit();
+  return { F, sx: e.clientX - r.left, sy: e.clientY - r.top };
+};
 $("camQuad").addEventListener("pointerdown", (e) => {
-  const h = e.target.closest(".cam-handle");
-  if (!h || !cam.still) return;
+  if (!cam.still || $("camera").dataset.mode !== "edit") return;
+  const { F, sx, sy } = camAt(e);
+  let i = e.target.dataset && e.target.dataset.i !== undefined ? +e.target.dataset.i : -1;
+  if (i < 0) {
+    // the nearest corner, if it's close enough
+    let best = e.pointerType === "mouse" ? 30 : 60;
+    cam.corners.forEach(([x, y], k) => {
+      const d = Math.hypot(F.x + x * F.k - sx, F.y + y * F.k - sy);
+      if (d < best) ((best = d), (i = k));
+    });
+  }
+  if (i < 0) return;
   e.preventDefault();
-  camDrag = { i: +h.dataset.i, id: e.pointerId };
+  const [cx, cy] = cam.corners[i];
+  camDrag = { i, id: e.pointerId, dx: F.x + cx * F.k - sx, dy: F.y + cy * F.k - sy };
   $("camQuad").setPointerCapture(e.pointerId);
 });
 $("camQuad").addEventListener("pointermove", (e) => {
   if (!camDrag || e.pointerId !== camDrag.id) return;
-  const r = $("camQuad").getBoundingClientRect(),
-    F = fitIn($("camQuad"), cam.still.width, cam.still.height);
-  const x = (e.clientX - r.left - F.x) / F.k,
-    y = (e.clientY - r.top - F.y) / F.k;
+  e.preventDefault();
+  const { F, sx, sy } = camAt(e),
+    x = (sx + camDrag.dx - F.x) / F.k,
+    y = (sy + camDrag.dy - F.y) / F.k;
   cam.corners[camDrag.i] = [Math.max(0, Math.min(cam.still.width, x)), Math.max(0, Math.min(cam.still.height, y))];
   cameraDrawQuad(cam.corners, cam.still.width, cam.still.height, true);
 });
+// iPad and iPhone: a finger on the camera never scrolls or zooms the page (which would cancel a corner's drag)
+for (const ev of ["touchstart", "touchmove"])
+  $("camera").addEventListener(
+    ev,
+    (e) => {
+      if (!e.target.closest("button, label, input")) e.preventDefault();
+    },
+    { passive: false }
+  );
 const camDrop = () => (camDrag = null);
 $("camQuad").addEventListener("pointerup", camDrop);
 $("camQuad").addEventListener("pointercancel", camDrop);

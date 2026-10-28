@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v111 · 2026-10-28
+
+- **Page corners fixed on touch screens.** The photo now sits clear of the message and the buttons, so a corner on the
+  photo's edge (no page found, Whole photo, an object) is never under them; before, the bottom corners sat under the
+  buttons and couldn't be grabbed. Each corner has a fingertip-sized grab area, a press near a corner takes it, and the
+  corner keeps its distance from the finger instead of jumping under it. On an iPad or iPhone a finger on the camera no
+  longer scrolls the page, which could cancel a drag. The shutter says when the camera is still starting.
+- Tests: A36 checks every corner on the photo's edges can be grabbed, and a drag that starts beside a corner.
+
 ## v110 · 2026-10-28
 
 - **Take a picture.** A live camera in the preview (full screen on a phone): on an iPad or phone, photograph a drawing,
