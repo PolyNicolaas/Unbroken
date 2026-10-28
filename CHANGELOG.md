@@ -3,6 +3,24 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v110 · 2026-10-28
+
+- **Take a picture.** A live camera in the preview (full screen on a phone): on an iPad or phone, photograph a drawing,
+  a print or anything else. The page it finds is outlined as you hold the camera over it; the shutter keeps the frame,
+  and the page's four corners can be dragged (or moved with the arrow keys) if one is off. **Use it** straightens the
+  page (its perspective undone) and cleans it into the picture to trace; **Whole photo** skips the straightening. Pick
+  **Drawing**, **Printed** or **Object** first. Take a picture is on the empty preview and the Picture card. Without a
+  live camera (refused, or an old browser) the device's own camera or photos open instead, and the photo goes to the
+  same corners.
+- **The Photo card** cleans the photo again: **Drawing** evens out the paper's light (shadows and a lamp's falloff go),
+  makes the paper white and the ink black, darkens faint pencil and removes specks; **Printed** does the same more
+  gently and keeps the greys (for Grey levels); **Object** finds no page and balances and stretches the colours (tap the
+  background in Image prep to remove it); **As taken** only straightens. Sliders: Even out the light, Darken faint
+  lines, Remove specks. **Page corners…** reopens the corners. An image you chose can be **Clean up as a photo**.
+- Engine: a new part, `14-photo.js`: `UNB.findPage` (the largest light, plain area, its corners made exact along each
+  side's edge; a second look with the light divided out when the shade makes the page's far end darker than the
+  table), `UNB.warpQuad`, `UNB.pageSize`, `UNB.photoClean`, `UNB.photoPicture` (in its own worker). Tests E37, A36.
+
 ## v109 · 2026-10-28
 
 - **A clean start.** The app opens on an empty workspace: nothing traced, and the preview says how to start (drop,

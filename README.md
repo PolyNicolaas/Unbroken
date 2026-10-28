@@ -53,7 +53,7 @@ the chocolate list. See [`ROADMAP.md`](ROADMAP.md).
 ```
 Unbroken/
 ├── source/                 Shared source code
-│   ├── engine/            The tracing engine (no DOM), one file per stage (00-util.js … 12-models.js);
+│   ├── engine/            The tracing engine (no DOM), one file per stage (00-util.js … 14-photo.js);
 │   │                       core.js lists them and loads them. Also runs in Node.
 │   ├── engine/worker.js    Runs the engine in the background so the app stays responsive
 │   ├── engine/fonts.js     Single-stroke fonts for the Text source
@@ -129,14 +129,28 @@ Test A34.
 Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 3D): **Art → Trace → 2D (plotter) or 3D
 (printers)**. Its **Input** switch picks one thing at a time (`web-app/js/art.js`):
 
-- **Picture**: a sample, an image of yours (Choose an image…, or drop one anywhere on the page) or a sketch (Draw your
-  own, on the preview). **Turn left / Turn right** and **Straighten** (±20°) turn it first; the corners that come in
+- **Picture**: a photo (**Take a picture**, below), a sample, an image of yours (Choose an image…, or drop one anywhere
+  on the page) or a sketch (Draw your own, on the preview). **Turn left / Turn right** and **Straighten** (±20°) turn it first; the corners that come in
   are white. The **still life** sample (flat greys) shows off grey levels and the picture patterns.
 - **Text**: lettering in a single-stroke font (the Text card).
 - **Pattern**: a geometric pattern, or a pattern that draws a picture's light and dark as one line (see
   [Geometric art](#geometric-art)).
 - **3D model**: an STL (or the sample vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
   makes its line drawing the picture to trace.
+
+**Take a picture** (`web-app/js/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
+phone) outlines the page it finds (`UNB.findPage`: the largest light, plain area on a small copy of the frame, its four
+corners from the widest four-sided shape round it, then made exact along each side's edge on the photo; if the shade
+makes the page's far end darker than the table, it looks again with the light divided out). The photo taken shows its
+corners to drag; pick **Drawing**, **Printed** or **Object**, then **Use it** (or **Whole photo**). `UNB.photoPicture`,
+in its own worker, flattens the page to a rectangle (`UNB.warpQuad`, the size from its sides' lengths, at most 1800 px)
+and cleans it (`UNB.photoClean`): a drawing has the paper's light divided out (the brightest of each cell, spread to its
+neighbours and smoothed), the paper set white and the darkest ink black, faint lines darkened (a gamma) and specks and
+what's left of the table along the edges removed; printed art the same, gentler, keeping its greys; an object no page,
+each colour stretched between its 0.5th and 99.5th percentile (which also balances a colour cast). The **Photo** card
+cleans it again with other settings, reopens **Page corners…**, or takes another; **Clean up as a photo** does the same
+to an image you chose. Without a live camera the device's camera or photos open (`capture="environment"`). The photo
+stays with the picture until another is used; undo and design files keep the cleaned picture. Tests E37, A36.
 
 **Made for** sets what the art is for. **Printing** (the default): one line, every part the needle's line spacing apart,
 so the pattern settings stop at the detail that prints, and Fit the needle sets their width. **Plotting**: the patterns

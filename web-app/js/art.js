@@ -198,6 +198,30 @@ function artUsePicture(canvas, label, sample) {
   const P = UNB.PATTERNS[st.art.pattern.style];
   artUse(st.art.kind === "pattern" && P && P.tone ? "pattern" : "picture");
 }
+// A photo (camera.js) becomes the picture: the cleaned picture, with the photo it came from (photo: { raw, corners,
+// kind, light, ink, specks }) kept beside it so the Photo card can clean it again. The same photo cleaned again keeps
+// its turn and straightening.
+function artUsePhoto(canvas, label, photo) {
+  const p = st.art.picture,
+    again = p && p.photo && p.photo.raw === photo.raw,
+    c = tagged(canvas);
+  st.art.picture = {
+    canvas: c,
+    orig: c,
+    label,
+    sample: "photo",
+    photo,
+    turn: again ? p.turn : 0,
+    angle: again ? p.angle : 0,
+  };
+  if (!again) $("picAngle").value = 0;
+  if (again && (p.turn || p.angle)) {
+    pictureTurn(p.turn, p.angle);
+    return;
+  }
+  const P = UNB.PATTERNS[st.art.pattern.style];
+  artUse(st.art.kind === "pattern" && P && P.tone ? "pattern" : "picture");
+}
 // an example (examples.js): a picture example is the Picture in use even after a pattern drawn from a picture (which
 // artUsePicture keeps); a pattern example starts from that style's own settings
 function artExamplePicture(key) {
@@ -416,6 +440,7 @@ function artUI() {
     model: "A 3D model: it is sliced on the Print step.",
   }[A.kind];
   workflowUI(); // workflow.js: what the Line step can do with this input
+  if (typeof photoUI === "function") photoUI(); // camera.js: the Photo card
   emptyUI(); // examples.js: the empty preview, until there's something to start from
 }
 // ---------- the picture turned: quarter turns and a few degrees to straighten, from the picture as loaded ----------

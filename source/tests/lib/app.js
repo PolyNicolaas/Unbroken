@@ -30,7 +30,7 @@ const SETTLE = () => {
       return false;
     }
   };
-  window.__settled = () => live.size === 0 && !["PIPE", "LAY", "AUX", "OPT"].some(busy);
+  window.__settled = () => live.size === 0 && !["PIPE", "LAY", "AUX", "OPT", "PHO"].some(busy);
 };
 const withExample = (url, ex) => (ex && !/[?&]example=/.test(url) ? url + (url.includes("?") ? "&" : "?") + "example=" + ex : url);
 async function open(ctx, opts = {}) {

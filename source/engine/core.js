@@ -10,7 +10,8 @@
     01-image.js    1. Image in — RGBA pixels → a clean grayscale image.
                       UNB.toGray, UNB.blur, boxBlur, UNB.prep, UNB.levels, boxSum, UNB.gradient
     02-lines.js 2. Line maps — grayscale → a 1-pixel map of the lines to draw: centerline or outline, erasing.
-                      UNB.canny, UNB.lineStrokes, UNB.levelEdges, UNB.otsu, UNB.thin, UNB.centerline, UNB.pruneSpurs, UNB.erase, UNB.lineScore
+                      UNB.canny, UNB.lineStrokes, UNB.levelEdges, UNB.otsu, UNB.thin, UNB.centerline, UNB.pruneSpurs,
+                      UNB.erase, UNB.lineScore
     03-text.js     3. Text — typed text → strokes in a single-stroke font → a line map.
                       UNB.textLayout, UNB.rasterText
     04-walk.js     4. The walk — line map → one continuous path over every line pixel, onto the middle of each stroke;
@@ -33,11 +34,13 @@
                       UNB.smallestPrintSteps, UNB.minBox, UNB.plateLayout, UNB.plateLocal, UNB.layerStack, UNB.lapFeeds,
                       UNB.testStrips
     10-export.js   9. Export — the files the app offers: plotter-page SVG, flat DXF, G-code, ZIP.
-                      bezierRaw, svgPathD, dxfDoc, UNB.toBezier, UNB.exportDXF, UNB.exportPlotSVG, UNB.exportLayersSVG, UNB.exportGcode,
+                      bezierRaw, svgPathD, dxfDoc, UNB.toBezier, UNB.exportDXF, UNB.exportPlotSVG, UNB.exportLayersSVG,
+                      UNB.exportGcode,
                       UNB.readGcode, CRC,
                       UNB.zip
     11-stages.js  10. Pipeline stages — what the app calls, in order; pure data in and out (Web Worker or page).
-                      UNB.stagePrep, UNB.stageLines, UNB.stageWalk, UNB.stageTrace, UNB.stageStrokes, UNB.stageVector, UNB.overlapAllow,
+                      UNB.stagePrep, UNB.stageLines, UNB.stageWalk, UNB.stageTrace, UNB.stageStrokes, UNB.stageVector,
+                      UNB.overlapAllow,
                       UNB.allowFromMask, UNB.decodeArgs,
                       UNB.stageSignal,
                       UNB.sweepSteps, UNB.pickTerms, UNB.TERM_TOL, UNB.autoTerms, UNB.shapeLine, UNB.stageFinal,
@@ -53,8 +56,14 @@
                       seeded, polyInside, largestGroup, roundLoop, roundOpen, roundPts, gcd, ringTrack, labyrinth,
                       lsystem, boxed, moore, hilbert, gosper, doubleSpiral, whirl, waves, spirograph, lissajous, rose,
                       truchet, gammaOf, easeOut, toneIn, toneGrid, hilbertTone, wavesTone, spiralTone, labyrinthTone,
-                      closeGaps, outlineLoop, rangeParam, choiceParam, checkParam, pct, ord, off0, SHAPE, SIDES, CORNERS, CONTRAST, INVERT,
+                      closeGaps, outlineLoop, rangeParam, choiceParam, checkParam, pct, ord, off0, SHAPE, SIDES,
+                      CORNERS, CONTRAST, INVERT,
                       UNB.PATTERNS, UNB.PATTERN_SHAPES, UNB.patternDefaults, UNB.patternLayout, UNB.pattern
+    14-photo.js   13. Photos — a camera photo → a clean picture: the page found and flattened, the light evened out,
+                      the paper white and the ink kept, or an object's colours balanced.
+                      photoCells, convexHull, quadArea, widestQuad, orderCorners, UNB.findPage, sharpenCorners,
+                      homography, UNB.pageSize, UNB.warpQuad, paperLight, shareBelow, UNB.PHOTO_KINDS,
+                      UNB.photoClean, UNB.photoPicture
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
@@ -79,6 +88,7 @@
     "11-stages.js",
     "12-models.js",
     "13-patterns.js",
+    "14-photo.js",
   ];
   if (typeof module !== "undefined" && module.exports) {
     // Node
