@@ -131,13 +131,15 @@ async function source(page, kind) {
   }
 }
 // The last step since v107 is Plot (made for a pen plotter) or Print (for a printer), chosen at the top. plot(page,
-// line): Making it for a pen plotter, the Line step's line (default "one": the traced line, as the tests before v107
+// line): Making it for a pen plotter, the Line step's line ("drawn": Trace off) (default "one": the traced line, as the tests before v107
 // plotted), then the Plot step. print(page): Making it for a printer, then the Print step.
 async function plot(page, line = "one") {
   await page.evaluate((m) => {
-    const set = (id) => { if (!$(id).checked) { $(id).checked = true; $(id).dispatchEvent(new Event("change", { bubbles: true })); } };
+    const set = (id, on = true) => { if ($(id).checked !== on) { $(id).checked = on; $(id).dispatchEvent(new Event("change", { bubbles: true })); } };
     set("artForPlot");
-    set({ one: "lineOne", strokes: "lineStrokes", drawn: "lineDrawn" }[m]);
+    // (since v112 "drawn" is the Trace switch off; the others are traced)
+    set("traceOn", m !== "drawn");
+    if (m !== "drawn") set({ one: "lineOne", strokes: "lineStrokes" }[m]);
   }, line);
   await idle(page, 300);
   await page.click("label[for=view2D]");
