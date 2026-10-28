@@ -10,7 +10,7 @@ module.exports = {
     for (const vp of [{ width: 1300, height: 1000 }, { width: 390, height: 844 }]) {
       const { page, errors, close } = await A.open(ctx, { viewport: vp }), w = vp.width;
       await page.click("#viewMenu summary"); await page.waitForTimeout(150);
-      const b = await (await page.$(".viewpanel")).boundingBox();
+      const b = await (await page.$("#viewMenu .viewpanel")).boundingBox();
       checks.push(check(`${w} px: panel fully on screen`, +(b.x >= 0 && b.y >= 0 && b.x + b.width <= vp.width && b.y + b.height <= vp.height), "==", 1));
       await page.selectOption("#lineView", "print"); await page.selectOption("#bg", "none"); await page.uncheck("#showMini"); await page.waitForTimeout(150);
       checks.push(check(`${w} px: mini-map hidden`, +(await page.$eval("#minimap", (e) => e.hidden)), "==", 1));

@@ -20,6 +20,10 @@ module.exports = {
     for (const vp of [{ width: 1300, height: 1000 }, { width: 390, height: 844 }]) {
       const { page, errors, close } = await A.open(ctx, { viewport: vp }), w = vp.width;
       checks.push(check(`${w} px: no Simple / Advanced switch`, (await page.$$("#lvlAdv, #lvlSimple, [name=level]")).length, "==", 0));
+      if (w < 900) {   // a phone's pinned preview tucks its edit tools away; Bigger shows them (v108)
+        checks.push(check(`${w} px: the pinned preview tucks the edit tools away`, +!(await visible(page, "#crossBtn")), "==", 1));
+        await page.click("#pvSize"); await page.waitForTimeout(200);
+      }
       checks.push(check(`${w} px Trace: main controls visible`, await count(page, MAIN), "==", MAIN.length));
       if (w > 1000) {
         checks.push(check("Trace: no px anywhere on the panel (readouts in mm)", +!/\d\s?px\b/.test(await page.evaluate(() => document.querySelector(".panel").innerText + document.getElementById("chip").innerText)), "==", 1));

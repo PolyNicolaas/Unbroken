@@ -325,7 +325,7 @@ body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; 
 .num-btn:last-child { border-left: 0; border-radius: 0 calc(7px * var(--corner)) calc(7px * var(--corner)) 0; }
 .num-btn:hover { background: var(--surface); }
 .num-btn:active { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); }
-.num:has(input:disabled) .num-btn { opacity: 0.4; cursor: not-allowed; }
+.num input:disabled ~ .num-btn { opacity: 0.4; cursor: not-allowed; } /* (no :has() here: it made every page change re-check the boxes) */
 .inline .num { width: auto; flex: none; }
 .inline .num input[type="number"] { width: 64px; flex: none; }
 /* touch screens: finger-sized buttons */
@@ -344,8 +344,11 @@ body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; 
 @media (max-width: 899px) {
   .pv-size { display: block; position: absolute; right: 8px; bottom: 8px; z-index: 4; }
   body:not([data-pv="big"]) .left { position: sticky; top: 0; z-index: 30; background: var(--paper); padding-block: 4px; margin-inline: calc(-4px * var(--space)); padding-inline: calc(4px * var(--space)); box-shadow: 0 6px 10px -8px rgb(0 0 0 / 0.35); }
-  body:not([data-pv="big"]) .canvas-box { aspect-ratio: auto; height: 34vh; height: 34svh; }
-  body:not([data-pv="big"]) .stage > :not(.canvas-box, .stage-tabs), body:not([data-pv="big"]) #math { display: none; }
+  body:not([data-pv="big"]) .canvas-box { aspect-ratio: auto; height: 28vh; height: 28svh; }
+  /* pinned: the preview and its main bar in one row (Play, undo, File, View); the edit tools and the speed with Bigger */
+  body:not([data-pv="big"]) .stage > :not(.canvas-box, .stage-tabs, .toolbar:not(.tools)), body:not([data-pv="big"]) #math { display: none; }
+  body:not([data-pv="big"]) .stage > .toolbar:not(.tools) { flex-wrap: nowrap; padding: 6px; gap: 6px; }
+  body:not([data-pv="big"]) .stage > .toolbar:not(.tools) :is(#speed, .tb-sep) { display: none; }
   body:not([data-pv="big"]) .stage-tabs { margin: 4px; }
   body:not([data-pv="big"]) #minimap { display: none !important; }
 }
@@ -364,3 +367,6 @@ body.wheel { overflow-anchor: none; } /* scroll.js keeps the landed card in plac
 .level-fill input[type="color"] { width: 40px; height: 32px; padding: 0 2px; border: 1px solid var(--rule); border-radius: calc(6px * var(--corner)); background: var(--surface); }
 .level-fill .num-btn { width: 28px; }
 @media (pointer: coarse) { .level-fill .num-btn { width: 36px; } }
+/* boxes in a row (Fit inside a box): narrower, and the row wraps on a phone rather than running off the card */
+.inline .num input[type="number"] { width: 48px; }
+#fitBoxRow .inline { flex-wrap: wrap; }
