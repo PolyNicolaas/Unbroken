@@ -1,6 +1,6 @@
-Unbroken · web app build v107
-Built:  2026-10-27T21:40:33.275Z
-Tests:  66 of 66 tests passed
+Unbroken · web app build v108
+Built:  2026-10-28T15:50:13.958Z
+Tests:  68 of 68 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
@@ -9,7 +9,7 @@ Files (sha1, first 12):
   badcff892ed9  02-lines.js
   941b223d9657  03-text.js
   9c623d1c6a37  04-walk.js
-  c434fcb30c2d  05-fill.js
+  34c190cb16fa  05-fill.js
   340aeaecfe87  06-fourier.js
   e88cd163925f  07-measure.js
   d0cc374de0d6  08-shape.js
@@ -18,19 +18,19 @@ Files (sha1, first 12):
   2189b17474c4  11-stages.js
   59aaa64e2642  12-models.js
   135d6e45a412  13-patterns.js
-  136005c5372b  core.js
-  5393eab567bc  css/app.css
-  7efa0c130b02  css/theme.css
+  9aa6ddb92d1b  core.js
+  ca39b4b8501c  css/app.css
+  0be9d7ad7cf8  css/theme.css
   666f911d2119  fonts.js
-  8d520e3d76d6  index.html
-  6bb64091f959  js/art.js
+  e9e1d621a77d  index.html
+  3ccf951c2256  js/art.js
   0e1dfa79417b  js/config.js
   4b8afd365d63  js/controls.js
   e666f8bf0b57  js/engine-bridge.js
   7b57af784570  js/export.js
-  d40f679cf96b  js/history.js
+  829a30a7fa5e  js/history.js
   31154129f62f  js/layers.js
-  7d8da1fe3b83  js/levels.js
+  6aa89b6e4e0e  js/levels.js
   49bc0882fd05  js/main.js
   a462e8546261  js/model.js
   26b7659e5ebe  js/notes.js
@@ -38,16 +38,18 @@ Files (sha1, first 12):
   cdc36022946d  js/patterns.js
   e11158a47338  js/pieces.js
   7e26c66beff1  js/pipeline.js
-  6d2141106196  js/plot.js
-  e89c6324eeb0  js/preview.js
+  5458c5bf3df8  js/plot.js
+  394916943e92  js/preview.js
   d61b587f3303  js/readouts.js
+  90c1c8639014  js/scroll.js
   1d05617e71e8  js/source.js
   78f5450a22d9  js/state.js
+  49125f92bd01  js/steppers.js
   9bdbe1dadb94  js/testprint.js
   b22c4183d365  js/tools.js
   e651a30c34d9  js/ui.js
-  55c6223a5cf4  js/views.js
-  81100b697e42  js/workflow.js
+  14f952feceb0  js/views.js
+  1a20ad86e7c5  js/workflow.js
   53b02936e233  js/zoom.js
   8c1e4e3be548  settings.js
   85d8193792d8  worker.js

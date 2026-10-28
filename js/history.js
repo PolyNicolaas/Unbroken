@@ -44,6 +44,7 @@ const DESIGN_IDS = [
   "levels",
   "levelSmooth",
   "levelModes",
+  "levelFills",
   "lineW",
   "needle",
   "lineGapMM",

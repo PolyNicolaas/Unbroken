@@ -187,6 +187,20 @@ function render() {
 function renderStrokes({ g, k, ox, oy, dpr, ink }) {
   const S = st.sepStrokes;
   if (!S) return;
+  // the filled greys first, thin, in their pens' colours; the strokes over them
+  g.lineWidth = 0.8 * dpr;
+  g.lineJoin = g.lineCap = "round";
+  for (const f of S.fills || []) {
+    g.strokeStyle = f.color;
+    g.globalAlpha = 0.75;
+    for (const s of f.strokes) {
+      g.beginPath();
+      for (let i = 0; i < s.length; i += 2)
+        i ? g.lineTo(ox + s[i] * k, oy + s[i + 1] * k) : g.moveTo(ox + s[i] * k, oy + s[i + 1] * k);
+      g.stroke();
+    }
+  }
+  g.globalAlpha = 1;
   g.strokeStyle = ink;
   g.lineWidth = 1.6 * dpr;
   g.lineJoin = g.lineCap = "round";

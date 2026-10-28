@@ -44,6 +44,7 @@
   /* shadows */
   --shadow-menu: 0 8px 24px rgba(0, 0, 0, 0.14);
   --shadow-toast: 0 4px 14px rgba(0, 0, 0, 0.18);
+  --snap-top: 12px;            /* where a card scrolled to lands: below the phone's pinned preview (scroll.js sets it) */
 }
 
 /* ---------- Colours: dark mode. Two copies of the same values: the first follows the computer's setting, the second

@@ -507,6 +507,10 @@ new ResizeObserver(drawPlate).observe($("plate"));
 new ResizeObserver(drawMini).observe($("box"));
 
 // ---------- collapsible control sections ----------
+// cardSetOpen(card, open, store): open or fold a card (store: remember it for the next visit); cardRestore(): every
+// card back as you left it (scroll.js, when the wheel is turned off)
+let cardSetOpen = null,
+  cardRestore = null;
 (() => {
   const KEY = storeKey("collapsed");
   let saved = {};
@@ -550,6 +554,11 @@ new ResizeObserver(drawMini).observe($("box"));
     // data-fold="closed": starts folded until opened
     setOpen(card, saved[card.id] === undefined ? card.dataset.fold !== "closed" : !saved[card.id], false);
   }
+  cardSetOpen = setOpen;
+  cardRestore = () => {
+    for (const card of cards)
+      setOpen(card, saved[card.id] === undefined ? card.dataset.fold !== "closed" : !saved[card.id], false);
+  };
   $("collapseAll").addEventListener("click", () => cards.forEach((c) => setOpen(c, false)));
   $("expandAll").addEventListener("click", () => cards.forEach((c) => setOpen(c, true)));
 })();

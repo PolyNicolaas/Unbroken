@@ -118,6 +118,31 @@ async function traceStrokes(g) {
   guard(g);
   const r = await PIPE.call("stageStrokes", [lineSpec(W, s.sens), W.w, W.h, { minLen: s.minLen }]);
   guard(g);
+  // the greys set to Fill or Both (levels.js), each filled with its own pen, at the page's scale (as artOnPage fits it)
+  const fills = W.levels ? levelFillList() : [];
+  let fillStrokes = [];
+  if (fills.length) {
+    const P = paperSize(),
+      mg = Math.max(0, +$("paperMargin").value || 0),
+      k = Math.min((P.w - 2 * mg) / W.w, (P.h - 2 * mg) / W.h), // mm per px
+      pen = Math.max(0.05, +$("penW").value || 0.5),
+      pat = fills.some((f) => f.style === "pattern") && st.art.pattern ? patternDrawn().r : null;
+    const res = await PIPE.call("levelFills", [
+      W.levels.lab,
+      W.w,
+      W.h,
+      fills.map((f) => ({
+        level: f.level,
+        style: f.style === "pattern" && !pat ? "hatch" : f.style,
+        spacing: f.spacing / k,
+        angle: f.angle,
+        inset: pen / 2 / k,
+        pattern: f.style === "pattern" && pat ? { paths: pat.paths, closed: pat.closed, box: pat.box } : null,
+      })),
+    ]);
+    guard(g);
+    fillStrokes = fills.map((f, i) => ({ level: f.level, color: f.color, strokes: res[i] }));
+  }
   Object.assign(st, {
     w: W.w,
     h: W.h,
@@ -126,9 +151,10 @@ async function traceStrokes(g) {
     gray: W.gray,
     walk: null,
     final: null,
+    bgCache: null, // (the preview's faint picture: this one's)
     plot: null,
     pfill: null,
-    sepStrokes: { ...r, w: W.w, h: W.h },
+    sepStrokes: { ...r, w: W.w, h: W.h, fills: fillStrokes },
     finalVer: (st.finalVer || 0) + 1,
   });
   let b = null;
@@ -141,10 +167,12 @@ async function traceStrokes(g) {
       b[3] = Math.max(b[3], s2[i + 1]);
     }
   Object.assign(st, { bw: b ? Math.max(1, b[2] - b[0]) : 1, bh: b ? Math.max(1, b[3] - b[1]) : 1 });
-  const n = r.strokes.length;
+  const n = r.strokes.length,
+    nf = fillStrokes.reduce((a, f) => a + f.strokes.length, 0);
   setChip(
-    n
-      ? `${n} stroke${n === 1 ? "" : "s"} · ${n - 1} pen lift${n === 2 ? "" : "s"}`
+    n || nf
+      ? `${n} stroke${n === 1 ? "" : "s"} · ${n ? n - 1 : 0} pen lift${n === 2 ? "" : "s"}` +
+          (fillStrokes.length ? ` · ${fillStrokes.length} grey${fillStrokes.length === 1 ? "" : "s"} filled` : "")
       : "No lines found — lower the threshold or the speck filter"
   );
   $("fitinfo").textContent = n ? `${n} stroke${n === 1 ? "" : "s"}` : "";

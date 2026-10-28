@@ -315,3 +315,58 @@ body[data-line="strokes"] #card-h-line, body[data-line="strokes"] #card-h-size, 
 body[data-line="strokes"] #startBtn, body[data-line="strokes"] #crossBtn, body[data-line="strokes"] #laneBtn { display: none; }
 /* the math is the one continuous line's Fourier series: nothing to show for strokes or as drawn */
 body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; }
+
+/* Number boxes with − and + (steppers.js): the box between its buttons, the browser's own tiny spinners hidden */
+.num { display: flex; align-items: stretch; min-width: 0; width: 100%; }
+.num input[type="number"] { flex: 1 1 auto; width: auto; min-width: 2.6em; border-radius: 0; text-align: center; -moz-appearance: textfield; appearance: textfield; }
+.num input[type="number"]::-webkit-inner-spin-button, .num input[type="number"]::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+.num-btn { flex: none; width: 30px; padding: 0; border: 1px solid var(--rule); background: var(--paper); color: var(--ink); font: 600 calc(16px * var(--text))/1 var(--font-body); cursor: pointer; touch-action: manipulation; user-select: none; -webkit-user-select: none; }
+.num-btn:first-child { border-right: 0; border-radius: calc(7px * var(--corner)) 0 0 calc(7px * var(--corner)); }
+.num-btn:last-child { border-left: 0; border-radius: 0 calc(7px * var(--corner)) calc(7px * var(--corner)) 0; }
+.num-btn:hover { background: var(--surface); }
+.num-btn:active { background: color-mix(in srgb, var(--accent) 18%, var(--surface)); }
+.num input:disabled ~ .num-btn { opacity: 0.4; cursor: not-allowed; } /* (no :has() here: it made every page change re-check the boxes) */
+.inline .num { width: auto; flex: none; }
+.inline .num input[type="number"] { width: 64px; flex: none; }
+/* touch screens: finger-sized buttons */
+@media (pointer: coarse) {
+  .num-btn { width: 40px; min-height: 44px; font-size: calc(18px * var(--text)); }
+  .num input[type="number"] { min-height: 44px; }
+}
+
+/* The preview stays in view while the settings scroll (views.js pvSize). Wide screens: the preview column sticks to the
+   top of the window and the settings scroll beside it. Phones: a compact preview sticks to the top (a third of the
+   screen, its tools tucked away); Bigger shows it full size, with its tools, in the page as before. */
+.pv-size { display: none; }
+@media (min-width: 900px) {
+  .left { position: sticky; top: calc(10px * var(--space)); max-height: calc(100vh - 20px * var(--space)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
+}
+@media (max-width: 899px) {
+  .pv-size { display: block; position: absolute; right: 8px; bottom: 8px; z-index: 4; }
+  body:not([data-pv="big"]) .left { position: sticky; top: 0; z-index: 30; background: var(--paper); padding-block: 4px; margin-inline: calc(-4px * var(--space)); padding-inline: calc(4px * var(--space)); box-shadow: 0 6px 10px -8px rgb(0 0 0 / 0.35); }
+  body:not([data-pv="big"]) .canvas-box { aspect-ratio: auto; height: 28vh; height: 28svh; }
+  /* pinned: the preview and its main bar in one row (Play, undo, File, View); the edit tools and the speed with Bigger */
+  body:not([data-pv="big"]) .stage > :not(.canvas-box, .stage-tabs, .toolbar:not(.tools)), body:not([data-pv="big"]) #math { display: none; }
+  body:not([data-pv="big"]) .stage > .toolbar:not(.tools) { flex-wrap: nowrap; padding: 6px; gap: 6px; }
+  body:not([data-pv="big"]) .stage > .toolbar:not(.tools) :is(#speed, .tb-sep) { display: none; }
+  body:not([data-pv="big"]) .stage-tabs { margin: 4px; }
+  body:not([data-pv="big"]) #minimap { display: none !important; }
+}
+
+/* The Wheel (scroll.js): cards tip as they turn past; room at the end so the last card can reach the top. (No scroll
+   snapping: it kept pulling the step tabs out of view.) */
+body.wheel .panel section.card { transform-origin: 50% 50%; transition: transform 120ms ease-out, opacity 120ms ease-out; will-change: transform; }
+body.wheel .panel { padding-bottom: 55vh; }
+.wheel-sw { margin-right: auto; font-size: calc(12px * var(--text)); }
+@media (prefers-reduced-motion: reduce) { body.wheel .panel section.card { transition: none; } }
+/* a card scrolled to (help, a warning, a test) lands below the phone's pinned preview, not under it */
+.panel section.card { scroll-margin-top: var(--snap-top, 12px); }
+body.wheel { overflow-anchor: none; } /* scroll.js keeps the landed card in place itself */
+/* a filled grey's own settings, under its row (levels.js) */
+.level-fill { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; align-items: end; margin: -2px 0 6px 30px; padding: 6px 8px; border-left: 2px solid var(--rule); }
+.level-fill input[type="color"] { width: 40px; height: 32px; padding: 0 2px; border: 1px solid var(--rule); border-radius: calc(6px * var(--corner)); background: var(--surface); }
+.level-fill .num-btn { width: 28px; }
+@media (pointer: coarse) { .level-fill .num-btn { width: 36px; } }
+/* boxes in a row (Fit inside a box): narrower, and the row wraps on a phone rather than running off the card */
+.inline .num input[type="number"] { width: 48px; }
+#fitBoxRow .inline { flex-wrap: wrap; }

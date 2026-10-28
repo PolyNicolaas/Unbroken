@@ -291,9 +291,14 @@ function artVectors() {
     pen = $("penColor").value || "#111111";
   // separate strokes (the Line step): the traced strokes, in px of the working image
   if (lineModeNow() === "strokes") {
-    const S = st.sepStrokes;
-    if (!S || !S.strokes.length) return null;
-    return { W: S.w, H: S.h, layers: [{ name: "strokes", pen, strokes: S.strokes }], pictures: 0 };
+    const S = st.sepStrokes,
+      fills = (S && S.fills) || [];
+    if (!S || !(S.strokes.length || fills.length)) return null;
+    // the strokes on pen 1, then each filled grey on its own pen (its own layer)
+    const layers = S.strokes.length ? [{ name: "strokes", pen, strokes: S.strokes }] : [];
+    for (const f of fills)
+      if (f.strokes.length) layers.push({ name: `grey ${f.level + 1} fill`, pen: f.color, strokes: f.strokes });
+    return { W: S.w, H: S.h, layers, pictures: 0 };
   }
   if (A.kind === "pattern") {
     const { r, L } = patternDrawn();

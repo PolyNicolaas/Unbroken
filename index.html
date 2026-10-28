@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v107</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v108</span></p>
 </header>
 
 <div class="wrap">
@@ -33,6 +33,7 @@
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
         <div class="chip" id="chip">loading…</div>
+        <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
         <div class="pathbar" role="group" aria-label="What the view shows">
           <label class="check pv-3d" title="Each line as the chocolate bead it prints: the needle's width, one layer tall, at true height"><input type="checkbox" id="pvSolid" checked> <span>Solid (as printed)</span></label>
           <label class="check" title="The line's layers"><input type="checkbox" id="pvWall" checked> <span class="pv-sw" data-k="wall"></span>Walls</label>
@@ -177,6 +178,7 @@
     </div>
     <div class="panel-tools">
       <span style="flex:1"></span>
+      <label class="check wheel-sw" title="The settings as a wheel: the card you scroll to opens, the others fold to their headers"><input type="checkbox" id="wheel" checked> Wheel</label>
       <span class="fold-all"><button class="btn mini" type="button" id="collapseAll">Collapse all</button><button class="btn mini" type="button" id="expandAll">Expand all</button></span>
     </div>
     <section class="card choc-only" aria-labelledby="h-choc">
@@ -499,8 +501,10 @@
           <input type="range" id="levelSmooth" min="0" max="10" value="2"></div>
           <div id="levelList" class="level-list" role="group" aria-label="What each grey does"></div>
           <input type="hidden" id="levelModes" value="">
+          <input type="hidden" id="levelFills" value="">
+          <p class="hint" id="levelFillNote" hidden>Fills are drawn with Separate strokes (the switch at the top of this step); with one continuous line only the traced edges are plotted.</p>
         </div>
-        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. The still-life sample (Art step, Picture) shows them well.</p>
+        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Making it for a pen plotter, a grey can also be filled (Fill), or traced and filled (Both): its blocks are hatched, cross-hatched, ringed or filled with the Pattern card's pattern, with its own pen (its own layer in the SVG); a filled grey that isn't traced still stops its fill at its edges. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. The still-life sample (Art step, Picture) shows them well.</p>
       </div>
     </section>
 
@@ -746,6 +750,8 @@
 <script src="js/testprint.js"></script>
 <script src="js/plot.js"></script>
 <script src="js/workflow.js"></script>
+<script src="js/steppers.js"></script>
+<script src="js/scroll.js"></script>
 <script src="js/model.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/history.js"></script>
