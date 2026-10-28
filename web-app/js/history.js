@@ -149,7 +149,6 @@ function designState() {
       srcLabel: st.srcLabel,
       art: artSaved(), // art.js: the layers (their pictures are kept apart)
       feedUnit: "mm/s",
-      sample: $("sample").value,
       posManual,
     },
   };
@@ -265,7 +264,6 @@ function applyDesign(d, src, imageSource, pics) {
     // the Art step's input (art.js); a design from before the Art step comes back as its source was
     if (s.art) artRestore(s.art, pics || null);
     else artFromOld($("srcModel").checked ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
-    if (s.sample && [...$("sample").options].some((o) => o.value === s.sample)) $("sample").value = s.sample;
     if ($("srcModel").checked) {
       // a 3D model: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
       // Designs saved before the fingerprint also match by id, but only when the model's name is the same too.

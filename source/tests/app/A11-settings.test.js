@@ -29,7 +29,7 @@ module.exports = {
     const ctxB = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), pb = await ctxB.newPage(), errsB = [];
     pb.on("pageerror", (e) => errsB.push(e.message));
     await pb.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body: "window.UNB_SETTINGS = { chocolates: [ { id: 'x' name: 'oops' } ] };" }));
-    await pb.goto(ctx.url); await A.idle(pb, 2500);
+    await pb.goto(A.withExample(ctx.url, "leaf")); await A.idle(pb, 2500);
     checks.push(check("broken file: app still traces (terms)", await A.terms(pb), ">", 10), check("broken file: built-in needles", (await pb.$$("#needle option")).length, "==", 11),
       check("broken file: says settings.js couldn't be read", +/couldn't be read/.test(await pb.textContent("#settingsNote")), "==", 1),
       check("broken file: only the settings.js syntax error", errsB.filter((m) => !/Unexpected|SyntaxError|missing/.test(m)).length, "==", 0));
@@ -39,7 +39,7 @@ module.exports = {
     pc.on("pageerror", (e) => errsC.push(e.message));
     const body = fs.readFileSync(path.resolve(__dirname, "../../../web-app/settings.js"), "utf8").replace('color: "#7b4a2d"', 'color: "brown"');
     await pc.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body }));
-    await pc.goto(ctx.url); await A.idle(pc, 2500);
+    await pc.goto(A.withExample(ctx.url, "leaf")); await A.idle(pc, 2500);
     checks.push(check("bad entry: skipped from the menu", (await pc.$$("#chocolate option")).length, "==", S.chocolates.length - 1),
       check("bad entry: named in the 3D tab", +/chocolate 2 skipped/.test(await pc.textContent("#settingsNote")), "==", 1), check("bad entry: page errors", errsC.length, "==", 0));
     await ctxC.close();
@@ -50,7 +50,7 @@ module.exports = {
     const swap = (re, to) => { const before = bodyD; bodyD = bodyD.replace(re, to); if (before === bodyD) throw new Error("test setup: couldn't change " + re); };
     swap(/lineView: "width",/, 'lineView: "printed",'); swap(/threshold: 0,/, "threshold: 10,");
     swap(/smoothing: 1.2,( +)\/\/ blur/, "smoothing: 2.0,$1// blur"); swap(/crossings: "remove-all",/, 'crossings: "keep",'); swap(/copies: 1,/, "copies: 4,");
-    swap(/animationSpeed: "normal",/, 'animationSpeed: "fast",'); swap(/sample: "leaf",/, 'sample: "smiley",'); swap(/problems: false,/, "problems: true,");
+    swap(/animationSpeed: "normal",/, 'animationSpeed: "fast",'); swap(/sample: "none",/, 'sample: "smiley",'); swap(/problems: false,/, "problems: true,");
     swap(/workingResolution: 500,/, "workingResolution: 720,"); swap(/simplify: 0.05,/, "simplify: 0.1,"); swap(/maxTextLines: 5,/, "maxTextLines: 3,");
     swap(/selectShape: "rect",/, 'selectShape: "lasso",'); swap(/font: "sans",/, 'font: "script",');
     await pd.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body: bodyD }));
@@ -59,7 +59,7 @@ module.exports = {
     checks.push(check("changed defaults: line view", await v("lineView"), "==", "print"), check("changed defaults: threshold", await v("sens"), "==", "10"),
       check("changed defaults: smoothing slider (2.0)", await v("blur"), "==", "20"), check("changed defaults: crossings kept", await v("uncross"), "==", "0"),
       check("changed defaults: copies", await v("copies"), "==", "4"), check("changed defaults: animation speed", await v("speed"), "==", "4"),
-      check("changed defaults: sample", await v("sample"), "==", "smiley"), check("changed defaults: problems shown", +(await c("showProb")), "==", 1),
+      check("changed defaults: sample", await pd.evaluate(() => st.art.picture && st.art.picture.sample), "==", "smiley"), check("changed defaults: problems shown", +(await c("showProb")), "==", 1),
       check("changed defaults: working resolution", await pd.evaluate(() => CFG.baseResolution), "==", 720), check("changed defaults: simplify slider (0.1 mm)", await v("simplify"), "==", "20"),
       check("changed defaults: lasso selection", +(await c("selLasso")), "==", 1), check("changed defaults: font", await v("font"), "==", "script"),
       check("changed defaults: app traces", await A.terms(pd), ">", 10), check("changed defaults: nothing reported wrong", +(await pd.isHidden("#settingsNote")), "==", 1), check("changed defaults: page errors", errsD.length, "==", 0));

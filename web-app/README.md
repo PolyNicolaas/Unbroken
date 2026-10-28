@@ -22,6 +22,7 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/patterns.js` | The Pattern card on the Art tab: the pattern's settings, built from the style's own list (`UNB.PATTERNS[style].params`: sliders, choices, switches), handed back to art.js. |
 | `js/art.js` | The Art tab: the Input switch (`st.art`: a picture, the text, a pattern or a 3D model, one at a time, each keeping its settings), what the trace starts from (`artApply` → `useSource` in source.js), and a pattern's or the text's lines for Plot as drawn (`artVectors`). |
 | `js/readouts.js` | The corner label, error and gap numbers, and the formula panel. |
+| `js/examples.js` | The clean start (the empty preview) and the examples as chips: pictures, patterns, lettering, the vase. |
 | `js/steppers.js` | − and + beside every number box (touch-friendly; holding repeats), boxes made later included. |
 | `js/scroll.js` | The preview kept in view (the phone's pinned preview: Bigger / Smaller) and the settings Wheel. |
 | `js/workflow.js` | The workflow: made for a printer or a pen plotter, the steps Art → Line → Print or Plot, the Line step's switch (one continuous line, separate strokes, as drawn), and tracing separate strokes. |

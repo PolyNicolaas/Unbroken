@@ -49,7 +49,7 @@ module.exports = {
     const d = S.defaults || {}, FONTS = require("../../engine/fonts.js");
     const oneOf = (...v) => (x) => v.includes(x), rng = (lo, hi) => (x) => num(x, lo, hi), isBool = (x) => typeof x === "boolean", nullOr = (f) => (x) => x === null || f(x);
     const DEF = {   // every setting in defaults: what it must be (mirrors web-app/js/config.js)
-      source: oneOf("image", "text"), sample: oneOf("leaf", "shapes", "smiley"), startFrom: oneOf("", "drawing", "photo", "logo", "lettering"),
+      source: oneOf("image", "text"), sample: oneOf("none", "leaf", "shapes", "smiley", "face", "still"), startFrom: oneOf("", "drawing", "photo", "logo", "lettering"),
       traceStyle: oneOf("centerline", "outline"), path: oneOf("closed", "open"), threshold: rng(-60, 60), smoothing: rng(0, 3), ignoreSpecks: rng(0, 200), dropFarParts: rng(0, 40),
       looseEnds: oneOf("loop-back", "jump-much-shorter", "jump-shorter"), workingResolution: (x) => num(x, 200, 1500), lightLinesOnDark: isBool,
       imagePrep: (x) => x && rng(-100, 100)(x.brightness) && rng(-80, 150)(x.contrast) && rng(0, 60)(x.backgroundTolerance) && isBool(x.evenOutLighting),

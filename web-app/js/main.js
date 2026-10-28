@@ -55,7 +55,7 @@ if (start === "lettering")
 else if (CFG.defaults.source === "text") artUse("text");
 else {
   if (start) applyPreset(start, true);
-  artUsePicture(makeSample(CFG.defaults.sample), "sample", CFG.defaults.sample);
+  startInput(); // examples.js: empty, or the sample settings.js or the address names
 }
 viewChanged(); // the tab that opens (Art) brings its view
 showE();

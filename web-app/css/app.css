@@ -370,3 +370,20 @@ body.wheel { overflow-anchor: none; } /* scroll.js keeps the landed card in plac
 /* boxes in a row (Fit inside a box): narrower, and the row wraps on a phone rather than running off the card */
 .inline .num input[type="number"] { width: 48px; }
 #fitBoxRow .inline { flex-wrap: wrap; }
+
+/* A clean start (examples.js): the empty preview says how to start; the examples are chips there and in the Input card */
+.chips { display: flex; flex-wrap: wrap; gap: calc(6px * var(--space)); }
+.chip-btn { border: 1px solid var(--rule); background: var(--surface); color: var(--ink); border-radius: 999px; padding: calc(5px * var(--space)) calc(12px * var(--space)); font: 500 calc(13px * var(--text))/1.2 var(--font-body); cursor: pointer; touch-action: manipulation; }
+.chip-btn:hover { border-color: var(--accent); }
+.chip-btn:active { background: color-mix(in srgb, var(--accent) 15%, var(--surface)); }
+@media (pointer: coarse) { .chip-btn { min-height: 40px; } }
+.examples { display: grid; gap: calc(6px * var(--space)); margin-block: calc(8px * var(--space)); }
+.examples .name { font-size: calc(12px * var(--text)); color: var(--muted); }
+.empty-state { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; justify-items: center; gap: calc(10px * var(--space)); padding: calc(24px * var(--space)); text-align: center; background: color-mix(in srgb, var(--surface) 88%, transparent); }
+.empty-state[hidden], body:not([data-stage="line"]) .empty-state { display: none; }
+.empty-state .es-title { margin: 0; font: 650 calc(18px * var(--text))/1.3 var(--font-display); }
+.empty-state .es-sub { margin: 0; color: var(--muted); max-width: 46ch; }
+.empty-state .chips { justify-content: center; max-width: 560px; }
+.linkish { border: 0; background: none; padding: 0; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; }
+body[data-empty="1"] :is(#minimap, .toolbar.tools) { display: none !important; }
+body[data-empty="1"] .pv-size { display: none; }

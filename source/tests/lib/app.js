@@ -32,6 +32,7 @@ const SETTLE = () => {
   };
   window.__settled = () => live.size === 0 && !["PIPE", "LAY", "AUX", "OPT"].some(busy);
 };
+const withExample = (url, ex) => (ex && !/[?&]example=/.test(url) ? url + (url.includes("?") ? "&" : "?") + "example=" + ex : url);
 async function open(ctx, opts = {}) {
   const context = await ctx.browser.newContext({
     viewport: opts.viewport || { width: 1300, height: 1000 },
@@ -53,7 +54,8 @@ async function open(ctx, opts = {}) {
         last = n;
       }, 10);
     });
-  await page.goto(opts.url || ctx.url);
+  // since v109 the app opens empty: the tests start on the leaf example, as the app used to (opts.clean: empty)
+  await page.goto(withExample(opts.url || ctx.url, opts.clean ? null : opts.example || "leaf"));
   await idle(page, 300);
   // the Wheel (v108) folds every card but the one scrolled to: the tests written before it expect cards to stay as they
   // set them, so it's off unless opts.wheel
@@ -144,4 +146,4 @@ async function print(page) {
   if (!(await page.isChecked("#artForPrint"))) { await page.click("label[for=artForPrint]"); await idle(page, 300); }
   await page.click("label[for=viewChoc]");
 }
-module.exports = { SETTLE, open, idle, source, chip, terms, errorMM, setValue, longestFreeze, plot, print };
+module.exports = { SETTLE, withExample, open, idle, source, chip, terms, errorMM, setValue, longestFreeze, plot, print };

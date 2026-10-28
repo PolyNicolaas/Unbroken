@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v109 · 2026-10-28
+
+- **A clean start.** The app opens on an empty workspace: nothing traced, and the preview says how to start (drop,
+  paste or choose a file). The **examples** are one tap away, as chips there and in the Input card: Leaf, Still life,
+  Face, Shapes & text, Smiley, Labyrinth, Spirograph, Wave portrait, Lettering and the Vase. The Picture card's sample
+  menu is gone. settings.js can still start on a sample (`defaults.sample`, now `"none"` by default), and so can the
+  page's address (`?example=leaf`).
+- Tests: A35; the app tests start on the leaf example (`?example=leaf`), as the app used to.
+
 ## v108 · 2026-10-28
 
 - **Fills per grey** (Line step, Grey levels, making it for a pen plotter): a grey can be **Fill** (its blocks filled)

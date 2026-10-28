@@ -120,9 +120,6 @@ const tagged = (c) => {
   c.__art = ++artSeq;
   return c;
 };
-function samplePicture(kind = CFG.defaults.sample || "leaf") {
-  return { canvas: tagged(makeSample(kind)), label: "sample", sample: kind };
-}
 
 // ---------- what the trace starts from ----------
 let applyTimer = null;
@@ -175,8 +172,8 @@ function artApply() {
       $("artMsg").textContent = note;
     } else $("artMsg").textContent = "Nothing left inside that shape: try more detail or another shape.";
   } else {
-    if (!A.picture) A.picture = samplePicture();
-    useSource("picture", A.picture.canvas, A.picture.label);
+    // no picture yet: a blank page to trace (examples.js shows how to start)
+    useSource("picture", A.picture ? A.picture.canvas : blankPicture(), A.picture ? A.picture.label : "nothing yet");
   }
   artUI();
 }
@@ -200,6 +197,19 @@ function artUsePicture(canvas, label, sample) {
   $("picAngle").value = 0; // a new picture starts as loaded
   const P = UNB.PATTERNS[st.art.pattern.style];
   artUse(st.art.kind === "pattern" && P && P.tone ? "pattern" : "picture");
+}
+// an example (examples.js): a picture example is the Picture in use even after a pattern drawn from a picture (which
+// artUsePicture keeps); a pattern example starts from that style's own settings
+function artExamplePicture(key) {
+  st.art.picture = { canvas: tagged(makeSample(key)), label: "sample", sample: key };
+  $("picAngle").value = 0;
+  artUse("picture");
+}
+function artExamplePattern(style) {
+  st.art.pattern = UNB.patternDefaults(style, { seed: 1 });
+  st.art.width = null;
+  patternControls(st.art.pattern); // patterns.js
+  artUse("pattern");
 }
 // the print's width changed by hand (pipeline.js setSize): a pattern keeps it from now on
 function artSized(W) {
@@ -388,7 +398,6 @@ function artUI() {
           ? (st.model && st.model.name) || ""
           : "";
   if (A.picture) {
-    $("sample").value = [...$("sample").options].some((o) => o.value === A.picture.sample) ? A.picture.sample : "user";
     $("picVal").textContent = A.picture.label;
     const t = A.picture.turn || 0,
       a = A.picture.angle || 0;
@@ -407,6 +416,7 @@ function artUI() {
     model: "A 3D model: it is sliced on the Print step.",
   }[A.kind];
   workflowUI(); // workflow.js: what the Line step can do with this input
+  emptyUI(); // examples.js: the empty preview, until there's something to start from
 }
 // ---------- the picture turned: quarter turns and a few degrees to straighten, from the picture as loaded ----------
 function turnedCanvas(src, deg) {
@@ -453,10 +463,6 @@ $("picAngle").addEventListener("input", () => {
 });
 
 // the picture card
-$("sample").addEventListener("change", () => {
-  const v = $("sample").value;
-  if (v !== "user") artUsePicture(makeSample(v), "sample", v);
-});
 $("picChoose").addEventListener("click", () => $("picFile").click());
 $("picFile").addEventListener("change", () => {
   loadFile($("picFile").files[0]); // controls.js: becomes the picture

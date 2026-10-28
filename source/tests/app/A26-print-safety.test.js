@@ -32,7 +32,7 @@ module.exports = {
     p2.on("pageerror", (e) => e2.push(e.message));
     try {
       await p2.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body: body2 }));
-      await p2.goto(ctx.url); await A.idle(p2, 2500);
+      await p2.goto(A.withExample(ctx.url, "leaf")); await A.idle(p2, 2500);
       await A.print(p2);
       const i0 = await p2.textContent("#chocInfo"); await p2.selectOption("#chocolate", { index: 1 }); await A.idle(p2, 300);
       const info = await p2.textContent("#chocInfo");

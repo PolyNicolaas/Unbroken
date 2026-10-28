@@ -108,7 +108,7 @@ report.
 
 | ID | Test | Guards against | Time |
 |---|---|---|---|
-| [A01](#a01) | The app opens and traces the sample | a blank or broken page | – |
+| [A01](#a01) | The app opens and traces the sample | a blank or broken page | 7.8 s |
 | [A02](#a02) | The page stays responsive while tracing | the page freezing while a trace is worked out | – |
 | [A03](#a03) | Line width, gap and needle settings hold in the trace | needle sizes and gaps not reaching the trace; the 3D tab's needle and the Trace tab's line width disagreeing | – |
 | [A04](#a04) | Text source: fonts, readable height, five-line limit | unreadable or unprintable lettering | – |
@@ -118,7 +118,7 @@ report.
 | [A08](#a08) | Optimize tracing improves or keeps the trace, and undoes cleanly | the optimizer making things worse, or leaving settings changed after Undo | – |
 | [A09](#a09) | Select area and erase tools | hand edits not reaching the trace | – |
 | [A10](#a10) | Works without background workers, with the same result | the app breaking when opened straight from disk | – |
-| [A11](#a11) | The app follows settings.js, and survives a broken one | edited settings not reaching the app; a typo in settings.js breaking the app | – |
+| [A11](#a11) | The app follows settings.js, and survives a broken one | edited settings not reaching the app; a typo in settings.js breaking the app | 37.0 s |
 | [A12](#a12) | One interface: every control on its tab, less-used cards start folded, one level only | a control that can't be reached, a 'More…' group that doesn't open, a panel wider than its card on a phone, and a Simple / Advanced switch coming back | – |
 | [A13](#a13) | One size slider: never below the smallest that fits, marks for detail, bigger prints traced finer | a print sized below what the needle can keep apart, marks out of order or in the wrong place, typed sizes slipping under the minimum, and big prints traced no finer than small ones | – |
 | [A14](#a14) | Layers: a base and an infill on the 3D tab, walls as Design draws them; the G-code climbs | infill leaking back into the Design trace, a base or infill whose fill doesn't show or reach the G-code, a density that doesn't change the fill, a layer readout that doesn't follow the settings, and G-code that stays flat | – |
@@ -137,10 +137,11 @@ report.
 | [A27](#a27) | The G-code the app downloads: start lines, flow, feeds, layers, one copy at a time, travel above finished copies | a print file that pushes the wrong amount of chocolate, prints too fast for a layer to set, travels through a finished copy, starts the next copy before the last is done, skips the purge line, or leaves a copy without its unretract and wipe | – |
 | [A28](#a28) | Support on the 3D tab: overhangs flagged, a skirt or a wall chosen, the step set in Fine-tuning | a model that reaches out over nothing exporting without a word, a Support choice that doesn't change the print, and an Overhang per layer box that's ignored | – |
 | [A29](#a29) | A text of several lines prints a piece for each line, all on one plate, in one G-code file | lines of a text joined by a connector strand when they should print apart, a line left off the plate or out of the file, pieces laid over each other, a piece that isn't one continuous line, and the Trace tab's drawing changing because of how the 3D tab prints it | – |
-| [A31](#a31) | The Art tab: one input at a time, traced, or plotted as drawn | an input that doesn't reach the trace, an input that forgets its settings when another is picked, a pattern that loses its one-line promise, art that can't be plotted without a trace, and the input lost by undo or a design file | 124.6 s |
+| [A31](#a31) | The Art tab: one input at a time, traced, or plotted as drawn | an input that doesn't reach the trace, an input that forgets its settings when another is picked, a pattern that loses its one-line promise, art that can't be plotted without a trace, and the input lost by undo or a design file | – |
 | [A32](#a32) | Image prep and plotting: grey levels, the background tapped, a picture turned, and art made for plotting | grey levels that don't change the trace, a grey set to Skip that is still traced, a tap that doesn't remove the background, a turned picture that doesn't turn, the printing limits holding back art made for plotting, a plotting pattern traced before it's asked for, and any of it lost by a design file | – |
 | [A33](#a33) | The workflow: made for a printer or a pen plotter, Art → Line → Print or Plot, one switch for the line | both last steps showing (or the wrong one), the line switch offering a printer something it can't make, a picture offered As drawn, a picture on the plotter traced into one joined line instead of strokes, a pattern traced when it's plotted as drawn, the preview not following the step, and the Next buttons going nowhere | – |
 | [A34](#a34) | Touch and scrolling: number steppers, the preview in view, the settings wheel; fills per grey | a number box without − and +, a stepper that skips its step or limits or doesn't reach the app, the preview scrolling away with the settings, a phone's pinned preview taking the screen or not growing, the wheel leaving several cards open or opening the wrong one, a card jumping away when the others fold, the wheel's off switch not putting the cards back, and filled greys missing from the page or the SVG | – |
+| [A35](#a35) | A clean start: the app opens empty, and every example is one tap away | a start that isn't empty, an empty preview that doesn't say how to start, later steps showing an old input while empty, an example chip that loads the wrong kind of input or nothing, and a picture example that leaves a picture pattern in use | 79.3 s |
 
 #### E01
 
@@ -685,6 +686,14 @@ report.
 - **Why:** On touch screens a number is easier to nudge than to type, so every number box has − and + (finger-sized on touch screens). The preview stays in view while the settings scroll: a sticky column on wide screens, a compact pinned preview on phones (Bigger shows it in full). The Wheel turns the settings like a drum: when the scrolling stops, the card that reached the top opens and the others fold. Making it for a pen plotter, grey levels can be filled (Fill, or Both with their edges traced), each with its own pen.
 - **How:** Opens the app on a laptop-sized window with the wheel on; checks every visible number box has its buttons; presses + on Copies (Print step) and holds − on the margin; scrolls the settings and checks the preview stays put; scrolls to the Plate card and checks it alone is open and stays where it landed; turns the wheel off. Then a phone-sized window: the pinned preview's height, Bigger and Smaller. Then fills per grey: a pen plotter, the still-life sample, 5 greys, the darkest two Both and Fill; the page and the SVG.
 - **Pass when:** Every number box on the Print step has − and +; + makes Copies 2 and the plate shows two copies; holding − on the margin steps it down more than once and never below its minimum; after scrolling 600 px the preview's top hasn't moved; the wheel lands on the Plate card, which is the only one open and within 40 px of where it landed; the wheel off puts back the cards it folded; on a phone the pinned preview is under 40% of the screen and Bigger makes it taller; the two filled greys plot as their own layers (3 in the SVG: strokes and two fills); no page errors.
+
+#### A35
+
+**A clean start: the app opens empty, and every example is one tap away** · `app/A35-clean-start.test.js`
+
+- **Why:** The app opens on a clean workspace: nothing traced, the preview saying how to start (drop, paste or choose a file) with the examples — pictures, patterns, lettering and a 3D model — as chips there and in the Input card. settings.js can still name a sample to start on (defaults.sample), and the page's address can (?example=leaf).
+- **How:** Opens the app with no example; checks the empty preview, its chips and the readout; visits the Line and Print steps; taps each example in the Input card and checks the input it makes; taps the Wave portrait then the Leaf.
+- **Pass when:** Empty at the start: the empty preview showing with all ten examples, the readout saying nothing yet, nothing traced on Line and Print; each example becomes its input (five pictures, three patterns, the text, the vase) and the preview is no longer empty; after the Wave portrait the Leaf is the Picture in use; no page errors.
 
 <!-- catalogue:end -->
 

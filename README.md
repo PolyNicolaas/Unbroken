@@ -104,7 +104,9 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
 **1 Art → 2 Line → 3 Print** (a printer) or **3 Plot** (a pen plotter) (`web-app/js/workflow.js`,
 [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)):
 
-- **Art**: what to start from (below).
+- **Art**: what to start from (below). The app opens empty; the examples (pictures, patterns, lettering, the vase) are
+  chips on the empty preview and in the Input card (`web-app/js/examples.js`; `?example=leaf` in the address, or
+  `defaults.sample` in settings.js, starts on one). Test A35.
 - **Line**: how the art becomes lines, the one switch for tracing. **One continuous line** is the Fourier trace, the
   only line a printer can make (a plotter draws it without lifting the pen). **Separate strokes** traces the art into
   strokes the pen draws one by one, lifting between them (`UNB.lineStrokes`: the line map split at ends and junctions,

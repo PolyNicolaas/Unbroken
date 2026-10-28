@@ -61,7 +61,7 @@ const BUILTIN = {
       endGcode: [],
     },
   ],
-  defaults: { chocolate: "dark", startFrom: "", source: "image", sample: "leaf", size: "medium" },
+  defaults: { chocolate: "dark", startFrom: "", source: "image", sample: "none", size: "medium" },
   presets: {
     drawing: {
       label: "Line drawing",
@@ -334,7 +334,7 @@ const CFG = (() => {
       ? d.startFrom
       : (notes.push(`defaults.startFrom "${d.startFrom}" isn't a starting point; none used`), ""),
     source: d.source === "text" ? "text" : "image",
-    sample: ["leaf", "shapes", "smiley"].includes(d.sample) ? d.sample : "leaf",
+    sample: ["none", "leaf", "shapes", "smiley", "face", "still"].includes(d.sample) ? d.sample : "none",
     size: ["smallest", "medium", "high"].includes(d.size) || num(d.size, 1, 5000) ? d.size : "medium",
     penColors:
       Array.isArray(d.penColors) && d.penColors.length && d.penColors.every((c) => /^#[0-9a-f]{6}$/i.test(c))
@@ -482,7 +482,7 @@ for (const q of CFG.printers) {
   const bool = (v) => typeof v === "boolean";
   const RULES = [
     ["source", list("image", "text"), (v) => radio(v === "text" ? "srcText" : "srcImage")],
-    ["sample", list("leaf", "shapes", "smiley"), (v) => set("sample", v)],
+    ["sample", list("none", "leaf", "shapes", "smiley", "face", "still"), () => {}], // (examples.js reads it at start)
     ["traceStyle", oneOf(MAP.traceStyle), (v) => radio(v === "outline" ? "modeOutline" : "modeCenter")],
     ["path", list("closed", "open"), (v) => radio(v === "open" ? "loopOpen" : "loopClosed")],
     ["threshold", range(-60, 60), (v) => set("sens", Math.round(v))],
