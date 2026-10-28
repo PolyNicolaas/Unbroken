@@ -57,16 +57,22 @@ function addStepper(el) {
       if (moved) el.dispatchEvent(new Event("change", { bubbles: true })); // once, when the button is let go
       moved = false;
     };
+    // repeats while held; stops by itself if the box goes away, is disabled, stops moving (a limit), or after 400 steps
+    let count = 0;
     const repeat = (delay) => {
       timer = setTimeout(() => {
-        moved = stepBy(el, dir) || moved;
-        repeat(70);
+        const ok = b.isConnected && !el.disabled && count++ < 400 && stepBy(el, dir);
+        moved = ok || moved;
+        if (ok) repeat(70);
+        else stop();
       }, delay);
     };
     b.addEventListener("pointerdown", (e) => {
       e.preventDefault(); // no focus change, no text selection
+      count = 0;
       moved = stepBy(el, dir);
       repeat(420);
+      addEventListener("pointerup", stop, { once: true }); // (let go anywhere)
     });
     for (const ev of ["pointerup", "pointerleave", "pointercancel"]) b.addEventListener(ev, stop);
     b.addEventListener("click", (e) => {
