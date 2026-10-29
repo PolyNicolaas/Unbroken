@@ -347,7 +347,7 @@ function photoUI() {
     ph = p && p.photo && photoPending && photoPending.raw === p.photo.raw ? photoPending : p && p.photo;
   $("photoRows").hidden = !ph;
   $("photoOff").hidden = !!ph || !p;
-  $("photoCard").hidden = !p;
+  $("photoBox").hidden = !p;
   if (!ph) {
     $("photoVal").textContent = "";
     return;

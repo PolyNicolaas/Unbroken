@@ -67,7 +67,7 @@ let lastTs = 0;
 function stopPlay(t = 0) {
   st.playing = false;
   st.t = t;
-  $("play").textContent = "Play drawing";
+  $("play").innerHTML = 'Play<span class="pl-long"> drawing</span>';
 }
 function loop(ts) {
   if (!st.playing) return;
@@ -86,7 +86,7 @@ $("play").addEventListener("click", () => {
   const v = stageNow();
   if (v === "plate" || (v === "line" ? !st.fit : v === "page" ? !st.plot : !st.layers)) return; // nothing to play yet
   st.playing = !st.playing;
-  $("play").textContent = st.playing ? "Pause" : "Play drawing";
+  $("play").innerHTML = st.playing ? "Pause" : 'Play<span class="pl-long"> drawing</span>'; // (phones: Play)
   if (st.playing) {
     if (st.t >= 1) st.t = 0;
     lastTs = 0;
@@ -184,26 +184,14 @@ function render() {
   renderMarks(v, r);
   if (r.animating && $("circles").checked && st.epi) renderCircles(v, r);
 }
-// Trace off, a picture: the picture as it is, fitted to the view (with its zoom)
+// Trace off, a picture: the picture as Image prep and Grey levels make it (pipeline.js), in the line view's frame (so
+// Tap the background and the zoom work as they do traced)
 function renderPictureOnly() {
-  const cv = $("view"),
-    { dpr } = fitCanvas(cv, true) || { dpr: window.devicePixelRatio || 1 },
-    g = cv.getContext("2d"),
-    p = st.art.picture && st.art.picture.canvas;
-  g.setTransform(1, 0, 0, 1, 0, 0);
-  g.clearRect(0, 0, cv.width, cv.height);
-  if (!p) return;
-  const pad = 26 * dpr,
-    k = Math.min((cv.width - 2 * pad) / p.width, (cv.height - 2 * pad) / p.height),
-    t = zoomT("line", cv);
-  g.imageSmoothingEnabled = true;
-  g.drawImage(
-    p,
-    ((cv.width - p.width * k) / 2) * t.z + t.tx,
-    ((cv.height - p.height * k) / 2) * t.z + t.ty,
-    p.width * k * t.z,
-    p.height * k * t.z
-  );
+  if (!st.small || !st.w) return;
+  const v = view();
+  v.g.clearRect(0, 0, v.cv.width, v.cv.height);
+  v.g.imageSmoothingEnabled = true;
+  v.g.drawImage(st.small, v.ox, v.oy, st.w * v.k, st.h * v.k);
 }
 // the Line step's separate strokes (st.sepStrokes, working px), each in the ink colour
 function renderStrokes({ g, k, ox, oy, dpr, ink }) {
