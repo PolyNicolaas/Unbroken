@@ -52,11 +52,11 @@ module.exports = {
     const F = await A.open(ctx, { art: true });
     await F.page.click("label[for=artForPlot]"); await A.idle(F.page, 800);
     await F.page.click("#examplesRow [data-example=still]"); await A.idle(F.page, 2000);
-    await F.page.click("label[for=viewDesign]"); await A.setValue(F.page, "#levels", 5); await A.idle(F.page, 3000);
+    await A.setValue(F.page, "#levels", 5); await A.idle(F.page, 3000); // (Grey levels: the Art step since v113)
     await F.page.click("label[for=level0b]"); await A.idle(F.page, 1500); await F.page.click("label[for=level1f]"); await A.idle(F.page, 2500);
     const fl = await F.page.evaluate(() => (st.sepStrokes.fills || []).map((f) => f.strokes.length));
     checks.push(check("two greys filled (strokes in the smaller fill)", fl.length === 2 ? Math.min(...fl) : 0, ">", 10));
-    await F.page.click("#goOut"); await A.idle(F.page, 1500);
+    await F.page.click("#goTrace"); await A.idle(F.page, 800); await F.page.click("#goOut"); await A.idle(F.page, 1500);
     const [dl] = await Promise.all([F.page.waitForEvent("download"), F.page.click("#exportBtn")]);
     const svg = fs.readFileSync(await dl.path(), "utf8");
     checks.push(check("the SVG: the strokes and each filled grey on its own layer", (svg.match(/inkscape:groupmode="layer"/g) || []).length, "==", 3), check("… the page says so", +/2 filled greys/.test(await F.page.textContent("#pageHint")), "==", 1));
