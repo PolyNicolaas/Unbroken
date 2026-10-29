@@ -11,7 +11,7 @@ module.exports = {
     await page.click("label[for=viewChoc]"); await A.idle(page, 1200);
     // steppers
     await page.evaluate(() => { $("wheel").checked = false; $("wheel").dispatchEvent(new Event("change")); }); // (every card open to count)
-    await page.click("#expandAll"); await page.waitForTimeout(200);
+    await page.evaluate(() => $("expandAll").click()); // (in the View menu since v115) await page.waitForTimeout(200);
     const bare = await page.evaluate(() => [...document.querySelectorAll('input[type="number"]')].filter((i) => i.offsetParent && !i.readOnly && !(i.parentElement.classList.contains("num") && i.parentElement.querySelectorAll(".num-btn").length === 2)).map((i) => i.id));
     checks.push(check("Print step: number boxes without − and +", bare.length, "==", 0));
     await page.locator("#copies").scrollIntoViewIfNeeded();

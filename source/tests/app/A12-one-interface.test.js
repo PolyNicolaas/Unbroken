@@ -1,5 +1,5 @@
 const A = require("../lib/app.js"), { check } = require("../lib/check.js");
-const MAIN = ["#sens", "#autoSens", "#blur", "#modeCenter", "#lineW", "#lineGapMM", "#loopOpen", "#loose", "#corner", "#fitBtn", "#sizeSlider", "#outW", "#outH", "#optBtn", "#terms", "#crossBtn", "#laneBtn", "#collapseAll", "#expandAll", "#minLen", "#far", "#invert", "#simplify", "#uncross"];
+const MAIN = ["#sens", "#autoSens", "#blur", "#modeCenter", "#lineW", "#lineGapMM", "#loopOpen", "#loose", "#corner", "#fitBtn", "#sizeSlider", "#outW", "#outH", "#optBtn", "#terms", "#crossBtn", "#laneBtn", "#minLen", "#far", "#invert", "#simplify", "#uncross"];
 const PLOT = ["#paper", "#paperOrient", "#paperMargin", "#penW", "#pageView", "#exportBtn", "#smooth"];
 const CHOC = ["#printer", "#printerSummary", "#chocolate", "#needle", "#limitPlate", "#layerTime", "#printHeightMM", "#layerCount", "#dxfBtn", "#stackView", "#copies", "#copyGap", "#plateRot", "#plateCenter", "#baseLayers", "#baseDensity", "#basePattern", "#fillDensity", "#fillPattern", "#gcodeBtn"], CHOC_MORE = ["#layerH", "#gFeed", "#gZ", "#gLift", "#gOx", "#gOy", "#gE", "#tuneReset"];
 const MORE = { "card-h-prep": ["#bright", "#contrast", "#bgTol", "#flatten"] };
@@ -33,6 +33,9 @@ module.exports = {
         checks.push(check("explanations behind ⓘ on the Trace tab", await page.$$eval(".card.design-only button.info", (els) => els.filter((e) => e.getBoundingClientRect().height > 0).length), ">", 3));
         checks.push(check("Save / Open folded into the File menu", +!(await visible(page, "#saveDesign")) + +(await visible(page, "#fileMenu summary")), "==", 2));
         await page.click("#fileMenu summary"); await page.waitForTimeout(100);
+        await page.click("#viewMenu summary"); await page.waitForTimeout(100);
+        checks.push(check("View menu holds the settings Wheel, Collapse all and Expand all", await count(page, ["#wheel", "#collapseAll", "#expandAll"]), "==", 3));
+        await page.keyboard.press("Escape"); await page.click("#fileMenu summary"); await page.waitForTimeout(100);
         checks.push(check("File menu opens to Save and Open", await count(page, ["#saveDesign", "#openDesign"]), "==", 2));
         await page.click("#viewMenu summary"); await page.waitForTimeout(100);
         checks.push(check("opening View closes File", +!(await page.$eval("#fileMenu", (e) => e.open)), "==", 1));

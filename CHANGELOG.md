@@ -3,6 +3,21 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v115 · 2026-10-29
+
+Laptop and iPad first.
+- **A slim top to the settings.** What it's for (a printer or a pen plotter) and the three steps are two slim rows, and
+  the settings Wheel, Collapse all and Expand all are in the View menu: the cards start about 120 px higher on every
+  step.
+- **Export in the Next bar** on the last step: Export G-code (Print) or Export SVG (Plot), one tap away however far
+  down the settings you are. The Export cards keep their options.
+- **The trace's tools on the Line step only** (Select area, Erase, Set start, Draw, Crossing areas, Connector paths);
+  the Art step's preview has just the toolbar.
+- **Notices can be put away**: a × on the Printer card's "New." note, and it stays away.
+- **A bigger preview on laptops**: on wide screens the page uses up to 1760 px, the preview takes the room, and it stays
+  inside the window's height.
+- Tests: A38 checks all of these; A12 and A34 follow the View menu.
+
 ## v114 · 2026-10-29
 
 - **Cut out the object** (Image prep, Select the object): drag a box round the thing you want on the preview. What's

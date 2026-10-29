@@ -607,3 +607,28 @@ let cardSetOpen = null,
     at.appendChild(b);
   }
 })();
+
+// ---------- notices that can be put away (data-notice: their name; gone for good once closed) ----------
+document.querySelectorAll("[data-notice]").forEach((el) => {
+  const key = storeKey("notice-" + el.dataset.notice);
+  let gone = false;
+  try {
+    gone = localStorage.getItem(key) === "1";
+  } catch {}
+  if (gone) {
+    el.hidden = true;
+    return;
+  }
+  const x = document.createElement("button");
+  x.type = "button";
+  x.className = "notice-x";
+  x.textContent = "×";
+  x.setAttribute("aria-label", "Close this notice");
+  x.addEventListener("click", () => {
+    el.hidden = true;
+    try {
+      localStorage.setItem(key, "1");
+    } catch {}
+  });
+  el.appendChild(x);
+});
