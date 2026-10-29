@@ -284,7 +284,7 @@ p.hint.help { border-left: 2px solid var(--rule); padding-left: 0.6em; }
 .card-toggle .hval.warn, .card-toggle .hval.bad { color: var(--warn); }
 
 /* the Art tab: the input in use shows its own card (art.js sets data-art) */
-body:not([data-art="picture"]) .art-picture, body:not([data-art="text"]) .art-text, body:not([data-art="pattern"]) .art-pattern, body:not([data-art="model"]) .art-model { display: none !important; }
+body:not([data-art="picture"]) .art-picture, body:not([data-art="text"]) .art-text, body:not([data-art="pattern"]) .art-pattern, body:not([data-art="model"]) .art-model, body:not([data-art="molecule"]) .art-molecule { display: none !important; }
 .seg.four { grid-template-columns: repeat(4, 1fr); }
 
 /* Image prep: grey levels, one row per grey (levels.js) */
@@ -471,3 +471,9 @@ body[data-view="art"] .toolbar.tools { display: none; }
 @media (min-width: 900px) {
   .canvas-box { max-height: calc(100vh - 190px); max-height: calc(100svh - 190px); min-height: 360px; }
 }
+
+/* ---------- v116: the Molecule input ---------- */
+.seg.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
+.seg.five label { padding-inline: calc(4px * var(--space)); }
+.mol-form { display: flex; gap: calc(6px * var(--space)); margin: 0; }
+.mol-form input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: calc(7px * var(--corner)); padding: calc(7px * var(--space)) calc(9px * var(--space)); }

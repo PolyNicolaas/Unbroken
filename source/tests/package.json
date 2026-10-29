@@ -15,5 +15,8 @@
   "dependencies": {
     "@napi-rs/canvas": "0.1.65",
     "playwright": "1.47.2"
+  },
+  "devDependencies": {
+    "@rdkit/rdkit": "^2026.3.6"
   }
 }

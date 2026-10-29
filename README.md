@@ -141,6 +141,9 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
 - **Text**: lettering in a single-stroke font (the Text card).
 - **Pattern**: a geometric pattern, or a pattern that draws a picture's light and dark as one line (see
   [Geometric art](#geometric-art)).
+- **Molecule** (`web-app/js/molecule.js`, engine `16-molecule.js`; [`docs/CHEM-PLAN.md`](docs/CHEM-PLAN.md)): a
+  chemical structure as a skeletal formula, from a SMILES or a name (PubChem), laid out by RDKit (loaded from a CDN when
+  first needed); the examples come laid out. Exact lines, like a pattern: plotted as drawn or traced. Tests E39, A40.
 - **3D model**: an STL (or the sample vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
   makes its line drawing the picture to trace.
 

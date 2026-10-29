@@ -105,6 +105,7 @@ report.
 | [E36](#e36) | Fills per grey: each grey level's blocks filled with its own style, inside its edges | a fill that strays outside its grey or onto the grey's edge, hatch rows at the wrong spacing or angle, cross-hatch without its second direction, rings that don't step in, a pattern that isn't cut to the grey, and a grey with no pixels that still draws | – |
 | [E37](#e37) | Photos: the page found in a photo, straightened, and cleaned for the line | a page in a photo not found or its corners off, the perspective not undone, a shadow left on the paper, ink lost or table left along the edges, a faint line not darkened, a page claimed in a photo with none, and an object's colour cast kept | – |
 | [E38](#e38) | Cut out the object: a box round it, and keep / remove strokes, give its mask | the floor an object stands on kept with it, the wall behind it kept, part of the object lost, a Remove stroke that doesn't remove, a Keep stroke that doesn't keep, and a box round the whole picture keeping everything | – |
+| [E39](#e39) | Molecules: atoms and bonds drawn as a skeletal formula | a double bond's second stroke outside its ring, carbons labelled, a hetero atom unlabelled, a bond running into its label's letters, the hydrogens on the side of the bonds, and RDKit's JSON read wrong | – |
 
 ### App tests
 
@@ -146,8 +147,9 @@ report.
 | [A35](#a35) | A clean start: the app opens empty, and every example is one tap away | a start that isn't empty, an empty preview that doesn't say how to start, later steps showing an old input while empty, an example chip that loads the wrong kind of input or nothing, and a picture example that leaves a picture pattern in use | – |
 | [A36](#a36) | Take a picture: the live camera finds the page, its corners can be dragged, and the photo becomes a clean picture | the camera not opening, the page not outlined, corners that can't be dragged, a photo that isn't straightened or cleaned, the camera left running, the Photo card's settings not cleaning it again, Page corners or Clean up as a photo not working, and a refused camera leaving no way in | – |
 | [A37](#a37) | The Trace switch: tracing on and off from under the preview, on every step | the switch missing from a step, a picture still traced with Trace off (or not shown), the Print step offering a print of an untraced picture, a turned-off trace not coming back, a pattern on the plotter traced before it's asked, a 3D model left without its slices, and older designs saved As drawn opening traced | – |
-| [A38](#a38) | The layout: picture prep on the Art step, a Next bar, fewer small cards | Image prep or Grey levels back on the Line step (or missing from Art), a Next card coming back, the Next bar out of reach or going to the wrong step, the photo's settings outside the Picture card, the examples taking several rows once started, and the suggestion box showing before it's asked for | 30.2 s |
+| [A38](#a38) | The layout: picture prep on the Art step, a Next bar, fewer small cards | Image prep or Grey levels back on the Line step (or missing from Art), a Next card coming back, the Next bar out of reach or going to the wrong step, the photo's settings outside the Picture card, the examples taking several rows once started, and the suggestion box showing before it's asked for | – |
 | [A39](#a39) | Cut out the object: a box dragged round it on the preview, Keep and Remove strokes, and only the object traced | the box not cutting anything out, the floor or wall left in the picture that's traced, a Remove stroke or Undo that does nothing, the cut-out lost by a design file or kept for the next picture | – |
+| [A40](#a40) | The Molecule input: a name or SMILES drawn as a skeletal formula, traced or plotted as drawn | the examples not drawing, a SMILES or a name not laid out, a wrong name not said so, a molecule made for a pen plotter traced instead of plotted as drawn, its SVG missing strokes, and a design file losing it | 17.0 s |
 
 #### E01
 
@@ -444,6 +446,14 @@ report.
 - **Why:** Removing a plain background by colour can't tell the floor under an object from the object (v114). UNB.cutout takes a box drawn round the object: colour models of what's inside and outside it, then the cheapest cut between them along the picture's edges (GrabCut), so the floor at the box's sides teaches it what the floor under the object looks like. Keep and Remove strokes fix what it gets wrong.
 - **How:** Draws a 480 × 360 photo of a teal vase standing on striped wooden floorboards in front of a wall, its shadow on the floor; cuts it out with a box round the vase (some wall and floor in it); again with a Remove stroke across the shadow; with a Keep stroke on the vase's neck where the box is cut too tight; and with a box round the whole picture. Compares each mask with the vase as drawn (the share of the two that overlaps, intersection over union).
 - **Pass when:** The box alone: overlap ≥ 0.9, and no more than 3% of the floor kept; with the Remove stroke ≥ 0.95, and the stroke's pixels removed; a box cutting through the neck with a Keep stroke there keeps the stroke's pixels; a box round the whole picture still ≥ 0.7; each under 4 s.
+
+#### E39
+
+**Molecules: atoms and bonds drawn as a skeletal formula** · `engine/E39-molecule.test.js`
+
+- **Why:** The Molecule input (v116) draws a structure as chemists do: bonds as strokes (double and triple ones as parallel strokes, a ring's double bonds inside the ring), carbons implied, other atoms as letters in the single-stroke font with their hydrogens (UNB.molecule). The layout comes from RDKit as JSON (UNB.molFromRDKit).
+- **How:** Draws benzene (a hexagon, alternating bonds) and phenol (an OH on it), and reads a small RDKit JSON (ethanol, with its defaults and coordinates).
+- **Pass when:** Benzene: 9 strokes (6 bonds and 3 inner ones), no letters, every inner stroke nearer the ring's centre than its bond; phenol: the O labelled with its H on the far side from the ring, the C–O bond stopping short of the O's letters; ethanol from JSON: 3 atoms, O third, 2 hydrogens… on the right atoms, and its drawing one label.
 
 #### A01
 
@@ -748,6 +758,14 @@ report.
 - **Why:** The floor an object stands on is hard to remove by colour (v114): Select the object (Image prep) lets you drag a box round it, and what's in the box that looks like what's around it is removed (UNB.cutout); Keep and Remove strokes fix the rest. Everything but the object is white before Grey levels and the trace.
 - **How:** Opens the app empty and puts in a 960 × 720 photo of a vase on a wooden floor in front of a wall. Taps Select the object, drags a box round the vase, then paints a Remove stroke and undoes it; Done. Checks the picture that's traced. Saves the design, removes the cut-out, opens the design again. Last, picks the leaf example.
 - **Pass when:** The box: the readout says how much of the box is kept (20–60%), Image prep says cut out, the traced picture is white on the floor and the wall beside the vase and not on the vase; a Remove stroke adds a stroke and works the mask out again, Undo takes it away; Done leaves the tool with the line traced; the design file brings the cut-out back (its box, and a mask worked out again); a new picture has no cut-out; no page errors.
+
+#### A40
+
+**The Molecule input: a name or SMILES drawn as a skeletal formula, traced or plotted as drawn** · `app/A40-molecule.test.js`
+
+- **Why:** A chemist's input (v116): a structure as a skeletal formula, exact lines like text and patterns (engine UNB.molecule). Its examples come laid out; a typed SMILES is laid out by RDKit (loaded when first needed), a name is looked up on PubChem first.
+- **How:** Opens the app empty with RDKit served from the test kit and PubChem answered here. Taps the Theobromine example; types a SMILES (paracetamol); types the name caffeine; types a name PubChem doesn't know. Makes it for a pen plotter and exports the SVG. Saves the design, picks the leaf, opens the design again.
+- **Pass when:** Theobromine: the Molecule input in use, 13 atoms, traced into one line (the readout counts terms); the SMILES: 11 atoms and 11 bonds; caffeine by name: 14 atoms, its SMILES shown; the unknown name: said PubChem doesn't know it, the molecule in use unchanged; for a pen plotter: Trace off (as drawn) and the SVG has a stroke for every stroke of the drawing; the design file brings the molecule back; no page errors.
 
 <!-- catalogue:end -->
 

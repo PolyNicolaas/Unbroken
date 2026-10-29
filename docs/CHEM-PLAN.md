@@ -31,6 +31,12 @@ which is drawing chemical structures?" Answers to the questions that day:
 
 | # | What | Version |
 |---|---|---|
-| 1 | Molecule input: a name or SMILES, laid out by RDKit, drawn as a skeletal formula; plotted as drawn or traced; a few examples (caffeine, aspirin, benzene, dopamine…) | v116 |
+| 1 | Molecule input: a name or SMILES, laid out by RDKit, drawn as a skeletal formula; plotted as drawn or traced; eight examples laid out (theobromine, caffeine, vanillin, aspirin, dopamine, serotonin, capsaicin, benzene) | v116 ✓ |
 | 2 | The structure editor (atoms, bonds, rings, elements, erase, Clean up) | v117 |
 | 3 | Ideas: stereo wedges and hashes, charges, a .mol / .sdf file, reaction arrows | – |
+
+## Notes from v116
+
+- Plotted as drawn, a structure is clean. Traced into one continuous line for chocolate it's recognisable but busy:
+  every bond and letter is a separate stroke, so the line doubles back along the strokes and adds connectors between
+  them. A molecule-aware route (bonds walked as a graph, letters drawn as their own pieces) would print cleaner.

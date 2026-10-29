@@ -3,6 +3,20 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v116 · 2026-10-29
+
+- **Molecule**, a fifth input on the Art step (experimental): a chemical structure drawn as a skeletal formula. Bonds
+  as lines (double and triple bonds as parallel lines, a ring's double bonds inside the ring), carbons implied, every
+  other atom as its letters with its hydrogens on the side away from its bonds (OH, HO, NH₂, H₂N), charges. Type a
+  SMILES (CCO, c1ccccc1) or a name (caffeine): names are looked up on PubChem, and RDKit, the chemistry toolkit, lays
+  it out, loaded from a CDN the first time (about 7 MB; both need the internet). Eight examples come laid out already
+  and work offline: Theobromine (chocolate's own molecule, also on the start page), Caffeine, Vanillin, Aspirin,
+  Dopamine, Serotonin, Capsaicin, Benzene. Like text and patterns it's exact lines: plotted as drawn with Trace off (a
+  pen plotter starts that way), or traced into one line for chocolate; its bonds start long enough that a double bond's
+  two lines are the line spacing apart. Saved with the design.
+- Engine: a new part, `16-molecule.js`: `UNB.molecule` (atoms and bonds → strokes) and `UNB.molFromRDKit`. Tests E39,
+  A40. Next: a structure editor (docs/CHEM-PLAN.md).
+
 ## v115 · 2026-10-29
 
 Laptop and iPad first.
