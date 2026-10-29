@@ -3,6 +3,17 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v114 · 2026-10-29
+
+- **Cut out the object** (Image prep, Select the object): drag a box round the thing you want on the preview. What's
+  in the box that looks like what's around it (the floor it stands on, the wall behind) is removed and the rest is the
+  object; everything else is white paper before Grey levels and the trace. Then paint **Keep** over parts that went
+  missing, or **Remove** over what isn't the object (a shadow, a bit of floor). Undo, Start over, and Remove the cut-out
+  in the card. The cut-out is kept with undo and design files, and goes when another picture is used. On a phone the
+  preview goes big to draw on.
+- Engine: a new part, `15-cutout.js`: `UNB.cutout` (GrabCut: colour models of the object and its surroundings, then the
+  cheapest cut between them along the picture's edges, a max-flow, four rounds; in its own worker). Tests E38, A39.
+
 ## v113 · 2026-10-29
 
 - **Picture prep is on the Art step.** Image prep (brightness, contrast, background, lighting) and Grey levels change the

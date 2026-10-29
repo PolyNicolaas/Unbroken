@@ -172,6 +172,12 @@ what it is tracing (Edit the art goes back). **Next** has **Trace it** (the prin
 continuous line) and **Plot as drawn**: a pattern or the text goes to the 2D tab exactly as made, without tracing
 (2D tab, **Art as drawn**, `UNB.exportLayersSVG`); a picture has no lines until it is traced.
 
+**Cut out the object** (Image prep, Select the object; `web-app/js/cutout.js`, engine `15-cutout.js`): drag a box
+round the object on the preview; `UNB.cutout` (GrabCut) learns the colours inside and outside the box and cuts along
+the picture's edges where they change, so the floor at the box's sides tells it what the floor under the object looks
+like. **Keep** and **Remove** strokes fix what it gets wrong. Everything but the object is painted white before the
+rest of Image prep, Grey levels and the trace (pipeline.js `working`). Tests E38, A39.
+
 **Image prep** (Art step, under the Picture card since v113) gets a picture ready before tracing: brightness, contrast, **Remove plain background** (a
 flood from the border through colours close to the border's, or from the point you tap with **Tap the background**),
 **Even out lighting**. **Grey levels** (their own card, after Image prep on the Art step): the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then

@@ -34,3 +34,30 @@ function pagePhoto({ w = 640, h = 480, corners = [[150, 70], [500, 95], [560, 42
   return { rgba, w, h, corners };
 }
 module.exports = { pagePhoto, inkAt };
+// A vase standing on a wooden floor in front of a wall, with its shadow on the floor: the object to cut out. Returns
+// { rgba, w, h, inVase(x, y), box } (box: round the vase with some wall and floor in it).
+function vaseScene({ w = 480, h = 360, seed = 3 } = {}) {
+  const rgba = new Uint8ClampedArray(w * h * 4), R = rng(seed), horizon = h * 0.58;
+  const cx = w * 0.5, top = h * 0.22, bottom = h * 0.8;
+  const halfW = (y) => { const t = (y - top) / (bottom - top); if (t < 0 || t > 1) return -1; return w * (t < 0.15 ? 0.045 : 0.045 + 0.11 * Math.sin(Math.PI * Math.min(1, (t - 0.15) / 0.85))); };
+  const inVase = (x, y) => { const hw = halfW(y); return hw > 0 && Math.abs(x - cx) <= hw; };
+  for (let y = 0; y < h; y++) for (let x = 0; x < w; x++) {
+    const i = 4 * (y * w + x);
+    let c;
+    if (inVase(x, y)) { const sh = 0.6 + 0.4 * Math.cos(((x - cx) / (halfW(y) || 1)) * 1.2); c = [40 * sh + 20, 110 * sh + 20, 120 * sh + 25]; }
+    else if (y < horizon) { const g = 222 - (y / horizon) * 18; c = [g, g - 4, g - 12]; } // the wall
+    else {
+      // the floor: wood planks, lighter and darker stripes, the vase's shadow behind and to the right
+      const plank = Math.floor((x + (y - horizon) * 0.6) / 38) % 2, grain = Math.sin(x * 0.21 + y * 0.05) * 6;
+      let b = (plank ? 168 : 150) + grain;
+      const sx = (x - cx - w * 0.1) / (w * 0.2), sy = (y - bottom + h * 0.02) / (h * 0.05);
+      if (sx * sx + sy * sy < 1 && y < bottom + h * 0.03) b *= 0.62;
+      c = [b, b * 0.78, b * 0.55];
+    }
+    for (let ch = 0; ch < 3; ch++) rgba[i + ch] = c[ch] + (R() - 0.5) * 10;
+    rgba[i + 3] = 255;
+  }
+  const box = [cx - w * 0.22, top - h * 0.06, cx + w * 0.22, bottom + h * 0.08];
+  return { rgba, w, h, inVase, box };
+}
+module.exports.vaseScene = vaseScene;

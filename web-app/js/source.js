@@ -232,6 +232,8 @@ function resetHandEdits() {
   st.erase = [];
   st.start = null;
   st.bgAt = null;
+  st.cutout = null;
+  if (typeof cutoutUI === "function") cutoutUI(); // cutout.js (loaded after this file)
   st.zones = { cross: [], lane: [] };
   st.zoneVer = (st.zoneVer || 0) + 1;
   st.zm = {};

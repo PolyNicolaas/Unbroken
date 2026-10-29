@@ -35,3 +35,4 @@ show the pattern fills. Answers to the questions that day:
 |---|---|---|
 | 1 | Still life sample; Image prep card: Levels (Trace / Skip), Smooth blocks, background by tapping; turn and straighten (crop stays Select area); Made for Printing / Plotting | v105 ✓ |
 | 2 | Fill and Both per grey; level fills on the 2D tab: hatch, cross-hatch, rings or a pattern per level, one pen per level, walls for Fill-only levels | v108 ✓ |
+| 3 | Cut out the object: a box round it on the preview, Keep / Remove strokes (GrabCut), for the floor an object stands on (asked 29 October) | v114 ✓ |

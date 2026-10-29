@@ -171,6 +171,7 @@ function render() {
     renderDraw();
     return;
   }
+  if (st.tool === "cut") return renderCutout(); // cutout.js: the picture, what's removed whitened
   if (lineModeNow() === "none") return renderPictureOnly(); // workflow.js: Trace off, a picture
   if (!st.w) return;
   const v = view();

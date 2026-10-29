@@ -12,8 +12,8 @@ const OWNERS = {
   // line settings (controls.js)
   spacing: ["controls.js", "source.js"], simplify: ["controls.js"],
   // hand edits (tools.js); a new source clears them (source.js)
-  sel: ["tools.js", "source.js"], erase: ["tools.js", "source.js"], start: ["tools.js", "source.js"], bgAt: ["levels.js", "source.js", "controls.js"], pageFit: ["pipeline.js"], sepStrokes: ["workflow.js"], lineChosen: ["workflow.js", "history.js"], zones: ["pipeline.js", "source.js"],
-  zoneVer: ["pipeline.js", "source.js", "tools.js"], zm: ["pipeline.js", "source.js", "tools.js"], tool: ["tools.js"], draft: ["tools.js"],
+  sel: ["tools.js", "source.js"], erase: ["tools.js", "source.js"], start: ["tools.js", "source.js"], bgAt: ["levels.js", "source.js", "controls.js"], cutout: ["cutout.js", "source.js", "history.js"], pageFit: ["pipeline.js"], sepStrokes: ["workflow.js"], lineChosen: ["workflow.js", "history.js"], zones: ["pipeline.js", "source.js"],
+  zoneVer: ["pipeline.js", "source.js", "tools.js"], zm: ["pipeline.js", "source.js", "tools.js"], tool: ["tools.js"], draft: ["tools.js", "cutout.js"],
   pendingSel: ["tools.js"], strokes: ["tools.js"],
   // the art (art.js): the layers every source comes in as
   art: ["art.js"],
