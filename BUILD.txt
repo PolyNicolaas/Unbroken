@@ -1,5 +1,5 @@
-Unbroken · web app build v114
-Built:  2026-10-29T15:57:05.447Z
+Unbroken · web app build v115
+Built:  2026-10-29T17:16:12.667Z
 Tests:  75 of 75 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
@@ -20,11 +20,12 @@ Files (sha1, first 12):
   135d6e45a412  13-patterns.js
   bf10b0415df9  14-photo.js
   c27f21ff6627  15-cutout.js
-  2645e262c9ba  core.js
-  164af26a0801  css/app.css
+  ff5aed89ddb3  16-molecule.js
+  f13257da0f45  core.js
+  f7e43cabac57  css/app.css
   0be9d7ad7cf8  css/theme.css
   666f911d2119  fonts.js
-  c7f7c2366b20  index.html
+  b91e211ac057  index.html
   c88760da787c  js/art.js
   1c04bb0cbfd9  js/camera.js
   9f7ab1ddf14c  js/config.js
@@ -38,6 +39,7 @@ Files (sha1, first 12):
   6aa89b6e4e0e  js/levels.js
   7510c8db4a05  js/main.js
   a462e8546261  js/model.js
+  373f39c13915  js/molecule.js
   e8b1737911e5  js/notes.js
   911e52e413f3  js/optimize.js
   cdc36022946d  js/patterns.js
@@ -53,8 +55,8 @@ Files (sha1, first 12):
   9bdbe1dadb94  js/testprint.js
   ffb18c999901  js/tools.js
   e651a30c34d9  js/ui.js
-  ae8cfe4af802  js/views.js
-  96f1c976a1d1  js/workflow.js
+  ea8a76378f00  js/views.js
+  9bed190e58eb  js/workflow.js
   53b02936e233  js/zoom.js
   820b1b0ec74b  settings.js
   85d8193792d8  worker.js

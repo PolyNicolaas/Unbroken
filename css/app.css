@@ -295,7 +295,7 @@ body:not([data-art="picture"]) .art-picture, body:not([data-art="text"]) .art-te
 .seg.mini label { padding: 4px 10px; font-size: 0.85em; }
 
 /* The workflow (workflow.js): what it's made for, then the steps Art → Line → Print or Plot */
-.output-row { display: grid; gap: calc(6px * var(--space)); margin-bottom: calc(10px * var(--space)); }
+.output-row { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: calc(8px * var(--space)); margin-bottom: calc(8px * var(--space)); }
 .output-row .name { font-size: calc(12px * var(--text)); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
 .steps label b { display: inline-block; min-width: 1.4em; height: 1.4em; line-height: 1.4em; margin-right: 4px; border-radius: 50%; background: var(--rule); font-size: 0.8em; text-align: center; }
 .steps input:checked + label b { background: var(--accent); color: var(--paper); }
@@ -448,4 +448,26 @@ body:not([data-empty="1"]) .examples .chips .chip-btn { flex: none; }
   .toolbar .pl-long, .toolbar .tb-sep { display: none; }
   .toolbar { gap: calc(6px * var(--space)); }
   .trace-switch { padding-right: calc(8px * var(--space)); }
+}
+
+/* ---------- v115: a slim top to the settings, the tools on the Line step, notices that go, a bigger preview ---------- */
+.output-seg label small, .steps label small { display: none; }
+.output-seg label, .steps label { padding: calc(5px * var(--space)) calc(8px * var(--space)); }
+.steps { margin-bottom: calc(4px * var(--space)); }
+.viewpanel .vhead { font-size: calc(11.5px * var(--text)); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+.viewpanel .fold-all { display: flex; gap: calc(6px * var(--space)); }
+.viewpanel .wheel-sw { margin: 0; font-size: inherit; }
+/* the trace's tools (select area, erase, set start…) belong to the Line step */
+body[data-view="art"] .toolbar.tools { display: none; }
+/* a notice that can be put away (views.js) */
+.construction { position: relative; padding-right: calc(34px * var(--space)); }
+.notice-x { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
+.notice-x:hover { background: color-mix(in srgb, var(--warn) 18%, transparent); color: var(--ink); }
+/* wide screens (a laptop): the preview takes the room; it stays inside the window's height */
+@media (min-width: 1400px) {
+  .wrap, header.top { max-width: 1760px; }
+  .wrap { grid-template-columns: minmax(0, 1fr) 400px; }
+}
+@media (min-width: 900px) {
+  .canvas-box { max-height: calc(100vh - 190px); max-height: calc(100svh - 190px); min-height: 360px; }
 }

@@ -243,3 +243,7 @@ async function traceStrokes(g) {
   labels();
 }
 workflowUI();
+
+// the last step's Next bar: the export, one tap away (the Export cards keep their options)
+$("nbGcode").addEventListener("click", () => $("gcodeBtn").click());
+$("nbSvg").addEventListener("click", () => $("exportBtn").click());

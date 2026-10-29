@@ -67,6 +67,9 @@
     15-cutout.js  14. Cutting out an object — a box round it (and keep / remove strokes) → its mask: colour models of
                       the object and its surroundings, then the cheapest cut between them (GrabCut, a max-flow).
                       fitMix, mixCost, makeFlow, markStroke, UNB.cutout
+    16-molecule.js 15. Molecules — atoms and bonds (a SMILES laid out by RDKit, or drawn) → a skeletal formula: bonds as
+                      strokes (double and triple as parallel strokes), the other atoms' letters with their hydrogens.
+                      ELEMENTS, UNB.molFromRDKit, ringOf, segOutside, UNB.molecule
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
@@ -93,6 +96,7 @@
     "13-patterns.js",
     "14-photo.js",
     "15-cutout.js",
+    "16-molecule.js",
   ];
   if (typeof module !== "undefined" && module.exports) {
     // Node

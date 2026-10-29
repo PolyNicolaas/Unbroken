@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v114</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v115</span></p>
 </header>
 
 <div class="wrap">
@@ -125,6 +125,10 @@
             <label class="check" title="Show the smallest box around the printed line, at any angle, with its size"><input type="checkbox" id="dims" checked> <span>Size box</span></label>
             <label class="check" title="Mark where the line crosses itself or breaks the minimum spacing"><input type="checkbox" id="showProb"> <span>Problems</span><span class="swatch dot"></span><span class="val" id="probInfo"></span></label>
             <label class="check" title="Small plate in the corner of the preview"><input type="checkbox" id="showMini" checked> <span>Plate mini-map</span></label>
+            <hr>
+            <span class="vhead">The settings</span>
+            <label class="check wheel-sw" title="The settings as a wheel: the card you scroll to opens, the others fold to their headers"><input type="checkbox" id="wheel" checked> <span>Wheel: open the card scrolled to</span></label>
+            <span class="fold-all"><button class="btn mini" type="button" id="collapseAll">Collapse all</button><button class="btn mini" type="button" id="expandAll">Expand all</button></span>
           </div>
         </details>
       </div>
@@ -207,10 +211,10 @@
 
   <div class="panel">
     <div class="output-row">
-      <span class="name">Making it for</span>
+      <span class="name">For</span>
       <div class="seg output-seg" role="radiogroup" aria-label="Making it for">
-        <input type="radio" name="artFor" id="artForPrint" value="print" checked><label for="artForPrint">A printer<small>chocolate, clay · one line</small></label>
-        <input type="radio" name="artFor" id="artForPlot" value="plot"><label for="artForPlot">A pen plotter<small>pens · any detail</small></label>
+        <input type="radio" name="artFor" id="artForPrint" value="print" checked><label for="artForPrint" title="Chocolate, clay: one continuous line">A printer<small>chocolate, clay · one line</small></label>
+        <input type="radio" name="artFor" id="artForPlot" value="plot"><label for="artForPlot" title="Pens: any detail">A pen plotter<small>pens · any detail</small></label>
       </div>
     </div>
     <div class="seg view-tabs steps" role="radiogroup" aria-label="Step">
@@ -219,14 +223,9 @@
       <input type="radio" name="view" id="view2D" value="plot"><label for="view2D"><b>3</b> Plot<small>the page, pens, SVG</small></label>
       <input type="radio" name="view" id="viewChoc" value="choc"><label for="viewChoc"><b>3</b> Print<small>plate, layers, G-code</small></label>
     </div>
-    <div class="panel-tools">
-      <span style="flex:1"></span>
-      <label class="check wheel-sw" title="The settings as a wheel: the card you scroll to opens, the others fold to their headers"><input type="checkbox" id="wheel" checked> Wheel</label>
-      <span class="fold-all"><button class="btn mini" type="button" id="collapseAll">Collapse all</button><button class="btn mini" type="button" id="expandAll">Expand all</button></span>
-    </div>
     <section class="card choc-only" aria-labelledby="h-choc">
       <h2 id="h-choc">Printer</h2>
-      <p class="construction"><b>New.</b> The G-code now follows choc OS's own files (purge line, retraction and wipe, E per mm from the needle). Watch the first prints closely, and fine-tune the flow on the printer.</p>
+      <p class="construction" data-notice="gcode-chocos-v95"><b>New.</b> The G-code now follows choc OS's own files (purge line, retraction and wipe, E per mm from the needle). Watch the first prints closely, and fine-tune the flow on the printer.</p>
       <label class="field"><span>Printer</span><select id="printer"><!-- filled from settings.js --></select></label>
       <p class="hint" id="printerSummary"><!-- the printer's cartridge, plate and retraction, from settings.js --></p>
       <div class="choc-pick">
@@ -750,6 +749,8 @@
       <span class="nb-hint" id="nextHint" aria-live="polite"></span>
       <button class="btn primary art-only" type="button" id="goTrace">Next: the line →</button>
       <button class="btn primary design-only" type="button" id="goOut">Next: print it →</button>
+      <button class="btn primary choc-only" type="button" id="nbGcode" title="The G-code for the printer (the Export card has the rest: DXF, the ZIP)">Export G-code</button>
+      <button class="btn primary plot-only" type="button" id="nbSvg" title="The SVG for Saxi (the Export card has its options)">Export SVG</button>
     </div>
   </div>
 
