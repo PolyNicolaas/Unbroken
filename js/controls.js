@@ -92,6 +92,7 @@ function labels() {
     p.contrast && "contrast",
     p.bgTol && "background",
     p.flatten && "lighting",
+    typeof cutoutOn === "function" && cutoutOn() && "cut out",
   ].filter(Boolean);
   $("prepVal").textContent = on.length ? on.join(", ") : "off";
   if (typeof levelsUI === "function") levelsUI(); // levels.js (loaded after this file): its greys and their shares

@@ -134,6 +134,7 @@ function designState() {
       erase: st.erase || [],
       start: st.start || null,
       bgAt: st.bgAt || null,
+      cutout: st.cutout && st.cutout.box ? { box: st.cutout.box, strokes: st.cutout.strokes } : null,
       lineChosen: !!st.lineChosen,
       zones: st.zones,
       penFill: structuredClone(st.penFill),
@@ -306,6 +307,19 @@ function applyDesign(d, src, imageSource, pics) {
       if (src) st.source = src;
       st.srcLabel = s.srcLabel || st.srcLabel;
     }
+    // the cut-out (cutout.js): its box and strokes come back with the picture, and its mask is worked out again
+    const cut = s.cutout && !textMode() ? structuredClone(s.cutout) : null,
+      same =
+        cut &&
+        st.cutout &&
+        st.cutout.src === (st.source && st.source.__id) &&
+        JSON.stringify([st.cutout.box, st.cutout.strokes]) === JSON.stringify([cut.box, cut.strokes]);
+    if (!cut) st.cutout = null;
+    else if (!same) {
+      st.cutout = { ...cut, src: st.source && st.source.__id, mask: null, ver: (st.cutout && st.cutout.ver) || 0 };
+      cutoutRun();
+    }
+    cutoutUI();
     $("srcinfo").textContent = st.srcLabel || "";
     if (![...$("chocolate").options].some((o) => o.value === $("chocolate").value))
       $("chocolate").value = CFG.defaults.chocolate;

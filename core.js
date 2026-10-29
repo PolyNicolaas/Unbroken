@@ -64,6 +64,9 @@
                       photoCells, convexHull, quadArea, widestQuad, orderCorners, UNB.findPage, sharpenCorners,
                       homography, UNB.pageSize, UNB.warpQuad, paperLight, shareBelow, UNB.PHOTO_KINDS,
                       UNB.photoClean, UNB.photoPicture
+    15-cutout.js  14. Cutting out an object — a box round it (and keep / remove strokes) → its mask: colour models of
+                      the object and its surroundings, then the cheapest cut between them (GrabCut, a max-flow).
+                      fitMix, mixCost, makeFlow, markStroke, UNB.cutout
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
@@ -89,6 +92,7 @@
     "12-models.js",
     "13-patterns.js",
     "14-photo.js",
+    "15-cutout.js",
   ];
   if (typeof module !== "undefined" && module.exports) {
     // Node

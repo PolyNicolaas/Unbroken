@@ -1,6 +1,6 @@
-Unbroken · web app build v113
-Built:  2026-10-29T14:39:19.733Z
-Tests:  73 of 73 tests passed
+Unbroken · web app build v114
+Built:  2026-10-29T15:57:05.447Z
+Tests:  75 of 75 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
@@ -19,19 +19,21 @@ Files (sha1, first 12):
   59aaa64e2642  12-models.js
   135d6e45a412  13-patterns.js
   bf10b0415df9  14-photo.js
-  0217db449ac4  core.js
+  c27f21ff6627  15-cutout.js
+  2645e262c9ba  core.js
   164af26a0801  css/app.css
   0be9d7ad7cf8  css/theme.css
   666f911d2119  fonts.js
-  49074d6f14db  index.html
+  c7f7c2366b20  index.html
   c88760da787c  js/art.js
   1c04bb0cbfd9  js/camera.js
   9f7ab1ddf14c  js/config.js
-  4b8afd365d63  js/controls.js
+  fe8b60afbbf8  js/controls.js
+  e154d9b5627a  js/cutout.js
   e666f8bf0b57  js/engine-bridge.js
   88d7674df0ca  js/examples.js
   7b57af784570  js/export.js
-  3b09ab956a81  js/history.js
+  f61f9234d357  js/history.js
   31154129f62f  js/layers.js
   6aa89b6e4e0e  js/levels.js
   7510c8db4a05  js/main.js
@@ -40,16 +42,16 @@ Files (sha1, first 12):
   911e52e413f3  js/optimize.js
   cdc36022946d  js/patterns.js
   e11158a47338  js/pieces.js
-  2b179ef4e0af  js/pipeline.js
+  10cd9f1951cd  js/pipeline.js
   5458c5bf3df8  js/plot.js
-  aca13f33eb6f  js/preview.js
+  e1f5ad88a908  js/preview.js
   1d2e8acf56ee  js/readouts.js
   90c1c8639014  js/scroll.js
-  1d05617e71e8  js/source.js
+  f468956f756e  js/source.js
   78f5450a22d9  js/state.js
   49125f92bd01  js/steppers.js
   9bdbe1dadb94  js/testprint.js
-  b22c4183d365  js/tools.js
+  ffb18c999901  js/tools.js
   e651a30c34d9  js/ui.js
   ae8cfe4af802  js/views.js
   96f1c976a1d1  js/workflow.js

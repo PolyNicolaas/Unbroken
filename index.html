@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v113</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v114</span></p>
 </header>
 
 <div class="wrap">
@@ -147,6 +147,18 @@
         <button class="btn" type="button" id="eraseUndo">Undo</button>
         <button class="btn" type="button" id="eraseClear">Restore all</button>
         <button class="btn primary" type="button" id="eraseDone">Done</button>
+      </div>
+      <div class="selbar" id="cutbar" hidden>
+        <div class="seg small" role="radiogroup" aria-label="What dragging does">
+          <input type="radio" name="cutMode" id="cutMbox" value="box" checked><label for="cutMbox">Box</label>
+          <input type="radio" name="cutMode" id="cutMkeep" value="keep"><label for="cutMkeep">Keep</label>
+          <input type="radio" name="cutMode" id="cutMdrop" value="drop"><label for="cutMdrop">Remove</label>
+        </div>
+        <label class="inline-field">Brush <input type="range" id="cutBrushSize" min="4" max="40" value="14" aria-label="Brush size"></label>
+        <span class="hint" id="cutHint">Drag a box round the object to keep.</span>
+        <button class="btn" type="button" id="cutUndo">Undo</button>
+        <button class="btn" type="button" id="cutStart">Start over</button>
+        <button class="btn primary" type="button" id="cutDone">Done</button>
       </div>
       <div class="selbar" id="bgbar" hidden>
         <span class="hint">Tap the picture's background: it is removed from there (Remove plain background sets how close a colour counts).</span>
@@ -488,6 +500,11 @@
     </section>
     <section class="card art-only art-picture" aria-labelledby="h-prep" data-fold="closed">
       <h2 id="h-prep">Image prep <span id="prepVal">off</span></h2>
+          <div class="row" id="cutRow">
+            <div class="lab"><span class="name">Cut out the object</span><span class="val" id="cutVal">off</span></div>
+            <div class="inline"><button class="btn mini" type="button" id="cutBtn" data-tool="cut" aria-pressed="false" title="Drag a box round the thing to keep on the preview: the floor it stands on and the wall behind are removed">Select the object</button><button class="btn mini" type="button" id="cutClear" hidden>Remove the cut-out</button></div>
+            <p class="hint help">Drag a box round the object on the preview. What's in the box that looks like what's around it (the floor the object stands on, the wall behind) is removed, and the rest is the object: everything else becomes white paper before Grey levels and the trace. Then paint Keep over parts that went missing, or Remove over what isn't the object (a shadow, a bit of floor). Works best when the object's colours differ from its surroundings.</p>
+          </div>
           <div class="row"><div class="lab"><label for="bright">Brightness</label><span class="val" id="brightVal"></span></div><input type="range" id="bright" min="-100" max="100" value="0"></div>
           <div class="row"><div class="lab"><label for="contrast">Contrast</label><span class="val" id="contrastVal"></span></div><input type="range" id="contrast" min="-80" max="150" value="0"></div>
           <div class="row"><div class="lab"><label for="bgTol">Remove plain background</label><span class="val" id="bgTolVal"></span></div><input type="range" id="bgTol" min="0" max="60" value="0">
@@ -773,6 +790,7 @@
 <script src="12-models.js"></script>
 <script src="13-patterns.js"></script>
 <script src="14-photo.js"></script>
+<script src="15-cutout.js"></script>
 <script src="core.js"></script>
 <script src="fonts.js"></script>
 <script src="settings.js"></script>
@@ -789,6 +807,7 @@
 <script src="js/readouts.js"></script>
 <script src="js/controls.js"></script>
 <script src="js/levels.js"></script>
+<script src="js/cutout.js"></script>
 <script src="js/export.js"></script>
 <script src="js/optimize.js"></script>
 <script src="js/pieces.js"></script>

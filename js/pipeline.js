@@ -20,6 +20,7 @@ async function working(res, engine = PIPE) {
     s.invert,
     s.blur,
     JSON.stringify(lv),
+    cutoutKey(), // cutout.js
   ].join("|");
   if (st.wk && st.wk.key === key) return st.wk;
   let sx = 0,
@@ -53,6 +54,7 @@ async function working(res, engine = PIPE) {
   g.fillStyle = "#fff";
   g.fillRect(0, 0, w, h);
   g.drawImage(src, sx, sy, sw, sh, 0, 0, w, h);
+  cutoutApply(g, sx, sy, sw, sh, w, h); // cutout.js: only the object, if it's cut out
   const r = await engine.call("stagePrep", [
     g.getImageData(0, 0, w, h).data,
     w,
