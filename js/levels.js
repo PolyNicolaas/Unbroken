@@ -38,7 +38,12 @@ function levelFillSpecs() {
   try {
     saved = JSON.parse($("levelFills").value || "[]");
   } catch {}
-  return Array.from({ length: n }, (_, j) => ({ ...defaultFill(j, n), ...(saved[j] || {}) }));
+  // (colour levels: a block's pen starts with its own colour, until a pen is picked)
+  return Array.from({ length: n }, (_, j) => {
+    const f = { ...defaultFill(j, n), ...(saved[j] || {}) };
+    if (!(saved[j] && saved[j].color) && levelColour() && levelHex(j)) f.color = levelHex(j);
+    return f;
+  });
 }
 function setLevelFill(j, patch) {
   const all = levelFillSpecs();
@@ -58,10 +63,17 @@ function levelModes() {
   return artForPlot() ? ok : ok.replace(/f/g, "s").replace(/b/g, "t");
 }
 // the settings the prep and the trace need (settings() in source.js), or null when off
+const levelColour = () => $("levelColours").checked;
 function levelSettings() {
   const n = levelCount();
-  return n ? { count: n, smooth: +$("levelSmooth").value, modes: levelModes() } : null;
+  return n ? { count: n, smooth: +$("levelSmooth").value, modes: levelModes(), colour: levelColour() } : null;
 }
+// a level's colour as #rrggbb, from the last prep (colour levels), or null
+const levelHex = (j) => {
+  const L = st.wk && st.wk.levels;
+  const c = L && L.colours && L.colours[j];
+  return c ? "#" + c.map((v) => v.toString(16).padStart(2, "0")).join("") : null;
+};
 // which greys' edges are lines (lineSpec in pipeline.js)
 const levelEdgeFlags = () => [...levelModes()].map((c) => c === "t" || c === "b");
 // the greys filled (Fill or Both), with their fills: [{ level, style, spacing, angle, color }]
@@ -73,7 +85,8 @@ const levelFillList = () => {
 let levelListKey = null;
 function levelsUI() {
   const n = levelCount();
-  $("levelsVal").textContent = $("levelsCardVal").textContent = n ? `${n} greys` : "off";
+  const what = levelColour() ? "colours" : "greys";
+  $("levelsVal").textContent = $("levelsCardVal").textContent = n ? `${n} ${what}` : "off";
   $("levelsBox").hidden = !n;
   // the line follows the greys' edges: the trace style and ink threshold don't apply
   $("levelsOnHint").hidden = !n;
@@ -88,9 +101,12 @@ function levelsUI() {
   if (plot) $("levelModes").value = modes; // (a printer's view of the modes doesn't overwrite the plotter's)
   $("levelFillNote").hidden = !(plot && /[fb]/.test(modes) && lineModeNow() !== "strokes");
   // each grey's tone and share, from the last prep (st.wk.levels); until then, evenly spread greys
-  const L = st.wk && st.wk.levels && st.wk.levels.tones.length === n ? st.wk.levels : null,
+  const L =
+      st.wk && st.wk.levels && st.wk.levels.tones.length === n && !!st.wk.levels.colours === levelColour()
+        ? st.wk.levels
+        : null,
     total = L ? L.count.reduce((a, b) => a + b, 0) : 0;
-  const key = JSON.stringify([n, modes, plot, specs, L && L.tones, L && L.count]);
+  const key = JSON.stringify([n, modes, plot, specs, L && L.tones, L && L.count, L && L.colours]);
   if (key === levelListKey) return;
   levelListKey = key;
   const box = $("levelList");
@@ -101,10 +117,12 @@ function levelsUI() {
     row.className = "level-row";
     const sw = document.createElement("span");
     sw.className = "level-swatch";
-    sw.style.background = `rgb(${tone},${tone},${tone})`;
+    sw.style.background = L && L.colours ? `rgb(${L.colours[j].join(",")})` : `rgb(${tone},${tone},${tone})`;
     const name = document.createElement("span");
     name.className = "level-name";
-    name.textContent = `Grey ${j + 1}` + (L ? ` · ${Math.round((100 * L.count[j]) / Math.max(1, total))}%` : "");
+    name.textContent =
+      `${levelColour() ? "Colour" : "Grey"} ${j + 1}` +
+      (L ? ` · ${Math.round((100 * L.count[j]) / Math.max(1, total))}%` : "");
     const seg = document.createElement("div");
     seg.className = "seg mini";
     seg.setAttribute("role", "radiogroup");
@@ -174,6 +192,14 @@ $("levels").addEventListener("input", () => {
   levelsUI();
   schedule(extract);
 });
+document.querySelectorAll('input[name="levelKind"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    labels();
+    levelsUI();
+    recordSoon();
+    schedule(extract);
+  })
+);
 $("levelSmooth").addEventListener("input", () => {
   levelsUI();
   schedule(extract);
