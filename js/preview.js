@@ -171,6 +171,7 @@ function render() {
     renderDraw();
     return;
   }
+  if (lineModeNow() === "none") return renderPictureOnly(); // workflow.js: Trace off, a picture
   if (!st.w) return;
   const v = view();
   v.g.clearRect(0, 0, v.cv.width, v.cv.height);
@@ -182,6 +183,27 @@ function render() {
   const r = renderLine(v);
   renderMarks(v, r);
   if (r.animating && $("circles").checked && st.epi) renderCircles(v, r);
+}
+// Trace off, a picture: the picture as it is, fitted to the view (with its zoom)
+function renderPictureOnly() {
+  const cv = $("view"),
+    { dpr } = fitCanvas(cv, true) || { dpr: window.devicePixelRatio || 1 },
+    g = cv.getContext("2d"),
+    p = st.art.picture && st.art.picture.canvas;
+  g.setTransform(1, 0, 0, 1, 0, 0);
+  g.clearRect(0, 0, cv.width, cv.height);
+  if (!p) return;
+  const pad = 26 * dpr,
+    k = Math.min((cv.width - 2 * pad) / p.width, (cv.height - 2 * pad) / p.height),
+    t = zoomT("line", cv);
+  g.imageSmoothingEnabled = true;
+  g.drawImage(
+    p,
+    ((cv.width - p.width * k) / 2) * t.z + t.tx,
+    ((cv.height - p.height * k) / 2) * t.z + t.ty,
+    p.width * k * t.z,
+    p.height * k * t.z
+  );
 }
 // the Line step's separate strokes (st.sepStrokes, working px), each in the ink colour
 function renderStrokes({ g, k, ox, oy, dpr, ink }) {

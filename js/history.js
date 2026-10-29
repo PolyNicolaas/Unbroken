@@ -15,7 +15,7 @@ const DESIGN_IDS = [
   "artForPlot",
   "lineOne",
   "lineStrokes",
-  "lineDrawn",
+  "traceOn",
   "srcModel",
   "textIn",
   "font",
@@ -230,6 +230,11 @@ function applyDesign(d, src, imageSource, pics) {
     stopOptimize();
     if (st.tool) exitTool();
     const s = d.s || {};
+    // As drawn (the Line card's third choice until v112) is Trace off now
+    if (d.v && d.v.lineDrawn !== undefined && d.v.traceOn === undefined) {
+      d.v = { ...d.v, traceOn: !d.v.lineDrawn };
+      if (d.v.lineDrawn) d.v.lineStrokes = true;
+    }
     for (let [id, val] of Object.entries(d.v || {})) {
       const el = $(id);
       if (!el) continue;
