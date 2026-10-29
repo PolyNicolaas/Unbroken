@@ -274,4 +274,273 @@
       bonds: B.length,
     };
   };
+
+  // ---------- editing (the structure editor, web-app/js/moleditor.js) ----------
+  // Structures are { atoms: [{ el, x, y, h, q }], bonds: [{ a, b, order }] } in RDKit's units (a bond ≈ 1.5, y up).
+  // Each edit returns a new structure (the editor keeps the old ones for Undo).
+  const molCopy = (m) => ({ atoms: m.atoms.map((a) => ({ ...a })), bonds: m.bonds.map((b) => ({ ...b })) });
+  const bondLen = (m) => {
+    let s = 0;
+    for (const b of m.bonds) s += Math.hypot(m.atoms[b.a].x - m.atoms[b.b].x, m.atoms[b.a].y - m.atoms[b.b].y);
+    return m.bonds.length ? s / m.bonds.length : 1.5;
+  };
+  UNB.molBondLength = bondLen;
+  const bondAt = (m, a, b) => m.bonds.findIndex((x) => (x.a === a && x.b === b) || (x.a === b && x.b === a));
+  const molNbrs = (m, i) => m.bonds.filter((b) => b.a === i || b.b === i).map((b) => (b.a === i ? b.b : b.a));
+  // the usual valences (the smallest that fits the bonds is used), by charge
+  const VALENCE = {
+    C: [4],
+    N: [3, 5],
+    O: [2],
+    S: [2, 4, 6],
+    P: [3, 5],
+    B: [3],
+    Si: [4],
+    F: [1],
+    Cl: [1, 3, 5, 7],
+    Br: [1],
+    I: [1, 3],
+    H: [1],
+    Se: [2, 4, 6],
+  };
+  function valences(el, q) {
+    const v = VALENCE[el];
+    if (!v) return null;
+    if (!q) return v;
+    // a charge shifts them: N⁺, O⁺ one more bond; O⁻, N⁻ one fewer; a carbocation or carbanion three
+    if (el === "C") return [3];
+    return v.map((x) => x + (["N", "O", "S", "P"].includes(el) ? q : -Math.abs(q))).filter((x) => x >= 0);
+  }
+  // Implicit hydrogens from each atom's bonds and charge (an element without usual valences keeps its count)
+  UNB.molHydrogens = function (mol) {
+    const m = molCopy(mol),
+      sum = new Array(m.atoms.length).fill(0);
+    for (const b of m.bonds) {
+      sum[b.a] += b.order;
+      sum[b.b] += b.order;
+    }
+    m.atoms.forEach((a, i) => {
+      const v = valences(a.el, a.q || 0);
+      if (!v) return;
+      const fit = v.find((x) => x >= sum[i]);
+      a.h = fit === undefined ? 0 : fit - sum[i];
+    });
+    return m;
+  };
+  // the nearest atom within r, else the nearest bond within r (its middle stretch); null for neither
+  UNB.molHit = function (mol, x, y, r) {
+    let best = r,
+      atom = -1;
+    mol.atoms.forEach((a, i) => {
+      const d = Math.hypot(a.x - x, a.y - y);
+      if (d < best) ((best = d), (atom = i));
+    });
+    if (atom >= 0) return { atom };
+    let bond = -1;
+    best = r;
+    mol.bonds.forEach((b, j) => {
+      const p = mol.atoms[b.a],
+        q = mol.atoms[b.b],
+        dx = q.x - p.x,
+        dy = q.y - p.y,
+        t = Math.max(0, Math.min(1, ((x - p.x) * dx + (y - p.y) * dy) / (dx * dx + dy * dy || 1))),
+        d = Math.hypot(p.x + dx * t - x, p.y + dy * t - y);
+      if (d < best) ((best = d), (bond = j));
+    });
+    return bond >= 0 ? { bond } : null;
+  };
+  // the best direction (radians) for a new bond from atom i: away from its bonds and from atoms nearby
+  function freeDir(m, i) {
+    const a = m.atoms[i],
+      L = bondLen(m),
+      ns = molNbrs(m, i),
+      dirs = ns.map((j) => Math.atan2(m.atoms[j].y - a.y, m.atoms[j].x - a.x));
+    let cands;
+    if (!ns.length) cands = [Math.PI / 6];
+    else if (ns.length === 1) cands = [dirs[0] + (2 * Math.PI) / 3, dirs[0] - (2 * Math.PI) / 3];
+    else {
+      // the middle of the widest gap between its bonds
+      const s = dirs.slice().sort((p, q) => p - q);
+      let gap = -1,
+        at = 0;
+      for (let k = 0; k < s.length; k++) {
+        const g = (k + 1 < s.length ? s[k + 1] : s[0] + 2 * Math.PI) - s[k];
+        if (g > gap) ((gap = g), (at = s[k] + g / 2));
+      }
+      cands = [at];
+    }
+    // of the candidates, the one whose new atom is farthest from the others
+    let best = cands[0],
+      far = -1;
+    for (const t of cands) {
+      const x = a.x + L * Math.cos(t),
+        y = a.y + L * Math.sin(t);
+      let d = Infinity;
+      m.atoms.forEach((o, k) => {
+        if (k !== i) d = Math.min(d, Math.hypot(o.x - x, o.y - y));
+      });
+      if (d > far + 1e-6) ((far = d), (best = t));
+    }
+    return best;
+  }
+  // an atom at (x, y), or the one already there (within 0.3 bond)
+  function atomAt(m, x, y, el) {
+    const L = bondLen(m);
+    const i = m.atoms.findIndex((a) => Math.hypot(a.x - x, a.y - y) < 0.3 * L);
+    if (i >= 0) return i;
+    m.atoms.push({ el: el || "C", x, y, h: 0, q: 0 });
+    return m.atoms.length - 1;
+  }
+  const molLink = (m, a, b, order = 1) => {
+    if (a === b) return;
+    const j = bondAt(m, a, b);
+    if (j < 0) m.bonds.push({ a, b, order });
+  };
+  // A new bond. from: an atom's index, or null (a new atom at `to`); to: [x, y] (snapped to a bond length at 30°
+  // steps from `from`; an atom already there is joined), or null (the best free direction). el: the new atom's
+  // element. Returns { mol, atom } (the atom at the far end).
+  UNB.molGrow = function (mol, from, to, el = "C") {
+    const m = molCopy(mol),
+      L = bondLen(m);
+    if (from == null) {
+      const i = atomAt(m, to ? to[0] : 0, to ? to[1] : 0, el);
+      return { mol: UNB.molHydrogens(m), atom: i };
+    }
+    const a = m.atoms[from];
+    let x, y;
+    if (to) {
+      const hit = m.atoms.findIndex((o, k) => k !== from && Math.hypot(o.x - to[0], o.y - to[1]) < 0.35 * L);
+      if (hit >= 0) {
+        if (bondAt(m, from, hit) < 0) molLink(m, from, hit);
+        return { mol: UNB.molHydrogens(m), atom: hit };
+      }
+      const t = Math.round(Math.atan2(to[1] - a.y, to[0] - a.x) / (Math.PI / 6)) * (Math.PI / 6);
+      x = a.x + L * Math.cos(t);
+      y = a.y + L * Math.sin(t);
+    } else {
+      const t = freeDir(m, from);
+      x = a.x + L * Math.cos(t);
+      y = a.y + L * Math.sin(t);
+    }
+    const i = atomAt(m, x, y, el);
+    molLink(m, from, i);
+    return { mol: UNB.molHydrogens(m), atom: i };
+  };
+  // A ring of n atoms (aromatic: alternate double bonds). where: { atom } (hung off it on a new bond, or round it when
+  // it has none), { bond } (fused on that bond, on its emptier side) or { x, y } (centred there). Atoms already where a
+  // ring
+  // atom falls are used, so rings fuse.
+  UNB.molRing = function (mol, where, n = 6, aromatic = false) {
+    const m = molCopy(mol),
+      L = m.bonds.length ? bondLen(m) : 1.5,
+      R = L / (2 * Math.sin(Math.PI / n)),
+      step = (2 * Math.PI) / n;
+    let cx, cy, start; // the centre, and the angle of the first atom from it
+    let ring = [];
+    if (where.bond != null) {
+      const b = m.bonds[where.bond],
+        p = m.atoms[b.a],
+        q = m.atoms[b.b],
+        mx = (p.x + q.x) / 2,
+        my = (p.y + q.y) / 2,
+        d = Math.hypot(q.x - p.x, q.y - p.y) || 1,
+        nx = -(q.y - p.y) / d,
+        ny = (q.x - p.x) / d,
+        ap = L / (2 * Math.tan(Math.PI / n));
+      // the side with fewer atoms near it
+      let s = 0;
+      m.atoms.forEach((o, k) => {
+        if (k !== b.a && k !== b.b)
+          s += Math.sign((o.x - mx) * nx + (o.y - my) * ny) / (1 + Math.hypot(o.x - mx, o.y - my));
+      });
+      const side = s > 0 ? -1 : 1;
+      cx = mx + side * nx * ap;
+      cy = my + side * ny * ap;
+      // around from p through q
+      const ta = Math.atan2(p.y - cy, p.x - cx),
+        tb = Math.atan2(q.y - cy, q.x - cx),
+        dir = Math.sin(tb - ta) > 0 ? 1 : -1;
+      ring = [b.a, b.b];
+      for (let k = 2; k < n; k++)
+        ring.push(atomAt(m, cx + R * Math.cos(ta + dir * k * step), cy + R * Math.sin(ta + dir * k * step)));
+    } else if (where.atom != null) {
+      // an atom with bonds: the ring hangs off it on a new bond (a phenyl, a cyclohexyl); a lone atom: it's in the ring
+      let at = where.atom;
+      if (molNbrs(m, at).length) {
+        const t0 = freeDir(m, at),
+          o = m.atoms[at];
+        const j = atomAt(m, o.x + L * Math.cos(t0), o.y + L * Math.sin(t0));
+        molLink(m, at, j);
+        at = j;
+      }
+      const a = m.atoms[at],
+        ns = molNbrs(m, at),
+        // straight on from its one bond, else the freest way
+        t = ns.length === 1 ? Math.atan2(a.y - m.atoms[ns[0]].y, a.x - m.atoms[ns[0]].x) : freeDir(m, at);
+      cx = a.x + R * Math.cos(t);
+      cy = a.y + R * Math.sin(t);
+      start = t + Math.PI;
+      ring = [at];
+      for (let k = 1; k < n; k++)
+        ring.push(atomAt(m, cx + R * Math.cos(start + k * step), cy + R * Math.sin(start + k * step)));
+    } else {
+      cx = where.x;
+      cy = where.y;
+      start = -Math.PI / 2 - step / 2; // (a flat side at the bottom)
+      for (let k = 0; k < n; k++)
+        ring.push(atomAt(m, cx + R * Math.cos(start + k * step), cy + R * Math.sin(start + k * step)));
+    }
+    // the ring's bonds; an aromatic ring's double bonds go in turn round it wherever neither end has one yet (so a ring
+    // fused on another gets the doubles the shared atoms leave room for)
+    const hasDouble = (i) => m.bonds.some((x) => (x.a === i || x.b === i) && x.order === 2);
+    for (let k = 0; k < n; k++) {
+      const a = ring[k],
+        b = ring[(k + 1) % n];
+      if (bondAt(m, a, b) >= 0) continue;
+      molLink(m, a, b, aromatic && !hasDouble(a) && !hasDouble(b) ? 2 : 1);
+    }
+    return UNB.molHydrogens(m);
+  };
+  // a bond's order cycled 1 → 2 → 3 → 1
+  UNB.molCycleBond = function (mol, j) {
+    const m = molCopy(mol);
+    m.bonds[j].order = (m.bonds[j].order % 3) + 1;
+    return UNB.molHydrogens(m);
+  };
+  // an atom's element (and charge) set
+  UNB.molSetAtom = function (mol, i, el, q) {
+    const m = molCopy(mol);
+    m.atoms[i].el = el;
+    if (q !== undefined) m.atoms[i].q = q;
+    return UNB.molHydrogens(m);
+  };
+  // an atom (with its bonds) or a bond taken away
+  UNB.molErase = function (mol, what) {
+    const m = molCopy(mol);
+    if (what.bond != null) m.bonds.splice(what.bond, 1);
+    else if (what.atom != null) {
+      const i = what.atom;
+      m.atoms.splice(i, 1);
+      m.bonds = m.bonds
+        .filter((b) => b.a !== i && b.b !== i)
+        .map((b) => ({ ...b, a: b.a > i ? b.a - 1 : b.a, b: b.b > i ? b.b - 1 : b.b }));
+    }
+    return UNB.molHydrogens(m);
+  };
+  // a structure as a V2000 mol block (for RDKit: Clean up, a SMILES)
+  UNB.molBlock = function (mol) {
+    const f = (v, w) => v.toFixed(4).padStart(w),
+      i3 = (v) => String(v).padStart(3),
+      out = ["", "  Unbroken", "", `${i3(mol.atoms.length)}${i3(mol.bonds.length)}  0  0  0  0  0  0  0  0999 V2000`];
+    for (const a of mol.atoms)
+      out.push(`${f(a.x, 10)}${f(a.y, 10)}${f(0, 10)} ${a.el.padEnd(3)} 0  0  0  0  0  0  0  0  0  0  0  0`);
+    for (const b of mol.bonds) out.push(`${i3(b.a + 1)}${i3(b.b + 1)}${i3(b.order)}  0`);
+    const ch = mol.atoms.map((a, i) => [i + 1, a.q || 0]).filter(([, q]) => q);
+    for (let k = 0; k < ch.length; k += 8) {
+      const part = ch.slice(k, k + 8);
+      out.push(`M  CHG${i3(part.length)}` + part.map(([i, q]) => ` ${i3(i)} ${i3(q)}`).join(""));
+    }
+    out.push("M  END");
+    return out.join("\n");
+  };
 })(typeof window !== "undefined" ? window : globalThis);
