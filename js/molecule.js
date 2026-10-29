@@ -431,3 +431,58 @@ for (const e of MOL_EXAMPLES) {
   });
   $("molChips").appendChild(b);
 }
+
+// ---------- printing in pieces (pieces.js): the bonds as one piece, each atom's label as a piece of its own ----------
+// the molecule prints in pieces: a printer, labels to print apart, and the Plate card says so
+function moleculePiecesOn() {
+  const { r } = st.art.kind === "molecule" ? moleculeDrawn() : { r: null };
+  // (and the line traced: the pieces take its scale, px per mm)
+  return !!r && r.labels > 0 && !artForPlot() && $("molPieces").value === "apart" && st.bw > 0 && st.outW > 0;
+}
+// each piece as a region of the working image W (pipeline.js working): its strokes drawn a little wider than they
+// are drawn for the trace, so the line map found there is the piece's own. Bonds first, then the labels in atom order.
+function moleculeRegions(W) {
+  const { r, L } = moleculeDrawn();
+  if (!r) return [];
+  const groups = new Map();
+  r.owner.forEach((o, i) => {
+    if (!groups.has(o)) groups.set(o, []);
+    groups.get(o).push(i);
+  });
+  const { sx, sy, kx, ky } = W.crop,
+    lw = Math.max(3, L.lineWidth * kx * 1.6),
+    A = st.art.molecule.mol.atoms,
+    out = [];
+  for (const [o, idx] of [...groups].sort((p, q) => p[0] - q[0])) {
+    const c = document.createElement("canvas");
+    c.width = W.w;
+    c.height = W.h;
+    const g = c.getContext("2d", { willReadFrequently: true });
+    g.strokeStyle = "#000";
+    g.lineWidth = lw;
+    g.lineCap = g.lineJoin = "round";
+    for (const i of idx) {
+      const p = r.paths[i];
+      g.beginPath();
+      for (let k = 0; k < p.length; k += 2) {
+        const x = ((p[k] + L.m) * L.s - sx) * kx,
+          y = ((p[k + 1] + L.m) * L.s - sy) * ky;
+        k ? g.lineTo(x, y) : g.moveTo(x, y);
+      }
+      g.stroke();
+    }
+    const d = g.getImageData(0, 0, W.w, W.h).data,
+      mask = new Uint8Array(W.w * W.h);
+    for (let i = 0; i < mask.length; i++) mask[i] = d[4 * i + 3] > 40 ? 1 : 0;
+    const a = o >= 0 ? A[o] : null;
+    out.push({ name: a ? `${a.el}${a.h ? "H" + (a.h > 1 ? a.h : "") : ""}` : "bonds", mask });
+  }
+  return out;
+}
+$("molPieces").addEventListener("change", () => {
+  pieceMenuUI(); // pieces.js
+  drawPlate();
+  drawMini();
+  layersSoon(0);
+  readyUI();
+});

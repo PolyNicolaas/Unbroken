@@ -302,7 +302,9 @@ function drawPlate() {
   const res = paintPlate($("plate"), true);
   if (!res) {
     $("plateHint").textContent = piecesOn()
-      ? "Tracing each line of the text as a piece of its own…"
+      ? st.text
+        ? "Tracing each line of the text as a piece of its own…"
+        : "Tracing the bonds and each label as pieces of their own…"
       : "Trace something in the Line step first.";
     return;
   }
@@ -332,14 +334,15 @@ function drawPlate() {
 function piecePlateText(lay, pl, ok) {
   const k = lay.pieces.length,
     gap = fmt(+$("copyGap").value || 0, 1),
-    what = `${lay.copies} piece${lay.copies === 1 ? "" : "s"} (${lay.sets > 1 ? `${lay.sets} × ` : ""}${k} lines)`,
+    lines = st.text ? "lines" : "pieces: the bonds and the labels",
+    what = `${lay.copies} piece${lay.copies === 1 ? "" : "s"} (${lay.sets > 1 ? `${lay.sets} × ` : ""}${k} ${lines})`,
     rot = lay.angle ? ` Turned ${fmt(lay.angle, 0)}° to fit more.` : "";
   $("gOx").disabled = $("gOy").disabled = $("plateCenter").disabled = true;
   $("plateInfo").textContent =
     `${k} pieces · ${fmt(lay.w, 1)} × ${fmt(lay.h, 1)} mm${lay.angle ? ` · rotated ${fmt(lay.angle, 0)}°` : ""}`;
   $("plateHint").className = ok ? "hint" : "hint warn";
   $("plateHint").textContent = ok
-    ? `${what} fit, ${gap} mm apart. Each line prints as its own piece, one after another.${rot}`
+    ? `${what} fit, ${gap} mm apart. ${st.text ? "Each line prints as its own piece, one after another." : "The bonds print as one line, then each label as its own piece, in their places."}${rot}`
     : `Only ${lay.fits} of ${what} fit at ${gap} mm spacing.${rot} Lower the copies or spacing, or make the letters smaller.`;
   layersSoon();
 }

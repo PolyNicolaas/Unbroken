@@ -1,5 +1,5 @@
-Unbroken · web app build v117
-Built:  2026-10-29T18:34:26.764Z
+Unbroken · web app build v118
+Built:  2026-10-29T19:06:42.609Z
 Tests:  79 of 79 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
@@ -13,19 +13,19 @@ Files (sha1, first 12):
   340aeaecfe87  06-fourier.js
   e88cd163925f  07-measure.js
   d0cc374de0d6  08-shape.js
-  322bde11c0c0  09-plate.js
+  5a569698769c  09-plate.js
   5d6faec33c27  10-export.js
   2189b17474c4  11-stages.js
   59aaa64e2642  12-models.js
   135d6e45a412  13-patterns.js
   bf10b0415df9  14-photo.js
   c27f21ff6627  15-cutout.js
-  209b52f52585  16-molecule.js
+  b73cf618dae8  16-molecule.js
   fbe9bd9f73c7  core.js
   1f975b62211f  css/app.css
   0be9d7ad7cf8  css/theme.css
   666f911d2119  fonts.js
-  8e5c5850c82a  index.html
+  5bd1e6ad54f2  index.html
   4dd7d89a4755  js/art.js
   1c04bb0cbfd9  js/camera.js
   9f7ab1ddf14c  js/config.js
@@ -39,13 +39,13 @@ Files (sha1, first 12):
   6aa89b6e4e0e  js/levels.js
   7510c8db4a05  js/main.js
   a462e8546261  js/model.js
-  6f70efded623  js/molecule.js
+  a41987ff8905  js/molecule.js
   b36b65d45ac6  js/moleditor.js
   e8b1737911e5  js/notes.js
   911e52e413f3  js/optimize.js
   cdc36022946d  js/patterns.js
-  e11158a47338  js/pieces.js
-  10cd9f1951cd  js/pipeline.js
+  d465ab82cd70  js/pieces.js
+  128885501494  js/pipeline.js
   5458c5bf3df8  js/plot.js
   e1f5ad88a908  js/preview.js
   1d2e8acf56ee  js/readouts.js
@@ -56,7 +56,7 @@ Files (sha1, first 12):
   9bdbe1dadb94  js/testprint.js
   ffb18c999901  js/tools.js
   e651a30c34d9  js/ui.js
-  ea8a76378f00  js/views.js
+  d4898ba1df26  js/views.js
   e4da5cfb232b  js/workflow.js
   53b02936e233  js/zoom.js
   820b1b0ec74b  settings.js
