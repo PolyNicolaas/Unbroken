@@ -164,6 +164,10 @@ for (const id of ["infillMin", "fillMin"])
 // Trace). D: the design it's for, st itself or one piece of a text (pieces.js), anything with walk, w, h, crop, outW,
 // bw, spacing and final.
 async function layerLine(plan, D = st) {
+  // the levels set to Fill (levels.js, a printer): their blocks print solid, in the layers with no infill of their own
+  const lvMask = D === st ? levelFillMask() : null;
+  if ((!plan || !plan.pattern) && lvMask)
+    plan = { pattern: "lines", angle: 45, spacing: pxSpacing(D), minArea: 0, levels: true };
   if (!plan || !plan.pattern) return { final: D.final };
   const fill = plan.pattern,
     angle = plan.angle;
@@ -182,6 +186,7 @@ async function layerLine(plan, D = st) {
       st.zones,
       D.outW,
       plan.minArea,
+      plan.levels ? lvMask.key : null,
     ]);
   let m = layerLinesCache.get(walk);
   if (!m) layerLinesCache.set(walk, (m = new Map()));
@@ -199,6 +204,7 @@ async function layerLine(plan, D = st) {
       fillAngle: angle,
       fillSpacing: plan.spacing,
       fillMinArea: (plan.minArea || 0) / sc ** 2,
+      fillMask: plan.levels ? { mask: lvMask.mask, w: lvMask.w, h: lvMask.h } : null,
       termTol: CFG.engine.termTolerance,
       unx: +$("uncross").value,
       minGap: MIN_GAP_PX,
@@ -715,7 +721,7 @@ function litBeads(c, segs, layerOf) {
   g.globalAlpha = 1;
   // a layer at a time: its groove (the dark edge where beads meet) under it, then its beads by brightness, then one
   // light streak along their tops, so the colour steps never draw marks across a bead
-  for (let a = 0; a < m; ) {
+  for (let a = 0; a < m;) {
     let b = a;
     while (b < m && lay[order[b]] === lay[order[a]]) b++;
     const gp = new Path2D();

@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v121 · 2026-10-29
+
+- **Filled levels on a printer.** A level (grey or colour) set to **Fill** on a printer has its outline traced and
+  its inside printed solid, as part of the one continuous line, like the infill: only that level's blocks fill, the
+  other enclosed areas stay open. A printer's rows offer Trace, Fill and Skip (no pen settings: the fill is solid, one
+  line spacing apart). The Line step shows the outline; the fill is on the Print step's 3D layers and in the G-code,
+  in every layer without an infill of its own. A block too narrow for a row stays open.
+- Engine: `UNB.infill` takes an area mask (`areaMask`), `UNB.stageSignal` a `fillMask`. Tests E42, A43.
+
 ## v120 · 2026-10-29
 
 - **Colour levels.** The Levels card (was Grey levels; its slider is Blocks) has **Greys / Colours**: with Colours

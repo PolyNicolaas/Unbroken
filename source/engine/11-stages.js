@@ -277,7 +277,7 @@
       filled = 0,
       skipped = 0,
       tooFine = false;
-    if (opt && opt.fill && d > 0) {
+    if (opt && (opt.fill || opt.fillMask) && d > 0) {
       // fill the enclosed areas, as part of the same line
       const jmp = walk.jmp,
         tip = walk.tip,
@@ -287,9 +287,10 @@
         // 5% over the spacing, so the series' small wobble doesn't make the spacing step push the fill around
         rows: rows * 1.05,
         bridge: d,
-        pattern: opt.fill,
+        pattern: opt.fill || "lines",
         angle: opt.fillAngle || 0,
         minArea: opt.fillMinArea || 0,
+        areaMask: opt.fillMask || null, // (only these areas: the levels set to Fill, on a printer)
         fixed: (k) => jmp[k] || (k > 0 && jmp[k - 1]) || tip[k] || jd[k] < 2 * d,
       });
       filled = off.areas;

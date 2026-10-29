@@ -92,7 +92,7 @@ report.
 | [E22](#e22) | Pen fills: the areas the pen line closes off, hatched one pen per layer | gaps that don't close (or close too far), slivers that don't merge, fills that spill over a line into the next area, stop short or overlap the outline's ink, miss spots, or end up in the wrong layer | – |
 | [E23](#e23) | Models: STL slices become one fitted line per layer, stacked into a spiral | STL files read wrongly, slices that miss or break a loop, walls on the wrong side of the surface, separate parts or holes left out, layers that don't add up to the model's height, and seams between layers | – |
 | [E24](#e24) | 3D → 2D: a model drawn as lines, hidden lines removed | hidden edges drawn through the model, outlines lost on curved surfaces, the flat-face diagonals of a mesh drawn as lines, and a fold angle that doesn't thin the drawing | – |
-| [E25](#e25) | The engine's parts load in the same order everywhere, and share helpers only through 00-util.js | a part missing from the page or the worker, parts loaded in a different order in different places, and a part quietly using another part's private helper (which would break as soon as the files are reordered) | 0.2 s |
+| [E25](#e25) | The engine's parts load in the same order everywhere, and share helpers only through 00-util.js | a part missing from the page or the worker, parts loaded in a different order in different places, and a part quietly using another part's private helper (which would break as soon as the files are reordered) | – |
 | [E26](#e26) | Edge cases found in the October 2026 bug hunt stay fixed | NaN lines from a one-pixel drawing, straight lines measured as a dot, closed walks offset differently at their seam, open slices split in two, line ends that don't join across a grid boundary, padded STL files rejected, and small mm drawings or many small shapes that take seconds | – |
 | [E27](#e27) | Each field of the app's shared state is set by its owner | a file quietly changing state another file is responsible for, which is how stale views and "who changed this?" bugs start | – |
 | [E28](#e28) | G-code starts, stops and moves between copies the way choc OS does | a blob or a string of chocolate at the end of each copy, an empty needle at the start of the next, no purge line, and a plunger speed that ignores the needle | – |
@@ -100,14 +100,15 @@ report.
 | [E30](#e30) | Support: overhangs measured, and held up by the print's own wall (a flared skirt or a thin wall) | a model that reaches out over nothing without a warning, a support that still leaves a layer stepping out too far, a skirt that ends in the air under a thin arm, a support that leaves a slit beside the model or stands apart from it (the line would have to join a second loop on every layer), a skirt that shrinks an arm from its sides instead of bracing it back into the model, and a thin wall that fills the whole space under an overhang | – |
 | [E31](#e31) | Text pieces: a line map per line of text, different pieces packed on one plate, and pieces kept together | a line's letters missing from its own line map or leaking into another's, the whole text's line map changing, pieces placed over each other or off the plate when they'd fit, and pieces left out when they don't | – |
 | [E33](#e33) | Geometric art: every style draws the line it promises, and the one-line styles trace as one line | a pattern that crosses itself or touches where it promises an even gap, a closed style that doesn't close, a seed that doesn't give the same pattern again, and a one-line pattern the tracer breaks up or doubles | – |
-| [E34](#e34) | Grey levels: a picture as a few flat greys, their edges as lines, and the background removed from a tap | levels that miss a grey the picture has, specks that survive Smooth blocks, edges drawn where nothing is traced or missing round a traced block, a tapped background that isn't removed, and patterns made for plotting that break the printing limits or take too long | 1.3 s |
+| [E34](#e34) | Grey levels: a picture as a few flat greys, their edges as lines, and the background removed from a tap | levels that miss a grey the picture has, specks that survive Smooth blocks, edges drawn where nothing is traced or missing round a traced block, a tapped background that isn't removed, and patterns made for plotting that break the printing limits or take too long | – |
 | [E35](#e35) | Separate strokes: a line map as strokes the pen draws one by one | strokes broken up along a plain line, a junction that isn't split, a closed ring drawn as an open stroke, specks kept, strokes in an order that sends the pen back and forth, and points off the drawn line | – |
 | [E36](#e36) | Fills per grey: each grey level's blocks filled with its own style, inside its edges | a fill that strays outside its grey or onto the grey's edge, hatch rows at the wrong spacing or angle, cross-hatch without its second direction, rings that don't step in, a pattern that isn't cut to the grey, and a grey with no pixels that still draws | – |
 | [E37](#e37) | Photos: the page found in a photo, straightened, and cleaned for the line | a page in a photo not found or its corners off, the perspective not undone, a shadow left on the paper, ink lost or table left along the edges, a faint line not darkened, a page claimed in a photo with none, and an object's colour cast kept | – |
 | [E38](#e38) | Cut out the object: a box round it, and keep / remove strokes, give its mask | the floor an object stands on kept with it, the wall behind it kept, part of the object lost, a Remove stroke that doesn't remove, a Keep stroke that doesn't keep, and a box round the whole picture keeping everything | – |
 | [E39](#e39) | Molecules: atoms and bonds drawn as a skeletal formula | a double bond's second stroke outside its ring, carbons labelled, a hetero atom unlabelled, a bond running into its label's letters, the hydrogens on the side of the bonds, and RDKit's JSON read wrong | – |
 | [E40](#e40) | Editing a structure: bonds, rings, elements, hydrogens and the mol block | a new bond at an awkward angle or on top of an atom, a ring that doesn't fuse onto the bond or atom it was put on, an aromatic ring with two double bonds on one carbon, hydrogens that don't follow the bonds and charges, and a mol block RDKit can't read | – |
-| [E41](#e41) | Colour levels: a picture as a few flat colours, telling apart colours of the same brightness | a red and a green of the same brightness merged into one block (as greys they are one), colours out of order, a removed background coloured in, and blocks that don't hold their own pixels | 0.1 s |
+| [E41](#e41) | Colour levels: a picture as a few flat colours, telling apart colours of the same brightness | a red and a green of the same brightness merged into one block (as greys they are one), colours out of order, a removed background coloured in, and blocks that don't hold their own pixels | – |
+| [E42](#e42) | Infill on a mask: only the areas asked for are filled (a printer's filled levels) | a level set to Fill filling every enclosed area, or none, and the fill no longer one line with the outline | – |
 
 ### App tests
 
@@ -154,6 +155,7 @@ report.
 | [A40](#a40) | The Molecule input: a name or SMILES drawn as a skeletal formula, traced or plotted as drawn | the examples not drawing, a SMILES or a name not laid out, a wrong name not said so, a molecule made for a pen plotter traced instead of plotted as drawn, its SVG missing strokes, and a design file losing it | – |
 | [A41](#a41) | The structure editor: atoms, bonds, rings, elements and charges by tap and drag, Undo, Clean up, Use it | a tap or drag that doesn't add what it should, a bond that won't go double or triple, an element or charge that doesn't take, Erase or Undo doing nothing, Clean up not tidying, Cancel changing the molecule, and Use it not making the structure the Molecule input | – |
 | [A42](#a42) | Colour levels: a picture as flat colours, each block traced or filled with a pen of its own colour | the Colours switch not changing the blocks, blocks that aren't the picture's colours, a filled block's pen not starting with its colour, the SVG without it, and the switch lost by a design file | – |
+| [A43](#a43) | Filled levels on a printer: a block set to Fill prints solid inside its traced outline | a printer's Fill doing nothing, filling every enclosed area, offering the plotter's pen settings, or not reaching the layers and the G-code | 12.1 s |
 
 #### E01
 
@@ -474,6 +476,14 @@ report.
 - **Why:** Grey levels (v105) merge colours that are equally bright; colour levels (v120, Grey levels card: Colours) find the flat colours in Lab, where colours that look different are far apart (UNB.colourLevels), in the same shape as the grey levels, darkest first, so tracing their edges and filling them work the same, with each block's colour for its pen.
 - **How:** Draws white paper with a red and a green disc of about the same brightness and a dark blue square; asks for 4 grey levels and for 4 colour levels; then 3 colour levels with the green disc made paper white by the prep (three colours left) (as a removed background is).
 - **Pass when:** Greys: the red and green discs fall in one level (the reason for colours); colours: every disc and the square in a level of its own, each holding at least 98% of its pixels, the levels darkest first (blue first, paper last), each level's colour within 20 of the colour drawn; with the green disc white in the prep, its pixels go with the paper.
+
+#### E42
+
+**Infill on a mask: only the areas asked for are filled (a printer's filled levels)** · `engine/E42-infill-mask.test.js`
+
+- **Why:** On a printer a level set to Fill prints solid inside its traced outline (v121): the layers' infill (UNB.infill) is told which areas to fill with a mask of the level's blocks (areaMask), so the other enclosed areas stay open.
+- **How:** A closed line round two 100 × 100 px squares joined by a 6 px neck (narrower than the wall the infill keeps from a line, so two areas); fills it with rows 8 px apart three ways: no mask, a mask over the left square, a mask over neither.
+- **Pass when:** No mask: 2 areas filled; the left square's mask: 1, and every fill point on the left; no area on the mask: 0 filled, the line as it was; the filled line longer than the outline (the rows are in it).
 
 #### A01
 
@@ -802,6 +812,14 @@ report.
 - **Why:** Levels (Art step) can find flat colours instead of greys (v120, UNB.colourLevels): colours that are equally bright stay apart, and a filled block's pen starts with its own colour, so a plotter draws it in colour.
 - **How:** Opens the app with a photo of a teal vase on a wooden floor in front of a wall, makes it for a pen plotter, sets 4 levels and picks Colours. Sets the vase's level to Fill, then exports the SVG. Saves the design, picks Greys, opens the design again.
 - **Pass when:** Colours: the card says 4 colours, the swatches are colours (not greys), one of the blocks is the vase's teal (blue and green well over red); the vase's level filled: its pen is that teal, the SVG has a layer drawn in it; the design file brings Colours back; no page errors.
+
+#### A43
+
+**Filled levels on a printer: a block set to Fill prints solid inside its traced outline** · `app/A43-printer-level-fills.test.js`
+
+- **Why:** On a printer a level set to Fill (v121) has its outline traced and its inside printed solid, as part of the one continuous line: the layers' infill is given a mask of the level's blocks (UNB.infill areaMask), so only those areas fill.
+- **How:** Opens the still life (a printer), sets 4 levels and the darkest to Fill; looks at its row, the note, the layer line, the Print step's layers and the G-code. Then makes it for a pen plotter and back.
+- **Pass when:** Printer rows offer Trace, Fill and Skip (no Both) and no pen settings; Fill sets the mode to Both (outline and inside), the note says it prints solid on the Print step; the wall layer's line fills at least one area and is longer than the traced line, and fewer areas than with every area filled; the G-code exports; for a pen plotter the row has the pen settings; no page errors.
 
 <!-- catalogue:end -->
 

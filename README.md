@@ -193,7 +193,8 @@ is **Trace** (its edges are lines) or **Skip**; the line map is the edges betwee
 (`UNB.levelEdges`), and the trace style and ink threshold are hidden. Making it for a pen plotter, a grey can also be
 **Fill** or **Both**: its blocks filled with its own style (hatch, cross-hatch, rings, or the Pattern card's pattern),
 spacing, angle and pen, on its own layer (`UNB.levelFills`; the blocks are the grey's own pixels, so a fill stops at
-its edges whether or not they're traced). Fills draw with Separate strokes. Tests E36, A34.
+its edges whether or not they're traced). Fills draw with Separate strokes. On a printer, **Fill** traces a level's outline and prints its inside solid,
+part of the one line (the layers' infill with an area mask, `UNB.infill` areaMask; tests E42, A43). Tests E36, A34.
 Tests E34, A32.
 
 **Editing the line by hand** is left to drawing apps: export the SVG from the 2D tab, fix it in Illustrator, Affinity or

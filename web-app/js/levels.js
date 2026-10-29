@@ -59,8 +59,8 @@ function levelModes() {
   const n = levelCount(),
     m = $("levelModes").value;
   const ok = m.length === n && /^[tfbs]*$/.test(m) ? m : defaultModes(n);
-  // a printer has no fills: Fill is skipped, Both traced
-  return artForPlot() ? ok : ok.replace(/f/g, "s").replace(/b/g, "t");
+  // a printer fills inside an outline: its Fill is Both (the edges traced, the inside printed solid)
+  return artForPlot() ? ok : ok.replace(/f/g, "b");
 }
 // the settings the prep and the trace need (settings() in source.js), or null when off
 const levelColour = () => $("levelColours").checked;
@@ -76,6 +76,21 @@ const levelHex = (j) => {
 };
 // which greys' edges are lines (lineSpec in pipeline.js)
 const levelEdgeFlags = () => [...levelModes()].map((c) => c === "t" || c === "b");
+// a printer: the blocks of the levels set to Fill, as a mask of the working image (pipeline.js working), for the
+// layers' solid fill (layers.js layerLine); null when there are none or the prep isn't the current one
+let levelMaskCache = null;
+function levelFillMask() {
+  if (artForPlot() || !levelCount() || !st.wk || !st.wk.levels) return null;
+  const modes = levelModes();
+  if (!modes.includes("b")) return null;
+  const W = st.wk,
+    key = W.key + "|" + modes;
+  if (levelMaskCache && levelMaskCache.key === key) return levelMaskCache;
+  const on = [...modes].map((c) => c === "b"),
+    mask = new Uint8Array(W.w * W.h);
+  for (let i = 0; i < mask.length; i++) mask[i] = on[W.levels.lab[i]] ? 1 : 0;
+  return (levelMaskCache = { key, mask, w: W.w, h: W.h });
+}
 // the greys filled (Fill or Both), with their fills: [{ level, style, spacing, angle, color }]
 const levelFillList = () => {
   const specs = levelFillSpecs();
@@ -99,7 +114,11 @@ function levelsUI() {
     plot = artForPlot(),
     specs = levelFillSpecs();
   if (plot) $("levelModes").value = modes; // (a printer's view of the modes doesn't overwrite the plotter's)
-  $("levelFillNote").hidden = !(plot && /[fb]/.test(modes) && lineModeNow() !== "strokes");
+  const fillsNow = /[fb]/.test(modes);
+  $("levelFillNote").hidden = !fillsNow || (plot && lineModeNow() === "strokes");
+  $("levelFillNote").textContent = plot
+    ? "Fills are drawn with Separate strokes (the switch at the top of the Line step); with one continuous line only the traced edges are plotted."
+    : "A filled block prints solid inside its traced outline, as part of the one line: on the Print step's 3D layers (the Line step shows the outline). A block too narrow for a row stays open.";
   // each grey's tone and share, from the last prep (st.wk.levels); until then, evenly spread greys
   const L =
       st.wk && st.wk.levels && st.wk.levels.tones.length === n && !!st.wk.levels.colours === levelColour()
@@ -127,7 +146,10 @@ function levelsUI() {
     seg.className = "seg mini";
     seg.setAttribute("role", "radiogroup");
     seg.setAttribute("aria-label", `Grey ${j + 1}`);
-    for (const [v, label, tip] of LEVEL_MODES.filter(([v]) => plot || v === "t" || v === "s")) {
+    // (a printer: Trace, Fill (its outline traced, its inside solid), Skip)
+    for (const [v, label0, tip0] of LEVEL_MODES.filter(([v]) => plot || v !== "f")) {
+      const label = !plot && v === "b" ? "Fill" : label0,
+        tip = !plot && v === "b" ? "Its outline traced and its inside printed solid, one continuous line" : tip0;
       const id = `level${j}${v}`,
         r = document.createElement("input");
       Object.assign(r, { type: "radio", name: `level${j}`, id, value: v, checked: modes[j] === v });
@@ -147,7 +169,7 @@ function levelsUI() {
     }
     row.append(sw, name, seg);
     box.appendChild(row);
-    if (modes[j] === "f" || modes[j] === "b") box.appendChild(fillRow(j, specs[j]));
+    if (plot && (modes[j] === "f" || modes[j] === "b")) box.appendChild(fillRow(j, specs[j])); // (a printer's is solid)
   }
 }
 // a filled grey's own settings, under its row: style, spacing (mm), angle, pen colour
