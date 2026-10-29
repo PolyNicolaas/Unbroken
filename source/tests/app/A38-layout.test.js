@@ -50,8 +50,25 @@ module.exports = {
     checks.push(check("Print step: Export G-code in the Next bar downloads the G-code", +/gcode/i.test(dl.suggestedFilename()), "==", 1));
     await L.page.click("[data-notice] .notice-x"); await L.page.reload(); await A.idle(L.page, 1500);
     checks.push(check("a notice closed stays closed after a reload", +(await L.page.evaluate(() => document.querySelector("[data-notice]").hidden)), "==", 1));
+    // v119: More print settings folded away (and remembered), the speed in the View menu, the printer's Line step
+    const vis = (sel) => L.page.isVisible(sel);
+    await A.print(L.page); await A.idle(L.page, 1500);
+    const folded = !(await vis("#baseLayers")) && !(await vis("#card-h-test"));
+    await L.page.click("#morePrintBtn"); await L.page.waitForTimeout(200);
+    const opened = (await vis("#card-h-base")) && (await vis("#card-h-test")) && (await vis("#card-h-profile"));
+    await L.page.reload(); await A.idle(L.page, 1500);
+    const kept = await L.page.evaluate(() => document.body.dataset.moreprint === "1");
+    await L.page.evaluate(() => { try { localStorage.clear(); } catch {} });
+    checks.push(check("Print: Base, Infill, Fine-tuning, Test print, Printer profile folded under More print settings; opened; remembered", +(folded && opened && kept), "==", 1));
+    checks.push(check("the play speed in the View menu, not the toolbar", +(!(await vis("#speed")) && (await L.page.evaluate(() => !!$("speed").closest("#viewMenu")))), "==", 1));
+    await L.page.click("label[for=viewDesign]"); await A.idle(L.page, 400);
+    checks.push(check("a printer's Line step: no Line card (one continuous line, nothing to choose)", +!(await vis("#card-h-src")), "==", 1));
     checks.push(check("laptop: page errors", L.errors.length, "==", 0));
     await L.close();
+    // the empty start: the preview has the examples, the Input card only what to start from
+    const E = await A.open(ctx, { clean: true, art: true, folded: true, viewport: { width: 1300, height: 900 } });
+    checks.push(check("empty: the Input card without examples or the drop zone (the preview has them)", +(!(await E.page.isVisible("#examplesRow")) && !(await E.page.isVisible("#dropZone")) && (await E.page.isVisible("#emptyState [data-example=leaf]"))), "==", 1));
+    await E.close();
     return { checks };
   },
 };

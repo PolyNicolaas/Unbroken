@@ -17,14 +17,14 @@ module.exports = {
     const want = { leaf: "picture", still: "picture", face: "picture", shapes: "picture", smiley: "picture", labyrinth: "pattern", spirograph: "pattern", portrait: "pattern", lettering: "text", theobromine: "molecule", vase: "model" };
     let right = 0; const wrong = [];
     for (const [k, kind] of Object.entries(want)) {
-      await page.click(`#examplesRow [data-example=${k}]`); await A.idle(page, 1500);
+      await page.click(`[data-examples] [data-example=${k}]:visible`); await A.idle(page, 1500);
       const got = await page.evaluate(() => ({ kind: st.art.kind, empty: document.body.dataset.empty, sample: st.art.picture && st.art.picture.sample, style: st.art.pattern.style }));
       const ok = got.kind === kind && got.empty === "" && (kind !== "picture" || got.sample === k) && (k !== "portrait" || got.style === "wavesTone");
       if (ok) right++; else wrong.push(`${k}: ${JSON.stringify(got)}`);
     }
     checks.push(check("examples that become their input", right, "==", 11));
-    await page.click("#examplesRow [data-example=portrait]"); await A.idle(page, 1500);
-    await page.click("#examplesRow [data-example=leaf]"); await A.idle(page, 1500);
+    await page.click("[data-examples] [data-example=portrait]:visible"); await A.idle(page, 1500);
+    await page.click("[data-examples] [data-example=leaf]:visible"); await A.idle(page, 1500);
     checks.push(check("the Leaf after the Wave portrait: the Picture in use", await page.evaluate(() => st.art.kind), "==", "picture"));
     checks.push(check("page errors", errors.length, "==", 0));
     await close();

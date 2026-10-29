@@ -38,13 +38,13 @@ module.exports = {
     // a pen plotter: the labyrinth starts as drawn
     const P = await A.open(ctx, { art: true });
     await P.page.click("label[for=artForPlot]"); await A.idle(P.page, 1000);
-    await P.page.click("#examplesRow [data-example=labyrinth]"); await A.idle(P.page, 2000);
+    await P.page.click("[data-examples] [data-example=labyrinth]:visible"); await A.idle(P.page, 2000);
     const lab = await P.page.evaluate(() => ({ on: $("traceOn").checked, mode: lineModeNow(), stage: document.body.dataset.stage }));
     await P.page.click(".trace-switch"); await A.idle(P.page, 3000);
     const lab2 = await P.page.evaluate(() => ({ mode: lineModeNow(), n: st.sepStrokes && st.sepStrokes.strokes.length }));
     checks.push(check("plotter, labyrinth: starts with Trace off (as drawn, the page)", +(!lab.on && lab.mode === "drawn" && lab.stage === "page"), "==", 1), check("… Trace on: traced into strokes", lab2.mode === "strokes" ? lab2.n : 0, ">=", 1));
     // a 3D model: always sliced
-    await P.page.click("#examplesRow [data-example=vase]"); await A.idle(P.page, 3000);
+    await P.page.click("[data-examples] [data-example=vase]:visible"); await A.idle(P.page, 3000);
     checks.push(check("3D model: Trace on and fixed", +((await P.page.isChecked("#traceOn")) || (await P.page.evaluate(() => lineModeNow())) === "one") * +(await P.page.isDisabled("#traceOn")), "==", 1));
     checks.push(check("page errors", errors.length + P.errors.length, "==", 0));
     await P.close(); await close();

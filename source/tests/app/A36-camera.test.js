@@ -56,7 +56,7 @@ module.exports = {
     await page.click("#camRetake"); await A.idle(page, 500);
     checks.push(check("Page corners: the corners open; Cancel leaves the picture", +(ed.open && ed.mode === "edit" && ed.from === "picture" && (await page.evaluate(() => $("camera").hidden)) && (await page.evaluate(() => st.art.picture.canvas.__art)) === before), "==", 1));
     // an image chosen, cleaned up as a photo
-    await page.click("#examplesRow [data-example=leaf]"); await A.idle(page, 1500);
+    await page.click("[data-examples] [data-example=leaf]:visible"); await A.idle(page, 1500);
     await page.click("#picPhoto"); await page.waitForTimeout(300);
     const msg = await page.textContent("#camMsg");
     // the corners are the photo's own corners: each must be grabbable (not under the message or the buttons)

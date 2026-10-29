@@ -3,6 +3,18 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v119 · 2026-10-29
+
+- **A shorter Print step**: Printer, Plate, Layers and Export, then **More print settings** (Base, Infill,
+  Fine-tuning, Test print, the printer profile) folded away under one button, remembered in this browser. A link to
+  one of them (the ready list) opens it.
+- **No doubled start**: while the app is empty, the Input card shows only what to start from (the preview has the
+  examples, Take a picture and the file choice).
+- **The play speed is in the View menu**: the toolbar has Trace, Play, Undo / Redo, File and View.
+- **A printer's Line step has no Line card**: a printer makes one continuous line, so there's nothing to choose (with
+  Trace off it shows, to say so).
+- Tests: A38 checks these; A12, A22, A33 and the tests that start empty follow them.
+
 ## v118 · 2026-10-29
 
 - **A molecule prints in pieces** (Print step, Plate card: Molecule, Bonds and labels apart, the default): the bonds

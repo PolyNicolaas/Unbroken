@@ -17,7 +17,7 @@ module.exports = {
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { clean: true, art: true }), checks = [];
     await offline(page);
-    await page.click("#examplesRow [data-example=theobromine]"); await A.idle(page, 4000);
+    await page.click("[data-examples] [data-example=theobromine]:visible"); await A.idle(page, 4000);
     const t = await page.evaluate(() => ({ kind: st.art.kind, n: st.art.molecule.mol.atoms.length, chip: $("chip").textContent }));
     checks.push(check("Theobromine: the Molecule in use, 13 atoms, traced", +(t.kind === "molecule" && t.n === 13 && /terms/.test(t.chip)), "==", 1));
     // printed in pieces: the bonds, then each label, in their places (pieces.js, Plate card: Molecule)
@@ -47,7 +47,7 @@ module.exports = {
     // a design file
     const [df] = await Promise.all([page.waitForEvent("download"), page.click("#fileMenu summary").then(() => page.click("#saveDesign"))]);
     const file = await df.path();
-    await page.click("label[for=viewArt]"); await page.click("#examplesRow [data-example=leaf]"); await A.idle(page, 1500);
+    await page.click("label[for=viewArt]"); await page.click("[data-examples] [data-example=leaf]:visible"); await A.idle(page, 1500);
     await page.setInputFiles("#designFile", file); await A.idle(page, 3000);
     checks.push(check("design file: the molecule back", +(await page.evaluate(() => st.art.kind === "molecule" && st.art.molecule.name === "caffeine" && st.art.molecule.mol.atoms.length === 14)), "==", 1));
     checks.push(check("page errors", errors.filter((e) => !/404/.test(e)).length, "==", 0));

@@ -11,7 +11,7 @@ module.exports = {
     const ink = (sel) => page.$eval(sel, (c) => { const d = c.getContext("2d").getImageData(0, 0, c.width, c.height).data; let n = 0; for (let i = 0; i < d.length; i += 4) if (d[i + 3] > 0 && d[i] + d[i + 1] + d[i + 2] < 600) n++; return n; });
     const pic = (sel) => page.$eval(sel, (c) => c.toDataURL().length + ":" + c.toDataURL().slice(-200));
     const playPartway = async (sel) => {
-      await page.selectOption("#speed", "4"); await page.click("#play"); await page.waitForTimeout(1300);
+      await page.evaluate(() => { $("speed").value = "4"; $("speed").dispatchEvent(new Event("change", { bubbles: true })); }); await page.click("#play"); await page.waitForTimeout(1300); // (speed: in the View menu since v119)
       const mid = await ink(sel); await page.waitForFunction(() => !st.playing, null, { timeout: 15000 }); await page.waitForTimeout(200);
       return [mid, await ink(sel)];
     };

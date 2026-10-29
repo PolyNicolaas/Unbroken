@@ -39,7 +39,7 @@ module.exports = {
     await page.setInputFiles("#designFile", file); await page.waitForFunction(() => st.cutout && st.cutout.mask && !CUT.busy, null, { timeout: 20000 }).catch(() => {});
     const back = await page.evaluate(() => st.cutout && { box: st.cutout.box, mask: !!st.cutout.mask, share: st.cutout.share });
     checks.push(check("Remove the cut-out, then the design file: the cut-out back with its mask", +(cleared && back && back.mask && JSON.stringify(back.box) === JSON.stringify(box0) && Math.abs(back.share - s.share) < 0.05), "==", 1));
-    await page.click("#examplesRow [data-example=leaf]"); await A.idle(page, 2000);
+    await page.click("[data-examples] [data-example=leaf]:visible"); await A.idle(page, 2000);
     checks.push(check("a new picture: no cut-out", +(await page.evaluate(() => !cutoutOn() && $("cutVal").textContent === "off")), "==", 1));
     checks.push(check("page errors", errors.length, "==", 0));
     await close();

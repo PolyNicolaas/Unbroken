@@ -51,7 +51,7 @@ module.exports = {
     // fills per grey
     const F = await A.open(ctx, { art: true });
     await F.page.click("label[for=artForPlot]"); await A.idle(F.page, 800);
-    await F.page.click("#examplesRow [data-example=still]"); await A.idle(F.page, 2000);
+    await F.page.click("[data-examples] [data-example=still]:visible"); await A.idle(F.page, 2000);
     await A.setValue(F.page, "#levels", 5); await A.idle(F.page, 3000); // (Grey levels: the Art step since v113)
     await F.page.click("label[for=level0b]"); await A.idle(F.page, 1500); await F.page.click("label[for=level1f]"); await A.idle(F.page, 2500);
     const fl = await F.page.evaluate(() => (st.sepStrokes.fills || []).map((f) => f.strokes.length));
