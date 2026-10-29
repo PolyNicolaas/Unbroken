@@ -69,7 +69,10 @@
                       fitMix, mixCost, makeFlow, markStroke, UNB.cutout
     16-molecule.js 15. Molecules — atoms and bonds (a SMILES laid out by RDKit, or drawn) → a skeletal formula: bonds as
                       strokes (double and triple as parallel strokes), the other atoms' letters with their hydrogens.
-                      ELEMENTS, UNB.molFromRDKit, ringOf, segOutside, UNB.molecule
+                      ELEMENTS, UNB.molFromRDKit, ringOf, segOutside, UNB.molecule; editing: molCopy, bondLen,
+                      UNB.molBondLength, bondAt, molNbrs, VALENCE, valences, UNB.molHydrogens, UNB.molHit, freeDir,
+                      atomAt, molLink, UNB.molGrow, UNB.molRing, UNB.molCycleBond, UNB.molSetAtom, UNB.molErase,
+                      UNB.molBlock
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.

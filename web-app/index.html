@@ -33,6 +33,40 @@
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
         <div class="chip" id="chip">loading…</div>
+        <div class="moled" id="molEd" hidden role="dialog" aria-modal="true" aria-label="Draw a structure">
+          <div class="me-top">
+            <div class="seg small me-tools" role="radiogroup" aria-label="Tool">
+              <input type="radio" name="meTool" id="meTbond" value="bond" checked><label for="meTbond" title="Tap to place an atom, drag from an atom to draw a bond, tap a bond to make it double or triple">Bond</label>
+              <input type="radio" name="meTool" id="meTbenzene" value="benzene"><label for="meTbenzene" title="A benzene ring: tap a space, an atom (it hangs off it) or a bond (fused on it)">⌬ Benzene</label>
+              <input type="radio" name="meTool" id="meTring6" value="ring6"><label for="meTring6" title="A six-membered ring, all single bonds">Ring 6</label>
+              <input type="radio" name="meTool" id="meTring5" value="ring5"><label for="meTring5" title="A five-membered ring">Ring 5</label>
+              <input type="radio" name="meTool" id="meTerase" value="erase"><label for="meTerase" title="Tap an atom or a bond to take it away">Erase</label>
+            </div>
+            <div class="me-els" role="radiogroup" aria-label="Element: tap an atom to make it this">
+              <input type="radio" name="meEl" id="meEC" value="C" checked><label for="meEC">C</label>
+              <input type="radio" name="meEl" id="meEN" value="N"><label for="meEN">N</label>
+              <input type="radio" name="meEl" id="meEO" value="O"><label for="meEO">O</label>
+              <input type="radio" name="meEl" id="meES" value="S"><label for="meES">S</label>
+              <input type="radio" name="meEl" id="meEP" value="P"><label for="meEP">P</label>
+              <input type="radio" name="meEl" id="meEF" value="F"><label for="meEF">F</label>
+              <input type="radio" name="meEl" id="meECl" value="Cl"><label for="meECl">Cl</label>
+              <input type="radio" name="meEl" id="meEBr" value="Br"><label for="meEBr">Br</label>
+              <input type="radio" name="meEl" id="meEI" value="I"><label for="meEI">I</label>
+              <input type="radio" name="meEl" id="meEplus" value="+"><label for="meEplus" title="Tap an atom: one more positive charge">+</label>
+              <input type="radio" name="meEl" id="meEminus" value="-"><label for="meEminus" title="Tap an atom: one more negative charge">−</label>
+            </div>
+          </div>
+          <canvas id="meView" aria-label="The structure being drawn"></canvas>
+          <p class="me-msg" id="meMsg" role="status"></p>
+          <div class="me-bar">
+            <button class="btn" type="button" id="meUndo">Undo</button>
+            <button class="btn" type="button" id="meClean" title="Lay the structure out again, tidily (RDKit, the chemistry toolkit)">Clean up</button>
+            <button class="btn" type="button" id="meClear">Clear</button>
+            <span class="me-gap"></span>
+            <button class="btn" type="button" id="meCancel">Cancel</button>
+            <button class="btn primary" type="button" id="meDone">Use it</button>
+          </div>
+        </div>
         <div class="camera" id="camera" data-mode="live" hidden role="dialog" aria-modal="true" aria-label="Take a picture">
           <video id="camVideo" playsinline muted autoplay></video>
           <canvas id="camStill" aria-label="The photo taken: drag its corners onto the page's corners"></canvas>
@@ -477,11 +511,12 @@
       <h2 id="h-mol">Molecule <span id="molVal"></span></h2>
       <form class="mol-form" id="molForm" autocomplete="off">
         <input type="text" id="molIn" spellcheck="false" autocapitalize="off" placeholder="a name (caffeine) or a SMILES" aria-label="A molecule's name or SMILES" aria-describedby="molMsg">
-        <button class="btn primary" type="submit" id="molGo">Draw</button>
+        <button class="btn primary" type="submit" id="molGo">Look up</button>
       </form>
+      <div class="inline"><button class="btn" type="button" id="molEdit" title="Draw a structure by hand, or change the one shown: atoms, bonds, rings, elements">Draw or edit…</button></div>
       <p class="status" id="molMsg" role="status"></p>
       <div class="examples"><span class="name">Examples</span><div class="chips" id="molChips"></div></div>
-      <p class="hint help">A chemical structure drawn as a skeletal formula: bonds as lines (double and triple bonds as parallel lines, a ring's double bonds inside the ring), carbons implied, every other atom as its letters with its hydrogens, in the single-stroke font. Type a SMILES (CCO, c1ccccc1) or a name (caffeine, theobromine): names are looked up on PubChem, and RDKit, the chemistry toolkit, lays it out (loaded the first time, about 7 MB; both need the internet; the examples don't). Like text and patterns it is exact lines: plotted as drawn with Trace off, or traced into one line for chocolate. Its bonds start long enough that a double bond's two lines are the line spacing apart.</p>
+      <p class="hint help">A chemical structure drawn as a skeletal formula: bonds as lines (double and triple bonds as parallel lines, a ring's double bonds inside the ring), carbons implied, every other atom as its letters with its hydrogens, in the single-stroke font. Type a SMILES (CCO, c1ccccc1) or a name (caffeine, theobromine), or Draw or edit… to draw one by hand or change the one shown (tap to place an atom, drag from an atom for a bond, tap a bond for double or triple; rings; elements and charges; Clean up tidies the layout). Names are looked up on PubChem, and RDKit, the chemistry toolkit, lays it out (loaded the first time, about 7 MB; both need the internet; the examples don't). Like text and patterns it is exact lines: plotted as drawn with Trace off, or traced into one line for chocolate. Its bonds start long enough that a double bond's two lines are the line spacing apart.</p>
     </section>
     <section class="card art-only art-model" aria-labelledby="h-model">
       <h2 id="h-model">3D model</h2>
@@ -831,6 +866,7 @@
 <script src="js/plot.js"></script>
 <script src="js/workflow.js"></script>
 <script src="js/molecule.js"></script>
+<script src="js/moleditor.js"></script>
 <script src="js/examples.js"></script>
 <script src="js/camera.js"></script>
 <script src="js/steppers.js"></script>

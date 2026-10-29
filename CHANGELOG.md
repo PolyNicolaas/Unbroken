@@ -3,6 +3,19 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v117 · 2026-10-29
+
+- **The structure editor** (Molecule card, Draw or edit…): draw a structure by hand, or change the one shown, on the
+  preview (full screen on a phone). Tap a space to place a carbon; drag from an atom to draw a bond (at 30° steps,
+  onto another atom to join them); tap an atom to grow the chain the free way; tap a bond to make it double, triple,
+  then single again. **Benzene**, **Ring 6** and **Ring 5**: tap a space, an atom (the ring hangs off it) or a bond
+  (fused on it; an aromatic ring's double bonds go where there's room). The element strip (C N O S P F Cl Br I) makes a
+  tapped atom that element; + and − add a charge. Hydrogens follow the bonds and charges. **Erase**, **Undo**
+  (Ctrl/⌘ Z), **Clear**; **Clean up** lays it out again tidily with RDKit and gives its SMILES. **Use it** makes it the
+  Molecule input; Cancel leaves the molecule as it was. The search button is Look up now.
+- Engine: `UNB.molGrow`, `UNB.molRing`, `UNB.molCycleBond`, `UNB.molSetAtom`, `UNB.molErase`, `UNB.molHydrogens`,
+  `UNB.molHit`, `UNB.molBlock` (16-molecule.js). Tests E40, A41.
+
 ## v116 · 2026-10-29
 
 - **Molecule**, a fifth input on the Art step (experimental): a chemical structure drawn as a skeletal formula. Bonds

@@ -143,7 +143,10 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   [Geometric art](#geometric-art)).
 - **Molecule** (`web-app/js/molecule.js`, engine `16-molecule.js`; [`docs/CHEM-PLAN.md`](docs/CHEM-PLAN.md)): a
   chemical structure as a skeletal formula, from a SMILES or a name (PubChem), laid out by RDKit (loaded from a CDN when
-  first needed); the examples come laid out. Exact lines, like a pattern: plotted as drawn or traced. Tests E39, A40.
+  first needed); the examples come laid out. **Draw or edit…** opens the structure editor on the preview
+  (`web-app/js/moleditor.js`): tap for atoms, drag for bonds, tap a bond for double or triple, rings, elements and
+  charges, Erase, Undo, Clean up (RDKit). Exact lines, like a pattern: plotted as drawn or traced. Tests E39, E40, A40,
+  A41.
 - **3D model**: an STL (or the sample vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
   makes its line drawing the picture to trace.
 
