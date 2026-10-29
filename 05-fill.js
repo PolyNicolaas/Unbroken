@@ -23,7 +23,8 @@
   // width makes the fill solid, more than d sparse; the first ring sits at least 0.7 d from the printed line), pattern,
   // angle (lines, degrees), bridge (width of the joins, default d: a sparse fill keeps them one line spacing), minArea
   // (px²: smaller
-  // areas are left open), fixed(i) → true
+  // areas are left open), areaMask ({ mask, w, h, share }: only areas at least share (0.5) on the mask are filled),
+  // fixed(i) → true
   // for path points a fill may not join at. Returns { x, y, idx } with the fills spliced in (fill points have idx -1)
   // and areas / skipped: how many areas were filled, and how many were left open as too small.
   UNB.infill = function (path, d, opt) {
@@ -65,11 +66,19 @@
     const outside = lab[0] >= 0 ? lab[0] : -2,
       size = new Float64Array(nl),
       deep = new Float32Array(nl);
+    // (areaMask: { mask, w, h } in the path's px: only areas mostly on it are filled, e.g. the grey levels set to Fill)
+    const M = o.areaMask,
+      onMask = M ? new Float64Array(nl) : null;
     for (let s = 0; s < w * h; s++) {
       const a = lab[s];
       if (a < 0) continue;
       size[a] += g * g;
       if (dist[s] > deep[a]) deep[a] = dist[s];
+      if (M) {
+        const X = Math.round(ox + (s % w) * g),
+          Y = Math.round(oy + Math.floor(s / w) * g);
+        if (X >= 0 && Y >= 0 && X < M.w && Y < M.h && M.mask[Y * M.w + X]) onMask[a] += g * g;
+      }
     } // each area: px², and how far in it goes
     let skipped = 0;
     const toXY = (gx, gy) => [ox + gx * g, oy + gy * g];
@@ -307,7 +316,7 @@
         done[root] = 1;
         const R = L[root];
         for (;;) {
-          for (let grew = true; grew; ) {
+          for (let grew = true; grew;) {
             grew = false;
             for (let i = 0; i < L.length; i++) {
               if (done[i]) continue;
@@ -339,6 +348,7 @@
     const fills = [];
     for (let id = 0; id < nl; id++) {
       if (id === outside) continue;
+      if (M && onMask[id] < (M.share || 0.5) * size[id]) continue; // not one of the areas asked for
       if (deep[id] * g < first) continue; // too narrow for even one ring
       if (o.minArea > 0 && size[id] < o.minArea) {
         skipped++;
