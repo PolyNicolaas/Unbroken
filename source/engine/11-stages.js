@@ -9,7 +9,8 @@
 
   // RGBA pixels → the working image, as the app does it: prepared gray (UNB.prep, then inverted for light lines on
   // dark), the same blurred for tracing, and a gray RGBA copy for the preview. o: { prep, invert, blur (sigma, px),
-  // levels ({ count, smooth }: grey levels, UNB.levels; the picture becomes flat greys, not blurred) }. Returns gray,
+  // levels ({ count, smooth, colour }: grey levels, UNB.levels, or colour levels, UNB.colourLevels; the picture becomes flat
+  // greys, not blurred) }. Returns gray,
   // blurred, preview, levels (UNB.levels' result or null).
   // Runs in a worker so a big image doesn't freeze the page.
   UNB.stagePrep = function (rgba, w, h, o) {
@@ -18,11 +19,22 @@
       preview = new Uint8ClampedArray(4 * N);
     if (o.invert) for (let i = 0; i < N; i++) gray[i] = 255 - gray[i];
     // grey levels: the picture as flat greys from here on (lab: level per pixel, for the line map and the fills)
-    const L = o.levels && o.levels.count >= 2 ? UNB.levels(gray, w, h, o.levels) : null;
+    // (colour levels: flat colours, from the colours under the prepared greys; the preview shows them)
+    const L =
+      o.levels && o.levels.count >= 2
+        ? o.levels.colour
+          ? UNB.colourLevels(rgba, w, h, gray, o.levels)
+          : UNB.levels(gray, w, h, o.levels)
+        : null;
     if (L) gray = Float32Array.from(L.lab, (j) => L.tones[j]);
     for (let i = 0; i < N; i++) {
       const v = o.invert ? 255 - gray[i] : gray[i];
-      preview[4 * i] = preview[4 * i + 1] = preview[4 * i + 2] = v;
+      if (L && L.colours) {
+        const c = L.colours[L.lab[i]];
+        preview[4 * i] = c[0];
+        preview[4 * i + 1] = c[1];
+        preview[4 * i + 2] = c[2];
+      } else preview[4 * i] = preview[4 * i + 1] = preview[4 * i + 2] = v;
       preview[4 * i + 3] = 255;
     }
     return { gray, blurred: L ? gray : UNB.blur(gray, w, h, o.blur || 0), preview, levels: L };
