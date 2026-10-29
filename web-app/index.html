@@ -84,7 +84,7 @@
       </div>
       <div class="toolbar">
         <label class="trace-switch" title="Trace on: the art becomes the line (Line step: one continuous line or separate strokes). Off: the art as it is, nothing traced: a pattern or text plots as its exact lines; a picture shows as the picture"><input type="checkbox" role="switch" id="traceOn" checked><span class="ts-track" aria-hidden="true"></span><span>Trace</span></label>
-        <button class="btn primary" id="play" type="button" title="Watch it being drawn: the circles drawing the line, the pen drawing the page, or the layers stacking up">Play drawing</button>
+        <button class="btn primary" id="play" type="button" title="Watch it being drawn: the circles drawing the line, the pen drawing the page, or the layers stacking up">Play<span class="pl-long"> drawing</span></button>
         <select id="speed" aria-label="Animation speed">
           <option value="24">Slow</option>
           <option value="10" selected>Normal</option>
@@ -99,6 +99,7 @@
           <div class="viewpanel menu" role="menu" aria-label="Design file">
             <button class="mitem" type="button" role="menuitem" id="saveDesign" title="Download this design as one file: the image or text, every setting, painted areas and erasing">Save design<small>one .unbroken.json file with the image or text and every setting (a big image takes a moment)</small></button>
             <button class="mitem" type="button" role="menuitem" id="openDesign" title="Open a design file saved from this app">Open design…<small>or drop the file on the page</small></button>
+            <button class="mitem" type="button" role="menuitem" id="notesOpen" title="Ideas and bugs, kept with the app">Suggestion box…<small><span id="notesMenuCount">notes</span> · ideas, bugs, anything to improve</small></button>
           </div>
         </details>
         <input type="file" id="designFile" accept=".json,application/json" hidden>
@@ -382,35 +383,35 @@
       <div class="inline"><button class="btn primary" type="button" id="picCamera" title="A drawing, a print or anything else, with the camera: the page is found and straightened">Take a picture</button><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
       <input type="file" id="picFile" accept="image/*" hidden>
       <input type="file" id="camFile" accept="image/*" capture="environment" hidden>
+      <div class="photo-box" id="photoBox">
+        <div class="lab"><span class="name">Photo</span><span class="val" id="photoVal"></span></div>
+  <div class="row" id="photoRows">
+          <div class="seg four small" role="radiogroup" aria-label="What the photo is of">
+            <input type="radio" name="photoKind" id="phKdrawing" value="drawing" checked><label for="phKdrawing">Drawing</label>
+            <input type="radio" name="photoKind" id="phKprint" value="print"><label for="phKprint">Printed</label>
+            <input type="radio" name="photoKind" id="phKobject" value="object"><label for="phKobject">Object</label>
+            <input type="radio" name="photoKind" id="phKnone" value="none"><label for="phKnone">As taken</label>
+          </div>
+          <div class="lab"><label for="phLight">Even out the light</label><span class="val" id="phLightVal"></span></div>
+          <input type="range" id="phLight" min="0" max="100" step="5" value="100">
+          <div class="lab"><label for="phInk">Darken faint lines</label><span class="val" id="phInkVal"></span></div>
+          <input type="range" id="phInk" min="0" max="100" step="5" value="50">
+          <div class="lab"><label for="phSpecks">Remove specks</label><span class="val" id="phSpecksVal"></span></div>
+          <input type="range" id="phSpecks" min="0" max="10" step="1" value="3">
+          <div class="inline"><button class="btn mini" type="button" id="phCorners" title="Drag the page's corners on the photo">Page corners…</button><button class="btn mini" type="button" id="phRetake">Take another</button></div>
+        </div>
+        <div class="inline" id="photoOff"><button class="btn mini" type="button" id="picPhoto" title="Find the page in this picture, straighten it and clean the paper to white">Clean up as a photo</button></div>
+        <p class="hint help">A photo of a page is straightened (its four corners pulled to a rectangle) and cleaned for the line. Drawing: the paper's light is evened out (shadows and a lamp's falloff go), the paper made white and the ink black; faint pencil is darkened. Printed: the same, gentler, keeping the greys (try Grey levels, below). Object: no page; its colours are balanced and stretched (tap its background in Image prep to remove it). As taken: only straightened. The photo itself stays with the picture until another picture is used; a saved design keeps the cleaned picture.</p>
+      </div>
       <div class="row" id="picTurnRow">
         <div class="lab"><label for="picAngle">Straighten</label><span class="val" id="picAngleVal">0°</span></div>
         <input type="range" id="picAngle" min="-20" max="20" step="0.5" value="0">
         <div class="inline"><button class="btn mini" type="button" id="picLeft" title="Turn the picture a quarter turn to the left">Turn left</button><button class="btn mini" type="button" id="picRight" title="Turn the picture a quarter turn to the right">Turn right</button><button class="btn mini" type="button" id="picUnturn">As loaded</button></div>
         <p class="hint help">Turns the picture before anything else: a quarter turn at a time, or a few degrees to straighten a photo (the corners that come in are white, the paper). To crop, use Select area on the Line step: the trace keeps to the selection and gets the full resolution there.</p>
       </div>
-      <p class="hint help">A photo taken with the camera, a sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. A photo of a page is cleaned up for the line (the Photo card); Clean up as a photo does the same to an image you chose. To edit a traced line by hand, export it as SVG from the Plot step, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
+      <p class="hint help">A photo taken with the camera, a sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. A photo of a page is straightened and cleaned up for the line (Photo, below); Clean up as a photo does the same to an image you chose. To edit a traced line by hand, export it as SVG from the Plot step, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
     </section>
 
-    <section class="card art-only art-picture" aria-labelledby="h-photo" id="photoCard">
-      <h2 id="h-photo">Photo <span id="photoVal"></span></h2>
-      <div class="row" id="photoRows">
-        <div class="seg four small" role="radiogroup" aria-label="What the photo is of">
-          <input type="radio" name="photoKind" id="phKdrawing" value="drawing" checked><label for="phKdrawing">Drawing</label>
-          <input type="radio" name="photoKind" id="phKprint" value="print"><label for="phKprint">Printed</label>
-          <input type="radio" name="photoKind" id="phKobject" value="object"><label for="phKobject">Object</label>
-          <input type="radio" name="photoKind" id="phKnone" value="none"><label for="phKnone">As taken</label>
-        </div>
-        <div class="lab"><label for="phLight">Even out the light</label><span class="val" id="phLightVal"></span></div>
-        <input type="range" id="phLight" min="0" max="100" step="5" value="100">
-        <div class="lab"><label for="phInk">Darken faint lines</label><span class="val" id="phInkVal"></span></div>
-        <input type="range" id="phInk" min="0" max="100" step="5" value="50">
-        <div class="lab"><label for="phSpecks">Remove specks</label><span class="val" id="phSpecksVal"></span></div>
-        <input type="range" id="phSpecks" min="0" max="10" step="1" value="3">
-        <div class="inline"><button class="btn mini" type="button" id="phCorners" title="Drag the page's corners on the photo">Page corners…</button><button class="btn mini" type="button" id="phRetake">Take another</button></div>
-      </div>
-      <div class="inline" id="photoOff"><button class="btn mini" type="button" id="picPhoto" title="Find the page in this picture, straighten it and clean the paper to white">Clean up as a photo</button></div>
-      <p class="hint help">A photo of a page is straightened (its four corners pulled to a rectangle) and cleaned for the line. Drawing: the paper's light is evened out (shadows and a lamp's falloff go), the paper made white and the ink black; faint pencil is darkened. Printed: the same, gentler, keeping the greys (try Grey levels on the Line step). Object: no page; its colours are balanced and stretched (tap its background in Image prep to remove it). As taken: only straightened. The photo itself stays with the picture until another picture is used; a saved design keeps the cleaned picture.</p>
-    </section>
 
     <section class="card art-only art-text" aria-labelledby="h-text">
       <h2 id="h-text">Text</h2>
@@ -485,14 +486,36 @@
         </div>
       </div>
     </section>
+    <section class="card art-only art-picture" aria-labelledby="h-prep" data-fold="closed">
+      <h2 id="h-prep">Image prep <span id="prepVal">off</span></h2>
+          <div class="row"><div class="lab"><label for="bright">Brightness</label><span class="val" id="brightVal"></span></div><input type="range" id="bright" min="-100" max="100" value="0"></div>
+          <div class="row"><div class="lab"><label for="contrast">Contrast</label><span class="val" id="contrastVal"></span></div><input type="range" id="contrast" min="-80" max="150" value="0"></div>
+          <div class="row"><div class="lab"><label for="bgTol">Remove plain background</label><span class="val" id="bgTolVal"></span></div><input type="range" id="bgTol" min="0" max="60" value="0">
+            <div class="inline"><button class="btn mini" type="button" id="bgPick" data-tool="bg" aria-pressed="false" title="Tap the background on the preview: it is removed from there, through every colour close to the one you tapped">Tap the background</button><span class="hint" id="bgPickInfo"></span></div>
+          </div>
+          <div class="inline" style="justify-content:space-between">
+            <label class="check"><input type="checkbox" id="flatten"> Even out lighting</label>
+            <button class="btn mini" type="button" id="prepReset">Reset</button>
+          </div>
 
-    <section class="card art-only" aria-labelledby="h-next">
-      <h2 id="h-next">Next</h2>
-      <div class="inline">
-        <button class="btn primary" type="button" id="goTrace">Next: the line →</button>
-      </div>
-      <p class="hint" id="nextHint">The Line step turns the art into lines: one continuous line for a printer; for a pen plotter also separate strokes. With Trace off (under the preview) a pattern or text plots exactly as drawn.</p>
     </section>
+    <section class="card art-only art-picture" aria-labelledby="h-levels">
+      <h2 id="h-levels">Grey levels <span id="levelsCardVal">off</span></h2>
+      <div class="row" id="levelsRow">
+        <div class="lab"><label for="levels">Greys</label><span class="val" id="levelsVal">off</span></div>
+        <input type="range" id="levels" min="1" max="6" value="1" aria-describedby="levelsHint">
+        <div id="levelsBox" hidden>
+          <div class="row"><div class="lab"><label for="levelSmooth">Smooth blocks</label><span class="val" id="levelSmoothVal"></span></div>
+          <input type="range" id="levelSmooth" min="0" max="10" value="2"></div>
+          <div id="levelList" class="level-list" role="group" aria-label="What each grey does"></div>
+          <input type="hidden" id="levelModes" value="">
+          <input type="hidden" id="levelFills" value="">
+          <p class="hint" id="levelFillNote" hidden>Fills are drawn with Separate strokes (the switch at the top of this step); with one continuous line only the traced edges are plotted.</p>
+        </div>
+        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Making it for a pen plotter, a grey can also be filled (Fill), or traced and filled (Both): its blocks are hatched, cross-hatched, ringed or filled with the Pattern card's pattern, with its own pen (its own layer in the SVG); a filled grey that isn't traced still stops its fill at its edges. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. The still-life sample (Art step, Picture) shows them well.</p>
+      </div>
+    </section>
+
 
     <section class="card design-only" aria-labelledby="h-src">
       <h2 id="h-src">The line <span id="srcinfo"></span></h2>
@@ -502,7 +525,7 @@
         <input type="radio" name="lineMode" id="lineStrokes" value="strokes"><label for="lineStrokes">Separate strokes<small>traced · the pen lifts between</small></label>
       </div>
       <p class="hint" id="lineModeHint"></p>
-      <div class="inline"><span class="hint" id="fromArt" hidden></span><button class="btn mini" type="button" id="toArt">← Edit the art</button></div>
+      <span class="hint" id="fromArt" hidden></span>
       <p class="hint help">Everything the Line step does follows this switch. One continuous line is the Fourier trace, the only line a printer can make, and a plotter can draw it without lifting the pen. Separate strokes traces the art into strokes the pen draws one by one, lifting between them: closer to the drawing, nothing joined or doubled. With Trace off (the switch under the preview) nothing is traced: a pattern's or the text's exact lines go to the page, and a picture shows as it is (it has no lines until it is traced), so nothing re-traces while you adjust the art.</p>
     </section>
 
@@ -539,36 +562,7 @@
     </section>
 
 
-    <section class="card design-only img-only" aria-labelledby="h-levels">
-      <h2 id="h-levels">Grey levels <span id="levelsCardVal">off</span></h2>
-      <div class="row" id="levelsRow">
-        <div class="lab"><label for="levels">Greys</label><span class="val" id="levelsVal">off</span></div>
-        <input type="range" id="levels" min="1" max="6" value="1" aria-describedby="levelsHint">
-        <div id="levelsBox" hidden>
-          <div class="row"><div class="lab"><label for="levelSmooth">Smooth blocks</label><span class="val" id="levelSmoothVal"></span></div>
-          <input type="range" id="levelSmooth" min="0" max="10" value="2"></div>
-          <div id="levelList" class="level-list" role="group" aria-label="What each grey does"></div>
-          <input type="hidden" id="levelModes" value="">
-          <input type="hidden" id="levelFills" value="">
-          <p class="hint" id="levelFillNote" hidden>Fills are drawn with Separate strokes (the switch at the top of this step); with one continuous line only the traced edges are plotted.</p>
-        </div>
-        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Making it for a pen plotter, a grey can also be filled (Fill), or traced and filled (Both): its blocks are hatched, cross-hatched, ringed or filled with the Pattern card's pattern, with its own pen (its own layer in the SVG); a filled grey that isn't traced still stops its fill at its edges. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. The still-life sample (Art step, Picture) shows them well.</p>
-      </div>
-    </section>
 
-    <section class="card design-only img-only" aria-labelledby="h-prep" data-fold="closed">
-      <h2 id="h-prep">Image prep <span id="prepVal">off</span></h2>
-          <div class="row"><div class="lab"><label for="bright">Brightness</label><span class="val" id="brightVal"></span></div><input type="range" id="bright" min="-100" max="100" value="0"></div>
-          <div class="row"><div class="lab"><label for="contrast">Contrast</label><span class="val" id="contrastVal"></span></div><input type="range" id="contrast" min="-80" max="150" value="0"></div>
-          <div class="row"><div class="lab"><label for="bgTol">Remove plain background</label><span class="val" id="bgTolVal"></span></div><input type="range" id="bgTol" min="0" max="60" value="0">
-            <div class="inline"><button class="btn mini" type="button" id="bgPick" data-tool="bg" aria-pressed="false" title="Tap the background on the preview: it is removed from there, through every colour close to the one you tapped">Tap the background</button><span class="hint" id="bgPickInfo"></span></div>
-          </div>
-          <div class="inline" style="justify-content:space-between">
-            <label class="check"><input type="checkbox" id="flatten"> Even out lighting</label>
-            <button class="btn mini" type="button" id="prepReset">Reset</button>
-          </div>
-
-    </section>
 
 
 
@@ -666,10 +660,6 @@
       </div>
     </section>
 
-    <section class="card design-only" aria-labelledby="h-next2">
-      <h2 id="h-next2">Next</h2>
-      <div class="inline"><button class="btn primary" type="button" id="goOut">Next: print it →</button></div>
-    </section>
 
     <section class="card plot-only" aria-labelledby="h-plot">
       <h2 id="h-plot">The page <span id="plotInfo"></span></h2>
@@ -728,6 +718,7 @@
 
     <section class="card notes" aria-labelledby="h-notes" data-fold="closed">
       <h2 id="h-notes">Suggestion box <span class="hval" id="notesCount"></span></h2>
+      <button class="btn mini notes-close" type="button" id="notesClose" title="Put the suggestion box away (File menu, Suggestion box…, brings it back)">Close</button>
       <form class="note-form" id="noteForm" autocomplete="off">
         <input type="text" id="noteIn" maxlength="500" aria-label="Suggestion" placeholder="An idea, a bug, anything to improve… (Enter to save)" aria-describedby="noteHelp">
       </form>
@@ -735,6 +726,14 @@
       <ul class="note-list" id="noteList"></ul>
       <p class="hint" id="noteHelp">Start with "bug:" or "idea:" to say which it is. Tick a note when it's done. Notes are <span id="notesWhere">kept in this browser</span>. <button class="btn mini" type="button" id="notesCopy">Copy open notes</button></p>
     </section>
+    <div class="nextbar" role="group" aria-label="The steps">
+      <button class="btn design-only" type="button" id="toArt">← Art</button>
+      <button class="btn choc-only" type="button" id="backLine">← Line</button>
+      <button class="btn plot-only" type="button" id="backLine2">← Line</button>
+      <span class="nb-hint" id="nextHint" aria-live="polite"></span>
+      <button class="btn primary art-only" type="button" id="goTrace">Next: the line →</button>
+      <button class="btn primary design-only" type="button" id="goOut">Next: print it →</button>
+    </div>
   </div>
 
   <details class="math" id="math">

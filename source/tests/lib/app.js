@@ -69,6 +69,8 @@ async function open(ctx, opts = {}) {
         if (b) b.click();
       })
     );
+  // the suggestion box is put away since v113 (File menu, Suggestion box…): shown, as the tests written before expect
+  if (!opts.folded) await page.evaluate(() => { document.body.dataset.notes = "1"; });
   // the app opens on the Art tab; most tests work on the Trace tab, so they start there (opts.art: stay on Art)
   if (!opts.art && (await page.$("label[for=viewDesign]"))) {
     await page.click("label[for=viewDesign]");

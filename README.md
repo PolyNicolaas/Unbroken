@@ -118,6 +118,9 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
   Trace off and a picture as separate strokes, until you pick. The cards a line doesn't use are hidden.
 - **Print** (plate, layers, G-code) or **Plot** (the page, pens, SVG for Saxi).
 
+**The Next bar** at the foot of the settings goes on (and back) a step; the suggestion box is in the File menu.
+Test A38.
+
 The preview follows the step: the art or the line on Art and Line (the page for as drawn), the page on Plot, the plate or
 the layers on Print. **Next** at the end of each step goes on. Test A33.
 
@@ -169,9 +172,9 @@ what it is tracing (Edit the art goes back). **Next** has **Trace it** (the prin
 continuous line) and **Plot as drawn**: a pattern or the text goes to the 2D tab exactly as made, without tracing
 (2D tab, **Art as drawn**, `UNB.exportLayersSVG`); a picture has no lines until it is traced.
 
-**Image prep** (Trace tab) gets a picture ready before tracing: brightness, contrast, **Remove plain background** (a
+**Image prep** (Art step, under the Picture card since v113) gets a picture ready before tracing: brightness, contrast, **Remove plain background** (a
 flood from the border through colours close to the border's, or from the point you tap with **Tap the background**),
-**Even out lighting**. **Grey levels** (their own card, after Tracing): the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then
+**Even out lighting**. **Grey levels** (their own card, after Image prep on the Art step): the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then
 **Smooth blocks** gives each pixel the grey most of its neighbours have, removing specks and rounding corners). Each grey
 is **Trace** (its edges are lines) or **Skip**; the line map is the edges between greys where either side is traced
 (`UNB.levelEdges`), and the trace style and ink threshold are hidden. Making it for a pen plotter, a grey can also be

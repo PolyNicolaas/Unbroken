@@ -3,6 +3,19 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v113 · 2026-10-29
+
+- **Picture prep is on the Art step.** Image prep (brightness, contrast, background, lighting) and Grey levels change the
+  picture, so they sit under the Picture card now; the Line step is only how it's traced (The line, Tracing, Line,
+  Size, Fit). With Trace off the preview shows the picture as Image prep and Grey levels make it.
+- **A Next bar** pinned at the foot of the settings replaces each step's Next card: Next: the line → on Art, ← Art and
+  Next: print it / plot it → on Line, ← Line on Print or Plot, with a note on what the next step does. Always in reach
+  on an iPad, however far down the settings you are.
+- **Fewer small cards.** The Photo settings are part of the Picture card. Once something is in, the examples are one
+  row that scrolls sideways. The suggestion box is put away: File → Suggestion box… opens it (Close puts it away).
+  On a phone the toolbar's Play drawing reads Play, so the Trace switch, File and View fit.
+- Tests: A38; A12, A19, A20, A32 and A36 follow the new places.
+
 ## v112 · 2026-10-28
 
 - **The Trace switch**, under the preview on every step: tracing on and off in one place. On, the art becomes the line

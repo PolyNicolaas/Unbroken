@@ -307,7 +307,8 @@ body[data-view="choc"] .stage-tabs label[for="stLine"], body[data-view="choc"] .
 body[data-out="print"] .line-modes label[for="lineStrokes"], body[data-out="print"] .line-modes label[for="lineDrawn"] { display: none; }
 .line-modes input:disabled + label { opacity: 0.45; cursor: not-allowed; }
 /* cards the line in use doesn't need: As drawn traces nothing; separate strokes have no spacing, size or series */
-body:is([data-line="drawn"], [data-line="none"]) :is(#card-h-trace, #card-h-levels, #card-h-prep, #card-h-line, #card-h-size, #card-h-fit, .toolbar.tools) { display: none; }
+body:is([data-line="drawn"], [data-line="none"]) :is(#card-h-trace, #card-h-line, #card-h-size, #card-h-fit) { display: none; }
+body:is([data-line="drawn"], [data-line="none"]) .toolbar.tools { display: none; }
 body:is([data-line="drawn"], [data-line="none"]) .line-modes { opacity: .45; pointer-events: none; }
 body[data-line="none"] :is(#math, #play, #speed, #minimap) { display: none !important; }
 body[data-line="strokes"] #card-h-line, body[data-line="strokes"] #card-h-size, body[data-line="strokes"] #card-h-fit { display: none; }
@@ -429,3 +430,22 @@ body[data-empty="1"] .pv-size { display: none; }
 .trace-needed { position: absolute; inset: 0; z-index: 4; display: grid; place-content: center; justify-items: center; gap: calc(10px * var(--space)); padding: calc(24px * var(--space)); text-align: center; background: color-mix(in srgb, var(--surface) 90%, transparent); }
 .trace-needed[hidden] { display: none; }
 .trace-needed p { margin: 0; max-width: 40ch; font-weight: 550; }
+
+/* ---------- v113: the Next bar, the photo in the Picture card, the suggestion box put away ---------- */
+.nextbar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) calc(12px * var(--space)) max(calc(10px * var(--space)), env(safe-area-inset-bottom)); margin-top: calc(4px * var(--space)); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)) calc(10px * var(--corner)) 0 0; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(6px); box-shadow: 0 -4px 14px rgb(0 0 0 / .06); }
+.nextbar .nb-hint { flex: 1; min-width: 0; color: var(--muted); font-size: calc(12.5px * var(--text)); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.nextbar .btn.primary { white-space: nowrap; }
+.photo-box { display: grid; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) 0 0; margin-top: calc(4px * var(--space)); border-top: 1px solid var(--rule); }
+.photo-box[hidden] { display: none; }
+body:not([data-notes="1"]) .card.notes { display: none !important; }
+.card.notes h2 { padding-right: 70px; }
+.notes-close { position: absolute; top: calc(10px * var(--space)); right: calc(44px * var(--space)); }
+.card.notes { position: relative; }
+/* the examples, once something is in: one row that scrolls sideways */
+body:not([data-empty="1"]) .examples .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding-bottom: 2px; }
+body:not([data-empty="1"]) .examples .chips .chip-btn { flex: none; }
+@media (max-width: 600px) {
+  .toolbar .pl-long, .toolbar .tb-sep { display: none; }
+  .toolbar { gap: calc(6px * var(--space)); }
+  .trace-switch { padding-right: calc(8px * var(--space)); }
+}

@@ -40,6 +40,7 @@ function renderNotes() {
   const open = notesList.filter((n) => n.status !== "done"),
     ul = $("noteList");
   $("notesCount").textContent = open.length ? `${open.length} open` : "none open";
+  $("notesMenuCount").textContent = open.length ? `${open.length} open` : "none open";
   ul.textContent = "";
   for (const n of [...notesList].sort(
     (a, b) => (a.status === "done") - (b.status === "done") || String(b.at).localeCompare(String(a.at))
@@ -165,3 +166,16 @@ renderNotes();
       }
     );
 })();
+
+// The suggestion box is put away until it's opened from the File menu (Suggestion box…): then it shows at the foot of
+// the settings, open, on every step, until Close
+function notesShow(on) {
+  document.body.dataset.notes = on ? "1" : "";
+  if (!on) return;
+  const c = $("card-h-notes");
+  if (c && cardSetOpen) cardSetOpen(c, true, false); // views.js
+  if (c) c.scrollIntoView({ block: "nearest" });
+  $("noteIn").focus({ preventScroll: true });
+}
+$("notesOpen").addEventListener("click", () => notesShow(true));
+$("notesClose").addEventListener("click", () => notesShow(false));

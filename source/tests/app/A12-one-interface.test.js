@@ -27,9 +27,9 @@ module.exports = {
       checks.push(check(`${w} px Trace: main controls visible`, await count(page, MAIN), "==", MAIN.length));
       if (w > 1000) {
         checks.push(check("Trace: no px anywhere on the panel (readouts in mm)", +!/\d\s?px\b/.test(await page.evaluate(() => document.querySelector(".panel").innerText + document.getElementById("chip").innerText)), "==", 1));
-        const order = ["#toArt", "label[for=modeCenter]", "#sens", "#blur", "#lineW", "label[for=loopOpen]", "#sizeSlider", "#terms", "#optBtn"];
+        const order = ["label[for=modeCenter]", "#sens", "#blur", "#lineW", "label[for=loopOpen]", "#sizeSlider", "#terms", "#optBtn"];
         const tops = []; for (const s of order) tops.push(await page.$eval(s, (e) => e.getBoundingClientRect().top));
-        checks.push(check("Trace tab in order: From the Art tab, Tracing, Line, Size, Fit", +tops.every((t, i) => i === 0 || t > tops[i - 1]), "==", 1));
+        checks.push(check("Line step in order: Tracing, Line, Size, Fit", +tops.every((t, i) => i === 0 || t > tops[i - 1]), "==", 1));
         checks.push(check("explanations behind ⓘ on the Trace tab", await page.$$eval(".card.design-only button.info", (els) => els.filter((e) => e.getBoundingClientRect().height > 0).length), ">", 3));
         checks.push(check("Save / Open folded into the File menu", +!(await visible(page, "#saveDesign")) + +(await visible(page, "#fileMenu summary")), "==", 2));
         await page.click("#fileMenu summary"); await page.waitForTimeout(100);
@@ -46,6 +46,7 @@ module.exports = {
         checks.push(check("leaf: no connectors, none mentioned", +!/connector/.test(await page.textContent("#chip")), "==", 1));
         await page.$eval("#spacingHint", (e) => { e.className = "hint warn"; e.textContent = "test warning"; });
         checks.push(check("warnings visible", +(await visible(page, "#spacingHint")), "==", 1));
+        await page.click("label[for=viewArt]"); await A.idle(page, 300); // (Image prep is on the Art step since v113)
         for (const [id, sels] of Object.entries(MORE)) {
           checks.push(check(`${id} starts folded`, +(await folded(page, id)), "==", 1));
           await page.click(`#${id} .card-toggle`); await page.waitForTimeout(100);

@@ -144,7 +144,8 @@ report.
 | [A34](#a34) | Touch and scrolling: number steppers, the preview in view, the settings wheel; fills per grey | a number box without − and +, a stepper that skips its step or limits or doesn't reach the app, the preview scrolling away with the settings, a phone's pinned preview taking the screen or not growing, the wheel leaving several cards open or opening the wrong one, a card jumping away when the others fold, the wheel's off switch not putting the cards back, and filled greys missing from the page or the SVG | – |
 | [A35](#a35) | A clean start: the app opens empty, and every example is one tap away | a start that isn't empty, an empty preview that doesn't say how to start, later steps showing an old input while empty, an example chip that loads the wrong kind of input or nothing, and a picture example that leaves a picture pattern in use | – |
 | [A36](#a36) | Take a picture: the live camera finds the page, its corners can be dragged, and the photo becomes a clean picture | the camera not opening, the page not outlined, corners that can't be dragged, a photo that isn't straightened or cleaned, the camera left running, the Photo card's settings not cleaning it again, Page corners or Clean up as a photo not working, and a refused camera leaving no way in | – |
-| [A37](#a37) | The Trace switch: tracing on and off from under the preview, on every step | the switch missing from a step, a picture still traced with Trace off (or not shown), the Print step offering a print of an untraced picture, a turned-off trace not coming back, a pattern on the plotter traced before it's asked, a 3D model left without its slices, and older designs saved As drawn opening traced | 25.9 s |
+| [A37](#a37) | The Trace switch: tracing on and off from under the preview, on every step | the switch missing from a step, a picture still traced with Trace off (or not shown), the Print step offering a print of an untraced picture, a turned-off trace not coming back, a pattern on the plotter traced before it's asked, a 3D model left without its slices, and older designs saved As drawn opening traced | – |
+| [A38](#a38) | The layout: picture prep on the Art step, a Next bar, fewer small cards | Image prep or Grey levels back on the Line step (or missing from Art), a Next card coming back, the Next bar out of reach or going to the wrong step, the photo's settings outside the Picture card, the examples taking several rows once started, and the suggestion box showing before it's asked for | 18.9 s |
 
 #### E01
 
@@ -583,8 +584,8 @@ report.
 **Suggestion box: a line typed on any tab is kept as a note** · `app/A19-suggestion-box.test.js`
 
 - **Why:** The suggestion box is where ideas and bugs are written down while using the app, to be sorted into ROADMAP.md later. A note that silently disappears is worse than no box.
-- **How:** Opens the app (outside Claude, so notes are kept in the browser), types an idea on the Trace tab and a "bug: …" line on the 3D tab, ticks the bug as done, reloads the page and reads the list again.
-- **Pass when:** Both notes are listed with their kind (idea, bug) and the tab they were written on; the open count is 1 after ticking the bug; after the reload both notes are still there and the bug is still done; no page errors.
+- **How:** Opens the app (outside Claude, so notes are kept in the browser), opens the suggestion box from the File menu and closes it, opens it again, types an idea on the Trace tab and a "bug: …" line on the 3D tab, ticks the bug as done, reloads the page and reads the list again.
+- **Pass when:** The box is put away until File, Suggestion box… opens it, and Close puts it away; both notes are listed with their kind (idea, bug) and the tab they were written on; the open count is 1 after ticking the bug; after the reload both notes are still there and the bug is still done; no page errors.
 
 #### A20
 
@@ -721,6 +722,14 @@ report.
 - **Why:** Turning tracing on and off is one switch under the preview (v112), on every step. On, the art becomes the line the Line step picks (one continuous line, or separate strokes on a plotter). Off, the art is left as it is: a pattern or text plots as its exact lines (what was the Line card's As drawn), a picture shows as the picture, and nothing re-traces while the art is adjusted. Printing, or plotting a picture, needs the line, so those steps say to turn Trace on.
 - **How:** Opens the app on the leaf (a printer); turns Trace off; checks the line view shows the picture and nothing is traced; goes to Print; turns Trace on with the Print step's button. Saves a design with Trace off and opens it again, then opens an older design saved As drawn. Then a pen plotter: picks the labyrinth, checks it starts with Trace off (as drawn), turns Trace on. Last, the vase (a 3D model).
 - **Pass when:** The switch is under the preview on Art, Line and Print; Trace off: the line mode is the picture as it is, the chip says Trace off, the trace isn't run (the traced line from before is kept, not redone), the Line card says Trace is off; Print says to turn Trace on, and its button does (the line traced again, the notice gone); a design saved with Trace off opens with it off, and an older one saved As drawn too; on the plotter the labyrinth starts with Trace off (as drawn, the page), and Trace on traces it into strokes; the 3D model's switch is on and can't be turned off; no page errors.
+
+#### A38
+
+**The layout: picture prep on the Art step, a Next bar, fewer small cards** · `app/A38-layout.test.js`
+
+- **Why:** v113 tidied the cards: what changes the picture (Image prep, Grey levels) is on the Art step with the Picture card, so the Line step is only how it's traced; one Next bar pinned at the foot of the settings replaces each step's Next card (always reachable on an iPad); the Photo settings are part of the Picture card; the examples become one sideways row once something is in; the suggestion box is in the File menu.
+- **How:** Opens the app on the leaf (a printer) at a laptop and an iPad size; lists the cards on Art and Line; checks the Next bar is in view on each step and what it shows; follows it forward and back; checks the Photo box is inside the Picture card; checks the example chips sit in one row; checks the suggestion box is put away.
+- **Pass when:** Art: Input, Picture, Image prep, Grey levels; Line: no Image prep or Grey levels; no Next cards anywhere; the Next bar's bottom within the window on Art, Line and Print, with Next: the line → on Art, ← Art and Next: print it → on Line, ← Line on Print, and each goes to its step; the Photo box is inside the Picture card; the examples in one row; the suggestion box not shown; no page errors.
 
 <!-- catalogue:end -->
 

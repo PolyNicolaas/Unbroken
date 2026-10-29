@@ -170,7 +170,13 @@ function traceWalk(W, s, engine = PIPE) {
 async function extract(g, P = Object.create(st), again = false) {
   // workflow.js: Trace off, as drawn: nothing to trace (the page redrawn)
   if (lineModeNow() === "drawn") return plotSoon(0);
-  if (lineModeNow() === "none") return render(); // workflow.js: Trace off, a picture: the picture as it is
+  if (lineModeNow() === "none") {
+    // workflow.js: Trace off, a picture: the picture as Image prep and Grey levels make it, nothing traced
+    const W = await working();
+    guard(g);
+    Object.assign(st, { w: W.w, h: W.h, crop: W.crop, small: W.small, gray: W.gray, bgCache: null });
+    return render();
+  }
   if (lineModeNow() === "strokes") return traceStrokes(g); // workflow.js: the Line step's Separate strokes
   const s = settings(),
     W = await working();

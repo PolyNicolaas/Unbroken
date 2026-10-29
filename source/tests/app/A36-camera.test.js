@@ -44,7 +44,7 @@ module.exports = {
       check("… the picture is the page's shape (off by)", Math.abs(pic.w / pic.h / aspect - 1), "<=", 0.06),
       check("… a photo, labelled so, traced", +(pic.photo && /^photo /.test(pic.label) && /terms/.test(pic.chip) && !pic.empty), "==", 1));
     // the Photo card
-    await page.evaluate(() => $("photoCard").classList.remove("collapsed"));
+    await page.evaluate(() => $("card-h-pic").classList.remove("collapsed"));
     await page.click("label[for=phKprint]"); await A.idle(page, 3000);
     const pr = await page.evaluate(() => ({ kind: st.art.picture.photo.kind, light: st.art.picture.photo.light, id: st.art.picture.canvas.__art, val: $("photoVal").textContent }));
     checks.push(check("Printed: cleaned again with its settings", +(pr.kind === "print" && pr.light === 70 && pr.id !== pic.id && /printed art, straightened/.test(pr.val)), "==", 1));

@@ -34,7 +34,7 @@ module.exports = {
     await page.evaluate(() => { const c = document.createElement("canvas"); c.width = 400; c.height = 300; const g = c.getContext("2d"); g.fillStyle = "#fff"; g.fillRect(0, 0, 400, 300); setSource(c, "blank"); });
     await A.idle(page, 2500);
     checks.push(check("blank image on the 2D tab: no drawing left on the page", +(await page.evaluate(() => !st.plot && !st.final)), "==", 1));
-    const p2 = await page.context().newPage(); await p2.goto(page.url()); await A.idle(p2, 1500);
+    const p2 = await page.context().newPage(); await p2.goto(page.url()); await A.idle(p2, 1500); await p2.evaluate(() => { document.body.dataset.notes = "1"; }); // (the suggestion box shown)
     const add = async (pg, t) => { await pg.fill("#noteIn", t); await pg.press("#noteIn", "Enter"); await pg.waitForTimeout(200); };
     await add(page, "idea: from tab one"); await add(p2, "idea: from tab two");
     await page.reload(); await A.idle(page, 1500);

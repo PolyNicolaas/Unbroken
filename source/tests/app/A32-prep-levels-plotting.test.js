@@ -8,8 +8,7 @@ module.exports = {
   pass: "Grey levels make the trace follow the greys' edges (the line changes) and the Grey levels card lists 5 greys; Skip changes the line again; the tap sets the background point and some tolerance; the turned picture is as tall as it was wide; for a pen plotter Wave rows go to 200 rows (printing stops at 120) and start as drawn, nothing traced; the 2D page shows the rows; its SVG is named after it; One continuous line traces them, filling the page with lines pen 1 + the gap apart; a Spirograph for printing turns Allow overlaps on and says so; the reopened design keeps 5 greys, the skipped grey and made for a pen plotter; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { art: true }), checks = [];
-    await page.click("#examplesRow [data-example=still]"); await A.idle(page, 2000);
-    await page.click("label[for=viewDesign]"); await A.idle(page, 800);
+    await page.click("#examplesRow [data-example=still]"); await A.idle(page, 2000); // (Grey levels and Image prep are on the Art step since v113)
     const plain = await page.evaluate(() => st.walk.px.length);
     await A.setValue(page, "#levels", 5); await A.idle(page, 3000);
     const lv = await page.evaluate(() => ({ n: st.walk.px.length, rows: document.querySelectorAll("#levelList .level-row").length, val: $("levelsCardVal").textContent, tones: st.wk.levels && st.wk.levels.tones.length }));
