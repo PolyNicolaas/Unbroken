@@ -37,6 +37,11 @@ module.exports = {
     checks.push(check("a name (caffeine): looked up, 14 atoms, its SMILES shown", +(c.n === 14 && c.name === "caffeine" && /CN1C=NC2/.test(c.msg)), "==", 1));
     await page.fill("#molIn", "notamolecule"); await page.click("#molGo"); await said(page, /Couldn/);
     checks.push(check("an unknown name: said so, caffeine still in use", +(/doesn't know it/.test(await page.textContent("#molMsg")) && (await page.evaluate(() => st.art.molecule.name)) === "caffeine"), "==", 1));
+    // the tip (v122): a SMILES from Wikipedia; its link searches for a typed name, not for a SMILES
+    const wiki = await page.evaluate(() => { const l = $("molWiki"); return { name: l.href, tip: !$("molTip").hidden && /SMILES/.test($("molTip").textContent) && /SMILES/.test($("molMsg").textContent) }; });
+    await page.fill("#molIn", "CCO");
+    const wiki2 = await page.evaluate(() => $("molWiki").href);
+    checks.push(check("the tip: a SMILES from Wikipedia, also on a name it doesn't know", +wiki.tip, "==", 1), check("its link searches Wikipedia for the name typed", +/search=notamolecule$/.test(wiki.name), "==", 1), check("a SMILES typed: the plain search page", +!/search=/.test(wiki2), "==", 1));
     // a pen plotter: as drawn, every stroke in the SVG
     await page.click("label[for=artForPlot]"); await A.idle(page, 2500);
     const mode = await page.evaluate(() => lineModeNow()), strokes = await page.evaluate(() => moleculeDrawn().r.paths.length);

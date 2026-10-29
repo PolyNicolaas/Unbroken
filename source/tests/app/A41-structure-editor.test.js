@@ -13,6 +13,14 @@ module.exports = {
     await page.route("https://unpkg.com/@rdkit/**", (r) => { const f = r.request().url().split("/").pop(); r.fulfill({ body: fs.readFileSync(RD + f), contentType: f.endsWith(".wasm") ? "application/wasm" : "text/javascript" }); });
     await page.click("label[for=srcMolecule]"); await A.idle(page, 400);
     await page.click("#molEdit"); await page.waitForTimeout(300);
+    // the drawing area between the tools and the buttons, never under them (v122), on a laptop and in iPad portrait
+    const layout = (page) => page.evaluate(() => { const r = (q) => document.querySelector(q).getBoundingClientRect(), v = r("#meView"), t = r(".me-top"), b = r(".me-bar"), m = r("#meMsg"), e = r("#molEd"); return { gapTop: Math.round(v.top - t.bottom), gapBot: Math.round(m.top - v.bottom), inside: b.bottom <= Math.min(e.bottom, innerHeight) + 1, h: Math.round(v.height) }; });
+    const L1 = await layout(page);
+    checks.push(check("drawing area below the tools (px)", L1.gapTop, ">=", 0), check("drawing area above the buttons (px)", L1.gapBot, ">=", 0), check("buttons on screen", L1.inside, "==", true), check("drawing area height (px)", L1.h, ">", 150));
+    await page.setViewportSize({ width: 820, height: 1180 }); await page.waitForTimeout(300);
+    const L2 = await layout(page);
+    checks.push(check("portrait: drawing area below the tools (px)", L2.gapTop, ">=", 0), check("portrait: drawing area above the buttons (px)", L2.gapBot, ">=", 0), check("portrait: buttons on screen", L2.inside, "==", true));
+    await page.setViewportSize({ width: 1180, height: 820 }); await page.waitForTimeout(300);
     const box = await page.locator("#meView").boundingBox(), cx = box.x + box.width * 0.35, cy = box.y + box.height * 0.5;
     await page.mouse.click(cx, cy);
     let p = await at(page, 0);

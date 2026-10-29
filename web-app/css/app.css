@@ -475,11 +475,12 @@ body[data-view="art"] .toolbar.tools { display: none; }
 /* ---------- v116: the Molecule input ---------- */
 .seg.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .seg.five label { padding-inline: calc(4px * var(--space)); }
+.mol-tip a { color: var(--accent); }
 .mol-form { display: flex; gap: calc(6px * var(--space)); margin: 0; }
 .mol-form input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: calc(7px * var(--corner)); padding: calc(7px * var(--space)) calc(9px * var(--space)); }
 
 /* ---------- v117: the structure editor (moleditor.js) ---------- */
-.moled { position: absolute; inset: 0; z-index: 6; display: grid; grid-template-rows: auto 1fr auto auto; background: var(--surface); }
+.moled { position: absolute; inset: 0; z-index: 6; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; overflow: hidden; background: var(--surface); }
 .moled[hidden] { display: none; }
 @media (max-width: 899px) { .moled { position: fixed; z-index: 60; } }
 .me-top { display: grid; gap: calc(6px * var(--space)); padding: calc(8px * var(--space)) calc(10px * var(--space)); border-bottom: 1px solid var(--rule); }
@@ -489,7 +490,9 @@ body[data-view="art"] .toolbar.tools { display: none; }
 .me-els label { min-width: 36px; height: 36px; display: grid; place-items: center; padding: 0 8px; border: 1px solid var(--rule); border-radius: calc(7px * var(--corner)); font-weight: 650; cursor: pointer; background: var(--paper); }
 .me-els input:checked + label { background: var(--accent); color: var(--paper); border-color: var(--accent); }
 .me-els input:focus-visible + label { outline: 2px solid var(--accent); outline-offset: 2px; }
-#meView { width: 100%; height: 100%; min-height: 0; display: block; touch-action: none; cursor: crosshair; background-image: radial-gradient(circle, var(--grid) 1px, transparent 1.2px); background-size: 24px 24px; }
+/* the canvas laid over its own box, so its drawing size never grows the row (Safari) */
+.me-stage { position: relative; min-height: 0; min-width: 0; overflow: hidden; }
+#meView { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: none; cursor: crosshair; background-image: radial-gradient(circle, var(--grid) 1px, transparent 1.2px); background-size: 24px 24px; }
 .me-msg { margin: 0; padding: calc(4px * var(--space)) calc(12px * var(--space)); color: var(--muted); font-size: calc(12.5px * var(--text)); border-top: 1px solid var(--rule); }
 .me-bar { display: flex; flex-wrap: wrap; align-items: center; gap: calc(6px * var(--space)); padding: calc(8px * var(--space)) calc(10px * var(--space)) max(calc(8px * var(--space)), env(safe-area-inset-bottom)); border-top: 1px solid var(--rule); }
 .me-bar .me-gap { flex: 1; }

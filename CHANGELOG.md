@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v122 · 2026-10-29
+
+- **The structure editor fits on an iPad.** In Safari the drawing area grew past its place and covered the editor's
+  buttons (Undo, Clean up, Use it…): the canvas's own drawing size pushed its row taller. It now sits in a box of its
+  own, between the tools and the buttons, on a laptop, an iPad either way round and a phone. Test A41 checks it.
+- **A SMILES is the easy way in.** The Molecule card says so: a SMILES needs no lookup and is never mistaken for
+  another molecule, and most molecules' Wikipedia pages give it (in the box on the right, under Identifiers → SMILES).
+  Its link searches Wikipedia for the name typed; a name PubChem doesn't know suggests the SMILES too. Test A40.
+
 ## v121 · 2026-10-29
 
 - **Filled levels on a printer.** A level (grey or colour) set to **Fill** on a printer has its outline traced and
