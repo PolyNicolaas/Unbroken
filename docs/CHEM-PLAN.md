@@ -33,7 +33,7 @@ which is drawing chemical structures?" Answers to the questions that day:
 |---|---|---|
 | 1 | Molecule input: a name or SMILES, laid out by RDKit, drawn as a skeletal formula; plotted as drawn or traced; eight examples laid out (theobromine, caffeine, vanillin, aspirin, dopamine, serotonin, capsaicin, benzene) | v116 ✓ |
 | 2 | The structure editor (atoms, bonds, rings, elements, charges, erase, Clean up) | v117 ✓ |
-| 3 | A molecule traced cleanly into one line for chocolate: the line walks the bonds as a graph, letters as their own pieces | v118 |
+| 3 | A molecule printed cleanly in chocolate: the bonds as one line, each label as a piece of its own in its place | v118 ✓ |
 | 4 | Ideas: stereo wedges and hashes, a .mol / .sdf file, reaction arrows, pinch to zoom in the editor | – |
 
 ## Notes from v116

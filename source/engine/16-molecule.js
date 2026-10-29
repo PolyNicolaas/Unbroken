@@ -90,7 +90,8 @@
 
   // Draw a molecule as a skeletal formula. mol: { atoms: [{ el, x, y, h, q }], bonds: [{ a, b, order }] } (any units, y
   // up); o: font (an entry of UNB_FONTS, for the labels), cap (label height ÷ bond length, default 0.5).
-  // Returns { paths ([x, y, …] polylines), closed, box [w, h], gap, bond: 1, labels (how many), boxes ([{ atom, el,
+  // Returns { paths ([x, y, …] polylines), closed, box [w, h], gap, bond: 1, labels (how many), owner (each stroke's:
+  // −1 a bond, else its label's atom), boxes ([{ atom, el,
   // rect }]: each label's letters), at (each atom's place) } in bond lengths (y down), the
   // shape UNB.patternLayout and the Art step's patterns use.
   UNB.molecule = function (mol, o = {}) {
@@ -111,6 +112,7 @@
     const cap = o.cap || 0.5,
       paths = [],
       closed = [],
+      owner = [], // each stroke's: −1 a bond, else the atom whose label it's part of
       rects = new Array(n).fill(null);
     // ---------- the labels: every atom but a carbon with bonds; the hydrogens on the side away from the bonds
     // ----------
@@ -143,6 +145,7 @@
           }
           paths.push(p);
           closed.push(false);
+          owner.push(i);
         }
       };
       put(main, x0, y0);
@@ -185,6 +188,7 @@
         dy = q[1] - p[1];
       paths.push([p[0] + dx * t[0], p[1] + dy * t[0], p[0] + dx * t[1], p[1] + dy * t[1]]);
       closed.push(false);
+      owner.push(-1);
     };
     const D = 0.17; // the gap between a double bond's strokes, in bond lengths
     for (const b of B) {
@@ -270,6 +274,7 @@
       labels,
       boxes,
       at,
+      owner,
       atoms: n,
       bonds: B.length,
     };

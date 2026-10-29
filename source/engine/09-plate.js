@@ -319,7 +319,8 @@
   // order, one set after another (copies = sets), left to right in rows from the back of the plate, each row as tall
   // as its tallest piece; the block is centred. Pieces that don't fit go on in more rows past the front edge, so they
   // show as off the plate rather than being left out.
-  // pieces: [{ x, y }] in mm, y up (any origin). opt: bedW, bedH, copies (sets, ≥1), gap, pad, straight.
+  // pieces: [{ x, y }] in mm, y up (any origin). opt: bedW, bedH, copies (sets, ≥1), gap, pad, straight, together
+  // (the pieces keep their places: one block per set, every piece placed at the block's place).
   // Returns { angle, pieces: [{ w, h, local, xf }], placed: [{ x, y, piece }], copies (pieces placed in all), fits
   // (how many of them are on the plate), sets, w, h (the block) }.
   UNB.plateLayoutPieces = function (pieces, opt) {
@@ -370,12 +371,23 @@
         xf: { cx, cy, angle: deg, sx: pad - x0, sy: pad - y0 },
       };
     };
+    // together (a molecule's bonds and labels): the pieces keep their places, turned and packed as one block, each
+    // with the block's footprint and transform
+    const group = (deg) => {
+      const all = {
+          x: Float64Array.from(pieces.flatMap((q) => Array.from(q.x))),
+          y: Float64Array.from(pieces.flatMap((q) => Array.from(q.y))),
+        },
+        G = turn(all, deg);
+      return pieces.map((q) => ({ w: G.w, h: G.h, local: UNB.plateLocal(q.x, q.y, G.xf), xf: G.xf }));
+    };
     const pack = (deg) => {
-      const P = pieces.map((q) => turn(q, deg)),
-        rows = [];
+      const P = opt.together ? group(deg) : pieces.map((q) => turn(q, deg)),
+        rows = [],
+        kk = opt.together ? 1 : k; // (together: a set is one block)
       let row = null;
       for (let s = 0; s < sets; s++)
-        for (let i = 0; i < k; i++) {
+        for (let i = 0; i < kk; i++) {
           const p = P[i];
           if (!row || (row.items.length && row.w + g + p.w > W)) rows.push((row = { items: [], w: 0, h: 0 }));
           row.items.push({ piece: i, dx: row.items.length ? row.w + g : 0 });
@@ -391,7 +403,7 @@
         if (need > H || r.w > W) break;
         used = need;
         onPlate++;
-        fits += r.items.length;
+        fits += r.items.length * (k / kk);
       }
       const bw = Math.max(0, ...rows.map((r) => r.w)),
         ox = (W - Math.min(bw, W)) / 2,
@@ -400,7 +412,9 @@
       let y = top;
       for (const r of rows) {
         y -= r.h;
-        for (const it of r.items) placed.push({ x: ox + it.dx, y: y + (r.h - P[it.piece].h) / 2, piece: it.piece });
+        for (const it of r.items)
+          for (let j = 0; j < k / kk; j++)
+            placed.push({ x: ox + it.dx, y: y + (r.h - P[it.piece].h) / 2, piece: kk === k ? it.piece : j });
         y -= g;
       }
       return { angle: deg, pieces: P, placed, fits, copies: sets * k, sets, w: bw, h: 0 };

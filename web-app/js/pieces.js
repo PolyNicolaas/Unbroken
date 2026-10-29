@@ -21,8 +21,13 @@ let piecesJob = null, // { key, promise } while a set of pieces is being traced
 const textLines = () => (st.text && st.text.lines ? st.text.lines.length : 0);
 // the text prints as a piece per line: a text (not a model) with two or more lines, and the Plate card says so
 function piecesOn() {
-  return !isModel() && !!st.text && textLines() > 1 && $("textPieces").value === "each";
+  return (
+    !isModel() &&
+    ((!!st.text && textLines() > 1 && $("textPieces").value === "each") ||
+      (typeof moleculePiecesOn === "function" && moleculePiecesOn()))
+  ); // (molecule.js: loaded after this file)
 }
+const moleculePieces = () => !st.text && typeof moleculePiecesOn === "function" && moleculePiecesOn();
 // everything a piece's line depends on: the text and its hand edits, the line settings, the size (letters per mm)
 function piecesKeyNow() {
   const s = settings();
@@ -41,6 +46,8 @@ function piecesKeyNow() {
     CFG.engine.loopRadius,
     CFG.engine.termTolerance,
     st.text && st.text.ppm,
+    // a molecule: the structure, how it prints, its size
+    moleculePieces() ? [moleculeName(), st.art.molecule.mol.atoms.length, st.outW, st.bw] : null,
   ]);
 }
 // the pieces for the text on screen, if they're traced
@@ -55,11 +62,17 @@ async function tracePieces() {
     const W = await working(),
       s = settings(),
       T = st.text,
-      ppm = T.ppm,
-      d = spacingMM() * ppm, // px: a text is traced at its own resolution, so every piece has the same scale
+      mol = !T, // a molecule's bonds and labels (molecule.js), else a text's lines
+      ppm = mol ? st.bw / st.outW : T.ppm, // px per mm of the working image
+      d = spacingMM() * ppm, // px: every piece has the same scale
+      items = mol
+        ? moleculeRegions(W)
+        : T.lines.map((m, i) => ({ text: m, name: (T.lineNames && T.lineNames[i]) || `line ${i + 1}` })),
       list = [];
-    for (let i = 0; i < T.lines.length; i++) {
-      const walk = await LAY.call("stageTrace", traceArgs(W, s, T.lines[i]));
+    if (!(ppm > 0 && Number.isFinite(ppm))) return { key, list }; // (no scale yet: nothing to trace pieces at)
+    for (let i = 0; i < items.length; i++) {
+      const it = items[i],
+        walk = await LAY.call("stageTrace", traceArgs(W, s, it.text || null, it.mask || null));
       if (!walk) continue; // every letter of the line erased
       const r = await LAY.call("stagePrint", [
         walk,
@@ -90,7 +103,7 @@ async function tracePieces() {
       }
       const bw = Math.max(1, walk.bbox.maxX - walk.bbox.minX);
       list.push({
-        name: (T.lineNames && T.lineNames[i]) || `line ${i + 1}`,
+        name: it.name,
         walk,
         w: W.w,
         h: W.h,
@@ -147,14 +160,23 @@ function piecePlate(n, gap, straight) {
   }
   const key = [P.key, n, gap, straight, lineWidthMM(), BED.w, BED.h].join("|");
   if (piecePlateCache && piecePlateCache.key === key && piecePlateCache.P === P) return piecePlateCache.lay;
+  // (a molecule's pieces keep their places: one frame for all of them)
+  const together = moleculePieces(),
+    U = together
+      ? {
+          x0: Math.min(...P.list.map((D) => D.fb.x0)),
+          y1: Math.max(...P.list.map((D) => D.fb.y1)),
+        }
+      : null;
   const lines = P.list.map((D) => {
     const k = D.outW / D.bw,
+      fb = U || D.fb,
       m = D.final.re.length,
       x = new Float64Array(m),
       y = new Float64Array(m);
     for (let i = 0; i < m; i++) {
-      x[i] = (D.final.re[i] - D.fb.x0) * k;
-      y[i] = (D.fb.y1 - D.final.im[i]) * k;
+      x[i] = (D.final.re[i] - fb.x0) * k;
+      y[i] = (fb.y1 - D.final.im[i]) * k;
     }
     return { x, y };
   });
@@ -165,6 +187,7 @@ function piecePlate(n, gap, straight) {
     gap,
     pad: 0.5 * lineWidthMM(),
     straight,
+    together,
   });
   lay.pieces.forEach((q, i) => (q.open = P.list[i].open));
   piecePlateCache = { key, P, lay };
@@ -192,10 +215,19 @@ const pieceShown = () => Math.max(0, +$("pieceShown").value || 0);
 // ---------- the Plate card: Lines of text, and which piece One copy shows ----------
 function pieceMenuUI() {
   const many = !isModel() && !!st.text && textLines() > 1,
+    molLabels =
+      typeof moleculeDrawn === "function" &&
+      !isModel() &&
+      !st.text &&
+      st.art.kind === "molecule" &&
+      !!moleculeDrawn().r &&
+      moleculeDrawn().r.labels > 0,
     on = piecesOn();
-  $("piecesRow").hidden = !many;
+  $("piecesRow").hidden = !many && !molLabels;
+  $("textPieces").closest(".field").hidden = !many;
+  $("molPiecesField").hidden = !molLabels;
   $("pieceShownField").hidden = !on;
-  $("copiesLab").textContent = on ? "Copies of each line" : "Copies";
+  $("copiesLab").textContent = on && many ? "Copies of each line" : "Copies";
   const P = piecesNow(),
     el = $("pieceShown");
   if (P) {

@@ -3,6 +3,17 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v118 · 2026-10-29
+
+- **A molecule prints in pieces** (Print step, Plate card: Molecule, Bonds and labels apart, the default): the bonds
+  print as one continuous line, then each atom's letters (N, O, NH, OH …) as a small piece of its own, in their places,
+  so no connector strand runs from a label to the bonds. The pieces keep their places on the plate (copies are whole
+  molecules), and the G-code prints them one after another. One piece prints it all as one line, as before; the Line
+  step still shows the one joined line.
+- Engine: `UNB.plateLayoutPieces` packs pieces together (`together`); `UNB.molecule` says which strokes are bonds and
+  which a label's. Tests E31, A40.
+- Fixed: tracing pieces before the line had a size could stop the layers' engine.
+
 ## v117 · 2026-10-29
 
 - **The structure editor** (Molecule card, Draw or edit…): draw a structure by hand, or change the one shown, on the

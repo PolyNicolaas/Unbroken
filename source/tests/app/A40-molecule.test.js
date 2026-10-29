@@ -12,14 +12,24 @@ module.exports = {
   id: "A40", title: "The Molecule input: a name or SMILES drawn as a skeletal formula, traced or plotted as drawn",
   guards: "the examples not drawing, a SMILES or a name not laid out, a wrong name not said so, a molecule made for a pen plotter traced instead of plotted as drawn, its SVG missing strokes, and a design file losing it",
   why: "A chemist's input (v116): a structure as a skeletal formula, exact lines like text and patterns (engine UNB.molecule). Its examples come laid out; a typed SMILES is laid out by RDKit (loaded when first needed), a name is looked up on PubChem first.",
-  how: "Opens the app empty with RDKit served from the test kit and PubChem answered here. Taps the Theobromine example; types a SMILES (paracetamol); types the name caffeine; types a name PubChem doesn't know. Makes it for a pen plotter and exports the SVG. Saves the design, picks the leaf, opens the design again.",
-  pass: "Theobromine: the Molecule input in use, 13 atoms, traced into one line (the readout counts terms); the SMILES: 11 atoms and 11 bonds; caffeine by name: 14 atoms, its SMILES shown; the unknown name: said PubChem doesn't know it, the molecule in use unchanged; for a pen plotter: Trace off (as drawn) and the SVG has a stroke for every stroke of the drawing; the design file brings the molecule back; no page errors.",
+  how: "Opens the app empty with RDKit served from the test kit and PubChem answered here. Taps the Theobromine example and goes to the Print step (its pieces, the G-code, One piece); types a SMILES (paracetamol); types the name caffeine; types a name PubChem doesn't know. Makes it for a pen plotter and exports the SVG. Saves the design, picks the leaf, opens the design again.",
+  pass: "Theobromine: the Molecule input in use, 13 atoms, traced into one line (the readout counts terms); on the Print step it prints in 7 pieces, the bonds and then each label, all placed together, its G-code exports, and Molecule: One piece turns the pieces off; the SMILES: 11 atoms and 11 bonds; caffeine by name: 14 atoms, its SMILES shown; the unknown name: said PubChem doesn't know it, the molecule in use unchanged; for a pen plotter: Trace off (as drawn) and the SVG has a stroke for every stroke of the drawing; the design file brings the molecule back; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { clean: true, art: true }), checks = [];
     await offline(page);
     await page.click("#examplesRow [data-example=theobromine]"); await A.idle(page, 4000);
     const t = await page.evaluate(() => ({ kind: st.art.kind, n: st.art.molecule.mol.atoms.length, chip: $("chip").textContent }));
     checks.push(check("Theobromine: the Molecule in use, 13 atoms, traced", +(t.kind === "molecule" && t.n === 13 && /terms/.test(t.chip)), "==", 1));
+    // printed in pieces: the bonds, then each label, in their places (pieces.js, Plate card: Molecule)
+    await page.click("#goTrace"); await A.idle(page, 600); await page.click("#goOut"); await A.idle(page, 2000);
+    await page.click("label[for=stPlate]"); await page.waitForFunction(() => st.pieces && st.pieces.list.length, null, { timeout: 60000 }).catch(() => {}); await A.idle(page, 2000);
+    const pc = await page.evaluate(() => { const lay = plateNow(); return { n: st.pieces ? st.pieces.list.length : 0, first: st.pieces && st.pieces.list[0].name, hint: $("plateHint").textContent, same: lay && lay.placed.length >= 2 && lay.placed.every((p) => p.x === lay.placed[0].x && p.y === lay.placed[0].y) }; });
+    checks.push(check("printer: Theobromine in 7 pieces (the bonds, then 6 labels), all in one place on the plate", +(pc.n === 7 && pc.first === "bonds" && pc.same && /bonds print as one line/.test(pc.hint)), "==", 1));
+    const [gz] = await Promise.all([page.waitForEvent("download", { timeout: 30000 }), page.click("#nbGcode")]);
+    checks.push(check("… its G-code exports", +/gcode/.test(gz.suggestedFilename()), "==", 1));
+    await page.selectOption("#molPieces", "one"); await A.idle(page, 1500);
+    checks.push(check("… Molecule: One piece turns the pieces off", +!(await page.evaluate(() => piecesOn())), "==", 1));
+    await page.selectOption("#molPieces", "apart"); await page.click("label[for=viewArt]"); await A.idle(page, 500);
     await page.fill("#molIn", "CC(=O)Nc1ccc(O)cc1"); await page.click("#molGo"); await said(page, /atoms|Couldn/); await A.idle(page, 3000);
     checks.push(check("a SMILES (paracetamol): 11 atoms, 11 bonds", +/11 atoms, 11 bonds/.test(await page.textContent("#molMsg")), "==", 1));
     await page.fill("#molIn", "caffeine"); await page.click("#molGo"); await said(page, /atoms|Couldn/); await A.idle(page, 3000);

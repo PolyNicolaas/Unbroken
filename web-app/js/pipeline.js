@@ -73,6 +73,15 @@ async function working(res, engine = PIPE) {
 // line map for one threshold: detection + selection mask + erasing.
 // lineSpec() describes it for the background engine (UNB.stageLines); detect() runs it here (auto threshold,
 // optimizer).
+// the selection (Select area), and a piece's region (pieces.js) when there is one: where lines are kept
+function regionMask(W, region) {
+  const m = selMask(W);
+  if (!region) return m;
+  if (!m) return region;
+  const out = new Uint8Array(m.length);
+  for (let i = 0; i < m.length; i++) out[i] = m[i] && region[i] ? 1 : 0;
+  return out;
+}
 function selMask(W) {
   if (!st.sel) return null;
   const { w, h } = W,
@@ -96,7 +105,7 @@ function selMask(W) {
   return m;
 }
 // textMask: one line of a text's letters instead of the whole text (pieces.js); the selection and erasing still apply
-function lineSpec(W, sens, textMask) {
+function lineSpec(W, sens, textMask, region) {
   const s = settings(),
     { w, h } = W,
     { sx, sy, kx } = W.crop;
@@ -125,7 +134,7 @@ function lineSpec(W, sens, textMask) {
     mode: s.mode,
     sens,
     split: CFG.engine.packedStrokeSplit,
-    selMask: selMask(W),
+    selMask: regionMask(W, region), // (a piece's region: pieces.js)
     erase,
   };
 }
@@ -134,12 +143,13 @@ function detect(W, sens) {
   return sp.lines || UNB.stageLines(sp.blurred, W.w, W.h, sp);
 }
 
-function traceArgs(W, s, textMask) {
-  // what stageTrace needs for one working image (textMask: one line of a text, pieces.js; it starts where it likes)
+function traceArgs(W, s, textMask, region) {
+  // what stageTrace needs for one working image (textMask: one line of a text; region: the part of the picture a
+  // piece is traced from, a molecule's bonds or one of its labels: pieces.js; a piece starts where it likes)
   const { w, h } = W,
-    startAt = st.start && !textMask ? toWork(st.start, W.crop) : null;
+    startAt = st.start && !textMask && !region ? toWork(st.start, W.crop) : null;
   return [
-    lineSpec(W, s.sens, textMask),
+    lineSpec(W, s.sens, textMask, region),
     w,
     h,
     {
