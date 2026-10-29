@@ -186,7 +186,8 @@ rest of Image prep, Grey levels and the trace (pipeline.js `working`). Tests E38
 
 **Image prep** (Art step, under the Picture card since v113) gets a picture ready before tracing: brightness, contrast, **Remove plain background** (a
 flood from the border through colours close to the border's, or from the point you tap with **Tap the background**),
-**Even out lighting**. **Grey levels** (their own card, after Image prep on the Art step): the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then
+**Even out lighting**. **Levels** (their own card, after Image prep on the Art step; Greys or **Colours**: flat colours found in Lab,
+`UNB.colourLevels`, a filled block's pen starting with its colour, test E41, A42): the picture as 2–6 flat greys (`UNB.levels`: k-means on its histogram, then
 **Smooth blocks** gives each pixel the grey most of its neighbours have, removing specks and rounding corners). Each grey
 is **Trace** (its edges are lines) or **Skip**; the line map is the edges between greys where either side is traced
 (`UNB.levelEdges`), and the trace style and ink threshold are hidden. Making it for a pen plotter, a grey can also be

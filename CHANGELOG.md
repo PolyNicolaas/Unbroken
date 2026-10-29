@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v120 · 2026-10-29
+
+- **Colour levels.** The Levels card (was Grey levels; its slider is Blocks) has **Greys / Colours**: with Colours
+  the picture becomes 2–6 flat colours, found in Lab (where colours that look different are far apart), so a red
+  and a green of the same brightness stay apart. The preview shows the colours, each row has its colour's swatch, and
+  a filled block's pen starts with its own colour, so a pen plotter draws it in colour. Trace, Fill, Both and Skip
+  work as for greys; a removed background or cut-out counts as paper.
+- Engine: `UNB.colourLevels` (01-image.js); `UNB.stagePrep` takes `levels.colour`. Tests E41, A42.
+
 ## v119 · 2026-10-29
 
 - **A shorter Print step**: Printer, Plate, Layers and Export, then **More print settings** (Base, Infill,

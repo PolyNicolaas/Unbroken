@@ -11,7 +11,8 @@ async function working(res, engine = PIPE) {
   const s = settings(),
     src = st.source;
   if (res === undefined) res = s.res;
-  const lv = s.levels && !st.text ? { count: s.levels.count, smooth: s.levels.smooth } : null;
+  const lv =
+    s.levels && !st.text ? { count: s.levels.count, smooth: s.levels.smooth, colour: !!s.levels.colour } : null;
   const key = [
     src.__id,
     JSON.stringify(st.sel),

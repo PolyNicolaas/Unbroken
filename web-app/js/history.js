@@ -16,6 +16,8 @@ const DESIGN_IDS = [
   "lineOne",
   "lineStrokes",
   "traceOn",
+  "levelGreys",
+  "levelColours",
   "srcModel",
   "textIn",
   "font",

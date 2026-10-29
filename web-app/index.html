@@ -568,11 +568,15 @@
 
     </section>
     <section class="card art-only art-picture" aria-labelledby="h-levels">
-      <h2 id="h-levels">Grey levels <span id="levelsCardVal">off</span></h2>
+      <h2 id="h-levels">Levels <span id="levelsCardVal">off</span></h2>
       <div class="row" id="levelsRow">
-        <div class="lab"><label for="levels">Greys</label><span class="val" id="levelsVal">off</span></div>
+        <div class="lab"><label for="levels">Blocks</label><span class="val" id="levelsVal">off</span></div>
         <input type="range" id="levels" min="1" max="6" value="1" aria-describedby="levelsHint">
         <div id="levelsBox" hidden>
+          <div class="seg small" role="radiogroup" aria-label="Greys or colours">
+            <input type="radio" name="levelKind" id="levelGreys" value="grey" checked><label for="levelGreys" title="Blocks by brightness: colours equally bright fall together">Greys</label>
+            <input type="radio" name="levelKind" id="levelColours" value="colour"><label for="levelColours" title="Blocks by colour: a red and a green of the same brightness stay apart, and each filled block starts with its own colour as its pen">Colours</label>
+          </div>
           <div class="row"><div class="lab"><label for="levelSmooth">Smooth blocks</label><span class="val" id="levelSmoothVal"></span></div>
           <input type="range" id="levelSmooth" min="0" max="10" value="2"></div>
           <div id="levelList" class="level-list" role="group" aria-label="What each grey does"></div>
@@ -580,7 +584,7 @@
           <input type="hidden" id="levelFills" value="">
           <p class="hint" id="levelFillNote" hidden>Fills are drawn with Separate strokes (the switch at the top of this step); with one continuous line only the traced edges are plotted.</p>
         </div>
-        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Making it for a pen plotter, a grey can also be filled (Fill), or traced and filled (Both): its blocks are hatched, cross-hatched, ringed or filled with the Pattern card's pattern, with its own pen (its own layer in the SVG); a filled grey that isn't traced still stops its fill at its edges. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. The still-life sample (Art step, Picture) shows them well.</p>
+        <p class="hint help" id="levelsHint">The picture as 2 to 6 flat greys, found from its own greys (darkest first). Each grey's edges can be traced (Trace) or left out (Skip): the line follows the edges between the greys you trace, like an outline of each block. Making it for a pen plotter, a grey can also be filled (Fill), or traced and filled (Both): its blocks are hatched, cross-hatched, ringed or filled with the Pattern card's pattern, with its own pen (its own layer in the SVG); a filled grey that isn't traced still stops its fill at its edges. Smooth blocks gives every pixel the grey most of its neighbours have, which removes specks and rounds the blocks' corners so their edges trace clean. With grey levels on, the Tracing card's trace style and ink threshold are not used. Colours finds flat colours instead of greys, so colours that are equally bright stay apart, and a filled block's pen starts with its colour. The still-life sample (Art step, Picture) shows them well.</p>
       </div>
     </section>
 

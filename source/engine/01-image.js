@@ -233,7 +233,7 @@
     const R = lin(r),
       G = lin(g),
       B = lin(b);
-    const f = (t) => (t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116);
+    const f = (t) => (t > 216 / 24389 ? Math.cbrt(t) : ((24389 / 27) * t + 16) / 116);
     const x = f((0.4124 * R + 0.3576 * G + 0.1805 * B) / 0.95047),
       y = f(0.2126 * R + 0.7152 * G + 0.0722 * B),
       z = f((0.0193 * R + 0.1192 * G + 0.9505 * B) / 1.08883);
@@ -276,7 +276,7 @@
         at = 0;
       S.forEach((i, j) => {
         near[j] = Math.min(near[j], d2(i, cen[cen.length - 1]));
-        if (near[j] > far) (far = near[j]), (at = i);
+        if (near[j] > far) ((far = near[j]), (at = i));
       });
       cen.push([L[at], A[at], Bb[at]]);
     }
@@ -287,7 +287,7 @@
           bd = Infinity;
         for (let c = 0; c < K; c++) {
           const d = d2(i, cen[c]);
-          if (d < bd) (bd = d), (best = c);
+          if (d < bd) ((bd = d), (best = c));
         }
         const q = sum[best];
         q[0] += L[i];
@@ -314,7 +314,7 @@
         bd = Infinity;
       for (let c = 0; c < K; c++) {
         const d = d2(i, cen[c]);
-        if (d < bd) (bd = d), (best = c);
+        if (d < bd) ((bd = d), (best = c));
       }
       lab[i] = rank[best];
     }

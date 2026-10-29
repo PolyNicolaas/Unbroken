@@ -9,7 +9,8 @@
 
   // RGBA pixels → the working image, as the app does it: prepared gray (UNB.prep, then inverted for light lines on
   // dark), the same blurred for tracing, and a gray RGBA copy for the preview. o: { prep, invert, blur (sigma, px),
-  // levels ({ count, smooth, colour }: grey levels, UNB.levels, or colour levels, UNB.colourLevels; the picture becomes flat
+  // levels ({ count, smooth, colour }: grey levels, UNB.levels, or colour levels, UNB.colourLevels; the picture becomes
+  // flat
   // greys, not blurred) }. Returns gray,
   // blurred, preview, levels (UNB.levels' result or null).
   // Runs in a worker so a big image doesn't freeze the page.

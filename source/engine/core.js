@@ -8,7 +8,9 @@
     bbox,
                       cumLength, resampleLoop, makeUF, makeHeap, gaussKernel, plotLine, bilinear, f3, svgPolylines
     01-image.js    1. Image in — RGBA pixels → a clean grayscale image.
-                      UNB.toGray, UNB.blur, boxBlur, UNB.prep, UNB.levels, boxSum, UNB.gradient
+                      UNB.toGray, UNB.blur, boxBlur, UNB.prep, smoothLabels, UNB.levels, toLab, UNB.colourLevels,
+                      boxSum,
+                      UNB.gradient
     02-lines.js 2. Line maps — grayscale → a 1-pixel map of the lines to draw: centerline or outline, erasing.
                       UNB.canny, UNB.lineStrokes, UNB.levelEdges, UNB.otsu, UNB.thin, UNB.centerline, UNB.pruneSpurs,
                       UNB.erase, UNB.lineScore
