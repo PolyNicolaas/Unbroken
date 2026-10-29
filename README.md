@@ -122,7 +122,7 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
 Test A38.
 
 The preview follows the step: the art or the line on Art and Line (the page for as drawn), the page on Plot, the plate or
-the layers on Print. **Next** at the end of each step goes on. Test A33.
+the layers on Print. Test A33.
 
 **Touch and scrolling** (`steppers.js`, `scroll.js`): every number box has − and + (finger-sized on touch screens;
 holding repeats). The preview stays in view while the settings scroll: a sticky column on wide screens, a compact
