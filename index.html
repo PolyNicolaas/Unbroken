@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v121</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v122</span></p>
 </header>
 
 <div class="wrap">
@@ -56,7 +56,7 @@
               <input type="radio" name="meEl" id="meEminus" value="-"><label for="meEminus" title="Tap an atom: one more negative charge">−</label>
             </div>
           </div>
-          <canvas id="meView" aria-label="The structure being drawn"></canvas>
+          <div class="me-stage"><canvas id="meView" aria-label="The structure being drawn"></canvas></div>
           <p class="me-msg" id="meMsg" role="status"></p>
           <div class="me-bar">
             <button class="btn" type="button" id="meUndo">Undo</button>
@@ -519,6 +519,7 @@
         <input type="text" id="molIn" spellcheck="false" autocapitalize="off" placeholder="a name (caffeine) or a SMILES" aria-label="A molecule's name or SMILES" aria-describedby="molMsg">
         <button class="btn primary" type="submit" id="molGo">Look up</button>
       </form>
+      <p class="hint mol-tip" id="molTip">A SMILES is the easiest way in: it needs no lookup and is never mistaken for another molecule. Most molecules' Wikipedia pages give it in the box on the right, under Identifiers → SMILES: copy it and paste it here. <a id="molWiki" href="https://en.wikipedia.org/wiki/Special:Search" target="_blank" rel="noopener">Find it on Wikipedia</a></p>
       <div class="inline"><button class="btn" type="button" id="molEdit" title="Draw a structure by hand, or change the one shown: atoms, bonds, rings, elements">Draw or edit…</button></div>
       <p class="status" id="molMsg" role="status"></p>
       <div class="examples"><span class="name">Examples</span><div class="chips" id="molChips"></div></div>

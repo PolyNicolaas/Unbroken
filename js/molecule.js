@@ -351,7 +351,7 @@ async function moleculeLookup(query) {
     } catch {
       throw new Error("PubChem couldn't be reached to look up the name (a SMILES works offline)");
     }
-    if (!r.ok) throw new Error(`“${q}” isn't a SMILES, and PubChem doesn't know it by that name`);
+    if (!r.ok) throw new Error(`“${q}” isn't a SMILES, and PubChem doesn't know it by that name: try its SMILES (on its Wikipedia page, under Identifiers)`);
     const p = ((await r.json()).PropertyTable || {}).Properties || [];
     smiles = p[0] && (p[0].IsomericSMILES || p[0].SMILES);
     if (!smiles) throw new Error(`PubChem has no structure for “${q}”`);
@@ -410,10 +410,22 @@ function moleculeExample(key) {
   const e = MOL_EXAMPLES.find((x) => x.key === key);
   if (!e) return false;
   $("molIn").value = e.name.toLowerCase();
+  moleculeWikiLink();
   artUseMolecule({ query: e.name, name: e.name, smiles: e.smiles, mol: molOf(e) });
   $("molMsg").textContent = `${e.name}${e.what ? `, ${e.what}` : ""}: ${e.atoms.length} atoms`;
   return true;
 }
+// the tip's Wikipedia link: the page for what's typed (a name), or the search page
+function moleculeWikiLink() {
+  const q = $("molIn").value.trim(),
+    // (a name: lower-case words, not only the letters and signs a SMILES is written in)
+    name = !!q && /[a-z]{3}/.test(q) && !/^[BCNOPSFIHKbcnopsilr0-9()=#@+\-[\]\/\\%.]+$/.test(q);
+  $("molWiki").href = name
+    ? "https://en.wikipedia.org/wiki/Special:Search?search=" + encodeURIComponent(q)
+    : "https://en.wikipedia.org/wiki/Special:Search";
+  $("molWiki").textContent = name ? `Find ${q} on Wikipedia` : "Find it on Wikipedia";
+}
+$("molIn").addEventListener("input", moleculeWikiLink);
 $("molForm").addEventListener("submit", (e) => {
   e.preventDefault();
   moleculeUse($("molIn").value);
