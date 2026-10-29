@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v115</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v116</span></p>
 </header>
 
 <div class="wrap">
@@ -370,10 +370,11 @@
     </section>
     <section class="card art-only" aria-labelledby="h-input">
       <h2 id="h-input">Input <span id="inputVal"></span></h2>
-      <div class="seg four" role="radiogroup" aria-label="What to start from">
+      <div class="seg five" role="radiogroup" aria-label="What to start from">
         <input type="radio" name="srcType" id="srcImage" value="picture" checked><label for="srcImage">Picture<small>trace an image</small></label>
         <input type="radio" name="srcType" id="srcText" value="text"><label for="srcText">Text<small>type words</small></label>
         <input type="radio" name="srcType" id="srcPattern" value="pattern"><label for="srcPattern">Pattern<small>geometric art</small></label>
+        <input type="radio" name="srcType" id="srcMolecule" value="molecule"><label for="srcMolecule">Molecule<small>a structure</small></label>
         <input type="radio" name="srcType" id="srcModel" value="model"><label for="srcModel">3D model<small>an STL</small></label>
       </div>
       <div class="examples" role="group" aria-label="Examples" id="examplesRow">
@@ -472,6 +473,16 @@
       <p class="hint help">Geometric art drawn as exact lines, then traced. The first group are patterns of their own; the second draw a picture's light and dark (the Picture row picks it), still as one line, so they print in chocolate. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print without doubled strokes (the Line card's Closed loop or Open is set to suit). Width sets the print's size in mm, and says how far apart its closest lines come against the needle's line spacing; Fit the needle picks the width where they are exactly that. Spirograph, Lissajous and Rose are one line that crosses itself: the trace follows their exact line, and with Allow overlaps (the Line step's Line card) the needle prints over each crossing; without it every crossing is undone. Truchet tiles are many pieces: those suit the pen plotter. Every style has its own settings below the style; Shuffle gives the random ones another version.</p>
     </section>
 
+    <section class="card art-only art-molecule" aria-labelledby="h-mol">
+      <h2 id="h-mol">Molecule <span id="molVal"></span></h2>
+      <form class="mol-form" id="molForm" autocomplete="off">
+        <input type="text" id="molIn" spellcheck="false" autocapitalize="off" placeholder="a name (caffeine) or a SMILES" aria-label="A molecule's name or SMILES" aria-describedby="molMsg">
+        <button class="btn primary" type="submit" id="molGo">Draw</button>
+      </form>
+      <p class="status" id="molMsg" role="status"></p>
+      <div class="examples"><span class="name">Examples</span><div class="chips" id="molChips"></div></div>
+      <p class="hint help">A chemical structure drawn as a skeletal formula: bonds as lines (double and triple bonds as parallel lines, a ring's double bonds inside the ring), carbons implied, every other atom as its letters with its hydrogens, in the single-stroke font. Type a SMILES (CCO, c1ccccc1) or a name (caffeine, theobromine): names are looked up on PubChem, and RDKit, the chemistry toolkit, lays it out (loaded the first time, about 7 MB; both need the internet; the examples don't). Like text and patterns it is exact lines: plotted as drawn with Trace off, or traced into one line for chocolate. Its bonds start long enough that a double bond's two lines are the line spacing apart.</p>
+    </section>
     <section class="card art-only art-model" aria-labelledby="h-model">
       <h2 id="h-model">3D model</h2>
       <div class="row" id="modelBox">
@@ -792,6 +803,7 @@
 <script src="13-patterns.js"></script>
 <script src="14-photo.js"></script>
 <script src="15-cutout.js"></script>
+<script src="16-molecule.js"></script>
 <script src="core.js"></script>
 <script src="fonts.js"></script>
 <script src="settings.js"></script>
@@ -818,6 +830,7 @@
 <script src="js/testprint.js"></script>
 <script src="js/plot.js"></script>
 <script src="js/workflow.js"></script>
+<script src="js/molecule.js"></script>
 <script src="js/examples.js"></script>
 <script src="js/camera.js"></script>
 <script src="js/steppers.js"></script>

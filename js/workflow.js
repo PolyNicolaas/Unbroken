@@ -51,13 +51,15 @@ function workflowUI() {
   $("traceOffNote").hidden = !off;
   $("traceOffWhat").textContent =
     mode === "drawn"
-      ? `the ${st.art.kind === "text" ? "text's" : "pattern's"} own lines, exactly as drawn.` +
+      ? `the ${{ text: "text's", molecule: "molecule's" }[st.art.kind] || "pattern's"} own lines, exactly as drawn.` +
         (plot ? "" : " A printer needs it traced: turn Trace on to print.")
       : "the picture as it is. Turn Trace on to make it into lines.";
   $("stepLineSub").textContent = LINE_SUB[mode];
   $("goOut").textContent = plot ? "Next: plot it →" : "Next: print it →";
   nextBarUI();
-  const kind = { picture: "picture", text: "text", pattern: "pattern", model: "model" }[st.art.kind];
+  const kind = { picture: "picture", text: "text", pattern: "pattern", molecule: "molecule", model: "model" }[
+    st.art.kind
+  ];
   $("lineModeHint").textContent = !plot
     ? "A printer makes one continuous line. (Making it for a pen plotter, at the top, also offers separate strokes and as drawn.)"
     : st.art.kind === "model"
@@ -74,7 +76,9 @@ function workflowUI() {
     plotFromUI(); // plot.js
   }
   if (mode === "drawn") {
-    setChip(`${st.art.kind === "text" ? "The text" : patternName(st.art.pattern)} as drawn: exact lines, no trace`);
+    setChip(
+      `${st.art.kind === "text" ? "The text" : st.art.kind === "molecule" ? moleculeName() : patternName(st.art.pattern)} as drawn: exact lines, no trace`
+    );
     $("fitinfo").textContent = "as drawn";
   }
   if (mode === "none") {

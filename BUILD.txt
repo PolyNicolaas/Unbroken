@@ -1,6 +1,6 @@
-Unbroken · web app build v115
-Built:  2026-10-29T17:16:12.667Z
-Tests:  75 of 75 tests passed
+Unbroken · web app build v116
+Built:  2026-10-29T17:59:25.178Z
+Tests:  77 of 77 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
@@ -20,26 +20,26 @@ Files (sha1, first 12):
   135d6e45a412  13-patterns.js
   bf10b0415df9  14-photo.js
   c27f21ff6627  15-cutout.js
-  ff5aed89ddb3  16-molecule.js
+  c5d31e939a54  16-molecule.js
   f13257da0f45  core.js
-  f7e43cabac57  css/app.css
+  c0a24f19e84d  css/app.css
   0be9d7ad7cf8  css/theme.css
   666f911d2119  fonts.js
-  b91e211ac057  index.html
-  c88760da787c  js/art.js
+  bd18d9612284  index.html
+  4dd7d89a4755  js/art.js
   1c04bb0cbfd9  js/camera.js
   9f7ab1ddf14c  js/config.js
   fe8b60afbbf8  js/controls.js
   e154d9b5627a  js/cutout.js
   e666f8bf0b57  js/engine-bridge.js
-  88d7674df0ca  js/examples.js
+  33183b7bba32  js/examples.js
   7b57af784570  js/export.js
   f61f9234d357  js/history.js
   31154129f62f  js/layers.js
   6aa89b6e4e0e  js/levels.js
   7510c8db4a05  js/main.js
   a462e8546261  js/model.js
-  373f39c13915  js/molecule.js
+  6f70efded623  js/molecule.js
   e8b1737911e5  js/notes.js
   911e52e413f3  js/optimize.js
   cdc36022946d  js/patterns.js
@@ -56,7 +56,7 @@ Files (sha1, first 12):
   ffb18c999901  js/tools.js
   e651a30c34d9  js/ui.js
   ea8a76378f00  js/views.js
-  9bed190e58eb  js/workflow.js
+  e4da5cfb232b  js/workflow.js
   53b02936e233  js/zoom.js
   820b1b0ec74b  settings.js
   85d8193792d8  worker.js

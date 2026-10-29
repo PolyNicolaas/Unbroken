@@ -20,8 +20,14 @@ st.art = {
   width: null,
 };
 const ART_LONG = 1600; // px: the long side a pattern is drawn at (UNB.patternLayout)
-const KIND_RADIO = { picture: "srcImage", text: "srcText", pattern: "srcPattern", model: "srcModel" };
-const KIND_NAME = { picture: "Picture", text: "Text", pattern: "Pattern", model: "3D model" };
+const KIND_RADIO = {
+  picture: "srcImage",
+  text: "srcText",
+  pattern: "srcPattern",
+  molecule: "srcMolecule",
+  model: "srcModel",
+};
+const KIND_NAME = { picture: "Picture", text: "Text", pattern: "Pattern", molecule: "Molecule", model: "3D model" };
 let artSeq = 0; // tags each picture canvas, so undo can tell a new picture from the same one
 
 function patternName(p) {
@@ -79,9 +85,9 @@ function patternFitWidth() {
     P = UNB.PATTERNS[st.art.pattern.style];
   return r && P && P.evenGap && st.spacing > 0 ? (r.box[0] / r.gap) * st.spacing * 1.03 : null;
 }
-// the pattern as a picture to trace: black strokes on white
-function patternPicture() {
-  const { r, L } = patternDrawn();
+// the pattern as a picture to trace: black strokes on white (or another drawing of exact lines: a molecule)
+function patternPicture(D = patternDrawn()) {
+  const { r, L } = D;
   if (!r) return null;
   const c = document.createElement("canvas");
   c.width = L.w;
@@ -134,7 +140,7 @@ function artApply() {
   $(KIND_RADIO[A.kind]).checked = true;
   document.body.dataset.art = A.kind;
   lineDefault(); // workflow.js: the line that suits this input, until one is picked
-  A.untraced = (A.kind === "pattern" || A.kind === "text") && lineModeNow() === "drawn";
+  A.untraced = asDrawnOK() && lineModeNow() === "drawn";
   if (A.untraced) {
     $("artMsg").textContent =
       A.kind !== "pattern" || patternDrawn().r
@@ -145,7 +151,21 @@ function artApply() {
     if (!st.model) setModel(sampleVase(), "sample vase");
     useSource("model");
   } else if (A.kind === "text") useSource("text");
-  else if (A.kind === "pattern") {
+  else if (A.kind === "molecule") {
+    // a molecule (molecule.js): its skeletal formula traced as drawn, like a pattern
+    const D = moleculeDrawn(),
+      c = D.r ? patternPicture(D) : null;
+    if (c) {
+      $("modeCenter").checked = true;
+      $("invert").checked = false;
+      $("loopOpen").checked = true;
+      labels();
+      useSource("picture", c, moleculeName());
+      const W = A.molWidth || moleculeWidth();
+      if (W) startSize(W, D.r.box[0] / Math.max(1e-9, D.r.box[1]));
+      $("artMsg").textContent = "";
+    } else useSource("picture", blankPicture(), "no molecule yet");
+  } else if (A.kind === "pattern") {
     const c = patternPicture(),
       P = UNB.PATTERNS[A.pattern.style];
     if (c) {
@@ -238,6 +258,7 @@ function artExamplePattern(style) {
 // the print's width changed by hand (pipeline.js setSize): a pattern keeps it from now on
 function artSized(W) {
   if (st.art.kind === "pattern") st.art.width = W;
+  if (st.art.kind === "molecule") st.art.molWidth = W;
   artSizeUI();
 }
 // the Pattern card's Width (mm) and how far apart its closest lines come, against the needle's line spacing
@@ -344,6 +365,12 @@ function artVectors() {
     });
     return { W: L.w, H: L.h, layers: [{ name: patternName(A.pattern), pen, strokes }], pictures: 0 };
   }
+  if (A.kind === "molecule") {
+    const { r, L } = moleculeDrawn();
+    if (!r) return null;
+    const strokes = r.paths.map((p) => p.map((v) => (v + L.m) * L.s));
+    return { W: L.w, H: L.h, layers: [{ name: moleculeName() || "molecule", pen, strokes }], pictures: 0 };
+  }
   if (A.kind === "text") {
     const t = textPicture();
     if (!t) return null;
@@ -351,7 +378,13 @@ function artVectors() {
   }
   return A.kind === "picture" ? { W: 1, H: 1, layers: [], pictures: 1 } : null;
 }
-const asDrawnOK = () => st.art.kind === "pattern" || st.art.kind === "text";
+const asDrawnOK = () => st.art.kind === "pattern" || st.art.kind === "text" || st.art.kind === "molecule";
+// a molecule (molecule.js) becomes the input in use; its own size until it's sized by hand
+function artUseMolecule(M) {
+  st.art.molecule = M;
+  st.art.molWidth = null;
+  artUse("molecule");
+}
 
 // ---------- undo and design files (history.js) ----------
 // The art without its picture (kept apart: by reference for undo, as an image in a file). The picture's tag makes a new
@@ -362,6 +395,8 @@ function artSaved() {
     kind: st.art.kind,
     pattern: { ...st.art.pattern },
     width: st.art.width,
+    molecule: st.art.molecule || null,
+    molWidth: st.art.molWidth || null,
     picture: P ? { label: P.label, sample: P.sample, key: P.canvas.__art } : null,
   };
 }
@@ -385,6 +420,8 @@ function artRestore(a, pic) {
     // (a design saved before v104 keeps its detail, twist, sides and shape: the keys are the same)
     pattern: UNB.patternDefaults(a.pattern && UNB.PATTERNS[a.pattern.style] ? a.pattern.style : "labyrinth", a.pattern),
     width: a.width || null,
+    molecule: a.molecule || null,
+    molWidth: a.molWidth || null,
     picture: pic
       ? {
           canvas: pic.__art ? pic : tagged(pic),
@@ -416,11 +453,13 @@ function artUI() {
   $("inputVal").textContent =
     A.kind === "pattern"
       ? patternName(A.pattern)
-      : A.kind === "picture"
-        ? (A.picture && A.picture.label) || ""
-        : A.kind === "model"
-          ? (st.model && st.model.name) || ""
-          : "";
+      : A.kind === "molecule"
+        ? moleculeName()
+        : A.kind === "picture"
+          ? (A.picture && A.picture.label) || ""
+          : A.kind === "model"
+            ? (st.model && st.model.name) || ""
+            : "";
   if (A.picture) {
     $("picVal").textContent = A.picture.label;
     const t = A.picture.turn || 0,
@@ -437,6 +476,7 @@ function artUI() {
     picture: "The picture, traced into one line.",
     text: "The text, traced from its font's strokes.",
     pattern: `The ${patternName(A.pattern)} pattern, traced into one line.`,
+    molecule: `${moleculeName() || "The molecule"}, traced into one line.`,
     model: "A 3D model: it is sliced on the Print step.",
   }[A.kind];
   workflowUI(); // workflow.js: what the Line step can do with this input

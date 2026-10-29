@@ -1,6 +1,7 @@
 // Unbroken · web app · examples.js
 // A clean start, and the examples one tap away. The app opens empty (the Art step's preview says how to start) unless
-// settings.js names a sample (defaults.sample) or the page's address does (?example=leaf: the tests start that way). The
+// settings.js names a sample (defaults.sample) or the page's address does (?example=leaf: the tests start that way).
+// The
 // examples — pictures, patterns, lettering and a 3D model — are chips in the Input card and on the empty preview; each
 // becomes the input in use just as choosing it by hand would.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
@@ -18,6 +19,7 @@ const EXAMPLES = [
   ["spirograph", "Spirograph", "a pattern that crosses itself", () => artExamplePattern("spirograph")],
   ["portrait", "Wave portrait", "the face in wave rows", () => artExamplePattern("wavesTone")],
   ["lettering", "Lettering", "text in a single-stroke font", () => artUse("text")],
+  ["theobromine", "Theobromine", "a molecule: chocolate's own", () => moleculeExample("theobromine")],
   ["vase", "Vase", "a 3D model", () => artUse("model")],
 ];
 function useExample(key) {

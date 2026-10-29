@@ -112,7 +112,8 @@
       paths = [],
       closed = [],
       rects = new Array(n).fill(null);
-    // ---------- the labels: every atom but a carbon with bonds; the hydrogens on the side away from the bonds ----------
+    // ---------- the labels: every atom but a carbon with bonds; the hydrogens on the side away from the bonds
+    // ----------
     const text = (s, h) => {
       if (!o.font) return null;
       const L = UNB.textLayout(s, o.font, { cap: h, spacing: "font", track: 0.04 * h, word: 0.3 * h, align: "left" });
@@ -255,9 +256,22 @@
       }
     // each label's place (the element's letters, padded), and each atom's, in the drawing
     const boxes = [];
-    rects.forEach((r, i) => r && boxes.push({ atom: i, el: A[i].el, rect: [r[0] - x0, r[1] - y0, r[2] - x0, r[3] - y0] }));
+    rects.forEach(
+      (r, i) => r && boxes.push({ atom: i, el: A[i].el, rect: [r[0] - x0, r[1] - y0, r[2] - x0, r[3] - y0] })
+    );
     const at = P.map(([x, y]) => [x - x0, y - y0]);
     // (the closest two separate strokes come: a double bond's, or the letters' own)
-    return { paths, closed, box: [Math.max(1e-6, x1 - x0), Math.max(1e-6, y1 - y0)], gap: Math.min(D, cap * 0.25), bond: 1, labels, boxes, at, atoms: n, bonds: B.length };
+    return {
+      paths,
+      closed,
+      box: [Math.max(1e-6, x1 - x0), Math.max(1e-6, y1 - y0)],
+      gap: Math.min(D, cap * 0.25),
+      bond: 1,
+      labels,
+      boxes,
+      at,
+      atoms: n,
+      bonds: B.length,
+    };
   };
 })(typeof window !== "undefined" ? window : globalThis);
