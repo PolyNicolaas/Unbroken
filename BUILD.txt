@@ -1,11 +1,11 @@
-Unbroken · web app build v118
-Built:  2026-10-29T19:06:42.609Z
+Unbroken · web app build v119
+Built:  2026-10-29T19:39:54.069Z
 Tests:  79 of 79 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.04 mm
 
 Files (sha1, first 12):
   0902e2e523fa  00-util.js
-  7e44e48da503  01-image.js
+  acbfd9d242ce  01-image.js
   badcff892ed9  02-lines.js
   941b223d9657  03-text.js
   9c623d1c6a37  04-walk.js
@@ -15,17 +15,17 @@ Files (sha1, first 12):
   d0cc374de0d6  08-shape.js
   5a569698769c  09-plate.js
   5d6faec33c27  10-export.js
-  2189b17474c4  11-stages.js
+  e36b24655f53  11-stages.js
   59aaa64e2642  12-models.js
   135d6e45a412  13-patterns.js
   bf10b0415df9  14-photo.js
   c27f21ff6627  15-cutout.js
   b73cf618dae8  16-molecule.js
   fbe9bd9f73c7  core.js
-  1f975b62211f  css/app.css
+  464430ac78ab  css/app.css
   0be9d7ad7cf8  css/theme.css
   666f911d2119  fonts.js
-  5bd1e6ad54f2  index.html
+  51919e3c2176  index.html
   4dd7d89a4755  js/art.js
   1c04bb0cbfd9  js/camera.js
   9f7ab1ddf14c  js/config.js
@@ -33,7 +33,7 @@ Files (sha1, first 12):
   e154d9b5627a  js/cutout.js
   e666f8bf0b57  js/engine-bridge.js
   33183b7bba32  js/examples.js
-  7b57af784570  js/export.js
+  36cb8d77d178  js/export.js
   f61f9234d357  js/history.js
   31154129f62f  js/layers.js
   6aa89b6e4e0e  js/levels.js
@@ -56,7 +56,7 @@ Files (sha1, first 12):
   9bdbe1dadb94  js/testprint.js
   ffb18c999901  js/tools.js
   e651a30c34d9  js/ui.js
-  d4898ba1df26  js/views.js
+  599c4af2c880  js/views.js
   e4da5cfb232b  js/workflow.js
   53b02936e233  js/zoom.js
   820b1b0ec74b  settings.js

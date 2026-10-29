@@ -493,3 +493,13 @@ body[data-view="art"] .toolbar.tools { display: none; }
 .me-msg { margin: 0; padding: calc(4px * var(--space)) calc(12px * var(--space)); color: var(--muted); font-size: calc(12.5px * var(--text)); border-top: 1px solid var(--rule); }
 .me-bar { display: flex; flex-wrap: wrap; align-items: center; gap: calc(6px * var(--space)); padding: calc(8px * var(--space)) calc(10px * var(--space)) max(calc(8px * var(--space)), env(safe-area-inset-bottom)); border-top: 1px solid var(--rule); }
 .me-bar .me-gap { flex: 1; }
+
+/* ---------- v119: More print settings, the empty start, the printer's Line step ---------- */
+body:not([data-moreprint="1"]) .print-more { display: none !important; }
+.more-print { display: flex; flex-wrap: wrap; align-items: center; gap: calc(4px * var(--space)) calc(10px * var(--space)); padding: calc(4px * var(--space)) 0; }
+.more-print .more-btn { font-weight: 650; }
+.more-print .hint { margin: 0; }
+/* empty: the preview shows the examples and how to start, so the Input card shows only what to start from */
+body[data-empty="1"] :is(#examplesRow, #dropZone) { display: none; }
+/* a printer makes one continuous line: the Line step has nothing to choose there (unless Trace is off, to say so) */
+body[data-out="print"]:not([data-line="drawn"]):not([data-line="none"]) #card-h-src { display: none; }

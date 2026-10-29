@@ -143,6 +143,32 @@
     return g;
   };
 
+  // every pixel the level most of its neighbours within r have (twice): specks go, blocks' corners round
+  function smoothLabels(lab, w, h, K, r) {
+    const N = w * h;
+    for (let pass = 0; pass < 2 && r > 0; pass++) {
+      // majority within (2r + 1)²: a box sum of each level's indicator, the biggest wins (ties keep the pixel's own)
+      const sums = [];
+      for (let j = 0; j < K; j++) {
+        const ind = new Float32Array(N);
+        for (let i = 0; i < N; i++) ind[i] = lab[i] === j ? 1 : 0;
+        sums.push(boxSum(ind, w, h, r));
+      }
+      const out = new Uint8Array(N);
+      for (let i = 0; i < N; i++) {
+        let best = lab[i],
+          bv = sums[best][i];
+        for (let j = 0; j < K; j++)
+          if (sums[j][i] > bv + 1e-6) {
+            bv = sums[j][i];
+            best = j;
+          }
+        out[i] = best;
+      }
+      lab = out;
+    }
+    return lab;
+  }
   // Grey levels (posterize): the picture as `count` flat greys (2–6). The greys are found by k-means on the picture's
   // histogram (starting spread evenly from its darkest to its lightest greys, so a mostly white picture still gets its
   // darker
@@ -195,31 +221,118 @@
       while (j < K - 1 && gray[i] > cuts[j]) j++;
       lab[i] = j;
     }
-    const r = Math.max(0, Math.round((o && o.smooth) || 0));
-    for (let pass = 0; pass < 2 && r > 0; pass++) {
-      // majority within (2r + 1)²: a box sum of each level's indicator, the biggest wins (ties keep the pixel's own)
-      const sums = [];
-      for (let j = 0; j < K; j++) {
-        const ind = new Float32Array(N);
-        for (let i = 0; i < N; i++) ind[i] = lab[i] === j ? 1 : 0;
-        sums.push(boxSum(ind, w, h, r));
-      }
-      const out = new Uint8Array(N);
-      for (let i = 0; i < N; i++) {
-        let best = lab[i],
-          bv = sums[best][i];
-        for (let j = 0; j < K; j++)
-          if (sums[j][i] > bv + 1e-6) {
-            bv = sums[j][i];
-            best = j;
-          }
-        out[i] = best;
-      }
-      lab = out;
-    }
+    lab = smoothLabels(lab, w, h, K, Math.max(0, Math.round((o && o.smooth) || 0)));
     const count = new Array(K).fill(0);
     for (let i = 0; i < N; i++) count[lab[i]]++;
     return { lab, tones: c.map((v) => Math.round(v)), cuts, count };
+  };
+
+  // sRGB 0–255 → CIE Lab (D65): colours that look different are far apart
+  function toLab(r, g, b) {
+    const lin = (v) => ((v /= 255) <= 0.04045 ? v / 12.92 : Math.pow((v + 0.055) / 1.055, 2.4));
+    const R = lin(r),
+      G = lin(g),
+      B = lin(b);
+    const f = (t) => (t > 216 / 24389 ? Math.cbrt(t) : (24389 / 27 * t + 16) / 116);
+    const x = f((0.4124 * R + 0.3576 * G + 0.1805 * B) / 0.95047),
+      y = f(0.2126 * R + 0.7152 * G + 0.0722 * B),
+      z = f((0.0193 * R + 0.1192 * G + 0.9505 * B) / 1.08883);
+    return [116 * y - 16, 500 * (x - y), 200 * (y - z)];
+  }
+  // Colour levels: the picture as `count` flat colours (2–6), found by k-means in Lab (the starts spread out: each the
+  // colour farthest from those so far). gray: the prepared picture (UNB.prep): where it's paper white (a removed
+  // background, a cut-out) the pixel counts as white. Returns UNB.levels' shape, darkest first, plus colours
+  // ([[r, g, b]…] per level): { lab, tones (each level's grey), colours, cuts: null, count }.
+  UNB.colourLevels = function (rgba, w, h, gray, o) {
+    const N = w * h,
+      K = Math.max(2, Math.min(6, Math.round((o && o.count) || 4))),
+      L = new Float32Array(N),
+      A = new Float32Array(N),
+      Bb = new Float32Array(N),
+      cache = new Map();
+    for (let i = 0; i < N; i++) {
+      const white = gray && gray[i] >= 254.5,
+        r = white ? 255 : rgba[4 * i],
+        g = white ? 255 : rgba[4 * i + 1],
+        b = white ? 255 : rgba[4 * i + 2],
+        key = ((r >> 2) << 12) | ((g >> 2) << 6) | (b >> 2);
+      let v = cache.get(key);
+      if (!v) cache.set(key, (v = toLab(r, g, b)));
+      L[i] = v[0];
+      A[i] = v[1];
+      Bb[i] = v[2];
+    }
+    const step = Math.max(1, Math.floor(N / 20000)),
+      S = [];
+    for (let i = 0; i < N; i += step) S.push(i);
+    const d2 = (i, c) => (L[i] - c[0]) ** 2 + (A[i] - c[1]) ** 2 + (Bb[i] - c[2]) ** 2;
+    // starts: the darkest sample, then each the farthest from those so far
+    let first = S[0];
+    for (const i of S) if (L[i] < L[first]) first = i;
+    const cen = [[L[first], A[first], Bb[first]]],
+      near = new Float64Array(S.length).fill(Infinity);
+    while (cen.length < K) {
+      let far = -1,
+        at = 0;
+      S.forEach((i, j) => {
+        near[j] = Math.min(near[j], d2(i, cen[cen.length - 1]));
+        if (near[j] > far) (far = near[j]), (at = i);
+      });
+      cen.push([L[at], A[at], Bb[at]]);
+    }
+    for (let it = 0; it < 20; it++) {
+      const sum = cen.map(() => [0, 0, 0, 0]);
+      for (const i of S) {
+        let best = 0,
+          bd = Infinity;
+        for (let c = 0; c < K; c++) {
+          const d = d2(i, cen[c]);
+          if (d < bd) (bd = d), (best = c);
+        }
+        const q = sum[best];
+        q[0] += L[i];
+        q[1] += A[i];
+        q[2] += Bb[i];
+        q[3]++;
+      }
+      let moved = 0;
+      for (let c = 0; c < K; c++)
+        if (sum[c][3]) {
+          const m = [sum[c][0] / sum[c][3], sum[c][1] / sum[c][3], sum[c][2] / sum[c][3]];
+          moved += Math.abs(m[0] - cen[c][0]) + Math.abs(m[1] - cen[c][1]) + Math.abs(m[2] - cen[c][2]);
+          cen[c] = m;
+        }
+      if (moved < 0.1) break;
+    }
+    // every pixel to its nearest colour, the colours darkest first
+    const order = cen.map((c, j) => j).sort((p, q) => cen[p][0] - cen[q][0]),
+      rank = new Uint8Array(K);
+    order.forEach((j, r) => (rank[j] = r));
+    let lab = new Uint8Array(N);
+    for (let i = 0; i < N; i++) {
+      let best = 0,
+        bd = Infinity;
+      for (let c = 0; c < K; c++) {
+        const d = d2(i, cen[c]);
+        if (d < bd) (bd = d), (best = c);
+      }
+      lab[i] = rank[best];
+    }
+    lab = smoothLabels(lab, w, h, K, Math.max(0, Math.round((o && o.smooth) || 0)));
+    // each level's colour: the mean of its pixels; its grey: that colour's luma
+    const sum = Array.from({ length: K }, () => [0, 0, 0, 0]);
+    for (let i = 0; i < N; i++) {
+      const q = sum[lab[i]],
+        white = gray && gray[i] >= 254.5;
+      q[0] += white ? 255 : rgba[4 * i];
+      q[1] += white ? 255 : rgba[4 * i + 1];
+      q[2] += white ? 255 : rgba[4 * i + 2];
+      q[3]++;
+    }
+    const colours = sum.map((q) => (q[3] ? [0, 1, 2].map((c) => Math.round(q[c] / q[3])) : [255, 255, 255]));
+    const tones = colours.map(([r, g, b]) => Math.round(0.299 * r + 0.587 * g + 0.114 * b)),
+      count = sum.map((q) => q[3]);
+    return { lab, tones, colours, cuts: null, count };
   };
   // one pass of a (2r + 1)² box sum (edges repeat the border)
   function boxSum(src, w, h, r) {

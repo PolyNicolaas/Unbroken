@@ -324,6 +324,7 @@ function readyItems() {
 // is
 // hidden, so its tab is shown first; if no tab shows it, the tab you were on stays.
 function showCard(card) {
+  if (card.classList.contains("print-more")) morePrintSet(true); // views.js: the card is among More print settings
   const seen = () => card.getClientRects().length > 0,
     pick = (r) => {
       const lab = document.querySelector(`label[for="${r.id}"]`);

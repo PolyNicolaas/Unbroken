@@ -635,3 +635,25 @@ document.querySelectorAll("[data-notice]").forEach((el) => {
   });
   el.appendChild(x);
 });
+
+// ---------- the Print step's More print settings (Base, Infill, Fine-tuning, Test print, the printer profile)
+// ----------
+// folded away under one button until wanted; remembered in this browser
+function morePrintSet(on, store = true) {
+  document.body.dataset.moreprint = on ? "1" : "";
+  $("morePrintBtn").setAttribute("aria-expanded", String(on));
+  $("morePrintBtn").querySelector(".more-tri").textContent = on ? "▾" : "▸";
+  $("morePrintBtn").lastChild.textContent = on ? " Fewer print settings" : " More print settings";
+  if (store)
+    try {
+      localStorage.setItem(storeKey("morePrint"), on ? "1" : "");
+    } catch {}
+}
+$("morePrintBtn").addEventListener("click", () => morePrintSet(document.body.dataset.moreprint !== "1"));
+(() => {
+  let on = false;
+  try {
+    on = localStorage.getItem(storeKey("morePrint")) === "1";
+  } catch {}
+  morePrintSet(on, false);
+})();
