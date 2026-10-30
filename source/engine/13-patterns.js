@@ -588,7 +588,9 @@
   // wheel is carried on the one before at its hole, a share of its size, turning as the gear ratio says (against it
   // or with it), the pen in its own hole. Centre path (v127): the ring's centre moves along a path drawn by hand (in
   // the ring's units, y down, from the ring's centre at rest), from its start to its end over the whole drawing,
-  // smoothed (pathSmooth): the figure trails along it as an open line. Frame: Fit (everything drawn, the box round
+  // smoothed (pathSmooth): the figure trails along it as an open line. Size at start / at end (v128): the figure
+  // grows or shrinks along the line (along the path, or spiralling round the centre without one), an open line. Frame:
+  // Fit (everything drawn, the box round
   // it) or Crop (a frame frameW × frameH, % of the ring's width, round the ring at rest: what falls outside is cut
   // away, so a path can start off the canvas). One line, crossing itself (cropped: pieces).
   function spiroPath(raw, smooth) {
@@ -711,12 +713,18 @@
     }
     laps = Math.min(laps, 400);
     const path = Array.isArray(o.path) && o.path.length >= 4 ? spiroPath(o.path, o.pathSmooth || 0) : null;
+    // the figure's size from the start of the line to its end (% of its size at rest): growing or shrinking along the
+    // centre path, or spiralling out or in round the centre without one. A size that changes leaves the line open.
+    const z0 = (o.sizeStart == null ? 100 : o.sizeStart) / 100,
+      z1 = (o.sizeEnd == null ? 100 : o.sizeEnd) / 100,
+      grows = Math.abs(z1 - z0) > 1e-9,
+      open = !!path || grows;
     const rot = ((o.rotate || 0) * Math.PI) / 180,
       cr = Math.cos(rot),
       sr = Math.sin(rot),
       steps = Math.min(60000, Math.max(800, Math.round(laps * Math.max(360, (L / Math.max(r, 0.5)) * 24)))),
       pts = [];
-    for (let i = 0; i < steps + (path ? 1 : 0); i++) {
+    for (let i = 0; i < steps + (open ? 1 : 0); i++) {
       const s = (laps * L * i) / steps,
         P = track.at(s),
         th = track.thAt(s),
@@ -734,8 +742,9 @@
         x += w.d * Math.cos(ph);
         y += w.d * Math.sin(ph);
       }
-      let X = x * cr - y * sr,
-        Y = -(x * sr + y * cr); // y down for the page
+      const z = z0 + (z1 - z0) * (i / steps);
+      let X = z * (x * cr - y * sr),
+        Y = -z * (x * sr + y * cr); // y down for the page
       if (path) {
         const [px, py] = path.at(i / steps);
         X += px;
@@ -767,7 +776,7 @@
     const box = boxed(pts);
     return {
       paths: [pts],
-      closed: [!path],
+      closed: [!open],
       box,
       gap: Math.max(box[0], box[1]) / 150,
       crosses: true,
@@ -1437,6 +1446,9 @@
           },
         ]),
         rangeParam("rotate", "Rotate", 0, 359, 0, (v) => `${v}°`),
+        // the figure's size along the line: from Size at start to Size at end
+        rangeParam("sizeStart", "Size at start", 5, 200, 100, (v) => `${v}%`),
+        rangeParam("sizeEnd", "Size at end", 5, 200, 100, (v) => `${v}%`),
         // the ring's centre moving along a path drawn by hand (the app's Draw the path pad)
         { key: "path", type: "path", name: "Centre path", value: null },
         {

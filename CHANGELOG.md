@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v128 · 2026-10-30
+
+- **Spirograph: Size at start and Size at end** (5–200% of the figure at rest): the figure grows or shrinks from the
+  start of the line to its end. Along a centre path it swells or dwindles as it travels; without one it spirals out
+  (or in) round its centre, a flower opening. A size that changes leaves the line open (its ends no longer meet).
+  Best with many laps (wheel teeth that share few factors with the ring's, such as 105 and 64): with only a few laps
+  the figure moves along the path about as fast as the pen goes round, and its loops smear into a wavy line.
+  Test E53.
+
 ## v127 · 2026-10-30
 
 - **Support: Slope** (Layers card, 3D models): the model's own ledges become short slopes, so no layer steps out
