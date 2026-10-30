@@ -148,7 +148,7 @@ function artApply() {
         : "Nothing left inside that shape: try more detail or another shape.";
     plotSoon(0); // (the preview shows the page, the pattern as drawn: workflow.js)
   } else if (A.kind === "model") {
-    if (!st.model) setModel(sampleVase(), "sample vase");
+    if (!st.model) useSampleModel(); // model.js
     useSource("model");
   } else if (A.kind === "text") useSource("text");
   else if (A.kind === "molecule") {
@@ -385,9 +385,17 @@ function artVectors() {
 }
 const asDrawnOK = () => st.art.kind === "pattern" || st.art.kind === "text" || st.art.kind === "molecule";
 // a molecule (molecule.js) becomes the input in use; its own size until it's sized by hand
-function artUseMolecule(M) {
+// the Molecule card's Turn (molecule.js moleculeTurn): degrees, and the width that keeps the bonds as long
+function artMolTurn(deg, width) {
+  st.art.molTurn = deg;
+  if (width) st.art.molWidth = width;
+}
+// (keepTurn: the structure editor's Use it keeps the Turn; a new molecule starts upright)
+function artUseMolecule(M, keepTurn) {
   st.art.molecule = M;
   st.art.molWidth = null;
+  if (!keepTurn) st.art.molTurn = 0;
+  if (typeof moleculeTurnUI === "function") moleculeTurnUI(); // molecule.js
   artUse("molecule");
 }
 
@@ -402,6 +410,7 @@ function artSaved() {
     width: st.art.width,
     molecule: st.art.molecule || null,
     molWidth: st.art.molWidth || null,
+    molTurn: st.art.molTurn || 0,
     picture: P
       ? { label: P.label, sample: P.sample, key: P.canvas.__art, turn: P.turn || 0, angle: P.angle || 0 }
       : null,
@@ -436,6 +445,7 @@ function artRestore(a, pic, more) {
     width: a.width || null,
     molecule: a.molecule || null,
     molWidth: a.molWidth || null,
+    molTurn: a.molTurn || 0,
     picture: pic
       ? {
           canvas: pic.__art ? pic : tagged(pic),

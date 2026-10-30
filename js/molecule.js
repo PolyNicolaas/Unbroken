@@ -371,15 +371,46 @@ async function moleculeLookup(query) {
 
 // ---------- the drawing (cached), like a pattern's ----------
 let molCache = null;
+// (turned by the Molecule card's Turn: the atoms move round, the letters stay upright)
 function moleculeDrawn() {
   const M = st.art.molecule;
   if (!M || !M.mol) return { r: null, L: null };
-  const key = M.smiles + "|" + M.mol.atoms.length;
+  const turn = st.art.molTurn || 0,
+    key = M.smiles + "|" + M.mol.atoms.length + "|" + turn;
   if (molCache && molCache.key === key && molCache.mol === M.mol) return molCache;
-  const r = UNB.molecule(M.mol, { font: UNB_FONTS.sans });
+  const r = UNB.molecule(moleculeTurned(M.mol, turn), { font: UNB_FONTS.sans });
   molCache = { key, mol: M.mol, r, L: r ? UNB.patternLayout(r, ART_LONG) : null };
   return molCache;
 }
+// a structure turned by deg (anticlockwise), round its own middle
+function moleculeTurned(mol, deg) {
+  if (!deg) return mol;
+  const a = (deg * Math.PI) / 180,
+    c = Math.cos(a),
+    s = Math.sin(a);
+  return { ...mol, atoms: mol.atoms.map((t) => ({ ...t, x: t.x * c - t.y * s, y: t.x * s + t.y * c })) };
+}
+// the Molecule card's Turn: the structure turned, its bonds kept the same length (a width set by hand follows the
+// new shape)
+function moleculeTurn(deg) {
+  if (!st.art.molecule) return;
+  const before = moleculeDrawn().r;
+  artMolTurn((((Math.round(deg) % 360) + 540) % 360) - 180); // art.js
+  const after = moleculeDrawn().r;
+  if (st.art.molWidth && before && after)
+    artMolTurn(st.art.molTurn, st.art.molWidth * (after.box[0] / Math.max(1e-9, before.box[0])));
+  moleculeTurnUI();
+  artUse("molecule"); // art.js
+  recordSoon();
+}
+function moleculeTurnUI() {
+  const t = st.art.molTurn || 0;
+  $("molTurn").value = t;
+  $("molTurnVal").textContent = `${t > 0 ? "+" : ""}${t}°`;
+}
+$("molTurn").addEventListener("input", () => moleculeTurn(+$("molTurn").value));
+$("molTurnL").addEventListener("click", () => moleculeTurn((st.art.molTurn || 0) + 15));
+$("molTurnR").addEventListener("click", () => moleculeTurn((st.art.molTurn || 0) - 15));
 // the width (mm) it starts at: bonds long enough that a double bond's two strokes are the line spacing apart (and at
 // least 8 mm)
 function moleculeWidth() {
@@ -434,6 +465,7 @@ function moleculeUI() {
   $("molMsg").textContent = e
     ? `${e.name}${e.what ? `, ${e.what}` : ""}: ${e.atoms.length} atoms`
     : molAtomsBonds(M.mol) + (M.smiles ? ` · ${M.smiles}` : "");
+  moleculeTurnUI();
 }
 // the tip's Wikipedia link: the page for what's typed (a name), or the search page
 function moleculeWikiLink() {

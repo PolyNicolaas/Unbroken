@@ -190,6 +190,7 @@ function piecePlate(n, gap, straight) {
     together,
   });
   lay.pieces.forEach((q, i) => (q.open = P.list[i].open));
+  lay.frame = U; // (a molecule's pieces: their lines go on the plate from this common corner, not their own)
   piecePlateCache = { key, P, lay };
   return lay;
 }
@@ -204,7 +205,10 @@ async function buildPieceLayers() {
   if (!lay || !lay.pieces) return null;
   const P = piecesNow(),
     list = [];
-  for (let i = 0; i < P.list.length; i++) list.push(await designLayers(P.list[i], lay.pieces[i].xf));
+  // (a molecule's pieces were laid out from one common corner, so each label keeps its place by its bond: the layers
+  // are worked out from that corner too)
+  const inFrame = (D) => (lay.frame ? { ...D, fb: { ...D.fb, x0: lay.frame.x0, y1: lay.frame.y1 } } : D);
+  for (let i = 0; i < P.list.length; i++) list.push(await designLayers(inFrame(P.list[i]), lay.pieces[i].xf));
   if (st.pieces !== P) return piecesOn() ? buildPieceLayers() : null; // new pieces landed meanwhile
   const k = Math.min(pieceShown(), list.length - 1);
   return Object.assign({}, list[k], { key: list.map((q) => q.key).join("|") + `#${k}`, pieces: list, piece: k });
@@ -226,7 +230,7 @@ function pieceMenuUI() {
   $("piecesRow").hidden = !many && !molLabels;
   $("textPieces").closest(".field").hidden = !many;
   $("molPiecesField").hidden = !molLabels;
-  $("pieceShownField").hidden = !on;
+  $("pieceShownField").hidden = !on || moleculePieces(); // (a molecule's One copy is every piece: molecule.js)
   $("copiesLab").textContent = on && many ? "Copies of each line" : "Copies";
   const P = piecesNow(),
     el = $("pieceShown");

@@ -23,6 +23,8 @@ window.UNB_SETTINGS = {
       // printing
       printSpeed: 20,                 // (used) mm/s along the line; the G-code feed is this × 60 (mm/min)
       needle: "18G",                  // (used) preferred needle, an id from the needle list below; picked with the chocolate
+      // flow: 100,                   // (used) % of the chocolate the needle and layer height work out (Fine-tuning's Flow;
+                                      // find it with a Flow test print); leave out for 100
       workingTempC: [31, 32],         // tempered working range, °C (min, max)
       notes: "Temper before loading. Keep the cartridge at working temperature; let lines set before moving the plate.",
 

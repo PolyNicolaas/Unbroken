@@ -34,7 +34,7 @@
     09-plate.js    8. Size, plate and layers — smallest size that keeps the spacing, the box round a design, copies on
                       the plate, layers stacked into one 3D path.
                       UNB.smallestPrintSteps, UNB.minBox, UNB.plateLayout, UNB.plateLocal, UNB.layerStack, UNB.lapFeeds,
-                      UNB.testStrips
+                      UNB.testStrips, UNB.testComb, UNB.L9, UNB.mainEffects
     10-export.js   9. Export — the files the app offers: plotter-page SVG, flat DXF, G-code, ZIP.
                       bezierRaw, svgPathD, dxfDoc, UNB.toBezier, UNB.exportDXF, UNB.exportPlotSVG, UNB.exportLayersSVG,
                       UNB.exportGcode,

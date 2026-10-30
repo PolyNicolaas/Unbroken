@@ -119,7 +119,41 @@
   // −1 a bond, else its label's atom), boxes ([{ atom, el,
   // rect }]: each label's letters), at (each atom's place) } in bond lengths (y down), the
   // shape UNB.patternLayout and the Art step's patterns use.
+  // An aldehyde's (a formyl group's) hydrogen drawn: a carbon double-bonded to an oxygen with hydrogens on it gets
+  // them as H atoms on bonds of their own, in the free directions (120° from its other bonds), since CHO reads as
+  // incomplete with the H left implicit. Formaldehyde gets both. Returns the structure, with the H atoms added.
+  function molFormylH(mol) {
+    const A = mol.atoms,
+      B = mol.bonds;
+    let out = null;
+    A.forEach((a, i) => {
+      if (a.el !== "C" || !(a.h > 0) || a.q) return;
+      const nb = B.filter((b) => b.a === i || b.b === i);
+      if (!nb.some((b) => b.order === 2 && A[b.a === i ? b.b : b.a].el === "O") || nb.length + a.h > 3) return;
+      out = out || { ...mol, atoms: A.map((t) => ({ ...t })), bonds: B.slice() };
+      // the bond length here, and the directions of its bonds
+      const dirs = nb.map((b) => {
+          const t = A[b.a === i ? b.b : b.a];
+          return Math.atan2(t.y - a.y, t.x - a.x);
+        }),
+        len = nb.reduce((s, b) => s + Math.hypot(A[b.a].x - A[b.b].x, A[b.a].y - A[b.b].y), 0) / nb.length || 1;
+      const put = (ang) => {
+        out.atoms.push({ el: "H", x: a.x + len * Math.cos(ang), y: a.y + len * Math.sin(ang), h: 0, q: 0 });
+        out.bonds.push({ a: i, b: out.atoms.length - 1, order: 1 });
+      };
+      if (dirs.length === 2) {
+        // opposite the middle of its two bonds
+        const mx = Math.cos(dirs[0]) + Math.cos(dirs[1]),
+          my = Math.sin(dirs[0]) + Math.sin(dirs[1]);
+        put(Math.hypot(mx, my) > 1e-6 ? Math.atan2(-my, -mx) : dirs[0] + Math.PI / 2);
+      } else for (let k = 1; k <= a.h; k++) put(dirs[0] + (k === 1 ? 1 : -1) * ((2 * Math.PI) / 3));
+      out.atoms[i].h = 0;
+    });
+    return out || mol;
+  }
+
   UNB.molecule = function (mol, o = {}) {
+    if (o.formylH !== false) mol = molFormylH(mol);
     const A = mol.atoms,
       B = mol.bonds,
       n = A.length;

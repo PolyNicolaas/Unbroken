@@ -592,8 +592,10 @@
   };
 
   // A test print: numbered strips side by side, each the same small serpentine a few layers tall, with one setting
-  // stepped from strip to strip, so one print compares them. o: vary ("layerH" | "speed" | "gap" | "flow"), values
-  // (one per strip: mm, mm/s, mm, %), w (line width mm), gap (mm), h (layer height mm), feed (mm/min), layers, rows,
+  // stepped from strip to strip, so one print compares them. o: vary ("layerH" | "speed" | "gap" | "flow" | "firstZ"),
+  // values (one per strip: mm, mm/s, mm, %, mm), z0 (the first layer's Z the export adds, for firstZ: each strip is
+  // lifted or lowered from it to its own), w (line width mm), gap (mm), h (layer height mm), feed (mm/min), layers,
+  // rows,
   // length (mm), stripGap (mm). Strip k has k+1 teeth in a comb printed in front of it (its number), first layer only.
   // Layers go round all the strips before stepping up, so each has time to set; every strip-layer is its own flat path
   // (the needle lifts and retracts between them). Paths are for UNB.exportGcode: x, y (mm, from 0,0), z (above the
@@ -617,8 +619,9 @@
       const s = o.w + (o.vary === "gap" ? v : o.gap),
         h = o.vary === "layerH" ? v : o.h,
         f = o.vary === "speed" ? v * 60 : o.feed;
-      const e = (o.vary === "flow" ? v / 100 : 1) * (o.vary === "layerH" ? v / o.h : 1);
-      return { s, h, f, e, w: (rows - 1) * s };
+      const e = (o.vary === "flow" ? v / 100 : 1) * (o.vary === "layerH" ? v / o.h : 1),
+        dz = o.vary === "firstZ" ? v - (o.z0 || o.h) : 0;
+      return { s, h, f, e, dz, w: (rows - 1) * s };
     });
     one.forEach((q, k) => {
       strips.push({ x, y: tooth + comb, w: Math.max(q.w, (k + 1) * comb), h: L, value: vals[k] });
@@ -634,17 +637,11 @@
     for (let j = 0; j < layers; j++)
       one.forEach((q, k) => {
         const S = strips[k],
-          z = (j + 1) * q.h - o.h; // the export adds the first layer's Z (o.h)
+          z = (j + 1) * q.h - o.h + q.dz; // the export adds the first layer's Z (o.z0, else o.h)
         if (j === 0) {
           // the number: k + 1 teeth along the front
-          const cx = [],
-            cy = [];
-          for (let t = 0; t <= k; t++) {
-            const tx = S.x + t * comb;
-            cx.push(tx, tx, tx + comb / 2, tx + comb / 2);
-            cy.push(0, tooth, tooth, 0);
-          }
-          paths.push(flat(cx, cy, z, q));
+          const c = UNB.testComb(S.x, 0, k + 1, tooth, comb);
+          paths.push(flat(c.x, c.y, z, q));
         }
         const xs = [],
           ys = [];
@@ -665,5 +662,59 @@
         if (j === 0) roundT += ((rows * L + (rows - 1) * q.s) / q.f) * 60;
       });
     return { paths, strips, w: x - (o.stripGap || 8), h: tooth + comb + L, height: H, roundSeconds: roundT };
+  };
+
+  // A test print's number: n teeth (a comb) from x, y along +x, each tooth tall and pitch apart (mm), as one flat line
+  // of points { x: [], y: [] }. Counting the teeth on the plate gives the strip's or the copy's number.
+  UNB.testComb = function (x, y, n, tooth = 3, pitch = 2.5) {
+    const cx = [],
+      cy = [];
+    for (let t = 0; t < n; t++) {
+      const tx = x + t * pitch;
+      cx.push(tx, tx, tx + pitch / 2, tx + pitch / 2);
+      cy.push(y, y + tooth, y + tooth, y);
+    }
+    return { x: cx, y: cy };
+  };
+
+  // A Taguchi L9 array for three settings at three levels each: nine runs, the level (0, 1, 2) of each setting per
+  // run. Every level of a setting meets every level of each other setting exactly once, so nine prints show each
+  // setting's own effect (its main effect), where every combination would take 27.
+  UNB.L9 = [
+    [0, 0, 0],
+    [0, 1, 1],
+    [0, 2, 2],
+    [1, 0, 1],
+    [1, 1, 2],
+    [1, 2, 0],
+    [2, 0, 2],
+    [2, 1, 0],
+    [2, 2, 1],
+  ];
+  // The main effects of a matrix print: runs (the level of each setting per run, e.g. UNB.L9), scores (one per run,
+  // higher is better; null or NaN for a run not scored yet). Returns, per setting, the mean score at each of its
+  // levels (null where no run at that level has a score) and the best level (or -1), and how many runs were scored.
+  UNB.mainEffects = function (runs, scores) {
+    const k = runs[0] ? runs[0].length : 0,
+      ok = (v) => v != null && Number.isFinite(+v) && v !== "";
+    const settings = [];
+    for (let s = 0; s < k; s++) {
+      const lv = Math.max(...runs.map((r) => r[s])) + 1,
+        sum = new Array(lv).fill(0),
+        cnt = new Array(lv).fill(0);
+      runs.forEach((r, i) => {
+        if (ok(scores[i])) {
+          sum[r[s]] += +scores[i];
+          cnt[r[s]]++;
+        }
+      });
+      const mean = sum.map((v, j) => (cnt[j] ? v / cnt[j] : null));
+      let best = -1;
+      mean.forEach((m, j) => {
+        if (m != null && (best < 0 || m > mean[best])) best = j;
+      });
+      settings.push({ mean, best });
+    }
+    return { settings, scored: scores.filter(ok).length };
   };
 })(typeof window !== "undefined" ? window : globalThis);

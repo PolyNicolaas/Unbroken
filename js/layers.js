@@ -246,9 +246,10 @@ async function buildLayers() {
 // One design's layers (D: st, or a piece), its lines turned and moved into its plate footprint by xf. Kept for the
 // last few designs and settings, so moving between tabs or pieces doesn't redo them.
 const designLayersCache = new Map();
-async function designLayers(D, xf) {
-  const S = layerSettings();
-  const key = JSON.stringify([S, D.finalVer, st.simplify, xf, D.open]);
+// (h: another layer height than the Print step's, for the Test matrix)
+async function designLayers(D, xf, h) {
+  const S = h ? { ...layerSettings(), h } : layerSettings();
+  const key = JSON.stringify([S, D.finalVer, st.simplify, xf, D.open, D.fb && [D.fb.x0, D.fb.y1]]);
   if (designLayersCache.has(key)) return designLayersCache.get(key);
   // each layer's line: the base's and the infill's fill plan per layer; the same plan is worked out (and turned to mm)
   // once
@@ -304,6 +305,7 @@ function layersSoon(delay = 250) {
       // left on a few layers doesn't hide the rest of the new print
       if (!st.layers || st.layers.stack !== L.stack) showEveryLayer();
       st.layers = L;
+      if (typeof mxSoon === "function") mxSoon(); // matrix.js: the Test matrix's size, time and chocolate
       layerReadout();
       drawStack();
       render();
@@ -556,9 +558,24 @@ function drawStack() {
     anim = st.playing || (st.t > 0 && st.t < 1),
     choc = css("--choc"),
     acc = css("--accent");
-  const all = copiesShown() ? printPath() : null; // Whole plate: the print as the G-code makes it
+  // Whole plate: the print as the G-code makes it; a molecule's One copy too, its bonds and labels together (they're
+  // separate pieces of one molecule, so one piece alone looks like the labels went missing)
+  const lay1 = L.pieces && !copiesShown() ? plateNow() : null,
+    together = !!(lay1 && lay1.frame),
+    all = copiesShown() ? printPath() : together ? printPath(moleculeSet(lay1, placements(lay1))) : null;
+  // (a molecule's One copy: framed on the molecule, not the whole plate)
+  let box = null;
+  if (together)
+    for (const p of moleculeSet(lay1, placements(lay1))) {
+      const f = footOf(lay1, p);
+      box = box || { x0: Infinity, y0: Infinity, x1: -Infinity, y1: -Infinity };
+      box.x0 = Math.min(box.x0, p.x);
+      box.y0 = Math.min(box.y0, p.y);
+      box.x1 = Math.max(box.x1, p.x + f.w);
+      box.y1 = Math.max(box.y1, p.y + f.h);
+    }
   const solid = show.solid,
-    P = stackProjection(cv, dpr, S, n, all, solid),
+    P = stackProjection(cv, dpr, S, n, all, solid, box),
     { TP, zx, pad, k } = P;
   const lw = Math.max(0.6, 0.9 * dpr) / zoomOn(g, "layers", cv).z; // zoom.js
   g.lineJoin = g.lineCap = "round";
@@ -578,6 +595,7 @@ function drawStack() {
   const c = { g, S, n, all, show, anim, solid, choc, acc, lw, B, cut, picked, mark, zCut, zLow, ...P };
   let { tip, note } = all ? drawPlateStack(c) : drawLapStack(c);
   const pc = st.layers.pieces && !all && st.pieces && st.pieces.list[st.layers.piece]; // a text's piece: say which
+  if (together) note = `the molecule: its ${st.layers.pieces.length} pieces, as the G-code prints them`;
   if (pc) note = `${pc.name} (piece ${st.layers.piece + 1} of ${st.layers.pieces.length})${note ? " · " + note : ""}`;
   if (tip) {
     const [X, Y] = tip;
@@ -604,7 +622,8 @@ function drawStack() {
   );
 }
 // the view's projection: turned (stackTurn) and tilted, the height exaggerated unless Solid, scaled to the canvas
-function stackProjection(cv, dpr, S, n, all, solid) {
+// (box: frame this part of the plate instead, bed mm { x0, y0, x1, y1 })
+function stackProjection(cv, dpr, S, n, all, solid, box) {
   let x0 = Infinity,
     x1 = -Infinity,
     y0 = Infinity,
@@ -615,12 +634,12 @@ function stackProjection(cv, dpr, S, n, all, solid) {
     y0 = Math.min(y0, S.y[i]);
     y1 = Math.max(y1, S.y[i]);
   }
-  const W = all ? BED.w : x1 - x0,
-    D = all ? BED.h : y1 - y0,
+  const W = box ? box.x1 - box.x0 : all ? BED.w : x1 - x0,
+    D = box ? box.y1 - box.y0 : all ? BED.h : y1 - y0,
     H = all ? Math.max(all.zTop, 0.1) : Math.max(S.height, 0.1);
   const zx = solid ? 1 : Math.max(1, Math.min(30, (0.35 * Math.max(W, D)) / H)),
-    cx = all ? BED.w / 2 : (x0 + x1) / 2,
-    cy = all ? BED.h / 2 : (y0 + y1) / 2;
+    cx = box ? (box.x0 + box.x1) / 2 : all ? BED.w / 2 : (x0 + x1) / 2,
+    cy = box ? (box.y0 + box.y1) / 2 : all ? BED.h / 2 : (y0 + y1) / 2;
   const ca = Math.cos(stackTurn.az),
     sa = Math.sin(stackTurn.az),
     ce = Math.cos(stackTurn.el),
@@ -646,7 +665,17 @@ function stackProjection(cv, dpr, S, n, all, solid) {
     [BED.w, BED.h],
     [0, BED.h],
   ];
-  if (all) {
+  if (box) {
+    for (const [x, y] of [
+      [box.x0, box.y0],
+      [box.x1, box.y0],
+      [box.x1, box.y1],
+      [box.x0, box.y1],
+    ]) {
+      grow(proj(x, y, 0));
+      grow(proj(x, y, H));
+    }
+  } else if (all) {
     for (const [x, y] of bed) {
       grow(proj(x, y, 0));
       grow(proj(x, y, H));
@@ -950,11 +979,12 @@ const pieceLayersOf = (L, p) => (L.pieces && p && p.piece != null ? L.pieces[p.p
 // The whole print as the printer will make it: the G-code the export would write, read back (UNB.readGcode) into
 // segments by kind (wall, fill, travel, purge, wipe), for the Whole plate views. Kept until something changes.
 let printPathCache = null;
-function printPath() {
+// (pl0: only these placements, e.g. one molecule's pieces)
+function printPath(pl0) {
   const L = st.layers,
     lay = L && plateNow();
   if (!lay) return null;
-  const pl = placements(lay),
+  const pl = pl0 || placements(lay),
     g = gcodeSettings(),
     key = JSON.stringify([L.key, pl, g, layerTimeS(), CFG.printer.id]);
   if (printPathCache && printPathCache.key === key && printPathCache.L === L) return printPathCache.path;

@@ -123,6 +123,8 @@ function placements(lay) {
   }
   return lay.placed;
 }
+// one molecule's pieces (they share a place on the plate, one set per copy)
+const moleculeSet = (lay, pl) => pl.filter((p) => p.x === pl[0].x && p.y === pl[0].y);
 function plateFits(lay, pl) {
   return (
     pl.every((p) => {
@@ -155,6 +157,8 @@ function paintPlate(cv, detail) {
         const one = (lay.pieces && pl.find((p) => p.piece === pieceShown())) || pl[0],
           ft = footOf(lay, one);
         shown = [one];
+        // (a molecule's pieces print together: one copy is the whole molecule, its bonds and every label)
+        if (lay.frame) shown = moleculeSet(lay, pl);
         const [rx, ry] = P(one.x, one.y + ft.h),
           w = ft.w * s,
           h = ft.h * s,

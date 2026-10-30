@@ -173,6 +173,10 @@ const CFG = (() => {
       notes.push(`${c.name}: printSpeed should be mm/s, e.g. 20; ignored`);
       c.printSpeed = null;
     }
+    if (c.flow != null && !num(c.flow, 50, 200)) {
+      notes.push(`${c.name}: flow should be a % from 50 to 200, e.g. 110; ignored`);
+      c.flow = null;
+    }
     // the optional facts shown under the menu: a bad one is dropped with a note, never left to break the page later
     if (c.costPer100g != null && !num(c.costPer100g, 0, 100000)) {
       notes.push(`${c.name}: costPer100g should be a number, e.g. 2.5 (no quotes); ignored`);
@@ -445,6 +449,7 @@ function applyChocolatePrinting() {
   // the chocolate's own, else the printer's
   $("layerH").value = num(c.layerHeight, 0.05, 3) ? c.layerHeight : CFG.printer.layerHeight;
   $("gZ").value = $("layerH").value; // the first layer is one layer height
+  $("gFlow").value = num(c.flow, 50, 200) ? c.flow : 100; // the chocolate's own flow, else as worked out
 }
 
 // the Plot step's paper sizes (plot.js has their sizes; "plate" is the printer's plate)

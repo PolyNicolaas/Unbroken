@@ -12,8 +12,13 @@
 function ePerMM() {
   const d = CFG.printer.cartridgeDiameter || 26.5,
     h = layerHmm();
-  return (lineWidthMM() * h) / ((Math.PI * d * d) / 4);
+  return ((lineWidthMM() * h) / ((Math.PI * d * d) / 4)) * (flowPct() / 100);
 }
+// the Flow box (Fine-tuning): % of the chocolate the needle and layer height work out; an empty or absurd box is 100
+const flowPct = () => {
+  const v = +$("gFlow").value;
+  return $("gFlow").value !== "" && v >= 50 && v <= 200 ? v : 100;
+};
 function showE() {
   $("gE").value = ePerMM().toPrecision(3);
 }
@@ -31,9 +36,10 @@ function tuneProfile() {
     gFeed: { v: c.printSpeed || 20, from: c.printSpeed ? c.name : "default" },
     gZ: { v: +$("layerH").value || h, from: "layer height" },
     gLift: { v: P.lift, from: P.name },
+    gFlow: { v: num(c.flow, 50, 200) ? c.flow : 100, from: num(c.flow, 50, 200) ? c.name : "default" },
   };
 }
-const TUNE_FROM = { layerH: "fromLayerH", gFeed: "fromFeed", gZ: "fromZ", gLift: "fromLift" };
+const TUNE_FROM = { layerH: "fromLayerH", gFeed: "fromFeed", gZ: "fromZ", gLift: "fromLift", gFlow: "fromFlow" };
 let tuneH = null; // the layer height last seen: Z follows it while they're equal
 function tuneUI() {
   const pr = tuneProfile();
@@ -53,11 +59,15 @@ $("layerH").addEventListener("input", () => {
   printSettingsChanged();
 }); // the layer height's own box: Z follows, then everything that depends on it
 for (const id of ["gFeed", "gZ", "gLift"]) $(id).addEventListener("input", tuneUI);
+$("gFlow").addEventListener("input", () => {
+  showE();
+  tuneUI();
+});
 onPrintSettings(tuneUI);
 $("tuneReset").addEventListener("click", () => {
   $("layerH").value = tuneProfile().layerH.v;
   $("layerH").dispatchEvent(new Event("input", { bubbles: true }));
-  for (const id of ["gFeed", "gZ", "gLift"]) {
+  for (const id of ["gFeed", "gZ", "gLift", "gFlow"]) {
     $(id).value = tuneProfile()[id].v;
     $(id).dispatchEvent(new Event("input", { bubbles: true }));
   }
@@ -96,6 +106,8 @@ function machineIssues() {
   const out = [];
   if (firstZ() !== +$("gZ").value || $("gZ").value === "")
     out.push(`First layer Z "${$("gZ").value}" → ${fmt(firstZ(), 2)} mm`);
+  if (flowPct() !== +$("gFlow").value || $("gFlow").value === "")
+    out.push(`Flow "${$("gFlow").value}" → ${fmt(flowPct(), 0)}%`);
   if (liftMM() !== +$("gLift").value || $("gLift").value === "")
     out.push(`Lift "${$("gLift").value}" → ${fmt(liftMM(), 1)} mm`);
   if (feedMMs() !== +$("gFeed").value || $("gFeed").value === "")

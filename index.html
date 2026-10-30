@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v123</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v124</span></p>
 </header>
 
 <div class="wrap">
@@ -381,7 +381,8 @@
         <label class="field" title="How far a layer may reach past the one below it before Support (Layers card, 3D models) holds it up. Empty: a third of the line width"><span>Overhang per layer (mm)</span><input type="number" id="gOver" min="0.05" max="2" step="0.01" placeholder="auto"><small class="from" id="fromOver"></small></label>
         <label class="field" title="Where a single copy sits on the plate (Center on plate, or drag it in the Plate view)"><span>Position X (mm)</span><input type="number" id="gOx" value="10" step="any"></label>
         <label class="field"><span>Position Y (mm)</span><input type="number" id="gOy" value="10" step="any"></label>
-        <label class="field" title="Plunger per mm of line: line width × layer height ÷ the cartridge's cross-section (settings.js). A wider needle pushes faster. Fine-tune the flow on the printer."><span>E per mm</span><input type="number" id="gE" value="" step="any" readonly tabindex="-1"></label>
+        <label class="field" title="More or less chocolate than the needle and layer height work out: 110% pushes 10% more (a thin or broken line), 90% less (lines that run together). Starts at the chocolate's (settings.js flow), else 100%. The Test print's Flow strips find it."><span>Flow (%)</span><input type="number" id="gFlow" min="50" max="200" value="100" step="1"><small class="from" id="fromFlow"></small></label>
+        <label class="field" title="Plunger per mm of line: line width × layer height ÷ the cartridge's cross-section (settings.js), × the Flow. A wider needle pushes faster."><span>E per mm</span><input type="number" id="gE" value="" step="any" readonly tabindex="-1"></label>
       </div>
       <div class="inline"><button class="btn mini" type="button" id="tuneReset" disabled>Back to the profile values</button></div>
     </section>
@@ -389,7 +390,7 @@
       <h2 id="h-test">Test print <span class="hval" id="testVal"></span></h2>
       <div class="two">
         <label class="field" title="The setting that changes from strip to strip; everything else is as set above"><span>Vary</span><select id="testVary">
-          <option value="layerH" selected>Layer height (mm)</option><option value="speed">Speed (mm/s)</option><option value="gap">Gap between lines (mm)</option><option value="flow">Flow (%)</option></select></label>
+          <option value="layerH" selected>Layer height (mm)</option><option value="speed">Speed (mm/s)</option><option value="gap">Gap between lines (mm)</option><option value="flow">Flow (%)</option><option value="firstZ">First layer Z (mm)</option></select></label>
         <label class="field"><span>Strips</span><input type="number" id="testN" min="2" max="10" step="1" value="5"></label>
       </div>
       <div class="three">
@@ -401,7 +402,29 @@
       <div class="inline"><button class="btn" type="button" id="testBtn">Export test G-code</button></div>
       <div class="inline"><label class="field inline-field" title="The strip that printed best: its value goes into the setting"><span>Best strip</span><input type="number" id="testPick" min="1" max="10" step="1" value="3"></label><button class="btn mini" type="button" id="testUse">Use it</button></div>
       <p class="status" id="testMsg" role="status"></p>
-      <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it.</p>
+      <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it: it becomes the setting (a Flow strip sets the Flow in Fine-tuning). First layer Z strips each start at their own height above the plate, to find the one that sticks; 1 or 2 layers are enough for those.</p>
+    </section>
+    <section class="card choc-only print-more" aria-labelledby="h-matrix" data-fold="closed">
+      <h2 id="h-matrix">Test matrix <span class="hval" id="mxVal"></span></h2>
+      <p class="hint">Nine copies of this design on one plate, each printed with its own speed, flow and layer height: a Taguchi L9, three levels of each setting in nine prints. Score the copies and the best level of each setting is worked out.</p>
+      <table class="mx-levels">
+        <thead><tr><th></th><th>Low</th><th>Mid</th><th>High</th></tr></thead>
+        <tbody>
+          <tr><th scope="row">Speed (mm/s)</th><td><input type="number" id="mxS1" data-stepper="off" min="0.5" max="200" step="any" aria-label="Speed, low (mm/s)"></td><td><input type="number" id="mxS2" data-stepper="off" min="0.5" max="200" step="any" aria-label="Speed, mid (mm/s)"></td><td><input type="number" id="mxS3" data-stepper="off" min="0.5" max="200" step="any" aria-label="Speed, high (mm/s)"></td></tr>
+          <tr><th scope="row">Flow (%)</th><td><input type="number" id="mxF1" data-stepper="off" min="50" max="200" step="1" aria-label="Flow, low (%)"></td><td><input type="number" id="mxF2" data-stepper="off" min="50" max="200" step="1" aria-label="Flow, mid (%)"></td><td><input type="number" id="mxF3" data-stepper="off" min="50" max="200" step="1" aria-label="Flow, high (%)"></td></tr>
+          <tr><th scope="row">Layer height (mm)</th><td><input type="number" id="mxH1" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, low (mm)"></td><td><input type="number" id="mxH2" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, mid (mm)"></td><td><input type="number" id="mxH3" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, high (mm)"></td></tr>
+        </tbody>
+      </table>
+      <div class="inline"><button class="btn mini" type="button" id="mxAround" title="Low, mid and high round the Fine-tuning settings: speed ±25%, flow ±10%, layer height ±0.05 mm">Round the settings</button>
+        <label class="check" title="Off: every copy prints at its own speed, so the speed is what's tested (a small layer then comes round in a few seconds). On: small layers are slowed to the Seconds per layer, as a normal print is, which can leave the speeds all the same."><input type="checkbox" id="mxSlow"> Slow small layers to the seconds per layer</label></div>
+      <p class="hint" id="mxInfo"></p>
+      <div class="inline"><button class="btn" type="button" id="mxBtn">Export matrix G-code</button></div>
+      <p class="status" id="mxMsg" role="status"></p>
+      <table class="mx-runs" id="mxRuns" aria-label="The nine copies and their scores"></table>
+      <input type="hidden" id="mxScores" value="[]">
+      <p class="hint" id="mxBest"></p>
+      <div class="inline"><button class="btn mini" type="button" id="mxUse" disabled>Use the best levels</button></div>
+      <p class="hint help">The copies are numbered by the comb printed in front of each (1 to 9 teeth), and print one after another, 1 first, in rows from the front left. Every level of a setting meets every level of the other two once, so the average score of the three copies at a level shows that setting's own effect. Score each copy from 1 (failed) to 5 (perfect) for what matters to you: a whole, even line, a first layer that stuck, sharp facets. A copy's first layer starts one of its own layer heights up, unless First layer Z is set apart from the layer height.</p>
     </section>
     <section class="card choc-only print-more" aria-labelledby="h-profile" data-fold="closed">
       <h2 id="h-profile">Printer profile <span class="hval">edit in settings.js</span></h2>
@@ -520,6 +543,7 @@
         <button class="btn primary" type="submit" id="molGo">Look up</button>
       </form>
       <p class="hint mol-tip" id="molTip">A SMILES is the easiest way in: it needs no lookup and is never mistaken for another molecule. Most molecules' Wikipedia pages give it in the box on the right, under Identifiers → SMILES: copy it and paste it here. <a id="molWiki" href="https://en.wikipedia.org/wiki/Special:Search" target="_blank" rel="noopener">Find it on Wikipedia</a></p>
+      <div class="inline mol-turn"><span class="lab-inline">Turn</span><button class="btn mini" type="button" id="molTurnL" title="Turn the structure 15° anticlockwise" aria-label="Turn 15° anticlockwise">↺</button><input type="range" id="molTurn" min="-180" max="180" step="5" value="0" aria-label="Turn the structure (degrees)" title="Turn the structure so it reads well: the bonds turn, the letters stay upright"><button class="btn mini" type="button" id="molTurnR" title="Turn the structure 15° clockwise" aria-label="Turn 15° clockwise">↻</button><span class="hval" id="molTurnVal">0°</span></div>
       <div class="inline"><button class="btn" type="button" id="molEdit" title="Draw a structure by hand, or change the one shown: atoms, bonds, rings, elements">Draw or edit…</button></div>
       <p class="status" id="molMsg" role="status"></p>
       <div class="examples"><span class="name">Examples</span><div class="chips" id="molChips"></div></div>
@@ -874,6 +898,7 @@
 <script src="js/zoom.js"></script>
 <script src="js/layers.js"></script>
 <script src="js/testprint.js"></script>
+<script src="js/matrix.js"></script>
 <script src="js/plot.js"></script>
 <script src="js/workflow.js"></script>
 <script src="js/molecule.js"></script>

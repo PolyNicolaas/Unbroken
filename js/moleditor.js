@@ -286,12 +286,15 @@ $("meDone").addEventListener("click", () => {
   }
   const M = st.art.molecule,
     same = M && M.mol && !me.undo.length;
-  artUseMolecule({
-    query: same ? M.query : "drawn",
-    name: same ? M.name : me.name || "your structure",
-    smiles: same ? M.smiles : me.smiles,
-    mol: me.mol,
-  }); // art.js
+  artUseMolecule(
+    {
+      query: same ? M.query : "drawn",
+      name: same ? M.name : me.name || "your structure",
+      smiles: same ? M.smiles : me.smiles,
+      mol: me.mol,
+    },
+    true
+  ); // art.js
   $("molMsg").textContent = molAtomsBonds(me.mol) + (me.smiles ? ` · ${me.smiles}` : "");
   molEditClose();
   recordSoon();

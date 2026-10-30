@@ -113,6 +113,14 @@ body:not([data-stage="layers"]) .pv-3d { display: none; }
 .pv-sw[data-k="travel"] { border-top: 2px dashed var(--muted); }
 .pv-sw[data-k="purge"] { border-color: var(--warn); }
 .pane-tip { bottom: auto; top: 46px; }
+/* the Test matrix (matrix.js): its levels and its nine copies */
+table.mx-levels, table.mx-runs { width: 100%; border-collapse: collapse; font-size: calc(13px * var(--text)); margin-block: calc(6px * var(--space)); }
+table.mx-levels th, table.mx-runs th { font-weight: 500; color: var(--muted); text-align: left; padding: 2px 4px; }
+table.mx-levels td { padding: 2px; }
+table.mx-levels input { width: 100%; min-width: 0; }
+table.mx-runs td { padding: 2px 4px; font-variant-numeric: tabular-nums; }
+table.mx-runs input { width: 4em; }
+table.mx-runs tr.mx-best td { font-weight: 600; }
 table.profile { font-family: var(--font-body); font-size: calc(13px * var(--text)); }
 table.profile td { text-align: left; white-space: normal; }
 table.profile td:first-child { color: var(--muted); width: 40%; }
@@ -488,6 +496,9 @@ body[data-view="art"] .toolbar.tools { display: none; }
 .seg.five { grid-template-columns: repeat(5, minmax(0, 1fr)); }
 .seg.five label { padding-inline: calc(4px * var(--space)); }
 .mol-tip a { color: var(--accent); }
+.mol-turn { align-items: center; gap: calc(6px * var(--space)); }
+.mol-turn input[type="range"] { flex: 1; min-width: 80px; }
+.mol-turn .lab-inline { color: var(--muted); font-size: calc(13px * var(--text)); }
 .mol-form { display: flex; gap: calc(6px * var(--space)); margin: 0; }
 .mol-form input { flex: 1; min-width: 0; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: calc(7px * var(--corner)); padding: calc(7px * var(--space)) calc(9px * var(--space)); }
 
