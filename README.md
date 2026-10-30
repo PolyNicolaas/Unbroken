@@ -147,7 +147,7 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   (`web-app/js/moleditor.js`): tap for atoms, drag for bonds, tap a bond for double or triple, rings, elements and
   charges, Erase, Undo, Clean up (RDKit). Exact lines, like a pattern: plotted as drawn or traced. Tests E39, E40, A40,
   A41.
-- **3D model**: an STL (or the sample skull vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
+- **3D model**: an STL (or the sample skull cup), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
   makes its line drawing the picture to trace.
 
 **Take a picture** (`web-app/js/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
@@ -401,3 +401,10 @@ Tests E23 (slicing and fitting), E29 (cutting, outside only, overlapping shells)
 - [`DESIGN.md`](DESIGN.md): how the code is meant to be built: the principles, where it is over- or under-engineered, and the plan.
 - [`docs/history/`](docs/history/): the October 2026 code audit (AUDIT.md) and code review (REVIEW.md), as written. Their open items are carried in ROADMAP.md.
 - The **Suggestion box** at the bottom of every tab: one line for an idea or a bug while using the app. Notes are sorted into ROADMAP.md from time to time.
+
+## Credits
+
+- **The sample 3D model** (the Skull cup example, `web-app/js/sample-skull.js`): "Low Poly Skull Pencil Cup" from
+  [Printables](https://www.printables.com/model/555563-low-poly-skull-pencil-cup), licensed under
+  [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Used unchanged;
+  the app scales it to 25 mm tall. Not for commercial use: prints of it can't be sold.

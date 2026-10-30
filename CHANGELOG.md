@@ -3,6 +3,14 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v125 · 2026-10-30
+
+- **The sample 3D model is a low-poly skull cup** from Printables, "Low Poly Skull Pencil Cup"
+  (https://www.printables.com/model/555563-low-poly-skull-pencil-cup, CC BY-NC 4.0, credited on the 3D model card and
+  in the README), in place of v124's skull drawn in code. It's scaled to 25 mm tall (21 × 32 mm on the plate), already
+  open at the top, and prints with no overhang past what a bead holds: 83 layers, about 20 minutes and 2 ml at 20 mm/s.
+  The example is called Skull cup; `?example=vase` and `?example=skull` open it. Not for commercial use.
+
 ## v124 · 2026-10-30
 
 Print week: tuning a chocolate's settings, and molecules that print whole.

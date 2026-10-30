@@ -1,14 +1,15 @@
 const A = require("../lib/app.js"), { check } = require("../lib/check.js");
 module.exports = {
-  id: "A49", title: "Test matrix: the skull vase as nine copies, each with its own speed, flow and layer height (L9), scored for the best levels",
+  id: "A49", title: "Test matrix: the skull cup as nine copies, each with its own speed, flow and layer height (L9), scored for the best levels",
   guards: "copies printed with the wrong settings, a layer height that doesn't change the slicing, a comb that doesn't count its copy, a flow that doesn't reach the plunger, scores that don't pick the best levels, and levels or scores lost from the design",
-  why: "Settings are where prints fail (v124): a Taguchi L9 tests three settings at three levels in nine prints. The sample is a low-poly skull vase, 25 mm with its top 20% cut off, a harder shape than a plain vase.",
+  why: "Settings are where prints fail (v124): a Taguchi L9 tests three settings at three levels in nine prints. The sample is a low-poly skull cup (Printables, CC BY-NC 4.0) at 25 mm, a harder shape than a plain vase.",
   how: "Opens ?example=vase (the skull now), goes to Print, sets levels 15/20/25 mm/s, 90/100/110%, 0.25/0.3/0.35 mm, and builds the matrix plan. Reads each copy's comb, first layer, layers, feed and flow. Exports the G-code and reads its head. Scores the nine copies so that 25 mm/s, 110% and 0.25 mm come out best, and uses the best levels.",
-  pass: "The sample is the skull vase, cut to 25 mm; nine combs with 1 to 9 teeth; each copy's first layer at its own layer height and its layers that far apart (25 mm ÷ the height, ±2 layers); its feed its speed; its flow (e against the export's) its layer height × flow ÷ the Print step's; nine copies inside the plate; the G-code names the nine copies; the best levels shown and put into Fine-tuning (25 mm/s, 110%, 0.25 mm); the levels and scores saved with the design; no page errors.",
+  pass: "The sample is the skull cup, 25 mm tall; nine combs with 1 to 9 teeth; each copy's first layer at its own layer height and its layers that far apart (25 mm ÷ the height, ±2 layers); its feed its speed; its flow (e against the export's) its layer height × flow ÷ the Print step's; nine copies inside the plate; the G-code names the nine copies; the best levels shown and put into Fine-tuning (25 mm/s, 110%, 0.25 mm); the levels and scores saved with the design; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { example: "vase" }), checks = [];
     const m = await page.evaluate(() => ({ name: st.model && st.model.name, h: printedMM() }));
-    checks.push(check("the sample: the skull vase, 25 mm after its top 20% is cut", +(m.name === "sample skull vase" && Math.abs(m.h - 25) < 0.1), "==", 1));
+    checks.push(check("the sample: the skull cup, 25 mm tall", +(m.name === "sample skull cup" && Math.abs(m.h - 25) < 0.1), "==", 1));
+    checks.push(check("its credit on the 3D model card (title, link, licence)", +(await page.evaluate(() => !$("modelCredit").hidden && /CC BY-NC 4\.0/.test($("modelCredit").textContent) && /printables\.com\/model\/555563/.test($("modelCredit").querySelector("a").href))), "==", 1));
     await A.print(page); await A.idle(page, 4000);
     const put = (id, v) => page.evaluate(([id, v]) => { $(id).value = v; $(id).dispatchEvent(new Event("input", { bubbles: true })); }, [id, v]);
     await put("gFeed", 20); await put("gFlow", 100); await put("layerH", 0.3); await A.idle(page, 3000);
