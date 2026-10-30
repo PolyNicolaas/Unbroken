@@ -916,7 +916,12 @@ for (const id of ["paper", "paperOrient", "paperMargin", "paperW", "paperH"])
 async function plotFile() {
   if (plotFromArt()) {
     const A = artOnPage();
-    if (!A || !A.layers.length) throw new Error("only a pattern or text can be plotted as drawn: pick Traced line");
+    if (!A || !A.layers.length)
+      throw new Error(
+        lineModeNow() === "none"
+          ? "Trace is off, and a picture has no lines until it's traced: turn Trace on to plot it"
+          : "nothing to plot as drawn yet"
+      );
     const w = +$("penW").value || 0.5;
     return {
       // (a pattern made for plotting isn't the traced source)

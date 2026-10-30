@@ -351,7 +351,10 @@ async function moleculeLookup(query) {
     } catch {
       throw new Error("PubChem couldn't be reached to look up the name (a SMILES works offline)");
     }
-    if (!r.ok) throw new Error(`“${q}” isn't a SMILES, and PubChem doesn't know it by that name: try its SMILES (on its Wikipedia page, under Identifiers)`);
+    if (!r.ok)
+      throw new Error(
+        `“${q}” isn't a SMILES, and PubChem doesn't know it by that name: try its SMILES (on its Wikipedia page, under Identifiers)`
+      );
     const p = ((await r.json()).PropertyTable || {}).Properties || [];
     smiles = p[0] && (p[0].IsomericSMILES || p[0].SMILES);
     if (!smiles) throw new Error(`PubChem has no structure for “${q}”`);
@@ -385,6 +388,9 @@ function moleculeWidth() {
   const bond = Math.max(8, st.spacing > 0 ? (st.spacing / r.gap) * 1.1 : 8);
   return r.box[0] * bond;
 }
+// "13 atoms, 14 bonds" (one atom, one bond)
+const molAtomsBonds = (m) =>
+  `${m.atoms.length} atom${m.atoms.length === 1 ? "" : "s"}, ${m.bonds.length} bond${m.bonds.length === 1 ? "" : "s"}`;
 const moleculeName = () => {
   const M = st.art.molecule;
   return M ? M.name || M.smiles : "";
@@ -397,8 +403,7 @@ async function moleculeUse(query) {
   try {
     const r = await moleculeLookup(query);
     artUseMolecule({ query, ...r }); // art.js
-    $("molMsg").textContent =
-      `${r.mol.atoms.length} atoms, ${r.mol.bonds.length} bonds` + (r.name ? ` · ${r.smiles}` : "");
+    $("molMsg").textContent = molAtomsBonds(r.mol) + (r.name ? ` · ${r.smiles}` : "");
     recordSoon();
   } catch (e) {
     $("molMsg").textContent = "Couldn't draw it: " + ((e && e.message) || e);
@@ -414,6 +419,21 @@ function moleculeExample(key) {
   artUseMolecule({ query: e.name, name: e.name, smiles: e.smiles, mol: molOf(e) });
   $("molMsg").textContent = `${e.name}${e.what ? `, ${e.what}` : ""}: ${e.atoms.length} atoms`;
   return true;
+}
+// The Molecule card as the design has it (a design undone, redone or opened: art.js artRestore): what was typed, and
+// what it is.
+function moleculeUI() {
+  const M = st.art.molecule;
+  if (!M || !M.mol) {
+    $("molMsg").textContent = "";
+    return;
+  }
+  const e = MOL_EXAMPLES.find((x) => x.name === M.name && x.smiles === M.smiles);
+  $("molIn").value = e ? e.name.toLowerCase() : M.query && M.query !== "drawn" ? M.query : M.smiles || "";
+  moleculeWikiLink();
+  $("molMsg").textContent = e
+    ? `${e.name}${e.what ? `, ${e.what}` : ""}: ${e.atoms.length} atoms`
+    : molAtomsBonds(M.mol) + (M.smiles ? ` · ${M.smiles}` : "");
 }
 // the tip's Wikipedia link: the page for what's typed (a name), or the search page
 function moleculeWikiLink() {

@@ -74,7 +74,8 @@
     return UNB.thin(out, w, h); // make edges strictly 1px so each becomes a single stroke
   };
 
-  // A line map → separate strokes, for a pen that can lift (the Line step's Separate strokes). Pixels are joined to their
+  // A line map → separate strokes, for a pen that can lift (the Line step's Separate strokes). Pixels are joined to
+  // their
   // 4 neighbours, and to a diagonal one only where neither pixel between them is set, so a corner isn't a little
   // triangle. Strokes run between ends and junctions; closed rings with neither are loops. Each is smoothed (ends and
   // junctions stay put) and simplified (tol px), shorter ones than minLen px are dropped, and they're put in an order
@@ -208,9 +209,20 @@
 
   // Grey levels → a line map: the edges between levels (UNB.levels), for the levels whose edges are wanted (edge[j]
   // true: Trace). An edge is drawn where either side wants it, on the darker side's pixel, so every block's outline is
-  // one pixel wide; thinned so the tracer sees single strokes. Edges along the picture's border aren't drawn.
-  UNB.levelEdges = function (lab, w, h, edge) {
+  // one pixel wide; thinned so the tracer sees single strokes. Edges along the picture's border aren't drawn, except
+  // for the levels in border (border[j] true: a level that is filled, so a block touching the edge is closed off and
+  // its fill reaches it): their runs along the border are drawn one pixel in (thinning clears the outermost pixels).
+  UNB.levelEdges = function (lab, w, h, edge, border) {
     const m = new Uint8Array(w * h);
+    if (border && border.some(Boolean) && w > 2 && h > 2)
+      for (let y = 0; y < h; y++)
+        for (let x = 0; x < w; x++) {
+          if (x > 0 && y > 0 && x < w - 1 && y < h - 1) {
+            x = w - 2; // (only the border: jump to the row's last pixel)
+            continue;
+          }
+          if (border[lab[y * w + x]]) m[Math.min(h - 2, Math.max(1, y)) * w + Math.min(w - 2, Math.max(1, x))] = 1;
+        }
     for (let y = 0; y < h; y++)
       for (let x = 0; x < w; x++) {
         const i = y * w + x,

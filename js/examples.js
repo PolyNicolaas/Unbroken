@@ -49,9 +49,12 @@ $("esChoose").addEventListener("click", () => $("anyFile").click());
 // Empty: the Art step's Picture with no picture yet. The preview says how to start; the trace has nothing to do.
 const isEmpty = () => st.art.kind === "picture" && !st.art.picture;
 function emptyUI() {
-  const e = isEmpty();
+  const e = isEmpty(),
+    was = document.body.dataset.empty === "1";
   document.body.dataset.empty = e ? "1" : "";
   $("emptyState").hidden = !e;
+  // the readout and the Trace note were set while it was empty (an opened design, the art as drawn): again, now
+  if (was && !e && typeof workflowUI === "function") workflowUI(); // workflow.js
 }
 // a blank page to trace while empty (so the steps after Art show nothing, not the last input)
 function blankPicture() {
@@ -67,6 +70,10 @@ function blankPicture() {
 function startInput() {
   const named = CFG.defaults.sample && CFG.defaults.sample !== "none" ? CFG.defaults.sample : null,
     asked = new URLSearchParams(location.search).get("example");
-  if (useExample(named || asked || "")) return;
+  const key = named || asked || "";
+  // a model starts as from empty then its chip: the blank picture first (the design's saved image, and undo, need a
+  // source)
+  if (key === "vase") artUse("picture");
+  if (useExample(key)) return;
   artUse("picture"); // empty: no picture yet
 }

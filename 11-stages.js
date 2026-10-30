@@ -17,14 +17,18 @@
   UNB.stagePrep = function (rgba, w, h, o) {
     let gray = UNB.prep(rgba, w, h, o.prep || {});
     const N = w * h,
-      preview = new Uint8ClampedArray(4 * N);
+      preview = new Uint8ClampedArray(4 * N),
+      colour = !!(o.levels && o.levels.count >= 2 && o.levels.colour),
+      // (colour levels read paper white from the prepared grey before light lines on dark invert it, or black ink
+      // would count as paper)
+      prepped = colour && o.invert ? Float32Array.from(gray) : gray;
     if (o.invert) for (let i = 0; i < N; i++) gray[i] = 255 - gray[i];
     // grey levels: the picture as flat greys from here on (lab: level per pixel, for the line map and the fills)
     // (colour levels: flat colours, from the colours under the prepared greys; the preview shows them)
     const L =
       o.levels && o.levels.count >= 2
-        ? o.levels.colour
-          ? UNB.colourLevels(rgba, w, h, gray, o.levels)
+        ? colour
+          ? UNB.colourLevels(rgba, w, h, prepped, o.levels)
           : UNB.levels(gray, w, h, o.levels)
         : null;
     if (L) gray = Float32Array.from(L.lab, (j) => L.tones[j]);
@@ -42,11 +46,11 @@
   };
 
   // image → line map, as the app does it: centerline or edges, then the selection mask and erasing.
-  // o: { mode: "centerline"|"edges", sens, split, selMask (Uint8Array or null), erase: [ops], levels ({ lab, edge }:
-  // grey levels, their edges instead: UNB.levelEdges) }
+  // o: { mode: "centerline"|"edges", sens, split, selMask (Uint8Array or null), erase: [ops], levels ({ lab, edge,
+  // border }: grey levels, their edges instead: UNB.levelEdges) }
   UNB.stageLines = function (blurred, w, h, o) {
     let lines;
-    if (o.levels) lines = UNB.levelEdges(o.levels.lab, w, h, o.levels.edge);
+    if (o.levels) lines = UNB.levelEdges(o.levels.lab, w, h, o.levels.edge, o.levels.border);
     else if (o.mode === "edges") {
       const hi = 150 - o.sens * 1.8;
       lines = UNB.canny(blurred, w, h, hi * 0.4, hi);

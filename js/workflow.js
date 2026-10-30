@@ -39,8 +39,9 @@ function workflowUI() {
   B.out = plot ? "plot" : "print";
   B.line = mode;
   // the last step is Plot or Print, not both
-  if (plot && $("viewChoc").checked) $("view2D").checked = true;
-  if (!plot && $("view2D").checked) $("viewChoc").checked = true;
+  // (an undo or an opened design can switch the output while its last step shows: that step's view follows)
+  const swap = plot ? $("viewChoc").checked : $("view2D").checked;
+  if (swap) $(plot ? "view2D" : "viewChoc").checked = true;
   $("lineStrokes").disabled = !plot;
   const model = st.art.kind === "model";
   $("traceOn").disabled = model; // (a model is sliced)
@@ -86,6 +87,7 @@ function workflowUI() {
     $("fitinfo").textContent = "trace off";
   }
   traceNeededUI();
+  if (swap) viewChanged(); // views.js
   // on Art and Line the preview shows what the line will be: the page for as drawn, else the line
   const v = document.body.dataset.view;
   if ((v === "art" || v === "design") && stageFor(v) !== stageNow()) setStage(stageFor(v));
@@ -112,6 +114,7 @@ function traceNeededUI() {
     v = document.body.dataset.view,
     need = (v === "choc" && (mode === "drawn" || mode === "none")) || (v === "plot" && mode === "none");
   $("traceNeeded").hidden = !need || !!document.body.dataset.empty;
+  if (v === "choc") readyUI(); // export.js: the ready list says Trace is off (or not any more)
   if (need)
     $("traceNeededMsg").textContent =
       v === "choc"
@@ -238,7 +241,7 @@ async function traceStrokes(g) {
     n || nf
       ? `${n} stroke${n === 1 ? "" : "s"} · ${n ? n - 1 : 0} pen lift${n === 2 ? "" : "s"}` +
           (fillStrokes.length ? ` · ${fillStrokes.length} grey${fillStrokes.length === 1 ? "" : "s"} filled` : "")
-      : "No lines found — lower the threshold or the speck filter"
+      : levelNoLinesAdvice(true) || "No lines found — lower the threshold or the speck filter"
   );
   $("fitinfo").textContent = n ? `${n} stroke${n === 1 ? "" : "s"}` : "";
   render();
@@ -249,5 +252,20 @@ async function traceStrokes(g) {
 workflowUI();
 
 // the last step's Next bar: the export, one tap away (the Export cards keep their options)
-$("nbGcode").addEventListener("click", () => $("gcodeBtn").click());
-$("nbSvg").addEventListener("click", () => $("exportBtn").click());
+// The export's message shows under its button, far down the Export card (off screen on an iPad), so a refusal or a
+// failure tapped from the Next bar also shows as a toast.
+function nextBarExport(btn, msg) {
+  let obs = null;
+  const say = () => {
+    if (!msg.classList.contains("busy") && obs) obs.disconnect();
+    if (msg.classList.contains("bad")) toast(msg.textContent, true); // ui.js
+  };
+  setStatus(msg, "", "");
+  $(btn).click();
+  if (msg.classList.contains("busy")) {
+    obs = new MutationObserver(say);
+    obs.observe(msg, { attributes: true, childList: true, characterData: true, subtree: true });
+  } else say();
+}
+$("nbGcode").addEventListener("click", () => nextBarExport("gcodeBtn", $("gcodeMsg")));
+$("nbSvg").addEventListener("click", () => nextBarExport("exportBtn", $("exportMsg")));

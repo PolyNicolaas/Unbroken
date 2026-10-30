@@ -87,6 +87,6 @@ function renderMath() {
 
 function setChip(t, model) {
   if (!model && isModel()) return;
-  if (document.body.dataset.empty === "1") t = "Nothing yet: start on the Art step"; // (examples.js)
+  if (!model && document.body.dataset.empty === "1") t = "Nothing yet: start on the Art step"; // (examples.js)
   $("chip").textContent = t;
 } // a model's readout is model.js's

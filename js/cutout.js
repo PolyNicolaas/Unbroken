@@ -19,10 +19,44 @@ const cutoutOn = () => !!(st.cutout && st.cutout.src === (st.source && st.source
 
 // ---------- the mask, worked out in the background ----------
 let cutoutSeq = 0;
+// what the cut-out was made on, beyond its canvas: a photo cleaned again (another Light, the same page corners and
+// turn) is the same picture, so the cut-out stays with it
+function cutoutPicNow() {
+  const P = st.art && st.art.kind === "picture" ? st.art.picture : null,
+    s = st.source;
+  return {
+    raw: P && P.photo ? P.photo.raw : null,
+    look: P && P.photo ? JSON.stringify([P.photo.corners, P.turn || 0, P.angle || 0]) : "",
+    w: s ? s.width : 0,
+    h: s ? s.height : 0,
+  };
+}
+// A new source (source.js setSource, canvas already tagged): true when the cut-out belongs to it (the same canvas, or
+// the same photo cleaned again), and then it's pointed at the new canvas.
+function cutoutKeepFor(canvas) {
+  const C = st.cutout;
+  if (!C || !canvas) return false;
+  if (C.src === canvas.__id) return true;
+  const P = cutoutPicNow();
+  if (!C.raw || P.raw !== C.raw || P.look !== C.look || canvas.width !== C.w || canvas.height !== C.h) return false;
+  C.src = canvas.__id;
+  C.ver = (C.ver || 0) + 1;
+  return true;
+}
+// a run no longer wanted (the cut-out cleared or started again): dropped, and the busy chip off
+function cutoutStop() {
+  cutoutSeq++;
+  CUT.cancel();
+  busyFor("cutout", false); // ui.js
+}
 async function cutoutRun() {
   const C = st.cutout,
     src = st.source;
   if (!C || !src || !C.box) return;
+  // a run started by undo, redo or opening a design (history.js) isn't a new step
+  const quiet = typeof restoring !== "undefined" && restoring;
+  if (C.src === src.__id) Object.assign(C, cutoutPicNow());
+  CUT.cancel(); // (an older run's mask is no longer wanted)
   const my = ++cutoutSeq,
     k = Math.min(1, 640 / Math.max(src.width, src.height)),
     w = Math.max(8, Math.round(src.width * k)),
@@ -45,16 +79,17 @@ async function cutoutRun() {
       h,
       {
         box: px(C.box),
-        keep: C.strokes.filter((s) => s.keep).map((s) => px(s.pts)),
-        drop: C.strokes.filter((s) => !s.keep).map((s) => px(s.pts)),
-        brush: (C.strokes.length ? C.strokes[C.strokes.length - 1].r : 0.02) * w,
+        // each stroke with its own brush size
+        keep: C.strokes.filter((s) => s.keep).map((s) => ({ pts: px(s.pts), r: (s.r || 0.02) * w })),
+        drop: C.strokes.filter((s) => !s.keep).map((s) => ({ pts: px(s.pts), r: (s.r || 0.02) * w })),
+        brush: 0.02 * w,
       },
     ]);
   } catch (e) {
     if (e !== CANCELLED) toast("The object couldn't be cut out: " + ((e && e.message) || e), true);
     return;
   } finally {
-    busyFor("cutout", false);
+    if (my === cutoutSeq) busyFor("cutout", false); // (a newer run keeps it on)
   }
   if (my !== cutoutSeq || st.cutout !== C) return; // a newer box or stroke is on its way
   // the mask as a canvas: white (opaque) where removed, clear where kept; drawn scaled up, its edge comes out soft
@@ -71,8 +106,10 @@ async function cutoutRun() {
   Object.assign(C, { mask: m, share: r.share, ver: (C.ver || 0) + 1 });
   cutoutUI();
   if (st.tool === "cut") render();
+  // (a mask worked out again for undo, redo or a design file: its trace belongs to that step, not a new one)
+  if (quiet) autoRun = true; // controls.js
   schedule(extract); // controls.js: traced (or shown) from the cut-out picture
-  recordSoon();
+  if (!quiet) recordSoon();
 }
 // the working image (pipeline.js working): the parts of the picture that aren't the object painted white
 function cutoutApply(g, sx, sy, sw, sh, w, h) {
@@ -184,6 +221,7 @@ function cutoutUp(d) {
     // a box drawn: go on to fixing it
     $("cutMkeep").checked = true;
   } else {
+    if (!cutoutOn()) return renderCutout(); // (the cut-out went while the stroke was painted)
     st.cutout.strokes.push({ keep: d.keep, pts: d.pts, r: d.r });
   }
   cutoutUI();
@@ -216,6 +254,7 @@ $("cutUndo").addEventListener("click", () => {
     cutoutRun();
   } else {
     st.cutout = null;
+    cutoutStop();
     $("cutMbox").checked = true;
     schedule(extract);
   }
@@ -225,7 +264,7 @@ $("cutUndo").addEventListener("click", () => {
 function cutoutClear() {
   if (!st.cutout) return;
   st.cutout = null;
-  cutoutSeq++;
+  cutoutStop();
   if (st.tool === "cut") exitTool();
   cutoutUI();
   schedule(extract);
@@ -234,7 +273,7 @@ function cutoutClear() {
 $("cutClear").addEventListener("click", cutoutClear);
 $("cutStart").addEventListener("click", () => {
   st.cutout = null;
-  cutoutSeq++;
+  cutoutStop();
   $("cutMbox").checked = true;
   cutoutUI();
   renderCutout();
