@@ -3,6 +3,34 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v124 · 2026-10-30
+
+Print week: tuning a chocolate's settings, and molecules that print whole.
+
+- **Test matrix** (Print step, More print settings): nine copies of the design on one plate, each printed with its own
+  speed, flow and layer height, as a Taguchi L9 (three levels of each setting in nine prints; every level of one
+  setting meets every level of the others once). A comb of 1 to 9 teeth in front of each copy is its number; copies
+  print one after another, 1 first. Score each copy from 1 to 5, and the card shows the mean score at each level and
+  puts the best level of each setting into Fine-tuning with **Use the best levels**. The levels start round the
+  current settings (speed ±25%, flow ±10%, layer height ±0.05 mm); each copy's first layer starts one of its own
+  layer heights up. Small layers print at their copy's speed unless **Slow small layers** is ticked (with it, the
+  seconds per layer can slow every copy to the same speed). Levels and scores are saved with the design.
+- **Flow (%)** in Fine-tuning: more or less chocolate than the needle and layer height work out (110% for a thin or
+  broken line). It's in E per mm, the G-code, the design file and a chocolate's settings (`flow` in settings.js).
+- **Test print:** a **First layer Z** test (each strip starts at its own height above the plate, to find the one that
+  sticks), and a Flow strip's **Use it** now sets the Flow (it used to say to set it on the printer). Flow strips are
+  % of the worked-out amount, round the Flow set.
+- **The sample 3D model is a low-poly skull vase** (the Skull vase example; it was a plain vase): a skull standing on
+  its jaw, with its top 20% cut off, so it prints as a 25 mm open vase, with eye sockets, the nose, cheekbones and
+  the brow stepping in and out from layer to layer, and no overhang that needs support. `?example=vase` opens it.
+- **A molecule's labels print by their bonds.** Printed in pieces (bonds and labels apart), every label was laid out
+  from its own corner, so they all printed on top of each other at the molecule's corner. On the Plate and 3D layers
+  views, One copy now shows the whole molecule (bonds and every label), not the bonds piece alone.
+- **Turn a molecule** (Molecule card): the structure turns in 5° steps (or 15° with ↺ ↻) so it reads well; the letters
+  stay upright and the bonds keep their length. Saved with the design.
+- **An aldehyde's H is drawn** on a bond of its own (vanillin's CHO; formaldehyde gets both), as chemists draw it.
+- Tests E46, E47, A48, A49, A50.
+
 ## v123 · 2026-10-29
 
 Bug hunt: four reviewers went through the picture, molecule, levels and workflow code; every bug below was reproduced

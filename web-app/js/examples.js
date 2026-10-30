@@ -20,7 +20,7 @@ const EXAMPLES = [
   ["portrait", "Wave portrait", "the face in wave rows", () => artExamplePattern("wavesTone")],
   ["lettering", "Lettering", "text in a single-stroke font", () => artUse("text")],
   ["theobromine", "Theobromine", "a molecule: chocolate's own", () => moleculeExample("theobromine")],
-  ["vase", "Vase", "a 3D model", () => artUse("model")],
+  ["skull", "Skull vase", "a 3D model", () => artUse("model")],
 ];
 function useExample(key) {
   const e = EXAMPLES.find(([k]) => k === key);
@@ -70,10 +70,11 @@ function blankPicture() {
 function startInput() {
   const named = CFG.defaults.sample && CFG.defaults.sample !== "none" ? CFG.defaults.sample : null,
     asked = new URLSearchParams(location.search).get("example");
-  const key = named || asked || "";
+  let key = named || asked || "";
+  if (key === "vase") key = "skull"; // (the sample was a plain vase until v124)
   // a model starts as from empty then its chip: the blank picture first (the design's saved image, and undo, need a
   // source)
-  if (key === "vase") artUse("picture");
+  if (key === "skull") artUse("picture");
   if (useExample(key)) return;
   artUse("picture"); // empty: no picture yet
 }

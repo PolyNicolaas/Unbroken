@@ -1,5 +1,6 @@
 // Unbroken · web app · model.js
-// 3D models as a source: load an STL (or the sample vase), turn it to the side it should print on, look at it in the
+// 3D models as a source: load an STL (or the sample skull vase), turn it to the side it should print on, look at it in
+// the
 // preview, and hand it to the Print step, where it is sliced and every layer is fitted with a Fourier series
 // (layers.js).
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
@@ -14,33 +15,116 @@ const MODEL_TOL = 0.05; // mm: each layer's series keeps 95% of the slice within
 let modelSeq = 0;
 st.model = null;
 
-function sampleVase() {
-  // a 40 mm vase with a wavy side, as triangles
-  const segs = 96,
-    prof = [[0, 0]];
-  for (let i = 0; i <= 40; i++) {
-    const z = i;
-    prof.push([11 + 4 * Math.sin(z / 6.5) + 2.5 * Math.sin(z / 2.2) * (z / 40), z]);
+// The sample: a low-poly skull vase, as triangles, standing on its jaw with its face towards +y. The whole skull is
+// 31.25 mm tall; the example cuts its top 20% off (SAMPLE_CUT), so it prints as a 25 mm open vase: a harder shape than
+// a plain vase (eye sockets, the nose, cheekbones and the brow step in and out from layer to layer), for test prints.
+const SAMPLE_NAME = "sample skull vase",
+  SAMPLE_CUT = { bottom: 0, top: 0.2 };
+function sampleSkull() {
+  const H = 31.25, // the whole skull; the example cuts the top 20% off: a 25 mm open vase
+    NA = 32, // facets round
+    NZ = 18; // rings up
+  // [t, half width, front, back] (mm), t = height share
+  const prof = [
+    [0, 5.6, 6.6, 4],
+    [0.06, 6.4, 8.2, 4.6],
+    [0.12, 7, 9, 5.2],
+    [0.19, 7.8, 9.2, 5.9],
+    [0.26, 8.9, 9.4, 6.9],
+    [0.32, 10.1, 9.4, 8.3],
+    [0.39, 11.1, 9.6, 10.2],
+    [0.46, 11.9, 9.8, 11.8],
+    [0.53, 11.6, 10, 13],
+    [0.6, 11.8, 10.5, 13.8],
+    [0.68, 12.4, 10.6, 14.2],
+    [0.76, 12.8, 10, 14.2],
+    [0.84, 12.2, 8.8, 13],
+    [0.92, 9.8, 6.8, 10.4],
+    [1, 5, 3.5, 5.5],
+  ];
+  const at = (t, k) => {
+    let i = 0;
+    while (i < prof.length - 2 && prof[i + 1][0] < t) i++;
+    const [a, b] = [prof[i], prof[i + 1]],
+      u = Math.min(1, Math.max(0, (t - a[0]) / (b[0] - a[0])));
+    return a[k] + (b[k] - a[k]) * u;
+  };
+  // dents (−) and bumps (+), mm along the surface's outward direction: [angle from the front (°), t, depth, σ angle, σ
+  // t]
+  const marks = [
+    [-28, 0.48, -3.3, 13, 0.08], // eye sockets
+    [28, 0.48, -3.3, 13, 0.08],
+    [0, 0.35, -2.1, 7, 0.07], // the nose
+    [0, 0.205, -1.1, 34, 0.022], // the mouth, between the teeth
+    [-58, 0.43, 0.8, 12, 0.07], // cheekbones
+    [58, 0.43, 0.8, 12, 0.07],
+    [-82, 0.53, -1, 10, 0.08], // temples
+    [82, 0.53, -1, 10, 0.08],
+    [0, 0.6, 0.45, 38, 0.05], // the brow
+    [-40, 0.1, -1.0, 14, 0.06], // under the cheeks, the jaw's sides drawn in
+    [40, 0.1, -1.0, 14, 0.06],
+  ];
+  const ring = [];
+  for (let j = 0; j <= NZ; j++) {
+    const t = j / NZ,
+      a = at(t, 1),
+      f = at(t, 2),
+      b = at(t, 3),
+      row = [];
+    for (let i = 0; i < NA; i++) {
+      // a quarter step's turn on every other ring: triangles, the low poly look
+      const th = (2 * Math.PI * (i + (j % 2) * 0.5)) / NA,
+        c = Math.cos(th),
+        s = Math.sin(th),
+        y = s > 0 ? f * Math.sign(s) * Math.pow(Math.abs(s), 0.7) : b * s,
+        sx = Math.sign(c) * Math.pow(Math.abs(c), 0.85),
+        x = a * sx;
+      const deg = (((Math.atan2(c, s) * 180) / Math.PI + 540) % 360) - 180; // 0 = straight ahead (+y)
+      let d = 0;
+      for (const [ma, mt, md, sa, stt] of marks)
+        d += md * Math.exp(-((deg - ma) ** 2) / (2 * sa * sa) - (t - mt) ** 2 / (2 * stt * stt));
+      const r = Math.hypot(x, y) || 1;
+      row.push([x + (x / r) * d, y + (y / r) * d, t * H]);
+    }
+    ring.push(row);
   }
-  prof.push([0, 40]);
-  const T = [];
-  for (let i = 0; i < segs; i++) {
-    const a0 = (2 * Math.PI * i) / segs,
-      a1 = (2 * Math.PI * (i + 1 === segs ? 0 : i + 1)) / segs;
-    for (let k = 0; k + 1 < prof.length; k++) {
-      const [r0, z0] = prof[k],
-        [r1, z1] = prof[k + 1],
-        P = (r, z, a) => [r * Math.cos(a), r * Math.sin(a), z];
-      const A = P(r0, z0, a0),
-        B = P(r0, z0, a1),
-        C = P(r1, z1, a1),
-        D = P(r1, z1, a0);
-      T.push(...A, ...B, ...C, ...A, ...C, ...D);
+  const T = [],
+    tri = (A, B, C) => T.push(...A, ...B, ...C);
+  for (let j = 0; j < NZ; j++)
+    for (let i = 0; i < NA; i++) {
+      const i1 = (i + 1) % NA,
+        A = ring[j][i],
+        B = ring[j][i1],
+        C = ring[j + 1][i1],
+        D = ring[j + 1][i];
+      if (j % 2 === 0) {
+        tri(A, B, D);
+        tri(B, C, D);
+      } else {
+        tri(A, B, C);
+        tri(A, C, D);
+      }
+    }
+  // closed at the bottom and the top (fans round the middle)
+  for (const [j, up] of [
+    [0, false],
+    [NZ, true],
+  ]) {
+    const R = ring[j],
+      m = [0, 0, j === 0 ? 0 : H];
+    for (const p of R) ((m[0] += p[0] / NA), (m[1] += p[1] / NA));
+    for (let i = 0; i < NA; i++) {
+      const A = R[i],
+        B = R[(i + 1) % NA];
+      up ? tri(m, A, B) : tri(m, B, A);
     }
   }
   return { tri: Float32Array.from(T), n: T.length / 9 };
 }
-function setModel(mesh, name) {
+function useSampleModel() {
+  setModel(sampleSkull(), SAMPLE_NAME, SAMPLE_CUT);
+}
+function setModel(mesh, name, cut) {
   const om = UNB.orientMesh(mesh.tri, {});
   st.model = {
     name,
@@ -49,7 +133,7 @@ function setModel(mesh, name) {
     turns: { x: 0, y: 0, z: 0 },
     om,
     heightMM: fitHeight(om.size),
-    cut: { bottom: 0, top: 0 },
+    cut: cut ? { ...cut } : { bottom: 0, top: 0 },
     yaw: -0.6,
     pitch: 0.55,
     id: ++modelSeq,
@@ -153,7 +237,7 @@ $("turnReset").addEventListener("click", () => {
   modelChanged(true);
 });
 function enterModel() {
-  if (!st.model) setModel(sampleVase(), "sample vase");
+  if (!st.model) useSampleModel();
   else modelChanged(false);
   drawPage(); // plot.js: the 2D page no longer shows the last picture's drawing
 }
@@ -219,12 +303,14 @@ function modelPlate(n, gap, straight) {
 // Every layer of the model: sliced, moved in by half a line width, joined into one loop, filled for the filled base,
 // and fitted with a Fourier series (UNB.modelStack, in the layers engine), then placed on the plate and stacked.
 const modelStacks = new Map(); // key → UNB.modelStack result (mm, model centred)
-async function buildModelLayers() {
+// (o: h and z0 to slice at another layer height and first-layer Z than the Print step's, for the Test matrix)
+async function buildModelLayers(o = {}) {
   const M = st.model,
     lay = plateNow();
   if (!M || !lay) return null;
-  const S0 = layerSettings(),
-    z0 = firstZ(),
+  const S0 = layerSettings();
+  if (o.h) S0.h = o.h;
+  const z0 = o.z0 || firstZ(),
     w = lineWidthMM(),
     d = Math.max(w, spacingMM() || 0);
   const opt = Object.assign(
@@ -247,9 +333,9 @@ async function buildModelLayers() {
   const key = JSON.stringify([M.id, M.turns, opt]);
   let R = modelStacks.get(key);
   if (!R) {
-    $("layerInfo").textContent = "slicing… (can take a while for a big or solid model)";
+    if (!o.h) $("layerInfo").textContent = "slicing… (can take a while for a big or solid model)";
     R = await LAY.call("modelStack", [M.om.tri, opt], (p) => {
-      $("layerInfo").textContent = `slicing ${p.done} / ${p.of}`;
+      if (!o.h) $("layerInfo").textContent = `slicing ${p.done} / ${p.of}`;
     });
     modelStacks.set(key, R);
     if (modelStacks.size > 6) modelStacks.delete(modelStacks.keys().next().value);

@@ -62,7 +62,7 @@ module.exports = {
     await page.click("label[for=srcText]"); await A.idle(page, 1200);
     checks.push(check("Text: traced from its strokes", +((await page.evaluate(() => document.body.dataset.src)) === "text" && (await page.isVisible("#textIn"))), "==", 1));
     await page.click("label[for=srcModel]"); await A.idle(page, 1200);
-    checks.push(check("3D model: the sample vase, its card showing", +((await page.evaluate(() => document.body.dataset.src)) === "model" && (await page.isVisible("#turnX"))), "==", 1));
+    checks.push(check("3D model: the sample skull vase, its card showing", +((await page.evaluate(() => document.body.dataset.src)) === "model" && (await page.isVisible("#turnX"))), "==", 1));
     // undo the switch to the model
     await page.mouse.click(5, 5); await page.keyboard.press("Control+z"); await A.idle(page, 1200);
     checks.push(check("undo: back on Text", await kind(page), "==", "text"));

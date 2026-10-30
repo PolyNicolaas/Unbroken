@@ -4,7 +4,7 @@ module.exports = {
   guards: "a start that isn't empty, an empty preview that doesn't say how to start, later steps showing an old input while empty, an example chip that loads the wrong kind of input or nothing, and a picture example that leaves a picture pattern in use",
   why: "The app opens on a clean workspace: nothing traced, the preview saying how to start (drop, paste or choose a file) with the examples — pictures, patterns, lettering and a 3D model — as chips there and in the Input card. settings.js can still name a sample to start on (defaults.sample), and the page's address can (?example=leaf).",
   how: "Opens the app with no example; checks the empty preview, its chips and the readout; visits the Line and Print steps; taps each example in the Input card and checks the input it makes; taps the Wave portrait then the Leaf.",
-  pass: "Empty at the start: the empty preview showing with all eleven examples, the readout saying nothing yet, nothing traced on Line and Print; each example becomes its input (five pictures, three patterns, the text, the theobromine molecule, the vase) and the preview is no longer empty; after the Wave portrait the Leaf is the Picture in use; no page errors.",
+  pass: "Empty at the start: the empty preview showing with all eleven examples, the readout saying nothing yet, nothing traced on Line and Print; each example becomes its input (five pictures, three patterns, the text, the theobromine molecule, the skull vase) and the preview is no longer empty; after the Wave portrait the Leaf is the Picture in use; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { clean: true, art: true }), checks = [];
     const empty = await page.evaluate(() => ({ e: document.body.dataset.empty, shown: !$("emptyState").hidden && $("emptyState").offsetParent !== null, chips: document.querySelectorAll("#emptyState [data-example]").length, chip: $("chip").textContent, pic: st.art.picture }));
@@ -14,7 +14,7 @@ module.exports = {
     await A.print(page); await A.idle(page, 800);
     checks.push(check("Line and Print while empty: nothing traced, the readout says so", +(!line.final && !line.walk && /Nothing yet/.test(line.chip)), "==", 1));
     await page.click("label[for=viewArt]"); await A.idle(page, 300);
-    const want = { leaf: "picture", still: "picture", face: "picture", shapes: "picture", smiley: "picture", labyrinth: "pattern", spirograph: "pattern", portrait: "pattern", lettering: "text", theobromine: "molecule", vase: "model" };
+    const want = { leaf: "picture", still: "picture", face: "picture", shapes: "picture", smiley: "picture", labyrinth: "pattern", spirograph: "pattern", portrait: "pattern", lettering: "text", theobromine: "molecule", skull: "model" };
     let right = 0; const wrong = [];
     for (const [k, kind] of Object.entries(want)) {
       await page.click(`[data-examples] [data-example=${k}]:visible`); await A.idle(page, 1500);

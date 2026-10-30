@@ -147,7 +147,7 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   (`web-app/js/moleditor.js`): tap for atoms, drag for bonds, tap a bond for double or triple, rings, elements and
   charges, Erase, Undo, Clean up (RDKit). Exact lines, like a pattern: plotted as drawn or traced. Tests E39, E40, A40,
   A41.
-- **3D model**: an STL (or the sample vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
+- **3D model**: an STL (or the sample skull vase), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
   makes its line drawing the picture to trace.
 
 **Take a picture** (`web-app/js/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a

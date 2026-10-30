@@ -74,7 +74,19 @@ const DESIGN_IDS = [
   "gOy",
   "gZ",
   "gLift",
+  "gFlow",
   "gOver",
+  "mxS1",
+  "mxS2",
+  "mxS3",
+  "mxF1",
+  "mxF2",
+  "mxF3",
+  "mxH1",
+  "mxH2",
+  "mxH3",
+  "mxSlow",
+  "mxScores",
   "support",
   "gFeed",
   "layerTime",
@@ -210,6 +222,7 @@ function syncDesignUI() {
   $("outW").value = +st.outW.toFixed(1);
   infillUI();
   baseUI();
+  if (typeof mxUI === "function") mxUI(); // matrix.js: the Test matrix's levels and scores
   applyPrinter(false);
   forgetHeightGoal();
   showHeight();

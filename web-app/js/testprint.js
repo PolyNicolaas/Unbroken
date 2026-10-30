@@ -24,7 +24,24 @@ const TEST_KIND = {
     },
   },
   gap: { unit: "mm", digits: 2, range: () => [0, 1] },
-  flow: { unit: "%", digits: 0, range: () => [90, 110] },
+  // (around the Flow set in Fine-tuning; a strip's % is of what the needle and layer height work out)
+  flow: {
+    unit: "%",
+    digits: 0,
+    range: () => {
+      const f = flowPct(); // export.js
+      return [Math.max(50, f - 20), Math.min(200, f + 30)];
+    },
+  },
+  // each strip's first layer at its own height above the plate: too high and it doesn't stick, too low and it smears
+  firstZ: {
+    unit: "mm",
+    digits: 2,
+    range: () => {
+      const z = firstZ(); // export.js
+      return [Math.max(0.05, z - 0.15), z + 0.15];
+    },
+  },
 };
 // From / To typed by hand: a change of chocolate, printer or speed leaves them alone; otherwise they follow the setting
 let testEdited = false;
@@ -46,7 +63,7 @@ function testRange() {
 // with it, unless From / To were typed by hand
 function testFollow() {
   const k = $("testVary").value;
-  if (!testEdited && (k === "layerH" || k === "speed")) testRange();
+  if (!testEdited && k !== "gap") testRange();
   else testUI();
 }
 function testPlan() {
@@ -54,10 +71,13 @@ function testPlan() {
     vals = testValues();
   return UNB.testStrips({
     vary,
-    values: vals,
+    // (a Flow strip's % is of what the needle and layer height work out; the export already pushes the Flow set, so
+    // the strips are stepped relative to it)
+    values: vary === "flow" ? vals.map((v) => (v * 100) / flowPct()) : vals,
     w: lineWidthMM(),
     gap: Math.max(0, +$("lineGapMM").value || 0),
     h: layerHmm(),
+    z0: firstZ(),
     feed: feedMMmin(),
     layers: intIn("testLayers", 1, 30, 5),
     rows: 6,
@@ -75,6 +95,8 @@ function testUI() {
       !Number.isFinite(v) ||
       ($("testVary").value === "layerH" && v < 0.05) ||
       ($("testVary").value === "speed" && v <= 0) ||
+      ($("testVary").value === "firstZ" && v < 0.05) ||
+      ($("testVary").value === "flow" && (v < 50 || v > 200)) ||
       v < 0
   );
   $("testVal").textContent =
@@ -96,7 +118,7 @@ $("testVary").addEventListener("change", testRange);
 for (const id of ["testFrom", "testTo"]) $(id).addEventListener("input", () => (testEdited = true));
 for (const id of ["testN", "testFrom", "testTo", "testLayers", "lineGapMM", "layerTime"])
   $(id).addEventListener("input", testUI);
-$("gFeed").addEventListener("input", testFollow);
+for (const id of ["gFeed", "gFlow", "gZ"]) $(id).addEventListener("input", testFollow);
 onPrintSettings(testFollow); // the printer, chocolate, needle, line width and layer height
 $("testBtn").addEventListener("click", async () => {
   const msg = $("testMsg"),
@@ -134,15 +156,9 @@ $("testUse").addEventListener("click", () => {
   if (vary === "layerH") put("layerH", +v.toFixed(3));
   else if (vary === "speed") put("gFeed", +v.toFixed(1));
   else if (vary === "gap") put("lineGapMM", +v.toFixed(2));
-  else {
-    testEdited = keep;
-    setStatus(
-      $("testMsg"),
-      "ok",
-      `Strip ${k}: set the flow to ${fmt(v, 0)}% on the printer (the app doesn't change the flow).`
-    );
-    return;
-  }
+  else if (vary === "flow") put("gFlow", Math.round(v));
+  else if (vary === "firstZ") put("gZ", +v.toFixed(2));
+  else testEdited = keep;
   recordSoon();
   setStatus($("testMsg"), "ok", `Strip ${k}: ${fmt(v, K.digits)} ${K.unit} is now the setting.`);
 });

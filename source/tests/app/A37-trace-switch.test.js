@@ -44,7 +44,7 @@ module.exports = {
     const lab2 = await P.page.evaluate(() => ({ mode: lineModeNow(), n: st.sepStrokes && st.sepStrokes.strokes.length }));
     checks.push(check("plotter, labyrinth: starts with Trace off (as drawn, the page)", +(!lab.on && lab.mode === "drawn" && lab.stage === "page"), "==", 1), check("… Trace on: traced into strokes", lab2.mode === "strokes" ? lab2.n : 0, ">=", 1));
     // a 3D model: always sliced
-    await P.page.click("[data-examples] [data-example=vase]:visible"); await A.idle(P.page, 3000);
+    await P.page.click("[data-examples] [data-example=skull]:visible"); await A.idle(P.page, 3000);
     checks.push(check("3D model: Trace on and fixed", +((await P.page.isChecked("#traceOn")) || (await P.page.evaluate(() => lineModeNow())) === "one") * +(await P.page.isDisabled("#traceOn")), "==", 1));
     checks.push(check("page errors", errors.length + P.errors.length, "==", 0));
     await P.close(); await close();
