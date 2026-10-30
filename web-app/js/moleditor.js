@@ -9,7 +9,8 @@
 
 const me = {
   mol: null, // the structure being drawn ({ atoms, bonds }, RDKit's units, y up)
-  undo: [],
+  undo: [], // the states before: { mol, name, smiles } (Clean up's SMILES goes with its structure)
+  redo: [], // the states undone, for Ctrl/⌘ Shift Z
   view: null, // { k (px per unit), ox, oy } in CSS px
   down: null, // the press: { x, y (CSS px), hit, moved }
   name: null, // the name it had when opened (kept while it's unchanged)
@@ -26,6 +27,7 @@ function molEditOpen() {
   me.name = M ? M.name : null;
   me.smiles = M ? M.smiles : null;
   me.undo = [];
+  me.redo = [];
   $("molEd").hidden = false;
   document.body.dataset.moled = "1";
   $("meTbond").checked = true;
@@ -49,7 +51,7 @@ function meSay(t) {
   $("meMsg").textContent =
     t ||
     (me.mol.atoms.length
-      ? `${me.mol.atoms.length} atoms, ${me.mol.bonds.length} bonds`
+      ? molAtomsBonds(me.mol)
       : "Tap to place a carbon; drag from an atom to draw a bond; or pick a ring and tap.");
 }
 
@@ -147,9 +149,11 @@ function meDraw() {
 }
 
 // ---------- editing ----------
+const meState = () => ({ mol: me.mol, name: me.name, smiles: me.smiles });
 function meApply(mol, say) {
-  me.undo.push(me.mol);
+  me.undo.push(meState());
   if (me.undo.length > 200) me.undo.shift();
+  me.redo = [];
   me.mol = mol;
   me.name = null; // (changed: no longer the one looked up)
   me.smiles = null;
@@ -234,17 +238,29 @@ for (const ev of ["touchstart", "touchmove"])
   $("meView").addEventListener(ev, (e) => e.preventDefault(), { passive: false });
 
 // ---------- the buttons ----------
-$("meUndo").addEventListener("click", () => {
-  if (!me.undo.length) return;
-  me.mol = me.undo.pop();
+// a step back (or forward again): the structure with the name and SMILES it had then
+function meStep(from, to) {
+  if (!from.length) return;
+  to.push(meState());
+  ({ mol: me.mol, name: me.name, smiles: me.smiles } = from.pop());
   meDraw();
   meSay();
-});
+}
+$("meUndo").addEventListener("click", () => meStep(me.undo, me.redo));
 $("meClear").addEventListener("click", () => {
   if (me.mol.atoms.length) meApply(meEmpty(), "Cleared: tap to start again");
 });
 $("meClean").addEventListener("click", async () => {
   if (!me.mol.atoms.length) return;
+  // too many bonds on an atom: RDKit won't read it, so say which
+  const over = UNB.molOverBonded(me.mol);
+  if (over.length) {
+    const o = over[0];
+    meSay(
+      `Couldn't tidy it: a ${o.el} has ${o.bonds} bonds' worth (${o.most} at most): erase a bond, or make a double one single.`
+    );
+    return;
+  }
   meSay(window.initRDKitModule ? "Tidying…" : "Loading the chemistry toolkit (once, ~7 MB)…");
   try {
     const RD = await rdkit(); // molecule.js
@@ -276,26 +292,29 @@ $("meDone").addEventListener("click", () => {
     smiles: same ? M.smiles : me.smiles,
     mol: me.mol,
   }); // art.js
-  $("molMsg").textContent =
-    `${me.mol.atoms.length} atoms, ${me.mol.bonds.length} bonds` + (me.smiles ? ` · ${me.smiles}` : "");
+  $("molMsg").textContent = molAtomsBonds(me.mol) + (me.smiles ? ` · ${me.smiles}` : "");
   molEditClose();
   recordSoon();
 });
 $("molEdit").addEventListener("click", molEditOpen);
-// (before the page's own keys: Ctrl/⌘ Z here undoes the drawing, not the design)
+// (before the page's own keys: Ctrl/⌘ Z here undoes the drawing, not the design; Shift Z or Y redoes it)
 addEventListener(
   "keydown",
   (e) => {
     if ($("molEd").hidden) return;
     if (e.key === "Escape") molEditClose();
-    else if ((e.ctrlKey || e.metaKey) && e.key.toLowerCase() === "z") {
+    else if ((e.ctrlKey || e.metaKey) && /^[zy]$/.test(e.key.toLowerCase())) {
       e.preventDefault();
       e.stopImmediatePropagation();
-      $("meUndo").click();
+      if (e.shiftKey || e.key.toLowerCase() === "y") meStep(me.redo, me.undo);
+      else meStep(me.undo, me.redo);
     }
   },
   true
 );
+// (a turned phone or a resized window: the structure fitted to the new size)
 addEventListener("resize", () => {
-  if (!$("molEd").hidden) meDraw();
+  if ($("molEd").hidden) return;
+  meFit();
+  meDraw();
 });

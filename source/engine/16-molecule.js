@@ -7,11 +7,12 @@
   "use strict";
   const UNB = root.UNB;
 
-  // the elements by atomic number (enough for organic and most inorganic structures)
-  const ELEMENTS =
-    "H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au Hg Tl Pb Bi Po At Rn".split(
-      " "
-    );
+  // the elements by atomic number, all 118
+  const ELEMENTS = (
+    "H He Li Be B C N O F Ne Na Mg Al Si P S Cl Ar K Ca Sc Ti V Cr Mn Fe Co Ni Cu Zn Ga Ge As Se Br Kr Rb Sr Y Zr Nb " +
+    "Mo Tc Ru Rh Pd Ag Cd In Sn Sb Te I Xe Cs Ba La Ce Pr Nd Pm Sm Eu Gd Tb Dy Ho Er Tm Yb Lu Hf Ta W Re Os Ir Pt Au " +
+    "Hg Tl Pb Bi Po At Rn Fr Ra Ac Th Pa U Np Pu Am Cm Bk Cf Es Fm Md No Lr Rf Db Sg Bh Hs Mt Ds Rg Cn Nh Fl Mc Lv Ts Og"
+  ).split(" ");
 
   // RDKit's JSON (get_json, after set_new_coords) → { atoms: [{ el, x, y, h, q }], bonds: [{ a, b, order }] }; y up as
   // RDKit gives it. Null when it holds no molecule.
@@ -88,6 +89,30 @@
     return t1 - t0 > 0.02 ? [t0, t1] : null;
   }
 
+  // The side of atom i's label its hydrogens go on: right, left, up or down (y down), the first of those with no bond
+  // within 60° of it, else the one farthest from its bonds.
+  function molHydrogenSide(P, nbrs, i) {
+    const sides = [
+      ["right", 1, 0],
+      ["left", -1, 0],
+      ["up", 0, -1],
+      ["down", 0, 1],
+    ];
+    let best = "right",
+      bestCos = Infinity;
+    for (const [name, sx, sy] of sides) {
+      let worst = -1; // the cosine to its nearest bond (1: along it)
+      for (const j of nbrs) {
+        const dx = P[j][0] - P[i][0],
+          dy = P[j][1] - P[i][1],
+          L = Math.hypot(dx, dy) || 1;
+        worst = Math.max(worst, (dx * sx + dy * sy) / L);
+      }
+      if (worst <= 0.5 + 1e-9) return name;
+      if (worst < bestCos - 1e-9) ((bestCos = worst), (best = name));
+    }
+    return best;
+  }
   // Draw a molecule as a skeletal formula. mol: { atoms: [{ el, x, y, h, q }], bonds: [{ a, b, order }] } (any units, y
   // up); o: font (an entry of UNB_FONTS, for the labels), cap (label height ÷ bond length, default 0.5).
   // Returns { paths ([x, y, …] polylines), closed, box [w, h], gap, bond: 1, labels (how many), owner (each stroke's:
@@ -113,8 +138,9 @@
       paths = [],
       closed = [],
       owner = [], // each stroke's: −1 a bond, else the atom whose label it's part of
-      rects = new Array(n).fill(null);
-    // ---------- the labels: every atom but a carbon with bonds; the hydrogens on the side away from the bonds
+      rects = new Array(n).fill(null),
+      hRects = []; // the hydrogens' places (bonds stop short of them as well)
+    // ---------- the labels: every atom but a carbon with bonds; the hydrogens on a side away from the bonds
     // ----------
     const text = (s, h) => {
       if (!o.font) return null;
@@ -127,10 +153,6 @@
         show = a.el !== "C" || !adj[i].length || a.q;
       if (!show) continue;
       labels++;
-      // which side the bonds leave from: the hydrogens go on the other (right unless the bonds go right)
-      let dx = 0;
-      for (const j of adj[i]) dx += P[j][0] - P[i][0];
-      const left = adj[i].length && dx > 0.3 * adj[i].length;
       const main = text(a.el, cap);
       const mw = main ? main.width : cap * 0.7 * a.el.length,
         x0 = P[i][0] - mw / 2,
@@ -149,25 +171,32 @@
         }
       };
       put(main, x0, y0);
-      let rx0 = x0,
-        rx1 = x0 + mw;
+      let rx1 = x0 + mw;
       if (a.h > 0) {
         const H = text("H", cap),
           hw = H ? H.width : cap * 0.7,
           sub = a.h > 1 ? text(String(a.h), cap * 0.62) : null,
           sw = sub ? sub.width : 0,
-          g = cap * 0.22;
-        if (left) {
+          g = cap * 0.22,
+          side = molHydrogenSide(P, adj[i], i);
+        let hx, hy;
+        if (side === "left") {
           // HO, H₂N: the H, then its number, then the element
-          const hx = x0 - g - sw - (sub ? g * 0.5 : 0) - hw;
-          put(H, hx, y0);
-          if (sub) put(sub, hx + hw + g * 0.5, y0 + cap * 0.55);
-          rx0 = hx;
+          hx = x0 - g - sw - (sub ? g * 0.5 : 0) - hw;
+          hy = y0;
+        } else if (side === "right") {
+          hx = x0 + mw + g;
+          hy = y0;
+          rx1 = hx + hw + (sub ? g * 0.5 + sw : 0);
         } else {
-          put(H, x0 + mw + g, y0);
-          if (sub) put(sub, x0 + mw + g + hw + g * 0.5, y0 + cap * 0.55);
-          rx1 = x0 + mw + g + hw + (sub ? g * 0.5 + sw : 0);
+          // above or below the element (an NH in a ring), centred on it
+          hx = x0 + (mw - hw) / 2;
+          hy = side === "up" ? y0 - cap - g : y0 + cap + g;
         }
+        put(H, hx, hy);
+        if (sub) put(sub, hx + hw + g * 0.5, hy + cap * 0.55);
+        // bonds (another atom's, or one at a slant) stop short of the hydrogens too
+        hRects.push([hx - 0.06, hy - 0.06, hx + hw + (sub ? g * 0.5 + sw : 0) + 0.06, hy + cap + 0.06]);
       }
       if (a.q) {
         const s = text((Math.abs(a.q) > 1 ? Math.abs(a.q) : "") + (a.q > 0 ? "+" : "-"), cap * 0.6);
@@ -176,13 +205,13 @@
           rx1 += cap * 0.08 + s.width;
         }
       }
-      // the label's place: bonds stop short of its letters (the element only: the hydrogens sit away from the bonds)
+      // the label's place: bonds stop short of its letters (and of its hydrogens: hRects, above)
       const pad = 0.12;
       rects[i] = [x0 - pad, y0 - pad, x0 + mw + pad, y0 + cap + pad];
     }
     // ---------- the bonds ----------
     const seg = (p, q) => {
-      const t = segOutside(p, q, rects.filter(Boolean));
+      const t = segOutside(p, q, rects.filter(Boolean).concat(hRects));
       if (!t) return;
       const dx = q[0] - p[0],
         dy = q[1] - p[1];
@@ -312,10 +341,30 @@
     const v = VALENCE[el];
     if (!v) return null;
     if (!q) return v;
-    // a charge shifts them: N⁺, O⁺ one more bond; O⁻, N⁻ one fewer; a carbocation or carbanion three
-    if (el === "C") return [3];
+    // a charged atom takes the valences of the element with as many electrons (N⁺ as C, O⁻ as F, B⁻ as C, C⁻ as N,
+    // C⁺ as B, N²⁺ as B), the way RDKit does; a noble gas's none
+    const z = ELEMENTS.indexOf(el) + 1 - q,
+      iso = z >= 1 ? ELEMENTS[z - 1] : null;
+    if (iso && VALENCE[iso]) return VALENCE[iso];
+    if (["He", "Ne", "Ar", "Kr", "Xe"].includes(iso)) return [0];
     return v.map((x) => x + (["N", "O", "S", "P"].includes(el) ? q : -Math.abs(q))).filter((x) => x >= 0);
   }
+  // The atoms with more bonds than their element (and charge) can have: [{ atom, el, bonds, most }] (bonds: the sum
+  // of their orders), so the editor can say which one RDKit won't take.
+  UNB.molOverBonded = function (mol) {
+    const sum = new Array(mol.atoms.length).fill(0),
+      out = [];
+    for (const b of mol.bonds) {
+      sum[b.a] += b.order;
+      sum[b.b] += b.order;
+    }
+    mol.atoms.forEach((a, i) => {
+      const v = valences(a.el, a.q || 0);
+      if (v && v.length && sum[i] > Math.max(...v))
+        out.push({ atom: i, el: a.el, bonds: sum[i], most: Math.max(...v) });
+    });
+    return out;
+  };
   // Implicit hydrogens from each atom's bonds and charge (an element without usual valences keeps its count)
   UNB.molHydrogens = function (mol) {
     const m = molCopy(mol),
