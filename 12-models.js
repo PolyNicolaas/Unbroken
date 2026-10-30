@@ -364,7 +364,8 @@
   // spacing, angle }.
   UNB.fillPlan = function (opt, base, j) {
     const p = base ? "base" : "infill",
-      dens = Math.min(1, Math.max(0, +opt[p + "Density"] || 0));
+      // (the base may go past 1, up to 1.25: rows closer than a line width, overlapping, for a base that's surely solid)
+      dens = Math.min(base ? 1.25 : 1, Math.max(0, +opt[p + "Density"] || 0));
     if (!(dens > 0.001)) return { pattern: null, spacing: 0, angle: 0, minArea: 0 };
     const pattern = opt[p + "Pattern"] === "rings" ? "rings" : "lines",
       turn = Math.max(1, opt[p + "Turn"] | 0 || 1);
@@ -487,11 +488,18 @@
   };
   // How far each layer reaches past the one below it (mm): a bead that steps out further than a fraction of its width
   // has nothing under it. outs: per layer, outside loops. Points every ~0.5 mm along each layer, outside every loop
-  // of the layer below, measured to its nearest edge. Returns { worst, at (layer index; -1: none), over (per layer) }.
-  UNB.modelOverhang = function (outs) {
-    const over = new Float64Array(outs.length);
+  // of the layer below, measured to its nearest edge. Inward too, when opt.inReach (k) gives how far in the layer
+  // below holds a bead up (mm; a hollow single-wall print: its own wall and the step, so a layer that steps in past it
+  // hangs over the empty inside; Infinity, or no inReach: a filled layer below, nothing measured): points inside the
+  // layer below, further than that from its edge. Returns { worst, at (layer index; -1: none), over (per layer),
+  // inWorst, inAt (how far in past the wall, mm, and where) }.
+  UNB.modelOverhang = function (outs, opt = {}) {
+    const over = new Float64Array(outs.length),
+      overIn = new Float64Array(outs.length);
     let worst = 0,
-      at = -1;
+      at = -1,
+      inWorst = 0,
+      inAt = -1;
     const thin = (P, s) => {
       const out = [P[0]];
       let acc = 0;
@@ -507,10 +515,12 @@
     for (let k = 1; k < outs.length; k++) {
       const below = outs[k - 1].map((P) => thin(P, 0.25));
       if (!below.length) continue;
+      const reachIn = opt.inReach ? opt.inReach(k) : Infinity;
       let m = 0;
       for (const P of outs[k])
         for (const [x, y] of thin(P, 0.5)) {
-          if (below.some((Q) => inLoop(Q, x, y))) continue;
+          const inside = below.some((Q) => inLoop(Q, x, y));
+          if (inside && !Number.isFinite(reachIn)) continue;
           let d2 = Infinity;
           for (const Q of below)
             for (let i = 0; i < Q.length; i++) {
@@ -524,7 +534,15 @@
                 dy = a[1] + t * uy - y;
               if (dx * dx + dy * dy < d2) d2 = dx * dx + dy * dy;
             }
-          m = Math.max(m, Math.sqrt(d2));
+          const dd = Math.sqrt(d2);
+          if (!inside) m = Math.max(m, dd);
+          else if (dd > reachIn) {
+            if (dd > overIn[k]) overIn[k] = dd;
+            if (dd > inWorst) {
+              inWorst = dd;
+              inAt = k;
+            }
+          }
         }
       over[k] = m;
       if (m > worst) {
@@ -532,7 +550,7 @@
         at = k;
       }
     }
-    return { worst, at, over };
+    return { worst, at, over, inWorst, inAt, overIn };
   };
   // Support, as part of the print (one continuous line can't print a separate support): worked from the top layer
   // down, each layer is widened so the layer above never reaches more than `step` mm past it.
@@ -554,7 +572,74 @@
   // Returns { outlines (per layer: flat outline arrays [x0, y0, x1, y1, …] for UNB.modelLayer, or null when the
   // layer is unchanged), layers (how many widened), from (the lowest widened layer, -1: none), area (mm² added in all)
   // }.
+  // Support "slope" (UNB.modelSupport): every layer within `step` of the one above (top down) and within opt.inReach of
+  // the one below (bottom up), on the same grid as the other supports. Returns the same { outlines, layers, from, area
+  // }.
+  function modelSlope(outs, opt) {
+    const T = outs.length,
+      step = Math.max(0.01, opt.step || 0.3),
+      reachIn = opt.inReach || Infinity;
+    const { x0, y0, x1, y1 } = boxOf(outs);
+    const none = { outlines: new Array(T).fill(null), layers: 0, from: -1, area: 0 };
+    if (!(x1 > x0) || T < 2) return none;
+    const g0 = opt.g || Math.max((opt.w || 0.8) / 8, Math.max(x1 - x0, y1 - y0) / 700);
+    const G = regionGrid(x0, y0, x1, y1, g0, Math.ceil((step + Math.min(reachIn, 5)) / g0) + 4);
+    const { N, g, fill, not, trace, w, h } = G;
+    const M = outs.map((L) => fill(L)),
+      R = M.map((m) => m.slice());
+    // the cells of X further than r (cells) inside its edge
+    const shrunk = (X, r) => {
+      const din = UNB.edt(not(X), w, h).dist,
+        S = new Uint8Array(N);
+      for (let i = 0; i < N; i++) if (X[i] && din[i] > r) S[i] = 1;
+      return S;
+    };
+    // only where a layer steps too far (opt.over / opt.overIn: UNB.modelOverhang's, per layer), and on down (or up)
+    // from there while the slope still changes the layer, so a layer that only rounds a little stays as sliced
+    const over = opt.over || null,
+      overIn = opt.overIn || null,
+      changed = new Uint8Array(T);
+    // (a layer that would only gain a few cells stays as sliced, and the next is judged against it as printed)
+    const widen = (k, from, r) => {
+      const S = shrunk(R[from], r),
+        X = R[k].slice();
+      let n = 0;
+      for (let i = 0; i < N; i++)
+        if (S[i] && !X[i]) {
+          X[i] = 1;
+          n++;
+        }
+      if (n > 3) R[k] = X;
+      return n;
+    };
+    for (let k = T - 2; k >= 0; k--)
+      // top down: under an overhang
+      if (!over || over[k + 1] > step || changed[k + 1]) if (widen(k, k + 1, step / g) > 3) changed[k] = 1;
+    if (Number.isFinite(reachIn))
+      for (let k = 1; k < T; k++)
+        // bottom up: where a layer steps in over the empty inside
+        if (!overIn || overIn[k] > 0 || changed[k - 1]) if (widen(k, k - 1, reachIn / g) > 3) changed[k] = 1;
+    const res = new Array(T).fill(null);
+    let layers = 0,
+      from = -1,
+      area = 0;
+    for (let k = 0; k < T; k++) {
+      if (!changed[k]) continue;
+      let add = 0;
+      for (let i = 0; i < N; i++) if (R[k][i] && !M[k][i]) add++;
+      res[k] = trace(R[k]);
+      layers++;
+      if (from < 0) from = k;
+      area += add * g * g;
+    }
+    return { outlines: res, layers, from, area };
+  }
+  // "slope" (a hollow single-wall print, v127): no layer steps out more than `step` past the one below (worked from the
+  //            top down: under an overhang each layer reaches within a step of the one above), nor in more than
+  //            opt.inReach (mm; worked from the bottom up: a layer reaches within that of the one below, so it never
+  //            hangs over the empty inside). A ledge becomes a short slope; the rest of the model is as it is.
   UNB.modelSupport = function (outs, opt) {
+    if (opt.mode === "slope") return modelSlope(outs, opt);
     const T = outs.length,
       mode = opt.mode === "thin" || opt.mode === "wall" ? "thin" : "skirt",
       step = Math.max(0.01, opt.step || 0.3); // ("wall": the straight wall thin replaced, v88)
@@ -762,16 +847,34 @@
         )
       );
     } // overlapping shells merged
+    // how far in the layer below holds a bead up: a filled layer (the base, or any infill) all of it; a hollow wall its
+    // own walls and a step
+    const stepMM = o.overhang || (o.w || 0.8) / 3,
+      hollow = !((o.infillDensity || 0) > 0),
+      reachIn = hollow ? Math.max(0, (o.walls || 1) - 1) * (o.d || o.w || 0.8) + stepMM : Infinity,
+      inReach = (k) => (k - 1 < NB ? Infinity : reachIn);
     const outs = outl.map(outsideLoops),
-      overhang = UNB.modelOverhang(outs);
+      overhang = UNB.modelOverhang(outs, { inReach });
     let support = null;
-    if (o.support === "skirt" || o.support === "thin" || o.support === "wall") {
-      support = UNB.modelSupport(outs, { mode: o.support, step: o.overhang || (o.w || 0.8) / 3, w: o.w, d: o.d });
+    if (o.support === "skirt" || o.support === "thin" || o.support === "wall" || o.support === "slope") {
+      support = UNB.modelSupport(outs, {
+        mode: o.support,
+        step: stepMM,
+        w: o.w,
+        d: o.d,
+        inReach: reachIn,
+        over: overhang.over,
+        overIn: overhang.overIn,
+      });
       support.outlines.forEach((L, k) => {
         if (L) outl[k] = L;
       });
       // what's left: within the step (grid rounding aside)
-      support.after = UNB.modelOverhang(outl.map(outsideLoops)).worst;
+      const after = UNB.modelOverhang(outl.map(outsideLoops), { inReach });
+      support.after = after.worst;
+      support.afterIn = after.inWorst;
+      support.afterAt = after.at;
+      support.afterInAt = after.inAt;
       delete support.outlines;
     }
     const base = [],
@@ -845,7 +948,7 @@
       joins,
       empty,
       height: Hmm,
-      overhang: { worst: overhang.worst, at: overhang.at },
+      overhang: { worst: overhang.worst, at: overhang.at, inWorst: overhang.inWorst, inAt: overhang.inAt },
       support,
     };
   };

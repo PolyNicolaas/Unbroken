@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v126</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v127</span></p>
 </header>
 
 <div class="wrap">
@@ -33,6 +33,12 @@
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
         <div class="chip" id="chip">loading…</div>
+        <div class="moled" id="pathEd" hidden role="dialog" aria-modal="true" aria-label="Draw the centre's path">
+          <div class="me-top"><p class="hint" id="peHint">Drag the path the ring's centre should follow, from its start to its end. The faint figure is the ring at rest; the dashed box is the frame. Start outside it if you like.</p></div>
+          <div class="me-stage"><canvas id="peView" aria-label="The centre's path being drawn"></canvas></div>
+          <p class="me-msg" id="peMsg" role="status"></p>
+          <div class="me-bar"><button class="btn" type="button" id="peClear">Clear</button><span class="me-gap"></span><button class="btn" type="button" id="peCancel">Cancel</button><button class="btn primary" type="button" id="peDone">Use it</button></div>
+        </div>
         <div class="moled" id="molEd" hidden role="dialog" aria-modal="true" aria-label="Draw a structure">
           <div class="me-top">
             <div class="seg small me-tools" role="radiogroup" aria-label="Tool">
@@ -313,8 +319,8 @@
       </div>
       <label class="field model-only" title="How many walls, one line spacing inside each other"><span>Walls</span><input type="number" id="wallCount" min="1" max="5" step="1" value="1"></label>
       <p class="hint help model-only" data-anchor="wallCount">A model prints its outside contour only: the inside surface of a hollow model (a cup's inner wall) and any hole are not traced. Walls adds lines inside the outside contour, one spacing apart; how much of the inside gets chocolate is up to Base and Infill.</p>
-      <label class="field model-only" title="Holds up parts that reach out further than a bead can step: the support is part of the same line, from the plate up"><span>Support</span><select id="support"><option value="off" selected>Off</option><option value="skirt">Flared skirt</option><option value="thin">Thin wall</option></select></label>
-      <p class="hint help model-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, in Fine-tuning) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Each layer stays one loop. The ready list says how far the model steps out with Support off.</p>
+      <label class="field model-only" title="Holds up parts that reach out further than a bead can step: the support is part of the same line, from the plate up"><span>Support</span><select id="support"><option value="off" selected>Off</option><option value="skirt">Flared skirt</option><option value="thin">Thin wall</option><option value="slope">Slope</option></select></label>
+      <p class="hint help model-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, in Fine-tuning) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Slope: the model's own ledges turned into short slopes, so no layer steps out more than a bead holds, nor in further than its wall (on a hollow print a layer that steps in hangs over the empty inside, like the bottom of a skull's nose): only the layers round a ledge change. Each layer stays one loop. The ready list says how far the model steps out, or in, with Support off.</p>
       <p class="hint" id="layerCount"></p>
       <p class="hint" id="layerHint"></p>
       <p class="hint" id="cartHint" hidden></p>
@@ -342,7 +348,7 @@
       </div>
       <div class="row">
         <div class="lab"><label for="baseDensity">Density</label><span class="val" id="baseDensityVal">100%</span></div>
-        <input type="range" id="baseDensity" min="0" max="100" step="5" value="100">
+        <input type="range" id="baseDensity" min="0" max="125" step="5" value="100">
       </div>
       <div class="two lines-only" id="baseDirRow">
         <label class="field" title="Direction of the rows, degrees (0 = across)"><span>Angle (°)</span><input type="number" id="baseAngle" min="-90" max="90" step="5" value="0"></label>
@@ -352,7 +358,7 @@
         <div class="lab"><label for="infillMin">Leave small areas open</label><span class="val" id="infillMinVal">fill all</span></div>
         <input type="range" id="infillMin" min="0" max="100" value="0">
       </div>
-      <p class="hint help" id="infillHint">Fills every area the line encloses with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
+      <p class="hint help" id="infillHint">Fills every area the line encloses with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); up to 125% overlaps them a little (rows 0.8 of a line width apart), for a base that's surely solid with no gaps between rows; 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
     </section>
     <section class="card choc-only print-more" aria-labelledby="h-infill" data-fold="closed">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>
@@ -373,16 +379,16 @@
     </section>
     <section class="card choc-only print-more" aria-labelledby="h-machine" data-fold="closed">
       <h2 id="h-machine">Fine-tuning <span class="hval" id="tuneVal">as the profiles</span></h2>
-      <div class="three tune">
+      <div class="tune tune-list">
         <label class="field" title="One layer of chocolate. Starts at the chocolate's own (settings.js), else the printer's."><span>Layer height (mm)</span><input type="number" id="layerH" min="0.05" max="3" step="0.05" value="0.3"><small class="from" id="fromLayerH"></small></label>
-        <label class="field" title="Printing speed along the line, in mm per second. Starts at the chocolate's (settings.js)."><span>Speed (mm/s)</span><input type="number" id="gFeed" min="0.5" max="1000" value="20" step="any"><small class="from" id="fromFeed"></small></label>
         <label class="field" title="Height of the first layer above the plate. Follows the layer height unless you change it."><span>First layer Z (mm)</span><input type="number" id="gZ" min="0.05" max="50" value="0.3" step="any"><small class="from" id="fromZ"></small></label>
-        <label class="field" title="How far the needle rises to travel between copies. Starts at the printer's."><span>Lift (mm)</span><input type="number" id="gLift" min="0.5" max="100" value="5" step="any"><small class="from" id="fromLift"></small></label>
-        <label class="field" title="How far a layer may reach past the one below it before Support (Layers card, 3D models) holds it up. Empty: a third of the line width"><span>Overhang per layer (mm)</span><input type="number" id="gOver" min="0.05" max="2" step="0.01" placeholder="auto"><small class="from" id="fromOver"></small></label>
-        <label class="field" title="Where a single copy sits on the plate (Center on plate, or drag it in the Plate view)"><span>Position X (mm)</span><input type="number" id="gOx" value="10" step="any"></label>
-        <label class="field"><span>Position Y (mm)</span><input type="number" id="gOy" value="10" step="any"></label>
+        <label class="field" title="Printing speed along the line, in mm per second. Starts at the chocolate's (settings.js)."><span>Speed (mm/s)</span><input type="number" id="gFeed" min="0.5" max="1000" value="20" step="any"><small class="from" id="fromFeed"></small></label>
         <label class="field" title="More or less chocolate than the needle and layer height work out: 110% pushes 10% more (a thin or broken line), 90% less (lines that run together). Starts at the chocolate's (settings.js flow), else 100%. The Test print's Flow strips find it."><span>Flow (%)</span><input type="number" id="gFlow" min="50" max="200" value="100" step="1"><small class="from" id="fromFlow"></small></label>
-        <label class="field" title="Plunger per mm of line: line width × layer height ÷ the cartridge's cross-section (settings.js), × the Flow. A wider needle pushes faster."><span>E per mm</span><input type="number" id="gE" value="" step="any" readonly tabindex="-1"></label>
+        <label class="field" title="Plunger per mm of line: line width × layer height ÷ the cartridge's cross-section (settings.js), × the Flow. A wider needle pushes faster."><span>E per mm</span><input type="number" id="gE" value="" step="any" readonly tabindex="-1"><small class="from" id="fromE"></small></label>
+        <label class="field" title="How far a layer may reach past the one below it before Support (Layers card, 3D models) holds it up. Empty: a third of the line width"><span>Overhang per layer (mm)</span><input type="number" id="gOver" min="0.05" max="2" step="0.01" placeholder="auto"><small class="from" id="fromOver"></small></label>
+        <label class="field" title="How far the needle rises to travel between copies. Starts at the printer's."><span>Lift (mm)</span><input type="number" id="gLift" min="0.5" max="100" value="5" step="any"><small class="from" id="fromLift"></small></label>
+        <label class="field" title="Where a single copy sits on the plate (Center on plate, or drag it in the Plate view)"><span>Position X (mm)</span><input type="number" id="gOx" value="10" step="any"><small class="from" id="fromOx"></small></label>
+        <label class="field"><span>Position Y (mm)</span><input type="number" id="gOy" value="10" step="any"><small class="from" id="fromOy"></small></label>
       </div>
       <div class="inline"><button class="btn mini" type="button" id="tuneReset" disabled>Back to the profile values</button></div>
     </section>
@@ -913,6 +919,7 @@
 <script src="js/workflow.js"></script>
 <script src="js/molecule.js"></script>
 <script src="js/moleditor.js"></script>
+<script src="js/pathpad.js"></script>
 <script src="js/examples.js"></script>
 <script src="js/camera.js"></script>
 <script src="js/steppers.js"></script>

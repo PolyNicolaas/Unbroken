@@ -119,6 +119,7 @@ function placements(lay) {
       $("gOx").value = +lay.placed[0].x.toFixed(1);
       $("gOy").value = +lay.placed[0].y.toFixed(1);
     }
+    $("fromOx").textContent = $("fromOy").textContent = posManual ? "set by hand" : "default centred";
     return [{ x: +$("gOx").value || 0, y: +$("gOy").value || 0 }];
   }
   return lay.placed;

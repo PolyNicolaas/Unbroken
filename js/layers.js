@@ -427,7 +427,7 @@ function layerReadout() {
   layerSliderUI();
   readyOverride = false;
   readyUI();
-  $("fromOver").textContent = $("gOver").value === "" ? `auto: ${fmt(overhangMM(), 2)}` : "";
+  $("fromOver").textContent = `default ${fmt(Math.round((lineWidthMM() / 3) * 100) / 100, 2)}`; // (a third of the line width)
   $("layerInfo").textContent =
     `${layers} layer${layers === 1 ? "" : "s"} · ${fmt(tall, 1)} mm · ${L.pieces ? `${all.length} lines: ` : ""}${fmt(len / 1000, len < 10000 ? 2 : 1)} m · ~${fmt(mins, mins < 10 ? 1 : 0)} min`;
   const F = L.fillInfo,

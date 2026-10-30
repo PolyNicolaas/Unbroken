@@ -354,7 +354,13 @@ function fillSettings() {
   }; // mm² (model.js); layerLine scales them to working px
 }
 const densityText = (v, none) =>
-  v <= 0 ? `0% · ${none}` : v >= 100 ? "100% · touching" : `${v}% · rows ${fmt(100 / v, 1)} line widths apart`;
+  v <= 0
+    ? `0% · ${none}`
+    : v > 100
+      ? `${v}% · overlapping, rows ${fmt(100 / v, 2)} line widths apart`
+      : v === 100
+        ? "100% · touching"
+        : `${v}% · rows ${fmt(100 / v, 1)} line widths apart`;
 function infillUI() {
   const bd = +$("baseDensity").value,
     fd = +$("fillDensity").value;

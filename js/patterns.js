@@ -54,6 +54,18 @@ function buildParams(style) {
         max: artForPlot() && q.plotMax ? q.plotMax : q.max,
         step: q.step,
       });
+    } else if (q.type === "path") {
+      // a path drawn by hand (pathpad.js): kept as JSON in a hidden box, drawn on its pad
+      wrap.innerHTML = `<div class="lab"><span class="name"></span><span class="val"></span></div><div class="inline"><button class="btn mini" type="button" data-path="draw">Draw the path…</button><button class="btn mini" type="button" data-path="clear">Clear</button></div><input type="hidden" id="${id}" value="null">`;
+      wrap.querySelector(".name").textContent = q.name;
+      wrap.querySelector('[data-path="draw"]').addEventListener("click", () => pathPadOpen(q.key)); // pathpad.js
+      wrap.querySelector('[data-path="clear"]').addEventListener("click", () => {
+        $(id).value = "null";
+        patternUI();
+        patternEdited(patternNow());
+      });
+      box.appendChild(wrap);
+      continue;
     } else if (q.type === "select") {
       wrap.innerHTML = `<label class="field"><span></span><select id="${id}"></select></label>`;
       wrap.querySelector("span").textContent = q.name;
@@ -71,13 +83,30 @@ function buildParams(style) {
     box.appendChild(wrap);
   }
 }
+// a path setting's box: its points, or null
+function patternPathOf(el) {
+  try {
+    const v = JSON.parse(el.value || "null");
+    return Array.isArray(v) ? v : null;
+  } catch {
+    return null;
+  }
+}
 // the settings as the controls stand (UNB.patternDefaults fills in and clamps)
 function patternNow() {
   const style = $("artStyle").value,
     o = { seed: +$("artSeed").value || 1 };
   for (const q of UNB.PATTERNS[style].params) {
     const el = $(`artP-${q.key}`);
-    if (el) o[q.key] = q.type === "range" ? +el.value : q.type === "check" ? el.checked : el.value;
+    if (el)
+      o[q.key] =
+        q.type === "range"
+          ? +el.value
+          : q.type === "check"
+            ? el.checked
+            : q.type === "path"
+              ? patternPathOf(el)
+              : el.value;
   }
   return (patternMemory[style] = UNB.patternDefaults(style, { ...o, plot: artForPlot() }));
 }
@@ -89,6 +118,7 @@ function patternControls(p) {
   for (const q of UNB.PATTERNS[p.style].params) {
     const el = $(`artP-${q.key}`);
     if (q.type === "check") el.checked = v[q.key];
+    else if (q.type === "path") el.value = JSON.stringify(v[q.key]);
     else el.value = String(v[q.key]);
   }
   $("artSeed").value = String(v.seed);
@@ -104,6 +134,12 @@ function patternUI() {
     if (!row) continue;
     row.hidden = !!q.when && !q.when(v);
     if (q.type === "range") row.querySelector(".val").textContent = q.say(v[q.key]);
+    if (q.type === "path") {
+      row.querySelector(".val").textContent = v[q.key]
+        ? "drawn: the centre moves along it"
+        : "none: the centre stays put";
+      row.querySelector('[data-path="clear"]').disabled = !v[q.key];
+    }
   }
   $("artShuffle").hidden = !P.seed;
   const suits = artForPlot()
@@ -125,7 +161,14 @@ function readRaw() {
     .querySelectorAll("[data-key]")
     .forEach((row) => {
       const el = row.querySelector("input, select");
-      o[row.dataset.key] = el.type === "checkbox" ? el.checked : el.type === "range" ? +el.value : el.value;
+      o[row.dataset.key] =
+        el.type === "checkbox"
+          ? el.checked
+          : el.type === "range"
+            ? +el.value
+            : el.type === "hidden"
+              ? patternPathOf(el)
+              : el.value;
     });
   return o;
 }
