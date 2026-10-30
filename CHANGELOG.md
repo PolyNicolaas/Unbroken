@@ -3,6 +3,28 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v127 · 2026-10-30
+
+- **Support: Slope** (Layers card, 3D models): the model's own ledges become short slopes, so no layer steps out
+  more than a bead holds, nor in further than its wall. On a hollow single-wall print a layer that steps in hangs over
+  the empty inside: the skull cup's nose did (1.7 mm at 11.7 mm), so a strand printed over nothing. Only the layers
+  round a ledge change (the skull's jaw stays as sliced). Tests E50.
+- **The overhang check sees inward steps too**: on a hollow single-wall print (no infill, one wall), the ready list
+  says when a layer steps in past its wall, and where ("Support: Slope").
+- **Base density up to 125%**: past 100% the base's rows overlap (at 125% they're 0.8 of a line width apart), for a
+  base that's surely solid. The infill stays at most 100%. Test E51.
+- **Fine-tuning as a list**: one setting a row, in the order they matter (layer height, first layer Z, speed, flow,
+  E per mm, overhang, lift, position), each with its default beside it; a changed one is marked.
+- **Spirograph**:
+  - **Wheels**, 1 to 6: each further wheel rides on the one before, with its own size, hole and direction (a design
+    with Second wheel ticked opens as 2 wheels).
+  - **Centre path**: Draw the path… opens a pad over the preview showing the figure at rest and the frame; drag the
+    path the ring's centre should follow, start to end (it can start outside the frame). **Smooth the path** evens out
+    the hand. The figure trails along it as an open line.
+  - **Frame**: Fit everything, or **Crop to a frame** (width and height, % of the ring): what falls outside is cut
+    away, so the drawing can sweep in from off the canvas (best on the pen plotter: cut ends break a single line).
+  - Tests E52, A51.
+
 ## v126 · 2026-10-30
 
 - **Every bond of a molecule prints as a matching pair of strands.** Traced as one line, a ring's bonds used to be

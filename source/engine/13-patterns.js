@@ -584,9 +584,106 @@
   // Spirograph: a toothed wheel rolling round a ring (inside or outside), the pen in one of its holes. The ring is a
   // circle, an oval, a stadium or a rounded polygon; its teeth and the wheel's set how many times the wheel goes round
   // before the line closes (wheel teeth ÷ their greatest common divisor). Hole: the pen's distance from the wheel's
-  // centre, as a share of its radius (past 100% the pen reaches outside the wheel: loops). Second wheel: a smaller
-  // wheel carried on the first at the hole, turning as the gear ratio says, the pen in its own hole. One closed line,
-  // crossing itself.
+  // centre, as a share of its radius (past 100% the pen reaches outside the wheel: loops). Wheels (1–6): each further
+  // wheel is carried on the one before at its hole, a share of its size, turning as the gear ratio says (against it
+  // or with it), the pen in its own hole. Centre path (v127): the ring's centre moves along a path drawn by hand (in
+  // the ring's units, y down, from the ring's centre at rest), from its start to its end over the whole drawing,
+  // smoothed (pathSmooth): the figure trails along it as an open line. Frame: Fit (everything drawn, the box round
+  // it) or Crop (a frame frameW × frameH, % of the ring's width, round the ring at rest: what falls outside is cut
+  // away, so a path can start off the canvas). One line, crossing itself (cropped: pieces).
+  function spiroPath(raw, smooth) {
+    // the drawn path resampled evenly, then smoothed (a moving average, the ends kept) as many times as smooth says
+    let P = [];
+    for (let i = 0; i + 1 < raw.length; i += 2) P.push([+raw[i], +raw[i + 1]]);
+    P = P.filter(([x, y]) => Number.isFinite(x) && Number.isFinite(y));
+    if (P.length < 2) return null;
+    let L = 0;
+    const cum = [0];
+    for (let i = 1; i < P.length; i++) cum.push((L += Math.hypot(P[i][0] - P[i - 1][0], P[i][1] - P[i - 1][1])));
+    if (!(L > 1e-9)) return null;
+    const M = 200,
+      Q = [];
+    for (let k = 0, j = 0; k <= M; k++) {
+      const s = (L * k) / M;
+      while (j < P.length - 2 && cum[j + 1] < s) j++;
+      const t = (s - cum[j]) / (cum[j + 1] - cum[j] || 1);
+      Q.push([P[j][0] + t * (P[j + 1][0] - P[j][0]), P[j][1] + t * (P[j + 1][1] - P[j][1])]);
+    }
+    const passes = Math.round((smooth / 100) * 60),
+      win = 4;
+    for (let it = 0; it < passes; it++) {
+      const R = Q.map((q) => q.slice());
+      for (let k = 1; k < M; k++) {
+        let sx = 0,
+          sy = 0,
+          n = 0;
+        for (let d = -win; d <= win; d++) {
+          const q = Q[Math.max(0, Math.min(M, k + d))];
+          sx += q[0];
+          sy += q[1];
+          n++;
+        }
+        R[k] = [sx / n, sy / n];
+      }
+      for (let k = 0; k <= M; k++) Q[k] = R[k];
+    }
+    // the position at a share u (0–1) of the way along
+    const at = (u) => {
+      const f = Math.max(0, Math.min(1, u)) * M,
+        k = Math.min(M - 1, Math.floor(f)),
+        t = f - k;
+      return [Q[k][0] + t * (Q[k + 1][0] - Q[k][0]), Q[k][1] + t * (Q[k + 1][1] - Q[k][1])];
+    };
+    return { at, pts: Q };
+  }
+  // a polyline (flat [x, y, …]) cut to the box x0…x1, y0…y1: the pieces inside
+  function spiroCrop(pts, x0, y0, x1, y1) {
+    const out = [],
+      inside = (x, y) => x >= x0 && x <= x1 && y >= y0 && y <= y1;
+    let cur = null;
+    const edge = (ax, ay, bx, by) => {
+      // Liang–Barsky: the part of the segment inside the box, or null
+      let t0 = 0,
+        t1 = 1;
+      const dx = bx - ax,
+        dy = by - ay;
+      for (const [p, q] of [
+        [-dx, ax - x0],
+        [dx, x1 - ax],
+        [-dy, ay - y0],
+        [dy, y1 - ay],
+      ]) {
+        if (p === 0) {
+          if (q < 0) return null;
+        } else {
+          const r = q / p;
+          if (p < 0) t0 = Math.max(t0, r);
+          else t1 = Math.min(t1, r);
+          if (t0 > t1) return null;
+        }
+      }
+      return [ax + t0 * dx, ay + t0 * dy, ax + t1 * dx, ay + t1 * dy, t0 > 0, t1 < 1];
+    };
+    for (let i = 2; i < pts.length; i += 2) {
+      const c = edge(pts[i - 2], pts[i - 1], pts[i], pts[i + 1]);
+      if (!c) {
+        if (cur) out.push(cur);
+        cur = null;
+        continue;
+      }
+      if (!cur || c[4]) {
+        if (cur) out.push(cur);
+        cur = [c[0], c[1]];
+      }
+      cur.push(c[2], c[3]);
+      if (c[5]) {
+        out.push(cur);
+        cur = null;
+      }
+    }
+    if (cur) out.push(cur);
+    return out.filter((q) => q.length >= 4 && !(q.length === 4 && q[0] === q[2] && q[1] === q[3]));
+  }
   function spirograph(o) {
     const ringT = o.ringTeeth,
       wheelT = o.wheelTeeth === o.ringTeeth ? o.wheelTeeth - 1 : o.wheelTeeth,
@@ -596,23 +693,30 @@
       track = ringTrack(o.ring, ringT, (o.oval || 70) / 100, (o.corner || 40) / 100, inside ? r : 0),
       L = track.L;
     let laps = wheelT / gcd(ringT, wheelT);
-    const w2 = !!o.wheel2,
-      r2 = w2 ? Math.max(0.1, (o.wheel2Teeth / 100) * r) : 0,
-      d2 = w2 ? (o.hole2 / 100) * r2 : 0,
-      m2 = w2 ? -(r / r2) * (o.wheel2Dir === "same" ? -1 : 1) : 0; // the second wheel turns this many times per turn
-    // closing with a second wheel: the first wheel turns a whole number of times; the second must too
-    if (w2) {
-      const q = Math.max(1, o.wheel2Teeth),
-        p = 100;
-      laps *= q / gcd(p, q);
+    // the wheels carried on the first: radius, hole and turns per turn of the wheel it rides on
+    const nW = Math.max(1, Math.min(6, Math.round(o.wheels || 1))),
+      chain = [];
+    let rPrev = r;
+    for (let k = 2; k <= nW; k++) {
+      const size = k === 2 ? o.wheel2Teeth : o[`wheel${k}Size`],
+        hole = o[`hole${k}`],
+        dir = k === 2 ? o.wheel2Dir : o[`wheel${k}Dir`],
+        rk = Math.max(0.1, ((size || 40) / 100) * rPrev),
+        m = -(rPrev / rk) * (dir === "same" ? -1 : 1); // this wheel turns m times per turn of the one it rides on
+      chain.push({ d: ((hole == null ? 60 : hole) / 100) * rk, m });
+      // closing: every wheel turns a whole number of times
+      const q = Math.max(1, Math.round(size || 40));
+      laps *= q / gcd(100, q);
+      rPrev = rk;
     }
     laps = Math.min(laps, 400);
+    const path = Array.isArray(o.path) && o.path.length >= 4 ? spiroPath(o.path, o.pathSmooth || 0) : null;
     const rot = ((o.rotate || 0) * Math.PI) / 180,
       cr = Math.cos(rot),
       sr = Math.sin(rot),
       steps = Math.min(60000, Math.max(800, Math.round(laps * Math.max(360, (L / Math.max(r, 0.5)) * 24)))),
       pts = [];
-    for (let i = 0; i < steps; i++) {
+    for (let i = 0; i < steps + (path ? 1 : 0); i++) {
       const s = (laps * L * i) / steps,
         P = track.at(s),
         th = track.thAt(s),
@@ -623,16 +727,53 @@
         cy = P.y + sg * r * ny,
         phi = th - sg * (s / r); // the wheel's turn: rolling without slipping
       let x = cx + d * Math.cos(phi),
-        y = cy + d * Math.sin(phi);
-      if (w2) {
-        const phi2 = phi * (1 + m2);
-        x += d2 * Math.cos(phi2);
-        y += d2 * Math.sin(phi2);
+        y = cy + d * Math.sin(phi),
+        ph = phi;
+      for (const w of chain) {
+        ph *= 1 + w.m;
+        x += w.d * Math.cos(ph);
+        y += w.d * Math.sin(ph);
       }
-      pts.push(x * cr - y * sr, -(x * sr + y * cr)); // y down for the page
+      let X = x * cr - y * sr,
+        Y = -(x * sr + y * cr); // y down for the page
+      if (path) {
+        const [px, py] = path.at(i / steps);
+        X += px;
+        Y += py;
+      }
+      pts.push(X, Y);
+    }
+    // the ring's size, for the frame: its width at rest
+    let rx = 0;
+    for (let i = 0; i < 64; i++) rx = Math.max(rx, Math.abs(track.at((L * i) / 64).x));
+    const ringW = Math.max(1e-6, 2 * rx);
+    if (o.frame === "crop") {
+      const fw = ((o.frameW || 100) / 100) * ringW,
+        fh = ((o.frameH || 100) / 100) * ringW,
+        pieces = spiroCrop(pts, -fw / 2, -fh / 2, fw / 2, fh / 2).map((q) =>
+          q.map((v, k) => v + (k % 2 ? fh / 2 : fw / 2))
+        );
+      if (!pieces.length) return null;
+      return {
+        paths: pieces,
+        closed: pieces.map(() => false),
+        box: [fw, fh],
+        gap: Math.max(fw, fh) / 150,
+        crosses: true,
+        laps,
+        ringW,
+      };
     }
     const box = boxed(pts);
-    return { paths: [pts], closed: [true], box, gap: Math.max(box[0], box[1]) / 150, crosses: true, laps };
+    return {
+      paths: [pts],
+      closed: [!path],
+      box,
+      gap: Math.max(box[0], box[1]) / 150,
+      crosses: true,
+      laps,
+      ringW,
+    };
   }
 
   // Lissajous / harmonograph: two swinging pendulums, x = sin(a t + phase), y = sin(b t). Whole-number ratios close
@@ -938,7 +1079,7 @@
     };
     split(0, 0, N, 0);
     // balance: a leaf more than twice the size of a neighbour splits, until none is
-    for (let changed = true; changed; ) {
+    for (let changed = true; changed;) {
       changed = false;
       own.fill(-1);
       leaves.forEach(([x, y, s], k) => {
@@ -1266,26 +1407,62 @@
           "inside"
         ),
         rangeParam("hole", "Hole", 0, 140, 70, (v) => `${v}% of the wheel's radius${v > 100 ? " · loops" : ""}`),
-        checkParam("wheel2", "Second wheel", false),
-        {
-          ...rangeParam("wheel2Teeth", "Second wheel's size", 10, 90, 40, (v) => `${v}% of the first`),
-          when: (p) => p.wheel2,
-        },
-        { ...rangeParam("hole2", "Its hole", 0, 140, 60, pct), when: (p) => p.wheel2 },
-        {
-          ...choiceParam(
-            "wheel2Dir",
-            "It turns",
-            [
-              ["against", "Against the first"],
-              ["same", "With the first"],
-            ],
-            "against"
-          ),
-          when: (p) => p.wheel2,
-        },
+        rangeParam("wheels", "Wheels", 1, 6, 1, (v) =>
+          v === 1 ? "1 wheel" : `${v} wheels, each riding on the one before`
+        ),
+        ...[2, 3, 4, 5, 6].flatMap((k) => [
+          {
+            ...rangeParam(
+              k === 2 ? "wheel2Teeth" : `wheel${k}Size`,
+              `Wheel ${k}'s size`,
+              10,
+              90,
+              40,
+              (v) => `${v}% of wheel ${k - 1}`
+            ),
+            when: (p) => p.wheels >= k,
+          },
+          { ...rangeParam(`hole${k}`, `Wheel ${k}'s hole`, 0, 140, 60, pct), when: (p) => p.wheels >= k },
+          {
+            ...choiceParam(
+              k === 2 ? "wheel2Dir" : `wheel${k}Dir`,
+              `Wheel ${k} turns`,
+              [
+                ["against", `Against wheel ${k - 1}`],
+                ["same", `With wheel ${k - 1}`],
+              ],
+              "against"
+            ),
+            when: (p) => p.wheels >= k,
+          },
+        ]),
         rangeParam("rotate", "Rotate", 0, 359, 0, (v) => `${v}°`),
+        // the ring's centre moving along a path drawn by hand (the app's Draw the path pad)
+        { key: "path", type: "path", name: "Centre path", value: null },
+        {
+          ...rangeParam("pathSmooth", "Smooth the path", 0, 100, 40, (v) => (v ? `${v}%` : "as drawn")),
+          when: (p) => Array.isArray(p.path) && p.path.length >= 4,
+        },
+        choiceParam(
+          "frame",
+          "Frame",
+          [
+            ["fit", "Fit everything"],
+            ["crop", "Crop to a frame"],
+          ],
+          "fit"
+        ),
+        {
+          ...rangeParam("frameW", "Frame width", 20, 400, 120, (v) => `${v}% of the ring`),
+          when: (p) => p.frame === "crop",
+        },
+        {
+          ...rangeParam("frameH", "Frame height", 20, 400, 120, (v) => `${v}% of the ring`),
+          when: (p) => p.frame === "crop",
+        },
       ],
+      // (a design from before v127: Second wheel ticked is two wheels)
+      legacy: (o) => (o && o.wheels == null && o.wheel2 ? { ...o, wheels: 2 } : o),
       line: "closed",
       crosses: true,
     },
@@ -1393,8 +1570,17 @@
     const S = UNB.PATTERNS[style],
       p = { style, seed: Math.max(1, Math.round(+(o && o.seed) || 1)) };
     if (!S) return p;
+    if (S.legacy) o = S.legacy(o);
     for (const q of S.params) {
       const v = o ? o[q.key] : undefined;
+      if (q.type === "path") {
+        // a path drawn by hand: [x, y, …], kept as it is (rounded to 0.001), or none
+        p[q.key] =
+          Array.isArray(v) && v.length >= 4 && v.length % 2 === 0 && v.every((x) => Number.isFinite(+x))
+            ? v.map((x) => Math.round(+x * 1000) / 1000)
+            : null;
+        continue;
+      }
       if (q.type === "range") {
         const n = v == null || v === "" || !Number.isFinite(+v) ? q.value : +v,
           max = o && o.plot && q.plotMax ? q.plotMax : q.max;

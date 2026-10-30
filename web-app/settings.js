@@ -191,7 +191,7 @@ window.UNB_SETTINGS = {
     // Base: filled layers at the bottom. Density (%): 100 puts the rows a line width apart (touching, solid), 50 two
     // line widths apart, 0 no fill. Lines rows turn 90° every baseTurn layers.
     baseLayers: 0,                    // how many base layers (0 = no base; up to 50)
-    baseDensity: 100,
+    baseDensity: 100,                 // (0–125: past 100 the base's rows overlap, for a surely solid base)
     basePattern: "lines",             // "lines" (straight rows) or "rings" (following the edge)
     baseAngle: 0,                     // degrees, direction of the rows for "lines" (-90 to 90)
     baseTurn: 1,                      // the rows turn 90° every this many layers (1–50)

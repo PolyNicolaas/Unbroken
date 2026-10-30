@@ -21,6 +21,7 @@ const flowPct = () => {
 };
 function showE() {
   $("gE").value = ePerMM().toPrecision(3);
+  $("fromE").textContent = "worked out"; // (line width × layer height ÷ the cartridge, × the Flow)
 }
 onPrintSettings(showE);
 
@@ -48,7 +49,9 @@ function tuneUI() {
     const off = Math.abs((+$(id).value || 0) - p.v) > 1e-6;
     n += off;
     $(id).closest("label").classList.toggle("changed", off);
-    $(TUNE_FROM[id]).textContent = off ? `${p.from}: ${+p.v.toFixed(3)}` : "";
+    // the default always beside it; changed, which it was (the chocolate's, the printer's)
+    $(TUNE_FROM[id]).textContent = `default ${+p.v.toFixed(3)}`;
+    $(TUNE_FROM[id]).title = `${p.from}: ${+p.v.toFixed(3)}`;
   }
   $("tuneVal").textContent = n ? `${n} changed` : "as the profiles";
   $("tuneReset").disabled = !n;
@@ -324,10 +327,13 @@ function readyItems() {
     const step = overhangMM(),
       S = L.support,
       zAt = (k) => fmt(firstZ() + k * L.S.h, 1);
+    const kind = { thin: "thin wall", slope: "slope", skirt: "flared skirt" }[$("support").value] || "flared skirt";
+    // (a hollow single-wall print: a layer stepping in past its wall hangs over the empty inside; Support: Slope)
+    const inward = L.overhang.inWorst > 0.02 && !(S && S.layers && $("support").value === "slope");
     if (S && S.layers)
       add(
         "ok",
-        `Support (${$("support").value === "thin" ? "thin wall" : "flared skirt"}): ${S.layers} layer${S.layers === 1 ? "" : "s"} widened, from ${zAt(S.from)} mm`,
+        `Support (${kind}): ${S.layers} layer${S.layers === 1 ? "" : "s"} ${$("support").value === "slope" ? "sloped" : "widened"}, from ${zAt(S.from)} mm`,
         "h-layers"
       );
     else if (L.overhang.worst > step + 0.02)
@@ -336,7 +342,13 @@ function readyItems() {
         `Overhang: a layer steps out ${fmt(L.overhang.worst, 2)} mm at ${zAt(L.overhang.at)} mm (a bead holds ${fmt(step, 2)}): turn on Support`,
         "h-layers"
       );
-    else add("ok", `No overhang past ${fmt(step, 2)} mm a layer`, "h-layers");
+    else if (!inward) add("ok", `No overhang past ${fmt(step, 2)} mm a layer`, "h-layers");
+    if (inward)
+      add(
+        "warn",
+        `A layer steps in ${fmt(L.overhang.inWorst, 2)} mm at ${zAt(L.overhang.inAt)} mm, over the empty inside (the wall holds ${fmt(step, 2)}): Support: Slope`,
+        "h-layers"
+      );
   }
   const c = cartridgeUse();
   if (c)

@@ -455,7 +455,7 @@ $("wallCount").addEventListener("input", () => layersSoon(0));
 $("support").addEventListener("change", () => layersSoon(0));
 for (const ev of ["input", "change"])
   $("gOver").addEventListener(ev, () => {
-    $("fromOver").textContent = $("gOver").value === "" ? `auto: ${fmt(overhangMM(), 2)}` : "";
+    $("fromOver").textContent = `default ${fmt(Math.round((lineWidthMM() / 3) * 100) / 100, 2)}`; // (a third of the line width)
     if (st.model) layersSoon(0);
   });
 
