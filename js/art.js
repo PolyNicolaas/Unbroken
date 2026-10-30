@@ -158,7 +158,7 @@ function artApply() {
     if (c) {
       $("modeCenter").checked = true;
       $("invert").checked = false;
-      $("loopOpen").checked = true;
+      $("loopClosed").checked = true; // (every bond out and back: the line ends where it starts)
       labels();
       useSource("picture", c, moleculeName());
       const W = A.molWidth || moleculeWidth();

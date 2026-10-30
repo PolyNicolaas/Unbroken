@@ -161,6 +161,8 @@ function traceArgs(W, s, textMask, region) {
       open: s.open,
       startAt,
       jumpCost: s.loose,
+      // a molecule: every bond out and back, a matching pair of strands (a ring's bonds too, not once round)
+      doubleAll: st.art.kind === "molecule" && !textMask,
       lanes: zoneMask("lane", w, h, W.crop),
     },
     { blurred: W.blurred, edges: !st.text && (s.mode === "edges" || !!W.levels) },

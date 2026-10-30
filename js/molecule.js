@@ -411,12 +411,13 @@ function moleculeTurnUI() {
 $("molTurn").addEventListener("input", () => moleculeTurn(+$("molTurn").value));
 $("molTurnL").addEventListener("click", () => moleculeTurn((st.art.molTurn || 0) + 15));
 $("molTurnR").addEventListener("click", () => moleculeTurn((st.art.molTurn || 0) - 15));
-// the width (mm) it starts at: bonds long enough that a double bond's two strokes are the line spacing apart (and at
-// least 8 mm)
+// the width (mm) it starts at: bonds long enough that a double bond's two strokes, each printed as a pair, stay the
+// line spacing apart (and at least 8 mm)
 function moleculeWidth() {
   const { r } = moleculeDrawn();
   if (!r) return null;
-  const bond = Math.max(8, st.spacing > 0 ? (st.spacing / r.gap) * 1.1 : 8);
+  // (every bond is printed as a pair of strands, v126: a double bond's two lines are each a pair, so twice the room)
+  const bond = Math.max(8, st.spacing > 0 ? (st.spacing / r.gap) * 1.1 * 2 : 8);
   return r.box[0] * bond;
 }
 // "13 atoms, 14 bonds" (one atom, one bond)
