@@ -112,7 +112,7 @@ function optEvaluate(c, W, ref) {
       outW: st.outW,
       spacing: st.spacing,
       lineRatio: lineRatio(),
-      loop: CFG.engine.loopRadius,
+      loop: endLoop(),
       roundMM: cornerMM(),
       unx: +$("uncross").value,
       minGap: MIN_GAP_PX,

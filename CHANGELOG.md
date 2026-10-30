@@ -7,9 +7,14 @@ the page's title (it shows "dev" when the page runs from the source folder). Add
 
 - **The sample 3D model is a low-poly skull cup** from Printables, "Low Poly Skull Pencil Cup"
   (https://www.printables.com/model/555563-low-poly-skull-pencil-cup, CC BY-NC 4.0, credited on the 3D model card and
-  in the README), in place of v124's skull drawn in code. It's scaled to 25 mm tall (21 × 32 mm on the plate), already
-  open at the top, and prints with no overhang past what a bead holds: 83 layers, about 20 minutes and 2 ml at 20 mm/s.
-  The example is called Skull cup; `?example=vase` and `?example=skull` open it. Not for commercial use.
+  in the README), used as designed in place of v124's skull drawn in code. It prints 30 mm tall (26 × 39 mm on the
+  plate), already open at the top; the bottom 0.6 mm is cut off, where the jaw flares out faster than a bead can follow,
+  so it needs no support: 100 layers, about 30 minutes and 2.7 ml at 20 mm/s. The example is called Skull cup;
+  `?example=vase` and `?example=skull` open it. Not for commercial use.
+- **Stroke ends** (Line card): how the line turns round at a stroke end (the tip of a letter, the end of a bond).
+  **Smooth turn**, now the start, is a plain U-turn as wide as the two strands beside it; **Round loop** is the loop
+  from before, twice as wide, which put a small bulb on every tip (the nubs on an H); **Small loop** is in between.
+  Saved with the design; settings.js `loopRadius` sets the start (0.5). Test E48.
 
 ## v124 · 2026-10-30
 

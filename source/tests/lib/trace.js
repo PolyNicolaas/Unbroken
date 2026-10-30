@@ -33,7 +33,7 @@ function trace(src, options) {
   t = performance.now();
   const lineMM = o.lineMM || 0.8 * o.spacingMM;                                       // the app: needle diameter, or 80% of the spacing
   const fillPx = o.fill && o.fillDensity > 0 ? lineMM / scale / o.fillDensity : 0;     // fill rows a line width ÷ density apart (the app's base and infill)
-  const sg = UNB.stageSignal(walk, dpx, w, h, { w: o.spacingMM > 0 ? dpx * lineMM / o.spacingMM : 0, round: o.roundMM / scale, fill: o.fill, fillAngle: o.fillAngle, fillMinArea: o.fillMinArea, fillSpacing: fillPx }), S = sg.S, open = sg.open, n0 = open ? S / 2 + 1 : S;
+  const sg = UNB.stageSignal(walk, dpx, w, h, { w: o.spacingMM > 0 ? dpx * lineMM / o.spacingMM : 0, round: o.roundMM / scale, loop: o.loop, fill: o.fill, fillAngle: o.fillAngle, fillMinArea: o.fillMinArea, fillSpacing: fillPx }), S = sg.S, open = sg.open, n0 = open ? S / 2 + 1 : S;
   const Ns = []; for (let n = 4; n < sg.Nmax; n = Math.max(n + 1, Math.round(n * 1.35))) Ns.push(n); Ns.push(sg.Nmax);
   const it = UNB.sweepSteps(sg.sp.ax, sg.sp.order, Ns, sg.jumpS, open); let r = it.next(); while (!r.done) r = it.next();
   const sweep = r.value, N = o.N || UNB.pickTerms(sweep, UNB.TERM_TOL);

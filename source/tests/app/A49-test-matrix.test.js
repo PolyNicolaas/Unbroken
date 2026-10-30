@@ -2,13 +2,13 @@ const A = require("../lib/app.js"), { check } = require("../lib/check.js");
 module.exports = {
   id: "A49", title: "Test matrix: the skull cup as nine copies, each with its own speed, flow and layer height (L9), scored for the best levels",
   guards: "copies printed with the wrong settings, a layer height that doesn't change the slicing, a comb that doesn't count its copy, a flow that doesn't reach the plunger, scores that don't pick the best levels, and levels or scores lost from the design",
-  why: "Settings are where prints fail (v124): a Taguchi L9 tests three settings at three levels in nine prints. The sample is a low-poly skull cup (Printables, CC BY-NC 4.0) at 25 mm, a harder shape than a plain vase.",
+  why: "Settings are where prints fail (v124): a Taguchi L9 tests three settings at three levels in nine prints. The sample is a low-poly skull cup (Printables, CC BY-NC 4.0) at 30 mm, a harder shape than a plain vase.",
   how: "Opens ?example=vase (the skull now), goes to Print, sets levels 15/20/25 mm/s, 90/100/110%, 0.25/0.3/0.35 mm, and builds the matrix plan. Reads each copy's comb, first layer, layers, feed and flow. Exports the G-code and reads its head. Scores the nine copies so that 25 mm/s, 110% and 0.25 mm come out best, and uses the best levels.",
-  pass: "The sample is the skull cup, 25 mm tall; nine combs with 1 to 9 teeth; each copy's first layer at its own layer height and its layers that far apart (25 mm ÷ the height, ±2 layers); its feed its speed; its flow (e against the export's) its layer height × flow ÷ the Print step's; nine copies inside the plate; the G-code names the nine copies; the best levels shown and put into Fine-tuning (25 mm/s, 110%, 0.25 mm); the levels and scores saved with the design; no page errors.",
+  pass: "The sample is the skull cup, 30 mm tall; nine combs with 1 to 9 teeth; each copy's first layer at its own layer height and its layers that far apart (30 mm ÷ the height, ±2 layers); its feed its speed; its flow (e against the export's) its layer height × flow ÷ the Print step's; nine copies inside the plate; the G-code names the nine copies; the best levels shown and put into Fine-tuning (25 mm/s, 110%, 0.25 mm); the levels and scores saved with the design; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { example: "vase" }), checks = [];
     const m = await page.evaluate(() => ({ name: st.model && st.model.name, h: printedMM() }));
-    checks.push(check("the sample: the skull cup, 25 mm tall", +(m.name === "sample skull cup" && Math.abs(m.h - 25) < 0.1), "==", 1));
+    checks.push(check("the sample: the skull cup, 30 mm tall", +(m.name === "sample skull cup" && Math.abs(m.h - 30) < 0.1), "==", 1));
     checks.push(check("its credit on the 3D model card (title, link, licence)", +(await page.evaluate(() => !$("modelCredit").hidden && /CC BY-NC 4\.0/.test($("modelCredit").textContent) && /printables\.com\/model\/555563/.test($("modelCredit").querySelector("a").href))), "==", 1));
     await A.print(page); await A.idle(page, 4000);
     const put = (id, v) => page.evaluate(([id, v]) => { $(id).value = v; $(id).dispatchEvent(new Event("input", { bubbles: true })); }, [id, v]);
@@ -25,7 +25,7 @@ module.exports = {
     const O = P.out;
     checks.push(check("combs: 1 to 9 teeth", O.map((o) => o.teeth).join(","), "==", "1,2,3,4,5,6,7,8,9"));
     checks.push(check("each copy's first layer at its own layer height", +O.every((o) => Math.abs(o.z0 - o.run.h) < 1e-6), "==", 1));
-    checks.push(check("each copy's layers: 25 mm ÷ its height (±2)", +O.every((o) => Math.abs(o.layers - 25 / o.run.h) <= 2), "==", 1));
+    checks.push(check("each copy's layers: 30 mm ÷ its height (±2)", +O.every((o) => Math.abs(o.layers - 30 / o.run.h) <= 2), "==", 1));
     checks.push(check("each copy's feed is its speed", +O.every((o) => Math.abs(o.f - o.run.speed * 60) < 1e-6), "==", 1));
     checks.push(check("each copy's flow: its layer height × flow against the Print step's", +O.every((o) => Math.abs(o.e - (o.run.h / 0.3) * (o.run.flow / 100)) < 1e-6), "==", 1));
     checks.push(check("all nine on the plate", +O.every((o) => o.inX && o.inY), "==", 1));

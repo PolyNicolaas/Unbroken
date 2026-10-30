@@ -16,10 +16,12 @@ let modelSeq = 0;
 st.model = null;
 
 // The sample: a low-poly skull cup (sample-skull.js: "Low Poly Skull Pencil Cup" from Printables, CC BY-NC 4.0),
-// scaled to 25 mm tall: a harder shape than a plain vase (the jaw, the eye sockets, the cheekbones and the brow step
+// scaled to 30 mm tall: a harder shape than a plain vase (the jaw, the eye sockets, the cheekbones and the brow step
 // in and out from layer to layer), for test prints. It's already open at the top.
+// The bottom 2% (0.6 mm) is cut off: there the jaw flares out faster than a bead can follow (0.47 mm a layer).
 const SAMPLE_NAME = "sample skull cup",
-  SAMPLE_HEIGHT = 25;
+  SAMPLE_CUT = { bottom: 0.02, top: 0 },
+  SAMPLE_HEIGHT = 30 / (1 - SAMPLE_CUT.bottom); // (the whole model: 30 mm printed once its bottom is cut)
 function sampleSkull() {
   const bin = atob(SAMPLE_SKULL.stl),
     bytes = new Uint8Array(bin.length);
@@ -27,7 +29,7 @@ function sampleSkull() {
   return UNB.parseSTL(bytes);
 }
 function useSampleModel() {
-  setModel(sampleSkull(), SAMPLE_NAME, null, SAMPLE_HEIGHT);
+  setModel(sampleSkull(), SAMPLE_NAME, SAMPLE_CUT, SAMPLE_HEIGHT);
 }
 // (cut, heightMM: the sample's own; otherwise uncut, and the model's own height kept on the plate)
 function setModel(mesh, name, cut, heightMM) {
@@ -108,7 +110,7 @@ function modelChanged(record) {
     a.target = "_blank";
     a.rel = "noopener";
     a.textContent = S.title;
-    credit.append("The sample: ", a, ` from Printables, ${S.license} (not for commercial use), scaled to 25 mm.`);
+    credit.append("The sample: ", a, ` from Printables, ${S.license} (not for commercial use), printed 30 mm tall.`);
   }
   cutUI();
   st.srcLabel = M.name;

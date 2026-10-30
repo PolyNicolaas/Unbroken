@@ -314,6 +314,18 @@ function zoneTint(kind) {
 const scale = () => st.outW / st.bw; // output units per working pixel
 const pxSpacing = (P) => P.spacing / (P.outW / P.bw);
 const cornerMM = () => +$("corner").value / 10;
+// the Line card's Stroke ends: the radius of the turn at a stroke end, × the line spacing (0.5: a plain U-turn)
+const endLoop = () => {
+  const v = +$("endTurn").value;
+  return v >= 0.5 && v <= 3 ? v : CFG.engine.loopRadius;
+};
+// (it starts as settings.js has it: a value between the menu's shows as its own entry)
+(() => {
+  const r = CFG.engine.loopRadius,
+    el = $("endTurn");
+  if (![...el.options].some((o) => +o.value === r)) el.add(new Option(`Loop, ${r} × the spacing`, String(r)));
+  el.value = String([...el.options].find((o) => +o.value === r).value);
+})();
 // The Print step's Base (filled layers at the bottom) and Infill (inside the layers above): each a density (0–100%: 100
 // puts
 // the rows a line width apart, touching), a pattern, and for Lines an angle and how many layers keep it before turning
@@ -369,7 +381,7 @@ async function signal(g, P = Object.create(st)) {
     d,
     P.w,
     P.h,
-    { w: d * lineRatio(), loop: CFG.engine.loopRadius, round: cornerMM() / (P.outW / P.bw), fill: null },
+    { w: d * lineRatio(), loop: endLoop(), round: cornerMM() / (P.outW / P.bw), fill: null },
   ]); // corners rounded, strands d apart, a loop at each stroke end (infill belongs to the Print step's base layers)
   guard(g);
   Object.assign(P, {
@@ -566,7 +578,7 @@ function marksKeyNow() {
     st.zones,
     st.spacing,
     lineRatio(),
-    CFG.engine.loopRadius,
+    endLoop(),
     CFG.engine.sizeDetail,
     +$("uncross").value,
     $("overlaps").checked,
@@ -632,7 +644,7 @@ async function sizeMarks(g) {
           spacing: st.spacing,
           bboxW: bw,
           lineRatio: lineRatio(),
-          loop: CFG.engine.loopRadius,
+          loop: endLoop(),
           roundMM: cornerMM(),
           termTol: CFG.engine.termTolerance,
           current: cur,

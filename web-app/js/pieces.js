@@ -43,7 +43,7 @@ function piecesKeyNow() {
     cornerMM(),
     +$("uncross").value,
     $("overlaps").checked,
-    CFG.engine.loopRadius,
+    endLoop(),
     CFG.engine.termTolerance,
     st.text && st.text.ppm,
     // a molecule: the structure, how it prints, its size
@@ -81,7 +81,7 @@ async function tracePieces() {
         W.h,
         {
           w: d * lineRatio(),
-          loop: CFG.engine.loopRadius,
+          loop: endLoop(),
           round: cornerMM() * ppm,
           fill: null,
           termTol: CFG.engine.termTolerance,

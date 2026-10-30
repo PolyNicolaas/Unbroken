@@ -263,7 +263,7 @@ window.UNB_SETTINGS = {
     minStrandGap: 0.75,               // px: smallest gap kept between strands when removing crossings
     packedStrokeSplit: 0.1,           // how readily strokes drawn close together are split apart (0 = never; share of ink↔paper contrast)
     farGroupShare: 0.2,               // a far-away group is dropped only if its line is shorter than this × the main group's
-    loopRadius: 1.0,                  // × line spacing: radius of the loop that turns the line round at each stroke end (0.5 = tightest)
+    loopRadius: 0.5,                  // × line spacing: radius of the turn at each stroke end, the Line card's Stroke ends to start with (0.5 = a smooth U-turn, 1 = a round loop)
     sizeDetail: { smallest: 0.022, medium: 0.013, high: 0.007 },   // size slider marks: how far (× drawing width) lines may move from the drawing to keep the spacing
     maxWorkingResolution: 2000,       // px: the most a big print is traced at
   },

@@ -182,7 +182,7 @@ async function layerLine(plan, D = st) {
       lineRatio(),
       cornerMM(),
       +$("uncross").value,
-      CFG.engine.loopRadius,
+      endLoop(),
       st.zones,
       D.outW,
       plan.minArea,
@@ -198,7 +198,7 @@ async function layerLine(plan, D = st) {
     D.h,
     {
       w: d * lineRatio(),
-      loop: CFG.engine.loopRadius,
+      loop: endLoop(),
       round: cornerMM() / sc,
       fill,
       fillAngle: angle,

@@ -51,6 +51,7 @@ const DESIGN_IDS = [
   "needle",
   "lineGapMM",
   "corner",
+  "endTurn",
   "infillMin",
   "fillMin",
   "basePattern",
