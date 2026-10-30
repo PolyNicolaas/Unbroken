@@ -138,6 +138,10 @@ body[data-src="model"] :is(.img-only, #pathRow, #looseRow, #cornerRow, .card[ari
 .row { display: grid; gap: calc(6px * var(--space)); }
 .row > .lab { display: flex; justify-content: space-between; gap: calc(8px * var(--space)); align-items: baseline; }
 .row > .lab label, .row > .lab .name { font-weight: 500; }
+/* a group of pattern settings (the Spirograph's ring, each wheel): a divider above, its name as a small heading */
+.pgroup { display: grid; gap: inherit; border-top: 1px solid var(--rule); padding-top: calc(10px * var(--space)); margin-top: calc(4px * var(--space)); }
+.pgroup[hidden] { display: none; }
+.pgroup-h { font-size: 0.78em; font-weight: 600; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
 .val { font: 500 calc(12px * var(--text))/1 var(--font-mono); color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .hint { color: var(--muted); font-size: calc(12.5px * var(--text)); margin: 0; }
 .hint.warn { color: var(--warn); }

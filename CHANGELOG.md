@@ -3,6 +3,13 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v129 · 2026-10-30
+
+- **Spirograph settings in groups**: Ring, Wheel 1, each further wheel, Figure and Frame, each under a small heading
+  with a divider above, so a wheel's settings are easy to find. Only the wheels in use show; inside a group the
+  labels are short (Wheel 3's "Hole", not "Wheel 3's hole"). Any pattern can group its settings (a param's group).
+  Test A51.
+
 ## v128 · 2026-10-30
 
 - **Spirograph: Size at start and Size at end** (5–200% of the figure at rest): the figure grows or shrinks from the

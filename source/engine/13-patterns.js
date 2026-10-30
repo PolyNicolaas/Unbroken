@@ -1259,6 +1259,8 @@
     step: step || 1,
   });
   const choiceParam = (key, name, options, value) => ({ key, type: "select", name, options, value });
+  // settings shown together under a heading (the app draws a divider above each group)
+  const inGroup = (group, list) => list.map((q) => ({ ...q, group }));
   const checkParam = (key, name, value) => ({ key, type: "check", name, value: !!value });
   // (a range's plotMax: how far it goes in art made for plotting, drawn as exact lines and never traced or printed;
   // max is the limit for printing, where the needle's spacing and the trace set what can be made)
@@ -1381,97 +1383,108 @@
     spirograph: {
       label: "Spirograph",
       tip: "A toothed wheel rolling round a ring, the pen in one of its holes",
+      // settings in groups (group: the app shows each under its heading, a divider between)
       params: [
-        choiceParam(
-          "ring",
-          "Ring",
-          [
-            ["circle", "Circle"],
-            ["oval", "Oval"],
-            ["stadium", "Stadium"],
-            ["triangle", "Triangle"],
-            ["square", "Square"],
-            ["pentagon", "Pentagon"],
-            ["hexagon", "Hexagon"],
-          ],
-          "circle"
-        ),
-        {
-          ...rangeParam("oval", "Ring width", 30, 100, 70, pct),
-          when: (p) => p.ring === "oval" || p.ring === "stadium",
-        },
-        {
-          ...rangeParam("corner", "Ring corners", 5, 90, 40, pct),
-          when: (p) => !["circle", "oval", "stadium"].includes(p.ring),
-        },
-        rangeParam("ringTeeth", "Ring teeth", 24, 160, 96, (v) => `${v} teeth`),
-        rangeParam("wheelTeeth", "Wheel teeth", 6, 150, 52, (v) => `${v} teeth`),
-        choiceParam(
-          "side",
-          "Wheel rolls",
-          [
-            ["inside", "Inside the ring"],
-            ["outside", "Outside the ring"],
-          ],
-          "inside"
-        ),
-        rangeParam("hole", "Hole", 0, 140, 70, (v) => `${v}% of the wheel's radius${v > 100 ? " · loops" : ""}`),
-        rangeParam("wheels", "Wheels", 1, 6, 1, (v) =>
-          v === 1 ? "1 wheel" : `${v} wheels, each riding on the one before`
-        ),
-        ...[2, 3, 4, 5, 6].flatMap((k) => [
+        ...inGroup("Ring", [
+          choiceParam(
+            "ring",
+            "Shape",
+            [
+              ["circle", "Circle"],
+              ["oval", "Oval"],
+              ["stadium", "Stadium"],
+              ["triangle", "Triangle"],
+              ["square", "Square"],
+              ["pentagon", "Pentagon"],
+              ["hexagon", "Hexagon"],
+            ],
+            "circle"
+          ),
           {
-            ...rangeParam(
-              k === 2 ? "wheel2Teeth" : `wheel${k}Size`,
-              `Wheel ${k}'s size`,
-              10,
-              90,
-              40,
-              (v) => `${v}% of wheel ${k - 1}`
-            ),
-            when: (p) => p.wheels >= k,
+            ...rangeParam("oval", "Width", 30, 100, 70, pct),
+            when: (p) => p.ring === "oval" || p.ring === "stadium",
           },
-          { ...rangeParam(`hole${k}`, `Wheel ${k}'s hole`, 0, 140, 60, pct), when: (p) => p.wheels >= k },
           {
-            ...choiceParam(
-              k === 2 ? "wheel2Dir" : `wheel${k}Dir`,
-              `Wheel ${k} turns`,
-              [
-                ["against", `Against wheel ${k - 1}`],
-                ["same", `With wheel ${k - 1}`],
-              ],
-              "against"
-            ),
-            when: (p) => p.wheels >= k,
+            ...rangeParam("corner", "Corners", 5, 90, 40, pct),
+            when: (p) => !["circle", "oval", "stadium"].includes(p.ring),
+          },
+          rangeParam("ringTeeth", "Teeth", 24, 160, 96, (v) => `${v} teeth`),
+        ]),
+        ...inGroup("Wheel 1", [
+          rangeParam("wheelTeeth", "Teeth", 6, 150, 52, (v) => `${v} teeth`),
+          choiceParam(
+            "side",
+            "Rolls",
+            [
+              ["inside", "Inside the ring"],
+              ["outside", "Outside the ring"],
+            ],
+            "inside"
+          ),
+          rangeParam("hole", "Hole", 0, 140, 70, (v) => `${v}% of the wheel's radius${v > 100 ? " · loops" : ""}`),
+          rangeParam("wheels", "How many wheels", 1, 6, 1, (v) =>
+            v === 1 ? "1 wheel" : `${v} wheels, each riding on the one before`
+          ),
+        ]),
+        ...[2, 3, 4, 5, 6].flatMap((k) =>
+          inGroup(`Wheel ${k}`, [
+            {
+              ...rangeParam(
+                k === 2 ? "wheel2Teeth" : `wheel${k}Size`,
+                "Size",
+                10,
+                90,
+                40,
+                (v) => `${v}% of wheel ${k - 1}`
+              ),
+              when: (p) => p.wheels >= k,
+            },
+            { ...rangeParam(`hole${k}`, "Hole", 0, 140, 60, pct), when: (p) => p.wheels >= k },
+            {
+              ...choiceParam(
+                k === 2 ? "wheel2Dir" : `wheel${k}Dir`,
+                "Turns",
+                [
+                  ["against", `Against wheel ${k - 1}`],
+                  ["same", `With wheel ${k - 1}`],
+                ],
+                "against"
+              ),
+              when: (p) => p.wheels >= k,
+            },
+          ])
+        ),
+        ...inGroup("Figure", [
+          rangeParam("rotate", "Rotate", 0, 359, 0, (v) => `${v}°`),
+          // the figure's size along the line: from Size at start to Size at end
+          rangeParam("sizeStart", "Size at start", 5, 200, 100, (v) => `${v}%`),
+          rangeParam("sizeEnd", "Size at end", 5, 200, 100, (v) => `${v}%`),
+          // the ring's centre moving along a path drawn by hand (the app's Draw the path pad)
+          { key: "path", type: "path", name: "Centre path", value: null },
+          {
+            ...rangeParam("pathSmooth", "Smooth the path", 0, 100, 40, (v) => (v ? `${v}%` : "as drawn")),
+            when: (p) => Array.isArray(p.path) && p.path.length >= 4,
           },
         ]),
-        rangeParam("rotate", "Rotate", 0, 359, 0, (v) => `${v}°`),
-        // the figure's size along the line: from Size at start to Size at end
-        rangeParam("sizeStart", "Size at start", 5, 200, 100, (v) => `${v}%`),
-        rangeParam("sizeEnd", "Size at end", 5, 200, 100, (v) => `${v}%`),
-        // the ring's centre moving along a path drawn by hand (the app's Draw the path pad)
-        { key: "path", type: "path", name: "Centre path", value: null },
-        {
-          ...rangeParam("pathSmooth", "Smooth the path", 0, 100, 40, (v) => (v ? `${v}%` : "as drawn")),
-          when: (p) => Array.isArray(p.path) && p.path.length >= 4,
-        },
-        choiceParam(
-          "frame",
-          "Frame",
-          [
-            ["fit", "Fit everything"],
-            ["crop", "Crop to a frame"],
-          ],
-          "fit"
-        ),
-        {
-          ...rangeParam("frameW", "Frame width", 20, 400, 120, (v) => `${v}% of the ring`),
-          when: (p) => p.frame === "crop",
-        },
-        {
-          ...rangeParam("frameH", "Frame height", 20, 400, 120, (v) => `${v}% of the ring`),
-          when: (p) => p.frame === "crop",
-        },
+        ...inGroup("Frame", [
+          choiceParam(
+            "frame",
+            "Fit or crop",
+            [
+              ["fit", "Fit everything"],
+              ["crop", "Crop to a frame"],
+            ],
+            "fit"
+          ),
+          {
+            ...rangeParam("frameW", "Width", 20, 400, 120, (v) => `${v}% of the ring`),
+            when: (p) => p.frame === "crop",
+          },
+          {
+            ...rangeParam("frameH", "Height", 20, 400, 120, (v) => `${v}% of the ring`),
+            when: (p) => p.frame === "crop",
+          },
+        ]),
       ],
       // (a design from before v127: Second wheel ticked is two wheels)
       legacy: (o) => (o && o.wheels == null && o.wheel2 ? { ...o, wheels: 2 } : o),
