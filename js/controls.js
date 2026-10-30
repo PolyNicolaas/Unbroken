@@ -123,6 +123,7 @@ $("corner").addEventListener("input", () => {
   labels();
   schedule(signal);
 });
+$("endTurn").addEventListener("change", () => schedule(signal)); // (the stroke-end turns: pipeline.js endLoop)
 $("showProb").addEventListener("change", () => {
   const n = +$("viewBadge").textContent || 0;
   $("viewBadge").hidden = !$("showProb").checked || !n;

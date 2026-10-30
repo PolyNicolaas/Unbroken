@@ -20,7 +20,7 @@ const EXAMPLES = [
   ["portrait", "Wave portrait", "the face in wave rows", () => artExamplePattern("wavesTone")],
   ["lettering", "Lettering", "text in a single-stroke font", () => artUse("text")],
   ["theobromine", "Theobromine", "a molecule: chocolate's own", () => moleculeExample("theobromine")],
-  ["skull", "Skull vase", "a 3D model", () => artUse("model")],
+  ["skull", "Skull cup", "a 3D model", () => artUse("model")],
 ];
 function useExample(key) {
   const e = EXAMPLES.find(([k]) => k === key);

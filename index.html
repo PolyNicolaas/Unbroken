@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v124</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v125</span></p>
 </header>
 
 <div class="wrap">
@@ -555,6 +555,7 @@
         <div class="inline">
           <span class="val" id="modelInfo"></span>
         </div>
+        <p class="hint" id="modelCredit" hidden></p>
         <div class="lab"><span class="name">Which way up it prints</span></div>
         <div class="inline">
           <button class="btn mini" type="button" id="turnX" title="Tip it a quarter turn forward (about the left–right axis)">Tip forward</button>
@@ -690,6 +691,15 @@
           <option value="1.2">Connect across whenever shorter</option>
         </select>
         <p class="hint help">The line can't stop or go back over itself, so it comes back from every stroke end as a narrow loop: out on one side, round a small loop, back on the other, one line spacing apart. A short connector, a straight strand across to a nearby loose end, can replace the way back (the line still doesn't stop).</p>
+      </div>
+      <div class="row" id="endTurnRow">
+        <div class="lab"><label for="endTurn">Stroke ends</label></div>
+        <select id="endTurn">
+          <option value="0.5">Smooth turn</option>
+          <option value="0.75">Small loop</option>
+          <option value="1">Round loop</option>
+        </select>
+        <p class="hint help">How the line turns round at a stroke end (the tip of a letter, the end of a bond). Smooth turn: a plain U-turn, as wide as the two strands beside it. Round loop: a loop twice as wide, a little bulb at every tip, which gives the chocolate more room to turn in.</p>
       </div>
       <div class="row" id="cornerRow">
         <div class="lab"><label for="corner">Round corners</label><span class="val" id="cornerVal">off</span></div>
@@ -907,6 +917,7 @@
 <script src="js/camera.js"></script>
 <script src="js/steppers.js"></script>
 <script src="js/scroll.js"></script>
+<script src="js/sample-skull.js"></script>
 <script src="js/model.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/history.js"></script>

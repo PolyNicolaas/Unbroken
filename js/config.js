@@ -105,7 +105,7 @@ const BUILTIN = {
     minStrandGap: 0.75,
     packedStrokeSplit: 0.1,
     farGroupShare: 0.2,
-    loopRadius: 1,
+    loopRadius: 0.5,
     sizeDetail: { smallest: 0.022, medium: 0.013, high: 0.007 },
     maxWorkingResolution: 2000,
   },

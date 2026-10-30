@@ -1,7 +1,7 @@
-Unbroken · web app build v124
-Built:  2026-10-30T16:37:06.095Z
-Tests:  95 of 95 tests passed
-Check:  opened and traced the sample: 332 terms · error 0.04 mm
+Unbroken · web app build v125
+Built:  2026-10-30T18:40:08.732Z
+Tests:  96 of 96 tests passed
+Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
   0902e2e523fa  00-util.js
@@ -25,31 +25,32 @@ Files (sha1, first 12):
   e7d844b2ab2f  css/app.css
   0be9d7ad7cf8  css/theme.css
   666f911d2119  fonts.js
-  23414c93bf48  index.html
+  cb0f8d51828e  index.html
   592566d46948  js/art.js
   01da455a1225  js/camera.js
-  fbbda4d1cf6c  js/config.js
-  fe8b60afbbf8  js/controls.js
+  807d9d0ee78b  js/config.js
+  bfd81ea732b7  js/controls.js
   419f0a9223bc  js/cutout.js
   e666f8bf0b57  js/engine-bridge.js
-  cacbb1065675  js/examples.js
+  65f719c0af2b  js/examples.js
   302101c188c9  js/export.js
-  e389d566a8e1  js/history.js
-  6d4c1af86792  js/layers.js
+  79abe79cfa8b  js/history.js
+  eb242dadf7ce  js/layers.js
   430a29c664e0  js/levels.js
   7510c8db4a05  js/main.js
   e04ad77f8f92  js/matrix.js
-  7111ec91ca43  js/model.js
+  d2a86b589098  js/model.js
   12858b4ee201  js/molecule.js
   7a0d068854d0  js/moleditor.js
   e8b1737911e5  js/notes.js
-  911e52e413f3  js/optimize.js
+  0d0910778259  js/optimize.js
   cdc36022946d  js/patterns.js
-  c74e343bbc19  js/pieces.js
-  b7141c6dd54d  js/pipeline.js
+  0fd3b2bb7e19  js/pieces.js
+  0c913a819f1b  js/pipeline.js
   f877d34b57d8  js/plot.js
   e1f5ad88a908  js/preview.js
   ede50da03b92  js/readouts.js
+  ce0678154019  js/sample-skull.js
   90c1c8639014  js/scroll.js
   cc3deb898c4f  js/source.js
   78f5450a22d9  js/state.js
@@ -60,5 +61,5 @@ Files (sha1, first 12):
   cb5b62ce13f2  js/views.js
   7c48c854ce75  js/workflow.js
   53b02936e233  js/zoom.js
-  ce730ada9881  settings.js
+  b29284c813fe  settings.js
   85d8193792d8  worker.js
