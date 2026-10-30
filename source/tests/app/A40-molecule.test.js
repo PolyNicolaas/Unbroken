@@ -22,6 +22,7 @@ module.exports = {
     checks.push(check("Theobromine: the Molecule in use, 13 atoms, traced", +(t.kind === "molecule" && t.n === 13 && /terms/.test(t.chip)), "==", 1));
     // printed in pieces: the bonds, then each label, in their places (pieces.js, Plate card: Molecule)
     await page.click("#goTrace"); await A.idle(page, 600); await page.click("#goOut"); await A.idle(page, 2000);
+    await page.evaluate(() => { const s = $("molPieces"); s.value = "apart"; s.dispatchEvent(new Event("change", { bubbles: true })); }); await A.idle(page, 1000); // (One piece is the start since v126)
     await page.click("label[for=stPlate]"); await page.waitForFunction(() => st.pieces && st.pieces.list.length, null, { timeout: 60000 }).catch(() => {}); await A.idle(page, 2000);
     const pc = await page.evaluate(() => { const lay = plateNow(); return { n: st.pieces ? st.pieces.list.length : 0, first: st.pieces && st.pieces.list[0].name, hint: $("plateHint").textContent, same: lay && lay.placed.length >= 2 && lay.placed.every((p) => p.x === lay.placed[0].x && p.y === lay.placed[0].y) }; });
     checks.push(check("printer: Theobromine in 7 pieces (the bonds, then 6 labels), all in one place on the plate", +(pc.n === 7 && pc.first === "bonds" && pc.same && /bonds print as one line/.test(pc.hint)), "==", 1));

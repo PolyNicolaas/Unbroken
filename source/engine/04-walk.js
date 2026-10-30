@@ -366,7 +366,9 @@
     // is chosen here. Each odd vertex is matched to a nearby one, cheapest first, either by retracing the shortest
     // stretch of line between them, or (when jumpCost > 0) by a straight connector that costs jumpCost × its length.
     // Anything left unmatched falls back to the spanning-tree T-join below.
-    const jumpCost = opt.jumpCost === undefined ? 2 : opt.jumpCost;
+    // (doubleAll: no connectors, so the lines drawn once are whole loops of the drawing, and doubling them keeps it
+    // walkable)
+    const jumpCost = opt.doubleAll ? 0 : opt.jumpCost === undefined ? 2 : opt.jumpCost;
     const diag = Math.hypot(w, h),
       toggled = [];
     {
@@ -499,7 +501,7 @@
       V0 = G.V0,
       { lab, rootComp } = P,
       startAt = opt.startAt || null,
-      open = !!opt.open;
+      open = !!opt.open && !opt.doubleAll; // (every edge doubled: the line ends where it starts)
     const E = eu.length;
     if (!E) return null; // a single dot: no line to walk
     const adj = Array.from({ length: V }, () => []);
@@ -545,6 +547,10 @@
         sub[p] ^= 1;
       }
     }
+    // doubleAll (a molecule: every bond a matching pair of strands): the edges still drawn once are the drawing's own
+    // loops (a ring), where every vertex meets an even number of them, so drawing them twice too keeps every vertex
+    // even
+    if (opt.doubleAll) for (let e = 0; e < E; e++) if (cnt[e] === 1) cnt[e] = 2;
     // nearest vertex to a requested start point
     let pinned = -1;
     if (startAt) {
@@ -829,7 +835,9 @@
   // jid / jd nearest junction, tip stroke end), plus mask, edt, nParts, dropped, jumpLen, doubledFrac, bbox, linePix.
   // Slow on big line maps: the connector searches are shortest-route (Dijkstra) runs over the pixel graph.
   UNB.buildWalk = function (lines, w, h, opt) {
-    const open = !!opt.open,
+    // (doubleAll: every edge drawn twice, out and back; the line closes, since an open one leaves its way from start
+    // to end drawn once)
+    const open = !!opt.open && !opt.doubleAll,
       N = w * h;
     const R = walkRouter(w, h, opt);
     const P = walkParts(lines, w, h, opt, R);

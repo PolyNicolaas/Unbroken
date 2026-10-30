@@ -24,7 +24,7 @@ function trace(src, options) {
   const blurred = UNB.blur(gray, w, h, o.blur);
   let t = performance.now();
   const lines = o.lines || UNB.stageLines(blurred, w, h, { mode: o.mode, sens: o.sens, selMask: null, erase: null });
-  const walk = UNB.stageWalk(lines, w, h, { minPix: o.minLen, maxJump: o.far ? o.far / 100 * Math.hypot(w, h) : 0, open: o.open, jumpCost: o.loose },
+  const walk = UNB.stageWalk(lines, w, h, { minPix: o.minLen, maxJump: o.far ? o.far / 100 * Math.hypot(w, h) : 0, open: o.open, jumpCost: o.loose, doubleAll: o.doubleAll },
     o.snap ? { blurred, edges: o.mode === "edges" } : null);
   ms.walk = performance.now() - t;
   if (!walk) return { w, h, k, lines, walk: null, ms };

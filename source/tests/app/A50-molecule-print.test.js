@@ -8,6 +8,7 @@ module.exports = {
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { example: "theobromine" }), checks = [];
     await page.evaluate(() => $("molEdit").click()); await page.waitForTimeout(400); await page.evaluate(() => $("meDone").click()); await A.idle(page, 3000);
+    await page.evaluate(() => { const s = $("molPieces"); s.value = "apart"; s.dispatchEvent(new Event("change", { bubbles: true })); }); // (One piece is the start since v126)
     await A.print(page); await A.idle(page, 5000);
     const P = await page.evaluate(() => {
       const L = st.layers, bb = (S) => { const a = [1e9, 1e9, -1e9, -1e9]; for (let i = 0; i < S.x.length; i++) { a[0] = Math.min(a[0], S.x[i]); a[1] = Math.min(a[1], S.y[i]); a[2] = Math.max(a[2], S.x[i]); a[3] = Math.max(a[3], S.y[i]); } return a; };

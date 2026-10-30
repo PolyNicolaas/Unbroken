@@ -7,18 +7,18 @@ module.exports = {
   guards: "Molecule (Bonds and labels apart / One piece) lost from design files and undo, Use it after the editor's Undo saving the SMILES of the tidied structure, Ctrl/⌘ Shift Z in the editor undoing, a turned phone leaving the structure off-screen, the Molecule card's box and message left from before an undo, the plate hint saying the bonds print for a molecule without bonds, and Clean up on a carbon with five bonds not saying which atom",
   why: "Found in the October 2026 review (scratchpad hunt, area B).",
   how: "Theobromine: Molecule set to One piece, undone and redone; Caffeine picked and undone. The editor on Theobromine: an O made S, Clean up, Undo twice, Use it; then Erase, Undo and Ctrl+Shift+Z; turned from landscape to portrait on a phone; a carbon with five bonds and Clean up. The plate hint worked out for one label piece and for two label pieces without bonds.",
-  pass: "molPieces is a design setting, Undo brings back Bonds and labels apart and Redo One piece; after Caffeine is undone the card shows theobromine; after the editor's Undo past Clean up no SMILES is kept, and Use it doesn't save the tidied one; Ctrl+Shift+Z redoes the erase; every atom on screen after turning; Clean up names the C with 5 bonds; the hints: 1 piece (1 piece: the label) fits … The label prints as one line, and … the labels … Each label prints as its own piece; no page errors.",
+  pass: "molPieces is a design setting, Undo brings back One piece (the start since v126) and Redo Bonds and labels apart; after Caffeine is undone the card shows theobromine; after the editor's Undo past Clean up no SMILES is kept, and Use it doesn't save the tidied one; Ctrl+Shift+Z redoes the erase; every atom on screen after turning; Clean up names the C with 5 bonds; the hints: 1 piece (1 piece: the label) fits … The label prints as one line, and … the labels … Each label prints as its own piece; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { clean: true, art: true, viewport: { width: 1180, height: 820 } }), checks = [];
     await page.route("https://unpkg.com/@rdkit/**", (r) => { const f = r.request().url().split("/").pop(); r.fulfill({ body: fs.readFileSync(RD + f), contentType: f.endsWith(".wasm") ? "application/wasm" : "text/javascript" }); });
     await page.click("[data-examples] [data-example=theobromine]:visible"); await A.idle(page, 3000);
     // the Plate card's Molecule: a design setting, undone and redone
-    await page.evaluate(() => { const s = $("molPieces"); s.value = "one"; s.dispatchEvent(new Event("change", { bubbles: true })); }); await A.idle(page, 1200);
+    await page.evaluate(() => { const s = $("molPieces"); s.value = "apart"; s.dispatchEvent(new Event("change", { bubbles: true })); }); await A.idle(page, 1200);
     await page.evaluate(() => undo()); await A.idle(page, 1500);
     const u1 = await page.evaluate(() => $("molPieces").value);
     await page.evaluate(() => redo()); await A.idle(page, 1500);
     const r1 = await page.evaluate(() => $("molPieces").value);
-    checks.push(check("Molecule (Plate card) saved in the design", +(await page.evaluate(() => DESIGN_IDS.includes("molPieces"))), "==", 1), check("… Undo: apart, Redo: one", u1 + "," + r1, "==", "apart,one"));
+    checks.push(check("Molecule (Plate card) saved in the design", +(await page.evaluate(() => DESIGN_IDS.includes("molPieces"))), "==", 1), check("… Undo: one, Redo: apart", u1 + "," + r1, "==", "one,apart"));
     // the Molecule card after a design undo
     await page.click("#molChips [data-mol=caffeine]"); await A.idle(page, 2500);
     await page.evaluate(() => undo()); await A.idle(page, 2000);

@@ -3,6 +3,16 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v126 · 2026-10-30
+
+- **Every bond of a molecule prints as a matching pair of strands.** Traced as one line, a ring's bonds used to be
+  walked once round (single) while chains and dead ends went out and back (double), which looked inconsistent. Now
+  every bond goes out and back, rings included. A ring's two strands (inside and outside) join with one small turn at
+  a corner. The line closes where it starts (a molecule starts as a Closed loop). Engine: `doubleAll` in the walk.
+  Test E49.
+- **A molecule prints as one piece by default** (Plate card, Molecule): exactly the line the Line step shows,
+  connectors and all. Bonds and labels apart is still there.
+
 ## v125 · 2026-10-30
 
 - **The sample 3D model is a low-poly skull cup** from Printables, "Low Poly Skull Pencil Cup"
