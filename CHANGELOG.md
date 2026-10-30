@@ -12,6 +12,8 @@ the page's title (it shows "dev" when the page runs from the source folder). Add
   Test E49.
 - **A molecule prints as one piece by default** (Plate card, Molecule): exactly the line the Line step shows,
   connectors and all. Bonds and labels apart is still there.
+- A molecule starts twice as wide as before (theobromine about 100 mm): every line is now a pair of strands, and a
+  double bond's two pairs need the room.
 
 ## v125 · 2026-10-30
 
