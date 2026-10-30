@@ -438,7 +438,7 @@ body[data-empty="1"] .pv-size { display: none; }
 .photo-box { display: grid; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) 0 0; margin-top: calc(4px * var(--space)); border-top: 1px solid var(--rule); }
 .photo-box[hidden] { display: none; }
 body:not([data-notes="1"]) .card.notes { display: none !important; }
-.card.notes h2 { padding-right: 70px; }
+.card.notes h2 { padding-right: 110px; }
 .notes-close { position: absolute; top: calc(10px * var(--space)); right: calc(44px * var(--space)); }
 .card.notes { position: relative; }
 /* the examples, once something is in: one row that scrolls sideways */
@@ -448,6 +448,18 @@ body:not([data-empty="1"]) .examples .chips .chip-btn { flex: none; }
   .toolbar .pl-long, .toolbar .tb-sep { display: none; }
   .toolbar { gap: calc(6px * var(--space)); }
   .trace-switch { padding-right: calc(8px * var(--space)); }
+  /* the 3D layers view: One copy / Whole plate in one line under the zoom, the Layer slider below them; the Bigger
+     button clear of the What's shown row */
+  .zoombar { flex-direction: column; align-items: flex-end; }
+  .copies-seg label { white-space: nowrap; }
+  .layerbar { top: 84px; }
+  .pathbar { max-width: calc(100% - 96px); }
+}
+/* phones: the preview's bar fits in one row (Trace, Play, undo, redo, File, View) */
+@media (max-width: 480px) {
+  body:not([data-pv="big"]) .stage > .toolbar:not(.tools) { gap: 4px; }
+  .toolbar .viewmenu > summary > span[aria-hidden="true"] { display: none; }
+  .toolbar > .btn:not(.icon), .toolbar .viewmenu > summary.btn { padding-inline: calc(9px * var(--space)); }
 }
 
 /* ---------- v115: a slim top to the settings, the tools on the Line step, notices that go, a bigger preview ---------- */

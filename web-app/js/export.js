@@ -130,7 +130,15 @@ function gcodeSettings() {
 // sticks. A project number joins them once designs are kept in a database (ROADMAP.md, Later).
 // name: what to name it after instead of the traced source (the art plotted as drawn)
 function designSlug(max = 20, name) {
-  const raw = name || (st.text ? $("textIn").value.split("\n")[0] || "text" : st.srcLabel || "design");
+  // (the art as drawn is never traced, so the traced source's name may be an earlier one's: the art names it)
+  const k = st.art.kind,
+    raw =
+      name ||
+      (st.text || k === "text"
+        ? $("textIn").value.split("\n")[0] || "text"
+        : k === "pattern"
+          ? patternName(st.art.pattern)
+          : (k === "molecule" && moleculeName()) || st.srcLabel || "design");
   return (
     raw
       .replace(/\.[a-z0-9]+$/i, "")
@@ -199,6 +207,12 @@ $("exportBtn").addEventListener("click", () => exportAs("svg", $("exportMsg")));
 $("dxfBtn").addEventListener("click", () => exportAs("chocdxf", $("gcodeMsg")));
 $("gcodeBtn").addEventListener("click", () => {
   const bad = readyUI().filter((r) => r.lvl === "bad");
+  if (printTraceOff()) {
+    // no export anyway: the line left from the last trace isn't what the art now is
+    readyOverride = false;
+    setStatus($("gcodeMsg"), "bad", TRACE_OFF_PRINT);
+    return;
+  }
   if (bad.length && !readyOverride) {
     // a red line: say so first; a second click exports anyway
     readyOverride = true;
@@ -216,9 +230,16 @@ $("gcodeBtn").addEventListener("click", () => {
 // ---------- ready to print: a checklist above Export G-code ----------
 // Each line: ok (✓), warn (⚠, prints but check it) or bad (✗, likely to fail); a click opens the card to fix it.
 let readyOverride = false;
+// a printer with Trace off: there's no line to print (st.final is the last trace's, not the art's now)
+const printTraceOff = () => !isModel() && !artForPlot() && ["drawn", "none"].includes(lineModeNow());
+const TRACE_OFF_PRINT = "Trace is off: turn it on to print.";
 function readyItems() {
   const out = [],
     add = (lvl, text, card) => out.push({ lvl, text, card });
+  if (printTraceOff()) {
+    add("bad", TRACE_OFF_PRINT, "h-fit");
+    return out;
+  }
   if (isModel() ? !st.model : !st.final) {
     add("bad", "Nothing traced yet", "h-src");
     return out;
@@ -380,6 +401,10 @@ async function exportAs(fmtName, msg) {
       "bad",
       "For 2D files of a model, use Draw this view on the Art step first (it adds a line drawing of the view to the art). The Print step exports the layers."
     );
+    return;
+  }
+  if ((fmtName === "gcode" || fmtName === "chocdxf") && printTraceOff()) {
+    setStatus(msg, "bad", TRACE_OFF_PRINT);
     return;
   }
   if (isModel() && fmtName === "chocdxf") {
