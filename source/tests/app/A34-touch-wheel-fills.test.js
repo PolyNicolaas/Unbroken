@@ -12,8 +12,8 @@ module.exports = {
     // steppers
     await page.evaluate(() => { $("wheel").checked = false; $("wheel").dispatchEvent(new Event("change")); }); // (every card open to count)
     await page.evaluate(() => $("expandAll").click()); // (in the View menu since v115) await page.waitForTimeout(200);
-    const bare = await page.evaluate(() => [...document.querySelectorAll('input[type="number"]')].filter((i) => i.offsetParent && !i.readOnly && !(i.parentElement.classList.contains("num") && i.parentElement.querySelectorAll(".num-btn").length === 2)).map((i) => i.id));
-    checks.push(check("Print step: number boxes without − and +", bare.length, "==", 0));
+    const bare = await page.evaluate(() => [...document.querySelectorAll('input[type="number"]')].filter((i) => i.offsetParent && !i.readOnly && i.dataset.stepper !== "off" && !(i.parentElement.classList.contains("num") && i.parentElement.querySelectorAll(".num-btn").length === 2)).map((i) => i.id));
+    checks.push(check("Print step: number boxes without − and +", bare.length, "==", 0)); // (the Test matrix's grid of boxes is too tight for them: data-stepper="off", v124)
     await page.locator("#copies").scrollIntoViewIfNeeded();
     await page.click("#copies ~ .num-btn"); await A.idle(page, 1500);
     checks.push(check("+ on Copies: 2, and the plate has two copies", +((await page.inputValue("#copies")) === "2" && /2 copies on the plate/.test(await page.textContent("#readyList"))), "==", 1));

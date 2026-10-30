@@ -385,6 +385,11 @@ function artVectors() {
 }
 const asDrawnOK = () => st.art.kind === "pattern" || st.art.kind === "text" || st.art.kind === "molecule";
 // a molecule (molecule.js) becomes the input in use; its own size until it's sized by hand
+// the Molecule card's Turn (molecule.js moleculeTurn): degrees, and the width that keeps the bonds as long
+function artMolTurn(deg, width) {
+  st.art.molTurn = deg;
+  if (width) st.art.molWidth = width;
+}
 // (keepTurn: the structure editor's Use it keeps the Turn; a new molecule starts upright)
 function artUseMolecule(M, keepTurn) {
   st.art.molecule = M;

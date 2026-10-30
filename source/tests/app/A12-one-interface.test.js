@@ -73,7 +73,7 @@ module.exports = {
         await page.click("label[for=viewDesign]"); await page.waitForTimeout(200);
         checks.push(check("big view follows the step: Line shows the line, with its tools and mini-map, no view tabs", +(await visible(page, "#view")) + +(await visible(page, "#selectBtn")) + +!(await visible(page, "#plate")) + +!(await visible(page, ".stage-tabs")), "==", 4));
         await A.print(page); await page.click("label[for=stLayers]"); await page.waitForTimeout(200);
-        checks.push(check("3D: cards that fold", await page.$$eval("section.card.choc-only .card-toggle", (b) => b.map((x) => x.querySelector(".t").textContent).join(",")), "==", "Printer,Plate,Layers,Export,Base,Infill,Fine-tuning,Test print,Printer profile")); // (the last five under More print settings since v119)
+        checks.push(check("3D: cards that fold", await page.$$eval("section.card.choc-only .card-toggle", (b) => b.map((x) => x.querySelector(".t").textContent).join(",")), "==", "Printer,Plate,Layers,Export,Base,Infill,Fine-tuning,Test print,Test matrix,Printer profile")); // (the last six under More print settings since v119)
         checks.push(check("one level of folding: no menus inside cards", await nested(page), "==", 0));
         checks.push(check("3D: Fine-tuning starts folded", +(await folded(page, "card-h-machine")), "==", 1));
         await page.click("#card-h-machine .card-toggle"); await page.waitForTimeout(100);

@@ -395,9 +395,10 @@ function moleculeTurned(mol, deg) {
 function moleculeTurn(deg) {
   if (!st.art.molecule) return;
   const before = moleculeDrawn().r;
-  st.art.molTurn = (((Math.round(deg) % 360) + 540) % 360) - 180;
+  artMolTurn((((Math.round(deg) % 360) + 540) % 360) - 180); // art.js
   const after = moleculeDrawn().r;
-  if (st.art.molWidth && before && after) st.art.molWidth *= after.box[0] / Math.max(1e-9, before.box[0]);
+  if (st.art.molWidth && before && after)
+    artMolTurn(st.art.molTurn, st.art.molWidth * (after.box[0] / Math.max(1e-9, before.box[0])));
   moleculeTurnUI();
   artUse("molecule"); // art.js
   recordSoon();
