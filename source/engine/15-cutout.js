@@ -243,8 +243,9 @@
   }
 
   // Cut out the object. rgba w × h; o: box [x0, y0, x1, y1] px (the object is inside it; outside is background),
-  // keep and drop (strokes [[x, y, x, y, …]…] px: more of the object, or not the object), brush (the strokes' radius,
-  // px), side (the longest side worked at, px; default 240), rounds (default 4). Returns { mask (Uint8Array 0/1, mw ×
+  // keep and drop (strokes [[x, y, x, y, …]…] px: more of the object, or not the object; a stroke can be { pts, r }
+  // with its own radius), brush (the radius of strokes without one, px), side (the longest side worked at, px; default
+  // 240), rounds (default 4). Returns { mask (Uint8Array 0/1, mw ×
   // mh), mw, mh, k (mask px per picture px), share (the object's share of the box) }.
   UNB.cutout = function (rgba, w, h, o = {}) {
     const side = o.side || 240,
@@ -283,10 +284,21 @@
       y1 = Math.min(mh, Math.ceil(Math.max(bx[1], bx[3]) * k));
     for (let y = 0; y < mh; y++)
       for (let x = 0; x < mw; x++) if (x < x0 || x >= x1 || y < y0 || y >= y1) fixed[y * mw + x] = 2;
-    const r = Math.max(1.5, (o.brush || 12) * k),
-      scaled = (s) => s.map((v) => v * k);
-    for (const s of o.keep || []) markStroke(fixed, mw, mh, scaled(s), r, 1);
-    for (const s of o.drop || []) markStroke(fixed, mw, mh, scaled(s), r, 2);
+    // (a stroke is its points, drawn with the brush, or { pts, r }: its points and its own radius, px)
+    const cutStroke = (s, v) => {
+      const pts = Array.isArray(s) ? s : s.pts,
+        r = Math.max(1.5, ((!Array.isArray(s) && s.r > 0 ? s.r : o.brush) || 12) * k);
+      markStroke(
+        fixed,
+        mw,
+        mh,
+        pts.map((q) => q * k),
+        r,
+        v
+      );
+    };
+    for (const s of o.keep || []) cutStroke(s, 1);
+    for (const s of o.drop || []) cutStroke(s, 2);
     // a box that covers the whole picture leaves no background to learn from: a band along its edge counts as
     // background
     // then (a photo's edges are nearly always background)

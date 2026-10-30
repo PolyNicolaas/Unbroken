@@ -13,6 +13,7 @@ const cam = {
   stream: null,
   facing: "environment",
   timer: null,
+  seq: 0, // each opening's number: a camera that starts after a newer opening (or Cancel) is stopped
   still: null, // the photo taken (a canvas), while its corners are adjusted
   corners: null, // its page's corners, px
   live: null, // the outline shown over the live camera (px of the video frame), smoothed
@@ -23,6 +24,7 @@ const camKind = () => (document.querySelector('input[name="camKind"]:checked') |
 // ---------- opening and closing ----------
 async function cameraOpen() {
   cameraStop();
+  const my = cam.seq;
   cam.from = "camera";
   const box = $("camera");
   box.hidden = false;
@@ -36,19 +38,26 @@ async function cameraOpen() {
     $("camFile").click();
     return;
   }
+  let stream;
   try {
-    cam.stream = await md.getUserMedia({
+    stream = await md.getUserMedia({
       video: { facingMode: { ideal: cam.facing }, width: { ideal: 1920 }, height: { ideal: 1440 } },
       audio: false,
     });
   } catch (e) {
+    if (my !== cam.seq) return; // (a newer opening, or closed meanwhile)
     cameraClose();
     const why = e && e.name === "NotAllowedError" ? "The camera wasn't allowed" : "No camera could be opened";
     toast(`${why}: choose a photo instead`, true);
     $("camFile").click();
     return;
   }
-  if ($("camera").hidden) return cameraStop(); // closed while it was starting
+  // closed, or opened again (Switch camera), while it was starting: this camera isn't wanted
+  if (my !== cam.seq || $("camera").hidden) {
+    for (const t of stream.getTracks()) t.stop();
+    return;
+  }
+  cam.stream = stream;
   const v = $("camVideo");
   v.srcObject = cam.stream;
   try {
@@ -56,11 +65,14 @@ async function cameraOpen() {
   } catch (e) {
     /* (autoplay: muted, so it plays) */
   }
+  if (my !== cam.seq) return; // (stopped while it started playing: cameraStop stopped its stream)
   cam.live = null;
   $("camMsg").textContent = "Hold the camera over the page";
+  clearInterval(cam.timer);
   cam.timer = setInterval(cameraLook, 280);
 }
 function cameraStop() {
+  cam.seq++;
   clearInterval(cam.timer);
   cam.timer = null;
   if (cam.stream) for (const t of cam.stream.getTracks()) t.stop();
@@ -309,6 +321,7 @@ async function photoMake(photo, label) {
     ]);
   } catch (e) {
     if (e !== CANCELLED) toast("The photo couldn't be cleaned up: " + ((e && e.message) || e), true);
+    if (my === photoSeq) photoPending = null; // (the card goes back to the picture's own settings)
     photoUI();
     return;
   }
@@ -321,9 +334,30 @@ async function photoMake(photo, label) {
   artUsePhoto(c, label || (st.art.picture && st.art.picture.label) || "photo", photo); // art.js
   recordSoon();
 }
+// The corners as dragged, untangled: in order round their middle (clockwise on screen, the first one first), so
+// corners dragged past each other make no bow-tie. Returns them and their four-sided area's share of the photo.
+function cameraCornersTidy(q, w, h) {
+  const cx = q.reduce((a, p) => a + p[0], 0) / 4,
+    cy = q.reduce((a, p) => a + p[1], 0) / 4,
+    ang = (p) => Math.atan2(p[1] - cy, p[0] - cx),
+    a0 = ang(q[0]),
+    turn = (p) => (ang(p) - a0 + 4 * Math.PI) % (2 * Math.PI),
+    out = q.map((p) => p.slice()).sort((a, b) => turn(a) - turn(b));
+  let area = 0;
+  for (let i = 0; i < 4; i++) area += out[i][0] * out[(i + 1) % 4][1] - out[(i + 1) % 4][0] * out[i][1];
+  return { corners: out, share: Math.abs(area) / 2 / Math.max(1, w * h) };
+}
 function cameraUse(whole) {
   const s = cam.still;
   if (!s) return;
+  if (!whole) {
+    const T = cameraCornersTidy(cam.corners, s.width, s.height);
+    if (T.share < 0.03) {
+      $("camMsg").textContent = "The corners are too close together: drag them out to the page's corners";
+      return;
+    }
+    cam.corners = T.corners;
+  }
   const kind = camKind(),
     prev = st.art.picture && st.art.picture.photo,
     again = cam.from === "picture" && prev && prev.raw === s, // its corners adjusted: its settings stay
@@ -411,7 +445,7 @@ $("phCorners").addEventListener("click", () => {
 $("picPhoto").addEventListener("click", () => {
   const p = st.art.picture;
   if (!p) return;
-  const src = p.orig || p.canvas,
+  const src = p.canvas, // (as shown: turned and straightened)
     k = Math.min(1, CAM_MAX / Math.max(src.width, src.height)),
     c = document.createElement("canvas");
   c.width = Math.round(src.width * k);

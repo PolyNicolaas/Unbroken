@@ -467,8 +467,10 @@
       for (let c = 0; c < 3; c++) {
         const v = ch[c];
         if (gain) for (let i = 0; i < N; i++) v[i] = Math.min(255, v[i] * gain[i]);
-        const lo = shareBelow(v, 0.005),
-          hi = Math.max(lo + 16, shareBelow(v, 0.995));
+        // (a channel with hardly any spread, e.g. a plain white wall: stretched down from its lightest, so white stays
+        // white)
+        const hi = Math.max(16, shareBelow(v, 0.995)),
+          lo = Math.min(shareBelow(v, 0.005), hi - 16);
         for (let i = 0; i < N; i++) out[4 * i + c] = ((v[i] - lo) / (hi - lo)) * 255;
       }
       for (let i = 0; i < N; i++) out[4 * i + 3] = 255;

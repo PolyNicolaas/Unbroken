@@ -131,7 +131,8 @@ function lineSpec(W, sens, textMask, region) {
   }
   return {
     blurred: W.blurred,
-    levels: W.levels ? { lab: W.levels.lab, edge: levelEdgeFlags() } : null, // grey levels: their edges (levels.js)
+    // grey levels: their edges, and a filled block's run along the border (levels.js)
+    levels: W.levels ? { lab: W.levels.lab, edge: levelEdgeFlags(), border: levelBorderFlags() } : null,
     mode: s.mode,
     sens,
     split: CFG.engine.packedStrokeSplit,
@@ -181,6 +182,7 @@ function traceWalk(W, s, engine = PIPE) {
   ]);
 }
 async function extract(g, P = Object.create(st), again = false) {
+  if (st.art.kind === "model") return; // a model is sliced (model.js), not traced
   // workflow.js: Trace off, as drawn: nothing to trace (the page redrawn)
   if (lineModeNow() === "drawn") return plotSoon(0);
   if (lineModeNow() === "none") {
@@ -212,7 +214,7 @@ async function extract(g, P = Object.create(st), again = false) {
     Object.assign(P, { final: null, plot: null, pfill: null, finalVer: (st.finalVer || 0) + 1 });
     Object.assign(st, P);
     forgetLayers();
-    setChip("No lines found — lower the threshold or the speck filter");
+    setChip(levelNoLinesAdvice(false) || "No lines found — lower the threshold or the speck filter");
     render();
     drawPlate();
     drawMini();

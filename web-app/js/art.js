@@ -352,7 +352,12 @@ function artVectors() {
     // the strokes on pen 1, then each filled grey on its own pen (its own layer)
     const layers = S.strokes.length ? [{ name: "strokes", pen, strokes: S.strokes }] : [];
     for (const f of fills)
-      if (f.strokes.length) layers.push({ name: `grey ${f.level + 1} fill`, pen: f.color, strokes: f.strokes });
+      if (f.strokes.length)
+        layers.push({
+          name: `${levelColour() ? "colour" : "grey"} ${f.level + 1} fill`,
+          pen: f.color,
+          strokes: f.strokes,
+        });
     return { W: S.w, H: S.h, layers, pictures: 0 };
   }
   if (A.kind === "pattern") {
@@ -397,12 +402,21 @@ function artSaved() {
     width: st.art.width,
     molecule: st.art.molecule || null,
     molWidth: st.art.molWidth || null,
-    picture: P ? { label: P.label, sample: P.sample, key: P.canvas.__art } : null,
+    picture: P
+      ? { label: P.label, sample: P.sample, key: P.canvas.__art, turn: P.turn || 0, angle: P.angle || 0 }
+      : null,
   };
 }
 const artCanvas = () => (st.art.picture ? st.art.picture.canvas : null);
-// Put saved art back (pic: the picture's canvas). A v101 design (layers) comes back as the top shown layer it had.
-function artRestore(a, pic) {
+// what undo keeps by reference beside the picture's canvas: the picture as loaded (before its turn) and the photo it
+// was cleaned from
+function artPicMore() {
+  const P = st.art.picture;
+  return P ? { orig: P.orig || null, photo: P.photo || null, turn: P.turn || 0, angle: P.angle || 0 } : null;
+}
+// Put saved art back (pic: the picture's canvas; more: artPicMore's, from undo). A v101 design (layers) comes back as
+// the top shown layer it had. A design file has no picture as loaded: the turned picture it saved is the one loaded.
+function artRestore(a, pic, more) {
   if (a.layers) {
     const shown = a.layers.filter((l) => l.on),
       top = shown.find((l) => l.kind === "model") || shown[shown.length - 1] || a.layers[a.layers.length - 1],
@@ -427,9 +441,14 @@ function artRestore(a, pic) {
           canvas: pic.__art ? pic : tagged(pic),
           label: (a.picture && a.picture.label) || "picture",
           sample: (a.picture && a.picture.sample) || "user",
+          ...(more && more.orig ? { orig: more.orig, turn: more.turn, angle: more.angle } : {}),
+          ...(more && more.photo ? { photo: more.photo } : {}),
         }
       : null,
   };
+  const P = st.art.picture;
+  pictureTurnUI((P && P.turn) || 0, (P && P.angle) || 0);
+  if (typeof moleculeUI === "function") moleculeUI(); // molecule.js: the Molecule card's box and message
 }
 // a design from before the Art step (v100 and older): its source as it was
 function artFromOld(kind, canvas, label, pattern) {
@@ -502,6 +521,10 @@ function turnedCanvas(src, deg) {
   return out;
 }
 let turnTimer = null;
+function pictureTurnUI(t, a) {
+  $("picAngle").value = a;
+  $("picAngleVal").textContent = `${a > 0 ? "+" : ""}${a}°` + (t ? ` · ${t * 90}° turned` : "");
+}
 function pictureTurn(turn, angle) {
   const p = st.art.picture;
   if (!p) return;
@@ -510,7 +533,7 @@ function pictureTurn(turn, angle) {
     a = angle ?? p.angle ?? 0;
   const c = t || a ? turnedCanvas(orig, t * 90 + a) : orig;
   st.art.picture = { ...p, canvas: c === orig ? orig : tagged(c), orig, turn: t, angle: a };
-  $("picAngleVal").textContent = `${a > 0 ? "+" : ""}${a}°` + (t ? ` · ${t * 90}° turned` : "");
+  pictureTurnUI(t, a);
   const P = UNB.PATTERNS[st.art.pattern.style];
   artUse(st.art.kind === "pattern" && P && P.tone ? "pattern" : "picture");
   recordSoon();

@@ -227,12 +227,13 @@ function settings() {
   };
 }
 
-// a new source: forget what was painted, erased or placed by hand on the old one
-function resetHandEdits() {
+// a new source: forget what was painted, erased or placed by hand on the old one (keepCut: the cut-out stays, as it
+// belongs to the picture coming in, or to the picture to go back to)
+function resetHandEdits(keepCut) {
   st.erase = [];
   st.start = null;
   st.bgAt = null;
-  st.cutout = null;
+  if (!keepCut) st.cutout = null;
   if (typeof cutoutUI === "function") cutoutUI(); // cutout.js (loaded after this file)
   st.zones = { cross: [], lane: [] };
   st.zoneVer = (st.zoneVer || 0) + 1;
@@ -248,12 +249,13 @@ function setSource(canvas, label) {
     st.imageSource = null;
     $("sizeRow").hidden = false;
   }
-  canvas.__id = ++srcCounter;
+  // (the same canvas back keeps its tag: undo steps and the cut-out know it by it)
+  if (!canvas.__id) canvas.__id = ++srcCounter;
   st.source = canvas;
   st.rr = 0;
   st.sizeUser = false;
   st.sel = null; // a new image: proportions unknown, size back to the starting mark
-  resetHandEdits();
+  resetHandEdits(typeof cutoutKeepFor === "function" && cutoutKeepFor(canvas)); // cutout.js
   if (st.penFill) st.penFill.areas = [];
   st.srcLabel = label;
   $("srcinfo").textContent = label;
@@ -401,7 +403,7 @@ function useSource(kind, canvas, label) {
   if (kind === "text") {
     const was = document.body.dataset.src === "text";
     document.body.dataset.src = "text";
-    if (!was) resetHandEdits();
+    if (!was) resetHandEdits(true); // (a cut-out is the picture's: unused by the text, there when it's back)
     textSizeUI(true);
     textChanged();
     return;

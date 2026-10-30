@@ -69,6 +69,7 @@ const DESIGN_IDS = [
   "copyGap",
   "plateRot",
   "textPieces",
+  "molPieces",
   "gOx",
   "gOy",
   "gZ",
@@ -164,6 +165,7 @@ function snapshot() {
     src: st.text ? null : st.source,
     imageSource: st.text ? st.imageSource : null,
     pics: artCanvas(), // art.js: the picture's canvas (kept while another input is in use)
+    picMore: artPicMore(), // art.js: the picture as loaded and its photo, so its turn and Photo card come back
     key: stateKey(d, st.text ? null : st.source),
   };
 }
@@ -224,7 +226,7 @@ function syncDesignUI() {
   artUI(); // art.js: the layer list and the chosen layer's cards
 }
 // Returns a note when part of the design couldn't come back (a 3D model that isn't the one loaded), else "".
-function applyDesign(d, src, imageSource, pics) {
+function applyDesign(d, src, imageSource, pics, picMore) {
   let note = "";
   restoring = true;
   try {
@@ -270,7 +272,7 @@ function applyDesign(d, src, imageSource, pics) {
     st.penFill = s.penFill ? structuredClone(s.penFill) : defaultPenFill();
     st.pfill = null; // older design files: no fill pens
     // the Art step's input (art.js); a design from before the Art step comes back as its source was
-    if (s.art) artRestore(s.art, pics || null);
+    if (s.art) artRestore(s.art, pics || null, picMore || null);
     else artFromOld($("srcModel").checked ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
     if ($("srcModel").checked) {
       // a 3D model: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
@@ -340,7 +342,7 @@ function undo() {
   if (hi <= 0) return;
   hi--;
   const h = hist[hi];
-  const note = applyDesign(h.d, h.src, h.imageSource, h.pics);
+  const note = applyDesign(h.d, h.src, h.imageSource, h.pics, h.picMore);
   histButtons();
   toast(note ? `Undone · ${note}` : "Undone", !!note);
 }
@@ -349,7 +351,7 @@ function redo() {
   if (hi >= hist.length - 1) return;
   hi++;
   const h = hist[hi];
-  const note = applyDesign(h.d, h.src, h.imageSource, h.pics);
+  const note = applyDesign(h.d, h.src, h.imageSource, h.pics, h.picMore);
   histButtons();
   toast(note ? `Redone · ${note}` : "Redone", !!note);
 }
@@ -430,6 +432,12 @@ async function openDesign(f) {
     const file = JSON.parse(await f.text());
     if (!file || file.app !== DESIGN_APP || !file.design || !file.design.v)
       throw new Error("this isn't an Unbroken design file");
+    // checked before anything changes, so a file that can't open leaves the design as it was
+    const ds = file.design.s;
+    if (ds && ds.art && !Object.hasOwn(KIND_RADIO, ds.art.kind))
+      throw new Error("its art is of a kind this app doesn't know");
+    if (ds && ["outW", "spacing", "simplify", "N"].some((k) => ds[k] !== undefined && !Number.isFinite(ds[k])))
+      throw new Error("its size or line settings aren't numbers");
     let canvas = null;
     if (file.image) {
       canvas = await loadImageURL(file.image);

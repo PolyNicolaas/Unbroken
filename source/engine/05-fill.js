@@ -915,7 +915,8 @@
             Y = Math.round(y);
           return X >= 0 && Y >= 0 && X < w && Y < h && !out[Y * w + X] && dist[Y * w + X] >= inset;
         };
-      const sp = Math.max(1, F.spacing || 4);
+      // (finer than a pixel is fine: the strokes are clipped at every half pixel; a quarter pixel keeps the count sane)
+      const sp = Math.max(0.25, F.spacing || 4);
       // a polyline cut to the parts inside the level (sampled every half pixel), pieces under 2 px dropped
       const clip = (pts, closed, into) => {
         const n = pts.length / 2,
