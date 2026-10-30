@@ -49,9 +49,9 @@ module.exports = {
     await page.evaluate(() => { $("overlaps").checked = true; $("overlaps").dispatchEvent(new Event("change")); });
     await page.selectOption("#artStyle", "spirograph");
     const hid = await page.isHidden("#artP-wheel2Teeth");
-    await page.check("#artP-wheel2");
+    await A.setValue(page, "#artP-wheels", 2); await A.idle(page, 500); // (Wheels, v127: a count in place of Second wheel)
     const shown = await page.isVisible("#artP-wheel2Teeth");
-    await page.uncheck("#artP-wheel2"); await A.setValue(page, "#artP-wheelTeeth", 60); await A.idle(page, 2500);
+    await A.setValue(page, "#artP-wheels", 1); await A.setValue(page, "#artP-wheelTeeth", 60); await A.idle(page, 2500);
     checks.push(check("Spirograph: the second wheel's settings show only with a second wheel", +(hid && shown && (await page.isHidden("#artP-wheel2Teeth"))), "==", 1));
     const sp = await page.evaluate(() => ({ vec: !!(st.walk && st.walk.vector), cross: UNB.findCrossings(st.final.re, st.final.im, !st.open).length, val: $("uncrossVal").textContent }));
     checks.push(check("… followed exactly as 1 part, and with Allow overlaps its crossings kept (crossings)", +((await parts(page)) === 1 && sp.vec && /kept \(overlaps\)/.test(sp.val)) * sp.cross, ">", 0));
