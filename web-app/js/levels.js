@@ -41,7 +41,9 @@ function levelFillSpecs() {
   // (colour levels: a block's pen starts with its own colour, until a pen is picked)
   return Array.from({ length: n }, (_, j) => {
     const f = { ...defaultFill(j, n), ...(saved[j] || {}) };
-    if (!(saved[j] && saved[j].color) && levelColour() && levelHex(j)) f.color = levelHex(j);
+    // (a design from before v123 saved every pen's colour, black unless picked: black counts as not picked)
+    const picked = saved[j] && saved[j].color && saved[j].color !== "#111111";
+    if (!picked && levelColour() && levelHex(j)) f.color = levelHex(j);
     return f;
   });
 }
@@ -91,7 +93,8 @@ const levelHex = (j) => {
 const levelEdgeFlags = () => [...levelModes()].map((c) => c === "t" || c === "b");
 // which greys are traced and filled (Both): their blocks' runs along the picture's border are lines too, so a block
 // touching the edge is closed off and its fill reaches the edge (UNB.levelEdges)
-const levelBorderFlags = () => [...levelModes()].map((c) => c === "b");
+// (a printer's only: a pen plotter's fill is clipped to its block, and its edge isn't a line of the drawing)
+const levelBorderFlags = () => [...levelModes()].map((c) => !artForPlot() && c === "b");
 // the chip's advice when nothing was traced with levels on (pipeline.js, workflow.js), or null when levels are off
 function levelNoLinesAdvice(strokes) {
   if (!levelSettings()) return null;

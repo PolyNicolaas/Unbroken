@@ -434,7 +434,8 @@ async function openDesign(f) {
       throw new Error("this isn't an Unbroken design file");
     // checked before anything changes, so a file that can't open leaves the design as it was
     const ds = file.design.s;
-    if (ds && ds.art && !Object.hasOwn(KIND_RADIO, ds.art.kind))
+    // (a v101 file keeps its art as layers, with no kind: artRestore takes those)
+    if (ds && ds.art && !ds.art.layers && ds.art.kind !== undefined && !Object.hasOwn(KIND_RADIO, ds.art.kind))
       throw new Error("its art is of a kind this app doesn't know");
     if (ds && ["outW", "spacing", "simplify", "N"].some((k) => ds[k] !== undefined && !Number.isFinite(ds[k])))
       throw new Error("its size or line settings aren't numbers");

@@ -79,6 +79,23 @@ module.exports = {
       const n = await page.evaluate(() => [$("notesCount").getBoundingClientRect(), $("notesClose").getBoundingClientRect()].map((r) => ({ left: r.left, right: r.right, top: r.top, bottom: r.bottom })));
       checks.push(check("phone: the suggestion box's count clear of Close", +ov(n[0], n[1]), "==", 0));
       allErrors.push(...errors); await close(); }
+    // the review after the fixes: a v101 design (art as layers, no kind) still opens; a pen plotter's Both draws no line
+    // along the picture's edge (only a printer's Fill does); a Vase start shows the model's readout
+    { const { page, errors, close } = await A.open(ctx, { example: "leaf" }), fs = require("fs"), os = require("os"), path = require("path");
+      const [df] = await Promise.all([page.waitForEvent("download"), page.click("#fileMenu summary").then(() => page.click("#saveDesign"))]);
+      const f = JSON.parse(fs.readFileSync(await df.path(), "utf8"));
+      f.design.s.art = { sel: 1, layers: [{ id: 1, kind: "picture", on: true, name: "leaf", picture: { sample: "user" } }] };
+      delete f.artImage; f.artImages = { 1: "source" };
+      const p = path.join(os.tmpdir(), "a47-v101.unbroken.json"); fs.writeFileSync(p, JSON.stringify(f));
+      await page.evaluate(() => artUse("pattern")); await A.idle(page, 1500);
+      await page.setInputFiles("#designFile", p); await A.idle(page, 1500);
+      checks.push(check("a v101 design (art as layers) opens, as a picture", +(/Opened/.test(await page.textContent("#toast")) && (await page.evaluate(() => st.art.kind)) === "picture"), "==", 1));
+      const flags = await page.evaluate(() => { $("levels").value = 2; $("levelModes").value = "bs"; const r = {}; r.print = levelBorderFlags().join(); $("artForPlot").checked = true; r.plot = levelBorderFlags().join(); $("artForPrint").checked = true; $("levels").value = 0; return r; });
+      checks.push(check("edge lines for Both: a printer's only", +(flags.plot === "false,false" && flags.print.startsWith("true")), "==", 1));
+      allErrors.push(...errors); await close(); }
+    { const { page, errors, close } = await A.open(ctx, { example: "vase" });
+      checks.push(check("a Vase start: the model's readout, not Nothing yet", +!/Nothing yet/.test(await page.textContent("#chip")), "==", 1));
+      allErrors.push(...errors); await close(); }
     checks.push(check("page errors", allErrors.length, "==", 0));
     return { checks, notes: notes.join("; ") + (allErrors.length ? "  \n" + allErrors.join("  \n") : "") };
   },

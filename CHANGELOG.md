@@ -3,6 +3,61 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v123 · 2026-10-29
+
+Bug hunt: four reviewers went through the picture, molecule, levels and workflow code; every bug below was reproduced
+with a script first and has a test now (E43–E45, A44–A47).
+
+**Printing and export**
+- With Trace off on a printer, Export G-code (and the DXF for choc OS) refuses and the ready list says "Trace is off:
+  turn it on to print". It used to export the last traced line under the new name.
+- Export G-code or Export SVG tapped in the Next bar shows a message when it can't export (on an iPad the message was
+  far down the page, so the tap seemed to do nothing).
+- When Undo or Open design switches between a printer and a pen plotter, the last step follows (Print or Plot, with
+  its own cards and Next bar).
+- A pattern, molecule or text plotted as drawn is saved and exported under its own name.
+
+**Pictures, photos and the cut-out**
+- Undo and Redo keep the picture's turn and straightening, and a photo's Photo card.
+- Each Keep and Remove stroke of Select the object keeps its own brush size (a big dab no longer widened every earlier
+  stroke).
+- The cut-out stays when the Photo card cleans the same photo again, and when you switch to Text and back; undoing back
+  to a cut-out no longer clears Redo; the busy chip stays on until the cut-out is done.
+- Switching camera while the camera is starting no longer leaves a camera running after Cancel.
+- Clean up as a photo starts from the picture as shown (turned and straightened).
+- Page corners dragged past each other are untangled; corners dragged almost together are refused.
+- Object cleaning keeps a plain light photo light (it could turn black).
+
+**Levels and fills**
+- Levels set on a picture no longer carry over into a molecule or a pattern (their trace was following the old block
+  edges, with the card hidden).
+- On a printer, a level set to Fill also fills blocks that touch the picture's edge.
+- Fill pens follow the picture again: a new picture or a switch to Colours gives each level its own colour, unless a
+  pen was picked by hand.
+- Tapping a level's mode for a printer no longer turns the pen plotter's Fills into Both.
+- Pen plotter fills can be finer than one working pixel.
+- Colours with Light lines on dark keeps black as black.
+- With every level on Skip, the message says so; in Colours, SVG layers and the controls say "colour N", and empty
+  colour rows are hidden.
+
+**Molecules**
+- An NH's H goes on a free side of the atom (often below, in a ring), so it no longer sits on a bond and prints twice.
+- The Plate card's Molecule setting (Bonds and labels apart / One piece) is saved in design files and can be undone.
+- Structure editor: Undo keeps each drawing's SMILES with it; Ctrl/⌘ Shift Z (or Ctrl/⌘ Y) redoes; turning the phone
+  fits the structure to the screen again; Clean up on an atom with too many bonds says which.
+- After Undo, Redo or opening a design, the Molecule card shows the molecule that came back.
+- A molecule without bonds gets a correct plate hint; every element is known (U, Ra, Pu …), and charged atoms such as
+  BH₄⁻ get the right hydrogens.
+
+**Elsewhere**
+- Phones: the preview bar fits on screen; One copy / Whole plate no longer covers the Layer slider; Bigger no longer
+  covers the Fill checkbox; the suggestion box's Close no longer covers its count.
+- Switching the Vase 3D model to a pen plotter no longer causes an error; starting on the Vase example can be saved and
+  undone.
+- A design saved as drawn no longer reopens saying "Nothing yet"; a broken design file is refused without changing the
+  open design.
+- With Trace off, plotting a picture says to turn Trace on (it mentioned a Traced line choice that no longer exists).
+
 ## v122 · 2026-10-29
 
 - **The structure editor fits on an iPad.** In Safari the drawing area grew past its place and covered the editor's
