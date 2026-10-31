@@ -41,7 +41,23 @@ function buildParams(style) {
   paramsFor = key;
   const box = $("artParams");
   box.textContent = "";
+  // settings with a group (the Spirograph's ring, each wheel, …) go together under its heading, a divider above
+  let into = box,
+    group = null;
   for (const q of UNB.PATTERNS[style].params) {
+    if ((q.group || null) !== group) {
+      group = q.group || null;
+      if (group) {
+        into = document.createElement("div");
+        into.className = "pgroup";
+        into.dataset.group = group;
+        const h = document.createElement("div");
+        h.className = "pgroup-h";
+        h.textContent = group;
+        into.appendChild(h);
+        box.appendChild(into);
+      } else into = box;
+    }
     const id = `artP-${q.key}`,
       wrap = document.createElement("div");
     wrap.className = "row";
@@ -64,7 +80,7 @@ function buildParams(style) {
         patternUI();
         patternEdited(patternNow());
       });
-      box.appendChild(wrap);
+      into.appendChild(wrap);
       continue;
     } else if (q.type === "select") {
       wrap.innerHTML = `<label class="field"><span></span><select id="${id}"></select></label>`;
@@ -80,7 +96,7 @@ function buildParams(style) {
       patternUI();
       patternEdited(patternNow());
     });
-    box.appendChild(wrap);
+    into.appendChild(wrap);
   }
 }
 // a path setting's box: its points, or null
@@ -141,6 +157,9 @@ function patternUI() {
       row.querySelector('[data-path="clear"]').disabled = !v[q.key];
     }
   }
+  // a group with nothing showing (Wheel 4 with 3 wheels) hidden, heading and all
+  for (const g of $("artParams").querySelectorAll(".pgroup"))
+    g.hidden = ![...g.querySelectorAll(".row")].some((r) => !r.hidden);
   $("artShuffle").hidden = !P.seed;
   const suits = artForPlot()
     ? "Made for plotting: drawn as exact lines on the Plot step (Plot as drawn), as fine as your pen allows."
