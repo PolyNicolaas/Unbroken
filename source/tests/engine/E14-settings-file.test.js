@@ -57,7 +57,7 @@ module.exports = {
       cornerRounding: rng(0, 5), baseLayers: rng(0, 50), wallLayers: rng(0, 500), baseDensity: rng(0, 100), basePattern: oneOf("rings", "lines"), baseAngle: rng(-90, 90), baseTurn: rng(1, 50), infillDensity: rng(0, 100), infillPattern: oneOf("rings", "lines"), infillAngle: rng(-90, 90), infillTurn: rng(1, 50), baseMinArea: rng(0, 400), infillMinArea: rng(0, 400), size: (x) => oneOf("smallest", "medium", "high")(x) || rng(1, 5000)(x),
       needle: (x) => nIds.has(x), lineWidth: rng(0.05, 5), gapBetweenLines: rng(0, 20), limitToPlate: isBool,
       text: (x) => typeof x === "string", font: (x) => !!FONTS[x], letterHeight: rng(1, 500), letterSpacing: oneOf("font-default", "even", "joined"),
-      letterGap: nullOr(rng(0, 100)), wordGap: nullOr(rng(0, 200)), lineGap: rng(1, 5), align: oneOf("left", "center", "right"),
+      letterGap: nullOr(rng(0, 100)), wordGap: nullOr(rng(0, 200)), lineGap: rng(1, 5), align: oneOf("left", "center", "right"), joinLetters: isBool, closeNearMisses: isBool, leaveOutIJDots: isBool, measuredHeight: isBool,
       chocolate: (x) => cIds.has(x), copies: rng(1, 200), copySpacing: rng(0, 200), rotation: oneOf("auto", "straight"), textLines: oneOf("each", "one"),
       wallCount: (x) => num(x, 1, 5), closeGaps: (x) => num(x, 0, 10), smallestShape: (x) => num(x, 0, 100), drawBridges: isBool, showShapes: isBool, penColors: (x) => Array.isArray(x) && x.length >= 1 && x.length <= 8 && x.every(hex), smoothCurves: isBool, printer: (x) => (S.printers || []).some((q) => q.id === x), paper: oneOf("a6", "a5", "a4", "a3", "a2", "a1", "letter", "legal", "tabloid", "6x8", "9x12", "11x14", "18x24", "plate", "custom"), paperOrientation: oneOf("landscape", "portrait"), paperSize: (x) => Array.isArray(x) && x.length === 2 && x.every(rng(20, 2000)), paperMargin: rng(0, 100), penWidth: rng(0.05, 5), simplify: rng(0, 0.5),
       lineView: oneOf("centreline", "centerline", "width", "printed"), background: oneOf("source", "lines", "none"),
@@ -72,7 +72,7 @@ module.exports = {
       for (const f of ["traceStyle", "smoothing", "ignoreSpecks", "dropFarParts", "looseEnds", "imagePrep"]) if (!DEF[f](pr[f])) bad.push(`presets.${k}.${f}: ${JSON.stringify(pr[f])} isn't an allowed value`);
     }
     const R = S.rules || {};
-    for (const [k, lo, hi] of [["maxTextLines", 1, 20], ["letterGapShare", 0, 2], ["minLetterGap", 0, 10], ["wordGapShare", 0, 5], ["minWordGap", 0, 20], ["undoSteps", 1, 1000]]) if (!num(R[k], lo, hi)) bad.push(`rules.${k} should be a number from ${lo} to ${hi}`);
+    for (const [k, lo, hi] of [["maxTextLines", 1, 20], ["letterGapShare", 0, 2], ["minLetterGap", 0, 10], ["wordGapShare", 0, 5], ["minWordGap", 0, 20], ["minLetterStrokes", 1, 30], ["undoSteps", 1, 1000]]) if (!num(R[k], lo, hi)) bad.push(`rules.${k} should be a number from ${lo} to ${hi}`);
     if (!R.minLetterHeight || !num(R.minLetterHeight.default, 1, 50)) bad.push("rules.minLetterHeight needs a default (line widths)");
     else for (const [f, v] of Object.entries(R.minLetterHeight)) if (f !== "default" && (!FONTS[f] || !num(v, 1, 50))) bad.push(`rules.minLetterHeight.${f}: unknown font or not a number`);
     const E = S.engine || {};

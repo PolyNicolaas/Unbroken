@@ -524,6 +524,14 @@
           <input type="radio" name="align" id="alCenter" value="center" checked><label for="alCenter">Center</label>
           <input type="radio" name="align" id="alRight" value="right"><label for="alRight">Right</label>
         </div>
+        <div class="pgroup" id="txtPrintOpts">
+          <span class="pgroup-h">Lettering for a printer</span>
+          <label class="check" title="The letters of a word are linked along the baseline, like joined handwriting, instead of by the tracer's short hops wherever they fall"><input type="checkbox" id="txtJoin" checked> <span>Join letters along the baseline</span></label>
+          <label class="check" title="A stroke end that stops within a stroke's width of another part of its letter would run into it in chocolate anyway: draw it on to meet it, one turn less"><input type="checkbox" id="txtSnap" checked> <span>Close near-misses</span></label>
+          <label class="check" title="The smallest letter height from the letters you typed: the size where none of their holes fills in and no dot runs into its stem. Off: a fixed number of stroke widths per font (settings.js)"><input type="checkbox" id="txtMeasured" checked> <span>Measure the smallest height</span></label>
+          <label class="check" title="An i's or j's dot is a piece of its own: the line needs a connector up to it and back, and it's the first thing to run into its stem when letters are small. Dots that make a letter (ü, ё, ї) stay"><input type="checkbox" id="txtNoDots" checked> <span>Leave out i and j dots</span></label>
+          <p class="hint" id="letteringHint"></p>
+        </div>
         <p class="hint help" id="textHint">Single-stroke lettering: every letter is drawn with the same stroke at the same height. Even gaps keep the closest point between neighbouring letters at exactly the letter gap.</p>
       </div>
     </section>

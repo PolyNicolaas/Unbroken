@@ -2150,6 +2150,7 @@
       family: "Chocolate",
       cap: 700,
       joined: true,
+      hairline: true, // each letter is the line to print, drawn once each way: no measured height (UNB.glyphShapeMin)
       glyphs: {
         0: [
           522,

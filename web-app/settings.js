@@ -167,6 +167,11 @@ window.UNB_SETTINGS = {
     wordGap: null,                    // mm between words (null = rules.wordGapShare × letter height)
     lineGap: 1.7,                     // line pitch, × letter height
     align: "center",                  // "left", "center" or "right"
+    // Lettering for a printer (Text card; making it for a pen plotter, letters are drawn as the font has them)
+    joinLetters: true,                // a word's letters linked along the baseline
+    closeNearMisses: true,            // a stroke end almost touching its letter joins it (one turn less)
+    leaveOutIJDots: true,             // i and j without their dots (ü's, ё's dots make the letter and stay)
+    measuredHeight: true,             // smallest letter height measured from the typed letters (false: rules.minLetterHeight)
 
     // --- 3D print
     printer: "chocmate2",             // an id from the printer list
@@ -248,6 +253,7 @@ window.UNB_SETTINGS = {
   rules: {
     maxTextLines: 5,                  // lines of typed text
     minLetterHeight: { default: 8, allure: 10, elfin: 10, badscript: 10 },   // smallest readable letter height, in line widths, per font
+    minLetterStrokes: 4,              // with the measured smallest height (defaults.measuredHeight): never below this many stroke widths
     letterGapShare: 0.15,             // default letter gap, × letter height
     minLetterGap: 1.2,                // letters never closer than this × line width
     wordGapShare: 0.5,                // default word gap, × letter height

@@ -86,6 +86,11 @@ Tests:
   maybe later (right to left, and Arabic letters change shape by their neighbours); Chinese, Japanese and similar
   scripts are skipped (too many strokes for a needle): import them as a picture and trace it. Dune Rise's dots
   could be redone with the new center-font.py (they come out as specks).
+- Lettering for a printer (v131): check the measured smallest height against real prints (a few letters at three
+  sizes per font, e.g. a comb in the test-print matrix), and whether joins along the baseline print clean. Ideas not
+  built yet: sort the font list by how well a font prints (free stroke ends and separate pieces per letter; the
+  Chocolate font has none), and telling a script's loop closing from an opening closing (э becoming ө) in the
+  measured height.
 
 ## 4 · Data and accounts (the big picture)
 

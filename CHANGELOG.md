@@ -3,6 +3,28 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v131 · 2026-11-02
+
+- **Lettering for a printer** (Text card): four switches, on when making it for a printer; for a pen plotter they're
+  hidden and the letters stay as the font draws them (the pen lifts between strokes).
+  - **Join letters along the baseline**: a word's letters are linked from the rightmost point of one letter's lowest
+    third to the leftmost of the next's, so each word is one piece, like handwriting, instead of the tracer's hops
+    wherever they fall. Connectors at 15–20 mm: "Choco love" in Sans 13 → 4, "Шоколад ёж" in Pebble 18 → 7,
+    "Happy birthday" in Bad Script 26 → 4.
+  - **Close near-misses**: a stroke end that almost touches its own letter (within a stroke's width, and at most 7%
+    of the letter height, which is where fonts mean strokes to touch) is drawn on to meet it: one turn less. A
+    letter's own openings (э's) stay open.
+  - **Leave out i and j dots**: no connector up to the dot and back, and the dot can't run into its stem. ü's, ё's
+    and ї's dots make the letter and stay.
+  - **Measure the smallest height**: from the letters typed, the size where none of their holes fills in and no dot
+    runs into its stem (each stroke drawn as wide as the printed stroke plus its gap); the hint names the letter that
+    sets it. It's often stricter than the fixed rule (Sans "Choco love" 20 mm against 17.4 mm with a 0.84 mm needle),
+    and the decorative fonts most (Bad Script, Elfin, Nixish's Q). Off: the fixed 8 or 10 stroke widths per font. The
+    Chocolate font keeps the fixed rule (its letters are already the printed line).
+  - The hint under them says what they did ("7 letter joins along the baseline · 1 dot left out").
+- Settings: `joinLetters`, `closeNearMisses`, `leaveOutIJDots`, `measuredHeight` (defaults) and
+  `rules.minLetterStrokes` (the measured height's floor, 4 stroke widths). Tests E54, A53.
+
 ## v130 · 2026-11-02
 
 - **Two new fonts with Cyrillic and accents**: **Pebble** (rounded; a single-stroke version of Comfortaa, renamed as

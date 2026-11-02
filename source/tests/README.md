@@ -120,6 +120,7 @@ report.
 | [E51](#e51) | A base denser than 100% (up to 125%): rows closer than a line width, for a surely solid base | a base density over 100% clamped back to 100% (no denser), or no limit (a base packed far past what the needle can lay) | – |
 | [E52](#e52) | Spirograph: up to six wheels, a centre path drawn by hand, and a frame that crops | a third wheel and on doing nothing, a design with Second wheel ticked losing it, a centre path that doesn't move the figure or closes a line that should be open, and a crop that draws outside its frame or sizes the canvas by the drawing instead of the frame | – |
 | [E53](#e53) | Spirograph: the figure's size changes along the line (Size at start → Size at end) | a size that doesn't change the figure, a growing figure left closed (its ends joined across the drawing), a figure that grows the wrong way, and designs from before v128 drawn differently | – |
+| [E54](#e54) | Lettering for a printer: letters joined along the baseline, near-misses closed, i and j dots, the measured smallest height | lettering full of connectors, stroke ends that blob into their letter, dots that run into their stems, letters printed too small to read | – |
 
 ### App tests
 
@@ -128,7 +129,7 @@ report.
 | [A01](#a01) | The app opens and traces the sample | a blank or broken page | – |
 | [A02](#a02) | The page stays responsive while tracing | the page freezing while a trace is worked out | – |
 | [A03](#a03) | Line width, gap and needle settings hold in the trace | needle sizes and gaps not reaching the trace; the 3D tab's needle and the Trace tab's line width disagreeing | – |
-| [A04](#a04) | Text source: fonts, readable height, five-line limit | unreadable or unprintable lettering | – |
+| [A04](#a04) | Text source: fonts, readable height, five-line limit | unreadable or unprintable lettering | 21.7 s |
 | [A05](#a05) | Plate, copies and G-code export, end to end | the plate view, copies or the exported G-code disagreeing with the design | – |
 | [A06](#a06) | View menu works on desktop and phone widths | display options unreachable, or the menu cut off on a phone | – |
 | [A07](#a07) | Undo, redo, and saving and opening designs | lost work; a saved design that doesn't come back the same | – |
@@ -175,7 +176,8 @@ report.
 | [A49](#a49) | Test matrix: the skull cup as nine copies, each with its own speed, flow and layer height (L9), scored for the best levels | copies printed with the wrong settings, a layer height that doesn't change the slicing, a comb that doesn't count its copy, a flow that doesn't reach the plunger, scores that don't pick the best levels, and levels or scores lost from the design | – |
 | [A50](#a50) | A molecule on the Print step: its labels printed by their bonds, One copy showing them, and the structure turned | labels piled up at the molecule's corner in the G-code (each laid out from its own corner instead of the molecule's), One copy showing only the bonds, a Turn that doesn't turn or isn't saved, and an aldehyde without its H | – |
 | [A51](#a51) | Spirograph: more wheels from the Pattern card, a centre path drawn on its pad, and the frame | the Wheels setting not reaching the drawing, the path pad not taking a drag, a path that isn't saved or undone, Clear not clearing, and the frame settings not showing | – |
-| [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | 10.2 s |
+| [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | 10.9 s |
+| [A53](#a53) | Text card: lettering toggles for a printer (join letters, close near-misses, i and j dots, measured smallest height) | lettering toggles that don't reach the print, or change a pen plotter's letters | 12.2 s |
 
 #### E01
 
@@ -593,6 +595,14 @@ report.
 - **How:** Draws the spirograph at rest, with Size 100% → 100% (the default), 30% → 100% with no path (a spiral out) and 100% → 30%, and with a path from (−60, 0) to (60, 0) at 20% → 150%. Measures how far the line is from the centre near its start and near its end.
 - **Pass when:** 100% → 100% is the drawing at rest, point for point, and closed; 30% → 100% is an open line, its first tenth within 45% of the full figure's reach and its last tenth past 85%; 100% → 30% the other way round; along the path, the last tenth's figure spans over twice the first tenth's.
 
+#### E54
+
+**Lettering for a printer: letters joined along the baseline, near-misses closed, i and j dots, the measured smallest height** · `engine/E54-lettering-for-print.test.js`
+
+- **Why:** In chocolate every separate piece of a text needs a connector, and every free stroke end a turn. Joining a word's letters along the baseline makes each word one piece, like handwriting; a stroke end that nearly touches its letter (the font meant it to) prints into it anyway, so closing it saves a turn; an i's dot is a piece of its own. The smallest readable height is measured from the typed letters: the size where none of their holes fills in and no dot runs into its stem. None of this may change a letter: an opening the font leaves (э's) stays open.
+- **How:** Lays out words in Sans, Pebble and Bad Script with each option, counts pieces and joins, checks the joins sit on the baseline, finds the near-misses Bad Script's letters close and that э stays open, drops i and j dots but keeps ü's, and measures the smallest height for an o, an e and a dotted i.
+- **Pass when:** Joined, each word is one piece (Sans "Choco love": 2, Pebble "Шоколад ёж": 2 plus ё's dots) and every join's ends sit in the lowest third of the letters (within 30% of the letter height of the baseline); joining off, more pieces. Bad Script "dhkqrvxy" closes near-misses at 12 mm, э closes none at any size; "jüi" without i and j dots keeps 2 of its 4 dots (ü's). The measured height: an o is at least 4 stroke widths and at most 8; an i with its dot needs more than without; the measured heights are cached; every font's every basic letter measures in under 45 stroke widths.
+
 #### A01
 
 **The app opens and traces the sample** · `app/A01-loads-and-traces.test.js`
@@ -1000,6 +1010,14 @@ report.
 - **Why:** Most fonts only have the basic Latin letters, so Cyrillic or accented text (ё, ü, é) would print as “?”. The font list sets apart and greys the fonts missing a letter of the typed text, says which letters, and the Style buttons narrow the list, while every font stays pickable for saved designs and presets.
 - **How:** Types Cyrillic with Sans picked, reads the menu and the hint, picks Pebble and Bad Script and traces each, tries the Script style, then traces accented Latin.
 - **Pass when:** With Cyrillic, Sans warns and names the missing letters, the Latin-only fonts sit greyed under “Missing letters” while Pebble and Bad Script stay enabled; both trace the Cyrillic with zero crossings; Script puts Bad Script first and the rest under “Other styles”; accented Latin in Pebble traces with no warning; no page errors.
+
+#### A53
+
+**Text card: lettering toggles for a printer (join letters, close near-misses, i and j dots, measured smallest height)** · `app/A53-lettering-toggles.test.js` · slow
+
+- **Why:** Joined letters, closed near-misses and dotless i and j make chocolate lettering cleaner, and the measured smallest height keeps holes from filling in; but on a pen plotter the pen lifts between strokes, so its letters must stay as the font draws them. Each toggle has to change the traced line, and say what it did.
+- **How:** Types "Choco jelly" in Sans for a printer: traces with every toggle off, then joining on, then leaving out i and j dots, reading the connectors and the hint; asks for 3 mm letters with the measured height on and off; switches to A pen plotter and checks the toggles are hidden and the text traces as with them off.
+- **Pass when:** The toggles show for a printer; joining cuts the connectors by at least half and the hint counts the joins; leaving out dots drops connectors further with the j and says so; the measured smallest height names the letter that sets it and differs from the fixed rule; for a pen plotter the toggles are hidden and the connectors match all-off; no page errors.
 
 <!-- catalogue:end -->
 

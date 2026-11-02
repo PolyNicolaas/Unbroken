@@ -94,6 +94,7 @@ const BUILTIN = {
   rules: {
     maxTextLines: 5,
     minLetterHeight: { default: 8, allure: 10, elfin: 10, badscript: 10 },
+    minLetterStrokes: 4,
     letterGapShare: 0.15,
     minLetterGap: 1.2,
     wordGapShare: 0.5,
@@ -293,6 +294,7 @@ const CFG = (() => {
     ["minLetterGap", 0, 10],
     ["wordGapShare", 0, 5],
     ["minWordGap", 0, 20],
+    ["minLetterStrokes", 1, 30],
     ["undoSteps", 1, 1000],
   ])
     if (!num(r[k], lo, hi)) {
@@ -616,6 +618,10 @@ for (const q of CFG.printers) {
     ["letterGap", (v) => v === null || num(v, 0, 100), (v) => set("letterGap", v === null ? "" : v)],
     ["wordGap", (v) => v === null || num(v, 0, 200), (v) => set("wordGap", v === null ? "" : v)],
     ["lineGap", range(1, 5), (v) => set("lineGap", v)],
+    ["joinLetters", bool, (v) => ($("txtJoin").checked = v)],
+    ["closeNearMisses", bool, (v) => ($("txtSnap").checked = v)],
+    ["leaveOutIJDots", bool, (v) => ($("txtNoDots").checked = v)],
+    ["measuredHeight", bool, (v) => ($("txtMeasured").checked = v)],
     [
       "align",
       list("left", "center", "right"),

@@ -294,6 +294,28 @@ function spacingMM() {
 function lineWidthMM() {
   return Math.min(5, Math.max(0.05, +$("lineW").value || 0.84));
 }
+// The Text card's lettering-for-a-printer toggles, as they apply now: all off when making it for a pen plotter (the
+// pen lifts between strokes, so the letters stay as the font draws them); the Chocolate font's letters are already
+// the printed line, so it keeps its fixed smallest height
+function textLettering() {
+  const font = UNB_FONTS[$("font").value],
+    on = !artForPlot();
+  return {
+    join: on && $("txtJoin").checked,
+    snap: on && $("txtSnap").checked,
+    dots: on && $("txtNoDots").checked ? "none" : "keep",
+    measured: on && $("txtMeasured").checked && !font.hairline,
+  };
+}
+// what the toggles did to this text, under them
+function letteringHint(lay) {
+  const el = $("letteringHint"),
+    bits = [];
+  if (lay.joins) bits.push(`${lay.joins} letter join${lay.joins > 1 ? "s" : ""} along the baseline`);
+  if (lay.snaps) bits.push(`${lay.snaps} near-miss${lay.snaps > 1 ? "es" : ""} closed`);
+  if (lay.dots) bits.push(`${lay.dots} dot${lay.dots > 1 ? "s" : ""} left out`);
+  el.textContent = bits.length ? bits.join(" · ") : "";
+}
 function buildText() {
   const font = UNB_FONTS[$("font").value],
     lw = spacingMM() || 1,
@@ -302,25 +324,48 @@ function buildText() {
   // spacing apart, so the stroke is line width + spacing wide (2 × needle + gap). Without a spacing it's one line.
   const lineW = lineWidthMM(),
     band = spacingMM() > 0 ? lineW + spacingMM() : lineW;
-  const minCap = ratio * band;
+  // Lettering for a printer (the Text card's toggles; a pen plotter draws the letters as the font has them)
+  const L = textLettering(),
+    text = ($("textIn").value || " ").split("\n").slice(0, MAX_LINES).join("\n");
+  // the smallest letter height: measured from the typed letters (the size where none of their holes fills in and no
+  // dot runs into its stem, each stroke as wide as the printed stroke plus the gap it needs), or a fixed number of
+  // stroke widths per font (settings.js rules)
+  let minCap = ratio * band,
+    limit = null;
+  if (L.measured) {
+    const thick = band + (spacingMM() || lineW);
+    let worst = 0;
+    for (const ch of new Set(text))
+      if (!/\s/.test(ch) && font.glyphs[ch]) {
+        const r = UNB.glyphShapeMin(font, ch, L.dots);
+        if (r > worst) (worst = r), (limit = ch);
+      }
+    minCap = Math.max(CFG.rules.minLetterStrokes * band, worst * thick);
+    if (minCap === CFG.rules.minLetterStrokes * band) limit = null;
+  }
   let cap = +$("capH").value || 15;
   const hint = $("capHint"),
     what =
       spacingMM() > 0
         ? `${fmt(band, 2)} mm letter stroke (two ${fmt(lineW, 2)} mm lines ${fmt(spacingMM(), 2)} mm apart)`
-        : `${fmt(lineW, 2)} mm line`;
+        : `${fmt(lineW, 2)} mm line`,
+    why = L.measured
+      ? limit
+        ? `below it the ${limit} loses its shape (a hole fills in, or a dot runs into its stem)`
+        : `as small as letters go: ${CFG.rules.minLetterStrokes} stroke widths`
+      : `${ratio} stroke widths`;
   if (cap < minCap + 0.005) {
     // at (or pushed up to) the smallest: the boxes say so, and what the print really is
     cap = minCap;
     $("capH").value = +minCap.toFixed(2);
     hint.className = "hint warn";
-    hint.textContent = `At the smallest: ${fmt(minCap, 1)} mm is the smallest readable letter height in this font for a ${what}, ${ratio} stroke widths. A smaller letter height, width or height comes back to this.`;
+    hint.textContent = `At the smallest: ${fmt(minCap, 1)} mm is the smallest readable letter height ${L.measured ? "for these letters" : "in this font"} for a ${what}; ${why}. A smaller letter height, width or height comes back to this.`;
     $("sizeHint").className = "hint warn";
     $("sizeHint").textContent =
       `As small as this lettering goes with this needle (letters ${fmt(minCap, 1)} mm tall): a smaller width or height comes back to this size. A finer needle or a plainer font goes smaller.`;
   } else {
     hint.className = "hint";
-    hint.textContent = `Smallest readable height in this font for a ${what}: ${fmt(minCap, 1)} mm.`;
+    hint.textContent = `Smallest readable height ${L.measured ? "for these letters" : "in this font"} for a ${what}: ${fmt(minCap, 1)} mm${L.measured && limit ? ` (the ${limit} sets it)` : ""}.`;
     textSizeUI(true);
   }
   const mode = $("txtSpacing").value === "auto" ? (font.joined ? "font" : "even") : $("txtSpacing").value;
@@ -328,7 +373,7 @@ function buildText() {
     gapIn = $("letterGap").value === "" ? TR.letterGapShare * cap : +$("letterGap").value;
   const gap = Math.max(gapIn, TR.minLetterGap * lw); // letters never closer than the line spacing
   const wordIn = $("wordGap").value === "" ? TR.wordGapShare * cap : +$("wordGap").value;
-  const lay = UNB.textLayout(($("textIn").value || " ").split("\n").slice(0, MAX_LINES).join("\n"), font, {
+  const lay = UNB.textLayout(text, font, {
     cap,
     spacing: mode,
     gap,
@@ -336,7 +381,11 @@ function buildText() {
     word: Math.max(wordIn, TR.minWordGap * lw),
     lineGap: Math.max(1, +$("lineGap").value || 1.7),
     align: document.querySelector('input[name="align"]:checked').value,
+    join: L.join,
+    snap: L.snap ? band : 0, // an end within a stroke's width would run into it in chocolate anyway
+    dots: L.dots,
   });
+  letteringHint(lay);
   if (!lay.strokes.length) {
     setChip("Type some text to trace");
     return null;
@@ -458,6 +507,16 @@ $("textIn").addEventListener("input", limitLines);
 for (const id of ["textIn", "capH", "letterGap", "wordGap", "lineGap"]) $(id).addEventListener("input", textChanged);
 for (const id of ["font", "txtSpacing"]) $(id).addEventListener("change", textChanged);
 document.querySelectorAll('input[name="fontStyle"]').forEach((r) => r.addEventListener("change", fontMenu)); // config.js
+for (const id of ["txtJoin", "txtSnap", "txtMeasured", "txtNoDots"]) $(id).addEventListener("change", textChanged);
+// the lettering toggles are for a printer: hidden (and not applied) when making it for a pen plotter
+const letteringShown = () => ($("txtPrintOpts").hidden = $("artForPlot").checked); // (artForPlot is defined later, in patterns.js)
+document.querySelectorAll('input[name="artFor"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    letteringShown();
+    if (st.text && textMode()) textChanged(); // only typed text changes with them
+  })
+);
+letteringShown();
 document.querySelectorAll('input[name="align"]').forEach((r) => r.addEventListener("change", textChanged));
 
 // source-normalized (u,v) <-> working pixels
