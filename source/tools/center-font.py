@@ -7,7 +7,7 @@ import sys, json, math, numpy as np
 from fontTools.ttLib import TTFont
 from PIL import Image, ImageDraw, ImageFont
 from skimage.morphology import skeletonize
-from scipy.ndimage import distance_transform_edt
+from scipy.ndimage import distance_transform_edt, find_objects, label as components
 F, label, out = sys.argv[1], sys.argv[2], sys.argv[3]
 tt = TTFont(F); upm = tt['head'].unitsPerEm; cmap = tt.getBestCmap(); hmtx = tt['hmtx']
 SZ = upm  # 1 px = 1 font unit
@@ -61,6 +61,18 @@ for code, name in sorted(cmap.items()):
     m = np.array(im) > 127
     if not m.any(): glyphs[ch] = [adv, ""]; continue
     dt = distance_transform_edt(m); widths.append(2 * dt.max())
+    # dots (i, ё, ü, !): a blob about as long as it is thick has a single point for a middle line, so it would be
+    # dropped; draw it as a small closed loop instead (like the Hershey and EMS fonts do), and skeletonize the rest
+    lab, nlab = components(m); dots = []
+    for k, sl in enumerate(find_objects(lab), 1):
+        comp = lab[sl] == k
+        h, w = comp.shape; thick = 2 * distance_transform_edt(np.pad(comp, 1)).max()  # padded: a bar fills its own box
+        if max(h, w) < 1.7 * thick:
+            cy, cx = (sl[0].start + sl[0].stop - 1) / 2, (sl[1].start + sl[1].stop - 1) / 2
+            r = max(max(h, w) * 0.3, 6)
+            ring = [(cx - pad + r * math.cos(a * math.pi / 4), asc - cy + r * math.sin(a * math.pi / 4)) for a in range(9)]
+            dots.append(" ".join(f"{round(x)},{round(y)}" for x, y in ring))
+            m[sl][comp] = False
     sk = skeletonize(m)
     paths, deg = trace(sk)
     half = dt.max()
@@ -71,7 +83,7 @@ for code, name in sorted(cmap.items()):
         pts = [(x - pad, asc - y) for y, x in p]
         pts = rdp(pts, 2.0)
         if len(pts) >= 2: strokes.append(" ".join(f"{round(x)},{round(y)}" for x, y in pts))
-    glyphs[ch] = [adv, "|".join(strokes)]
+    glyphs[ch] = [adv, "|".join(strokes + dots)]
 # the cap height of the middle line: an H's strokes, top to bottom (the font's own cap height counts the stroke's
 # thickness, so letters would come out short)
 hy = [float(q.split(",")[1]) for q in glyphs["H"][1].replace("|", " ").split()] if "H" in glyphs else []

@@ -371,6 +371,7 @@ function buildText() {
 }
 let textTimer = null;
 function textChanged() {
+  fontMenu(); // config.js: the font list follows the text (fonts missing one of its letters set apart)
   clearTimeout(textTimer);
   textTimer = setTimeout(() => {
     if (!textMode()) return artTextChanged(); // art.js: the text is one of several layers, drawn into the art
@@ -456,6 +457,7 @@ $("textIn").addEventListener("keydown", (e) => {
 $("textIn").addEventListener("input", limitLines);
 for (const id of ["textIn", "capH", "letterGap", "wordGap", "lineGap"]) $(id).addEventListener("input", textChanged);
 for (const id of ["font", "txtSpacing"]) $(id).addEventListener("change", textChanged);
+document.querySelectorAll('input[name="fontStyle"]').forEach((r) => r.addEventListener("change", fontMenu)); // config.js
 document.querySelectorAll('input[name="align"]').forEach((r) => r.addEventListener("change", textChanged));
 
 // source-normalized (u,v) <-> working pixels

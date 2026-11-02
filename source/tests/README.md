@@ -109,6 +109,17 @@ report.
 | [E40](#e40) | Editing a structure: bonds, rings, elements, hydrogens and the mol block | a new bond at an awkward angle or on top of an atom, a ring that doesn't fuse onto the bond or atom it was put on, an aromatic ring with two double bonds on one carbon, hydrogens that don't follow the bonds and charges, and a mol block RDKit can't read | – |
 | [E41](#e41) | Colour levels: a picture as a few flat colours, telling apart colours of the same brightness | a red and a green of the same brightness merged into one block (as greys they are one), colours out of order, a removed background coloured in, and blocks that don't hold their own pixels | – |
 | [E42](#e42) | Infill on a mask: only the areas asked for are filled (a printer's filled levels) | a level set to Fill filling every enclosed area, or none, and the fill no longer one line with the outline | – |
+| [E43](#e43) | Cut-out strokes keep their own brush size; a plain light photo of an object stays light | every Keep and Remove stroke drawn with the newest stroke's brush (a thin Remove stroke growing fat after a big Keep dab elsewhere), strokes as plain point lists no longer working, and Object cleaning turning a nearly plain white photo black | – |
+| [E44](#e44) | Molecules (October 2026 review): an NH's H clear of the bonds, every element, charged atoms' hydrogens, too many bonds named | an NH label's H drawn on a bond (the bonds piece and the label piece printing the same strokes twice), uranium or radium read as ?, wrong hydrogens on a charged atom (BH₄⁻ as BH₂⁻, N²⁺ as NH₄²⁺), and a carbon with five bonds sent to RDKit without saying which atom is wrong | – |
+| [E45](#e45) | Level fixes: a filled block on the picture's edge is closed off, Colours with light lines on dark, fine plotter fills | a printer's Fill never filling a block that touches the picture's edge (its outline open along the border), Colours with Light lines on dark counting black ink as paper, and a plotter fill finer than one working pixel quietly coarsened | – |
+| [E46](#e46) | The test matrix: the L9 array is balanced, main effects pick the best level, the comb counts | an L9 where a level of one setting misses a level of another (its effects would mix), main effects that average the wrong runs, and a comb with the wrong number of teeth | – |
+| [E47](#e47) | An aldehyde's H is drawn on a bond of its own; a ketone's carbon stays bare | an aldehyde (CHO) drawn without its H, so it reads as incomplete; an H put on a ketone or an acid; the H on top of another bond | – |
+| [E48](#e48) | Stroke ends as a smooth turn: as wide as the strands beside it, no bulb, the spacing kept | a bulb (a loop wider than the stroke) at every tip when Stroke ends is Smooth turn, and a smooth turn that brings the strands closer than the spacing or crosses the line | – |
+| [E49](#e49) | Every edge doubled (a molecule): rings out and back like chains, the spacing kept, the line closed | a molecule printed with some bonds single (a ring walked once round) and others as pairs (chains, out and back), a doubled ring whose two passes run the same way (one on top of the other), and an open line that leaves its way from start to end single | – |
+| [E50](#e50) | A hollow single-wall print: a layer stepping in over the empty inside is caught, and Support: Slope turns the ledge into a slope | a layer that steps in past its own wall (nothing under it on a hollow print) reported as fine, so no support is offered; a Slope that changes the whole model, or leaves the ledge | – |
+| [E51](#e51) | A base denser than 100% (up to 125%): rows closer than a line width, for a surely solid base | a base density over 100% clamped back to 100% (no denser), or no limit (a base packed far past what the needle can lay) | – |
+| [E52](#e52) | Spirograph: up to six wheels, a centre path drawn by hand, and a frame that crops | a third wheel and on doing nothing, a design with Second wheel ticked losing it, a centre path that doesn't move the figure or closes a line that should be open, and a crop that draws outside its frame or sizes the canvas by the drawing instead of the frame | – |
+| [E53](#e53) | Spirograph: the figure's size changes along the line (Size at start → Size at end) | a size that doesn't change the figure, a growing figure left closed (its ends joined across the drawing), a figure that grows the wrong way, and designs from before v128 drawn differently | – |
 
 ### App tests
 
@@ -155,7 +166,16 @@ report.
 | [A40](#a40) | The Molecule input: a name or SMILES drawn as a skeletal formula, traced or plotted as drawn | the examples not drawing, a SMILES or a name not laid out, a wrong name not said so, a molecule made for a pen plotter traced instead of plotted as drawn, its SVG missing strokes, and a design file losing it | – |
 | [A41](#a41) | The structure editor: atoms, bonds, rings, elements and charges by tap and drag, Undo, Clean up, Use it | a tap or drag that doesn't add what it should, a bond that won't go double or triple, an element or charge that doesn't take, Erase or Undo doing nothing, Clean up not tidying, Cancel changing the molecule, and Use it not making the structure the Molecule input | – |
 | [A42](#a42) | Colour levels: a picture as flat colours, each block traced or filled with a pen of its own colour | the Colours switch not changing the blocks, blocks that aren't the picture's colours, a filled block's pen not starting with its colour, the SVG without it, and the switch lost by a design file | – |
-| [A43](#a43) | Filled levels on a printer: a block set to Fill prints solid inside its traced outline | a printer's Fill doing nothing, filling every enclosed area, offering the plotter's pen settings, or not reaching the layers and the G-code | 12.1 s |
+| [A43](#a43) | Filled levels on a printer: a block set to Fill prints solid inside its traced outline | a printer's Fill doing nothing, filling every enclosed area, offering the plotter's pen settings, or not reaching the layers and the G-code | – |
+| [A44](#a44) | The picture's turn and photo through undo, Clean up as a photo, corners, the cut-out kept, the camera opened twice | undo losing the picture's turn (the card saying 0° on a turned picture, Unturn doing nothing) or its photo (the Photo card gone, Redo not bringing it back); Clean up as a photo starting from the unturned picture; corners dragged into a bow-tie or a point; the cut-out dropped by a Photo card change or by Text and back; undo into a cut-out wiping Redo; the busy chip going off while a cut-out still works; a camera left running after Switch camera and Cancel | – |
+| [A45](#a45) | Molecules (October 2026 review): the Plate card's Molecule saved and undoable, the editor's Undo, redo and turning, the card after an undo, the plate hint | Molecule (Bonds and labels apart / One piece) lost from design files and undo, Use it after the editor's Undo saving the SMILES of the tidied structure, Ctrl/⌘ Shift Z in the editor undoing, a turned phone leaving the structure off-screen, the Molecule card's box and message left from before an undo, the plate hint saying the bonds print for a molecule without bonds, and Clean up on a carbon with five bonds not saying which atom | – |
+| [A46](#a46) | Level fixes: levels only for a picture, an edge block filled, pens and modes kept apart, the advice and names | levels left on from a picture spoiling a molecule's trace, a printer's Fill skipping a block on the picture's edge, fill pens frozen from one picture into the next or into Colours, one printer tap turning the plotter's Fills into Both, the threshold advice with every level on Skip, and Colours' controls named Grey | – |
+| [A47](#a47) | Workflow and state: Trace off on a printer, the output switched by undo, the Next bar's messages, a model start, opened designs, the phone bar | a printer exporting the last trace's G-code with Trace off, an undo that switches printer/plotter leaving the other step's cards, a Next bar export that seems to do nothing, a page error when a model goes to the plotter, a model start that can't be saved or undone, a design opened as drawn saying Nothing yet, a pattern saved as nothing-yet, a broken design file half-applied, and the phone's preview bar and 3D layers controls running off or over each other | – |
+| [A48](#a48) | Tuning a chocolate: the Flow in Fine-tuning, and test prints of the flow and the first layer's Z | a Flow that doesn't reach the G-code, test strips that don't print what they're labelled, a first-layer Z test whose strips all start at one height, Use it that doesn't set the setting, and a Flow that isn't saved with the design | – |
+| [A49](#a49) | Test matrix: the skull cup as nine copies, each with its own speed, flow and layer height (L9), scored for the best levels | copies printed with the wrong settings, a layer height that doesn't change the slicing, a comb that doesn't count its copy, a flow that doesn't reach the plunger, scores that don't pick the best levels, and levels or scores lost from the design | – |
+| [A50](#a50) | A molecule on the Print step: its labels printed by their bonds, One copy showing them, and the structure turned | labels piled up at the molecule's corner in the G-code (each laid out from its own corner instead of the molecule's), One copy showing only the bonds, a Turn that doesn't turn or isn't saved, and an aldehyde without its H | – |
+| [A51](#a51) | Spirograph: more wheels from the Pattern card, a centre path drawn on its pad, and the frame | the Wheels setting not reaching the drawing, the path pad not taking a drag, a path that isn't saved or undone, Clear not clearing, and the frame settings not showing | – |
+| [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | 10.2 s |
 
 #### E01
 
@@ -485,6 +505,94 @@ report.
 - **How:** A closed line round two 100 × 100 px squares joined by a 6 px neck (narrower than the wall the infill keeps from a line, so two areas); fills it with rows 8 px apart three ways: no mask, a mask over the left square, a mask over neither.
 - **Pass when:** No mask: 2 areas filled; the left square's mask: 1, and every fill point on the left; no area on the mask: 0 filled, the line as it was; the filled line longer than the outline (the rows are in it).
 
+#### E43
+
+**Cut-out strokes keep their own brush size; a plain light photo of an object stays light** · `engine/E43-cutout-photo-fixes.test.js`
+
+- **Why:** The cut-out (v119) sent one brush for all strokes, so changing the brush size changed every stroke already painted. Object cleaning stretched each colour from its darkest to at least 16 levels above: a plain white wall had no spread, so white became black.
+- **How:** A red square on white, a box round it, a thin (2 px) Remove stroke across its middle and a big (30 px) Keep dab near its top: as { pts, r } strokes, and as point lists with one brush of 30; the same with the big brush given per stroke. photoClean (Object) on a plain 250 grey.
+- **Pass when:** With its own radius the Remove stroke takes the line (mask 0 on it) but not 12 px below it (mask 1); the old way (one brush of 30) takes both; point lists with a brush equal { pts, r } strokes with that radius; the plain light photo comes out white (255).
+
+#### E44
+
+**Molecules (October 2026 review): an NH's H clear of the bonds, every element, charged atoms' hydrogens, too many bonds named** · `engine/E44-molecule-review.test.js`
+
+- **Why:** Found in the October 2026 review: the H of theobromine's and capsaicin's NH was put on the side away from the bonds' sum, which in a ring or a chain is often on a bond; the element list stopped at radon; a charge shifted the valence by a rule that only fits N and O; and Clean up only said RDKit couldn't read the structure.
+- **How:** Draws every example (theobromine, capsaicin, …) and measures how close a bond's stroke comes to a label's; reads RDKit JSON atoms 88, 92 and 94; works out the hydrogens of a lone B⁻, N²⁺ and C²⁻ on one bond, and of N⁺ with four; asks UNB.molOverBonded about a carbon with five bonds and about ethane.
+- **Pass when:** No bond within 0.1 bond lengths of any label's strokes in any example; Ra, U, Pu; B⁻ alone BH₄⁻ (B4), N²⁺ on one bond N2, C²⁻ on one bond C1, N⁺ with four bonds N0; the five-bonded carbon named (C, 5, at most 4) and ethane fine.
+
+#### E45
+
+**Level fixes: a filled block on the picture's edge is closed off, Colours with light lines on dark, fine plotter fills** · `engine/E45-level-fixes.test.js`
+
+- **Why:** Level edges along the border aren't drawn (a traced picture gets no frame), so a filled block on the edge had an open outline and the infill took it for outside; UNB.levelEdges now draws the border run of the levels given in border (the filled ones, v-next). Colour levels read paper white from the prepared grey, which Invert had already flipped (UNB.stagePrep). UNB.levelFills clamped the spacing to 1 px.
+- **How:** Level edges of a disc and a band along the bottom edge, the dark level traced, without and with border flags; UNB.stagePrep on white paper with a black disc and a red square, 3 colour levels, with and without invert; UNB.levelFills hatching a disc at 0.5 and 1 px spacing.
+- **Pass when:** Without border flags no edge pixel on the row next to the bottom border (as before); with the dark level's flag the band's border run is drawn there (≥ 100 px) and the disc's outline is unchanged; Colours with invert: the disc's level is 0 (darkest) and black, as without invert; hatching at 0.5 px gives at least 1.8× the strokes of 1 px.
+
+#### E46
+
+**The test matrix: the L9 array is balanced, main effects pick the best level, the comb counts** · `engine/E46-test-matrix.test.js`
+
+- **Why:** The Test matrix (v124) prints nine copies with three settings at three levels; its use rests on every level of each setting meeting every level of the others exactly once.
+- **How:** Counts every pair of levels across every pair of columns of UNB.L9; scores the runs with a known rule (+2 at setting 1's level 2, +1 at setting 2's level 0, nothing from setting 3) and reads UNB.mainEffects; leaves three runs unscored; makes combs of 1 and 9 teeth.
+- **Pass when:** 9 runs; each level 3 times in each column; each pair of levels once in each pair of columns; main effects: setting 1 best at level 2 by 2, setting 2 best at level 0 by 1, setting 3 flat; unscored runs left out (6 scored); combs with 4 and 36 points, the 9-tooth one 22.5 mm wide.
+
+#### E47
+
+**An aldehyde's H is drawn on a bond of its own; a ketone's carbon stays bare** · `engine/E47-aldehyde-h.test.js`
+
+- **Why:** Nicolaas (30 October 2026): an aldehyde should be a bond to an H, as chemists draw it (vanillin's CHO). v124 adds the formyl H as an atom of its own.
+- **How:** Draws acetaldehyde (CH3–CH=O), formaldehyde (H2C=O), acetone and acetic acid with UNB.molecule and counts the labels; measures the angle between the aldehyde H's bond and the carbon's other two bonds.
+- **Pass when:** Acetaldehyde: 2 labels (O and H), the H's bond 120° (±1°) from the other two; formaldehyde: 3 (O and two H); acetone: 1 (O); acetic acid: 2 (O and OH, no extra H); formylH: false leaves acetaldehyde with 1.
+
+#### E48
+
+**Stroke ends as a smooth turn: as wide as the strands beside it, no bulb, the spacing kept** · `engine/E48-smooth-stroke-ends.test.js`
+
+- **Why:** Nicolaas (30 October 2026): the tips of letters like H had small nubs instead of a smooth turn. They were the stroke-end loops, a circle twice the spacing wide (E16). v125's Line card has Stroke ends; Smooth turn (0.5 × the spacing, the start) turns round in a plain U-turn.
+- **How:** Traces the leaf, the shapes sample and "Happy" (as E16) with the stroke-end radius at 0.5 × the spacing, and measures every stroke end as E16 does.
+- **Pass when:** The typical turn at most 1.15 spacings wide (a round loop is about 1.8) and at least 80% of tips under 1.3 (a tip with another strand close by reads wider), and the chocolate edge within half a spacing of the drawn end; closest gap ≥ 90% of the spacing; no crossings.
+
+#### E49
+
+**Every edge doubled (a molecule): rings out and back like chains, the spacing kept, the line closed** · `engine/E49-double-every-edge.test.js`
+
+- **Why:** Nicolaas (30 October 2026): traced as one line, a molecule's ring bonds printed single and its chains double, which looks inconsistent. v126 walks every bond of a molecule out and back (doubleAll).
+- **How:** Traces a hexagon with a stub (100 mm wide, 18G needle, 0.5 mm gap) as usual and with doubleAll, closed and asked to be open; reads the share of the walk drawn twice, the line's length, the closest gap and crossings.
+- **Pass when:** As usual some of it is single (under 50% doubled); with doubleAll all of it is doubled (99%: a loop's closing point has no edge), the line over 1.6× as long, the closest gap ≥ 90% of the spacing and no crossings; asked to be open, doubleAll still closes the line and doubles all of it.
+
+#### E50
+
+**A hollow single-wall print: a layer stepping in over the empty inside is caught, and Support: Slope turns the ledge into a slope** · `engine/E50-slope-support.test.js`
+
+- **Why:** Nicolaas (30 October 2026): the skull cup's nose printed a strand over nothing. The overhang check only measured layers stepping out; on a hollow single-wall print, stepping in hangs over the empty inside too. v127 measures both, and Support: Slope makes each ledge a short slope.
+- **How:** Slices the sample skull cup (30 mm, 0.3 mm layers, 18G needle, one wall, hollow) with Support off and with Slope, and reads the overhang check before and after.
+- **Pass when:** Off: no layer steps out past 0.28 mm, but one steps in over 1 mm (the nose, 10–13 mm up); Slope: after it no layer steps in or out more than 0.4 mm (0.28 plus grid rounding), and the layers below 9 mm (the jaw) are as sliced.
+
+#### E51
+
+**A base denser than 100% (up to 125%): rows closer than a line width, for a surely solid base** · `engine/E51-base-over-100.test.js`
+
+- **Why:** Nicolaas (30 October 2026): a base at 100% has its rows just touching; up to 125% overlaps them a little so the base is surely solid. The infill stays at most 100%.
+- **How:** Reads UNB.fillPlan's row spacing for a base and an infill at 125%, and the length of a 30 mm disc's base line at 100%, 125% and 150%.
+- **Pass when:** Base at 125%: rows 0.672 mm apart (0.84 ÷ 1.25); infill at 125%: 0.84 (held at 100%); the base line at 125% about 1.25× (over 1.15×) as long as at 100%; 150% no longer than 125%.
+
+#### E52
+
+**Spirograph: up to six wheels, a centre path drawn by hand, and a frame that crops** · `engine/E52-spirograph-wheels-path.test.js`
+
+- **Why:** Nicolaas (30 October 2026): keep adding wheels, move the centre along a path drawn by hand (smoothed), and let the drawing start off the canvas (cropped by a frame). v127.
+- **How:** Draws the spirograph with 1, 3 and 6 wheels, with the old Second wheel setting, with a path from (−60, 0) to (60, 0) through a wiggle (Smooth 0 and 80), and cropped to a 100% frame with that path.
+- **Pass when:** More wheels, more laps (1 < 3 < 6) and a different line; Second wheel alone is 2 wheels; with the path the line is open, starts about 60 units left of where it ends (± 2 ring widths), and spans over 100 units across; smoothing changes the line; cropped, every piece lies inside the frame, the box is the frame (100% of the ring each way), and there are several pieces.
+
+#### E53
+
+**Spirograph: the figure's size changes along the line (Size at start → Size at end)** · `engine/E53-spirograph-size.test.js`
+
+- **Why:** Nicolaas (30 October 2026): let the spirograph's scale change along the centre path, to see if it makes fun designs. v128 adds Size at start and Size at end.
+- **How:** Draws the spirograph at rest, with Size 100% → 100% (the default), 30% → 100% with no path (a spiral out) and 100% → 30%, and with a path from (−60, 0) to (60, 0) at 20% → 150%. Measures how far the line is from the centre near its start and near its end.
+- **Pass when:** 100% → 100% is the drawing at rest, point for point, and closed; 30% → 100% is an open line, its first tenth within 45% of the full figure's reach and its last tenth past 85%; 100% → 30% the other way round; along the path, the last tenth's figure spans over twice the first tenth's.
+
 #### A01
 
 **The app opens and traces the sample** · `app/A01-loads-and-traces.test.js`
@@ -618,16 +726,16 @@ report.
 **3D models: load an STL, turn it, slice it on the 3D tab, set its height, export** · `app/A17-models.test.js` · slow
 
 - **Why:** A 3D model is a source like an image: picked in Design, turned to the side it should print on, then sliced and fitted on the 3D tab, where its height is set and the G-code comes from. Undo has to cover turning it, and going back to an image has to trace the image again.
-- **How:** Opens the app and picks 3D model (the sample vase loads). Loads an STL of two 5 mm posts 20 mm apart (30 × 10 × 10 mm) through the file box and slices it on the 3D tab; tips it sideways and goes back to the 3D tab; tries the infill at 100%, then hollow with 2 walls, then back; types a height of 15 mm; exports G-code and reads its Z range. Checks the 2D tab's note, undoes back past the turn, and goes back to Image.
-- **Pass when:** The sample vase shows (29.1 × 29.1 × 40 mm) and the tracing controls are hidden; the posts load as 768 triangles, 30 × 10 × 10 mm; the 3D tab slices them (layers in the readout) with one line reaching both posts; tipped sideways they stand 30 mm tall and the Height field shows 30; the infill shows its density and pattern and at 100% makes more line than hollow; hollow with 2 walls more than 1; 15 mm makes 50 layers and the G-code tops out at 0.3 + 49 × 0.3 = 15 mm; the 2D tab points to Draw this view; undoing back past the turn stands the posts 10 mm tall again; Image traces the leaf again; no page errors. Cutting 1 mm off the bottom and 2 mm off the top leaves a 7 mm print (the Height box and the layers agree); the solid layers view shows a brightness spread over 20 of 255.
+- **How:** Opens the app and picks 3D model (the sample skull cup loads). Loads an STL of two 5 mm posts 20 mm apart (30 × 10 × 10 mm) through the file box and slices it on the 3D tab; tips it sideways and goes back to the 3D tab; tries the infill at 100%, then hollow with 2 walls, then back; types a height of 15 mm; exports G-code and reads its Z range. Checks the 2D tab's note, undoes back past the turn, and goes back to Image.
+- **Pass when:** The sample skull cup shows (26.0 × 38.8 × 30.6 mm: the Printables skull cup, its bottom 2% cut so it prints 30 mm) and the tracing controls are hidden; the posts load as 768 triangles, 30 × 10 × 10 mm; the 3D tab slices them (layers in the readout) with one line reaching both posts; tipped sideways they stand 30 mm tall and the Height field shows 30; the infill shows its density and pattern and at 100% makes more line than hollow; hollow with 2 walls more than 1; 15 mm makes 50 layers and the G-code tops out at 0.3 + 49 × 0.3 = 15 mm; the 2D tab points to Draw this view; undoing back past the turn stands the posts 10 mm tall again; Image traces the leaf again; no page errors. Cutting 1 mm off the bottom and 2 mm off the top leaves a 7 mm print (the Height box and the layers agree); the solid layers view shows a brightness spread over 20 of 255.
 
 #### A18
 
 **3D → 2D: Draw this view turns a model into a traced line drawing** · `app/A18-draw-view.test.js` · slow
 
 - **Why:** A model's 2D life (the pen plotter, or a single chocolate line of it) goes through a line drawing of one view: Draw this view renders it (hidden lines removed) and hands it to the tracer like any picture. The model stays loaded so the view can be changed and drawn again.
-- **How:** Picks 3D model (the sample vase), turns on the drawing preview and reads how much of the preview is drawn at folds over 60° and over 1°. Sets 20°, exports the drawing as SVG and reads it, then presses Draw this view, waits for the trace, goes to the 2D tab, then switches to 3D model and back to Image.
-- **Pass when:** The drawing preview draws less at 60° than at 1°; Export SVG saves sample-vase-view.svg at the vase's size in mm (plus a 5 mm margin each side) with its edge pieces joined into under half as many strokes; Draw this view switches to Image with the source named 'sample vase · drawing' and traces it (terms in the readout); the 2D tab places the pen line on the page; 3D model brings the vase back, and Image brings the drawing back; no page errors.
+- **How:** Picks 3D model (the sample skull cup), turns on the drawing preview and reads how much of the preview is drawn at folds over 60° and over 1°. Sets 20°, exports the drawing as SVG and reads it, then presses Draw this view, waits for the trace, goes to the 2D tab, then switches to 3D model and back to Image.
+- **Pass when:** The drawing preview draws less at 60° than at 1°; Export SVG saves sample-skull-cup-view.svg at the vase's size in mm (plus a 5 mm margin each side) with its edge pieces joined into under half as many strokes; Draw this view switches to Image with the source named 'sample skull cup · drawing' and traces it (terms in the readout); the 2D tab places the pen line on the page; 3D model brings the vase back, and Image brings the drawing back; no page errors.
 
 #### A19
 
@@ -707,7 +815,7 @@ report.
 
 - **Why:** October 2026: supports are the print's own wall widened from the plate up (one continuous line can't print a separate one). The ready list has to say when a model needs one.
 - **How:** Loads a mushroom (a 4 mm stem under a 14 mm cap) and opens the 3D tab with Support off: reads the ready list and the Overhang box's auto value. Picks Flared skirt, then Thin wall: reads the ready list and the line's length. Then Support off with Overhang per layer 2 mm.
-- **Pass when:** Off: the ready list warns of an overhang over 1 mm at the cap and the box shows auto 0.28 (a third of the 0.84 mm line); each support: the ready list names it and the warning is gone, both lines are longer than with none; 2 mm a layer: no overhang warning; no page errors.
+- **Pass when:** Off: the ready list warns of an overhang over 1 mm at the cap and the box shows its default 0.28 (a third of the 0.84 mm line); each support: the ready list names it and the warning is gone, both lines are longer than with none; 2 mm a layer: no overhang warning; no page errors.
 
 #### A29
 
@@ -755,7 +863,7 @@ report.
 
 - **Why:** The app opens on a clean workspace: nothing traced, the preview saying how to start (drop, paste or choose a file) with the examples — pictures, patterns, lettering and a 3D model — as chips there and in the Input card. settings.js can still name a sample to start on (defaults.sample), and the page's address can (?example=leaf).
 - **How:** Opens the app with no example; checks the empty preview, its chips and the readout; visits the Line and Print steps; taps each example in the Input card and checks the input it makes; taps the Wave portrait then the Leaf.
-- **Pass when:** Empty at the start: the empty preview showing with all eleven examples, the readout saying nothing yet, nothing traced on Line and Print; each example becomes its input (five pictures, three patterns, the text, the theobromine molecule, the vase) and the preview is no longer empty; after the Wave portrait the Leaf is the Picture in use; no page errors.
+- **Pass when:** Empty at the start: the empty preview showing with all eleven examples, the readout saying nothing yet, nothing traced on Line and Print; each example becomes its input (five pictures, three patterns, the text, the theobromine molecule, the skull cup) and the preview is no longer empty; after the Wave portrait the Leaf is the Picture in use; no page errors.
 
 #### A36
 
@@ -820,6 +928,78 @@ report.
 - **Why:** On a printer a level set to Fill (v121) has its outline traced and its inside printed solid, as part of the one continuous line: the layers' infill is given a mask of the level's blocks (UNB.infill areaMask), so only those areas fill.
 - **How:** Opens the still life (a printer), sets 4 levels and the darkest to Fill; looks at its row, the note, the layer line, the Print step's layers and the G-code. Then makes it for a pen plotter and back.
 - **Pass when:** Printer rows offer Trace, Fill and Skip (no Both) and no pen settings; Fill sets the mode to Both (outline and inside), the note says it prints solid on the Print step; the wall layer's line fills at least one area and is longer than the traced line, and fewer areas than with every area filled; the G-code exports; for a pen plotter the row has the pen settings; no page errors.
+
+#### A44
+
+**The picture's turn and photo through undo, Clean up as a photo, corners, the cut-out kept, the camera opened twice** · `app/A44-picture-camera-fixes.test.js`
+
+- **Why:** Undo kept only the picture's canvas, not its turn, the picture as loaded or its photo. Every picture handed to the trace was a new source, so the cut-out was forgotten, and a restored cut-out's mask, worked out again, made a new undo step that cut off Redo. The camera's start and Switch camera could overlap.
+- **How:** The leaf example: turn right, change Sensitivity, Undo, then Unturn. Turn right again, Clean up as a photo: corners nearly together, then a bow-tie, Use it. Printed, Undo, Redo. Object, a box round the leaf, Light 30. Text and back to Picture, Undo twice. Two quick Remove strokes while watching the busy chip. Last, a fake slow camera: Take a picture, Switch camera at once, Cancel.
+- **Pass when:** After Undo the picture is still 90° turned (the card says so) with its original, and Unturn turns it back; Clean up as a photo starts from the turned picture; corners nearly together are refused (the camera stays open, a message); a bow-tie is untangled; Undo after Printed keeps the Photo card (Drawing), Redo brings Printed; the cut-out stays through the Light change and Text and back; undoing back to it leaves Redo on and the steps as they were; the busy chip is on all the while the cut-out works; after Cancel no camera is live; no page errors.
+
+#### A45
+
+**Molecules (October 2026 review): the Plate card's Molecule saved and undoable, the editor's Undo, redo and turning, the card after an undo, the plate hint** · `app/A45-molecule-review.test.js`
+
+- **Why:** Found in the October 2026 review (scratchpad hunt, area B).
+- **How:** Theobromine: Molecule set to One piece, undone and redone; Caffeine picked and undone. The editor on Theobromine: an O made S, Clean up, Undo twice, Use it; then Erase, Undo and Ctrl+Shift+Z; turned from landscape to portrait on a phone; a carbon with five bonds and Clean up. The plate hint worked out for one label piece and for two label pieces without bonds.
+- **Pass when:** molPieces is a design setting, Undo brings back One piece (the start since v126) and Redo Bonds and labels apart; after Caffeine is undone the card shows theobromine; after the editor's Undo past Clean up no SMILES is kept, and Use it doesn't save the tidied one; Ctrl+Shift+Z redoes the erase; every atom on screen after turning; Clean up names the C with 5 bonds; the hints: 1 piece (1 piece: the label) fits … The label prints as one line, and … the labels … Each label prints as its own piece; no page errors.
+
+#### A46
+
+**Level fixes: levels only for a picture, an edge block filled, pens and modes kept apart, the advice and names** · `app/A46-level-fixes.test.js`
+
+- **Why:** Levels are a picture's (the card is hidden for the rest), but the prep applied them to molecules and patterns too; a filled block on the edge had an open outline; a fill edit saved every level's whole spec, colours worked out from the picture included; a printer tap saved its own view of the modes (Fill as Both).
+- **How:** Still life with 4 levels, then the theobromine example; a picture with a dark band along the bottom edge on a printer, 3 levels, the darkest on Fill, 100 mm wide; every level on Skip; a pen plotter: grey 2 on Fill, a printer tap on grey 3's Skip, back; grey 1 on Fill and its spacing edited, then Colours.
+- **Pass when:** The molecule's prep has no levels and its trace is under 0.2 mm error; the printer fills at least 2 areas (the disc and the band); every level on Skip says so; the plotter's grey 2 is still Fill and grey 1 still Trace after the printer tap; after the spacing edit only the spacing is saved, and in Colours the pen is the level's colour and the controls are named Colour 1; no page errors.
+
+#### A47
+
+**Workflow and state: Trace off on a printer, the output switched by undo, the Next bar's messages, a model start, opened designs, the phone bar** · `app/A47-workflow-state.test.js`
+
+- **Why:** Area D of the v123 bug hunt (scratchpad/hunt/d/REPORT.md, items 1–5 and 8–10).
+- **How:** Lettering, printer, Trace off, text changed, Print: the ready list and the Next bar's Export G-code. Leaf for the plotter, Plot step, Undo. Vase, then A pen plotter. ?example=vase: history and Save design. Lettering as drawn saved and reopened in a fresh page. Labyrinth as drawn from the empty app: saved file name. Leaf for the plotter, Trace off, Export SVG. A design with an unknown art kind and one with outW null. A phone (390 × 844): the preview bar, the 3D layers view, the suggestion box.
+- **Pass when:** No G-code with Trace off (a red Trace is off line, a toast says so); after Undo the Print step shows (view choc); no page errors; a model start has a history entry and saves; the reopened design's readout isn't Nothing yet; the pattern's file is labyrinth….json; the SVG message says to turn Trace on; a bad file leaves the art and size as they were; the phone's View button inside the screen, One copy / Whole plate clear of the Layer slider, Bigger clear of the What's shown row, the suggestion box's count clear of Close.
+
+#### A48
+
+**Tuning a chocolate: the Flow in Fine-tuning, and test prints of the flow and the first layer's Z** · `app/A48-flow-and-first-z.test.js`
+
+- **Why:** Prints fail on the settings first: a thin or broken line (too little chocolate) and a first layer that won't stick (the needle too high). v124 adds the Flow (%) to Fine-tuning and a First layer Z test print, and a Flow strip's Use it now sets the Flow (it used to say to set it on the printer).
+- **How:** Opens the leaf example for a printer. Sets Flow 110% and reads E per mm. Makes a Flow test (80–120%) and a First layer Z test (0.2–0.4 mm) through the app's own plan, reads each strip's flow factor and its first layer's height, and uses strip 4 of each. Then undoes once.
+- **Pass when:** E per mm at 110% is 1.1× the 100% value; with the Flow at 110%, the Flow strips push 80, 90, 100, 110, 120% of the worked-out amount; the First layer Z strips' first layers sit at 0.2, 0.25, 0.3, 0.35, 0.4 mm above the plate (the export's first-layer Z plus each strip's offset) and every strip's layers stay one layer height apart; Use it sets Flow 110 and First layer Z 0.35; Undo takes the First layer Z back; no page errors.
+
+#### A49
+
+**Test matrix: the skull cup as nine copies, each with its own speed, flow and layer height (L9), scored for the best levels** · `app/A49-test-matrix.test.js`
+
+- **Why:** Settings are where prints fail (v124): a Taguchi L9 tests three settings at three levels in nine prints. The sample is a low-poly skull cup (Printables, CC BY-NC 4.0) at 30 mm, a harder shape than a plain vase.
+- **How:** Opens ?example=vase (the skull now), goes to Print, sets levels 15/20/25 mm/s, 90/100/110%, 0.25/0.3/0.35 mm, and builds the matrix plan. Reads each copy's comb, first layer, layers, feed and flow. Exports the G-code and reads its head. Scores the nine copies so that 25 mm/s, 110% and 0.25 mm come out best, and uses the best levels.
+- **Pass when:** The sample is the skull cup, 30 mm tall; nine combs with 1 to 9 teeth; each copy's first layer at its own layer height and its layers that far apart (30 mm ÷ the height, ±2 layers); its feed its speed; its flow (e against the export's) its layer height × flow ÷ the Print step's; nine copies inside the plate; the G-code names the nine copies; the best levels shown and put into Fine-tuning (25 mm/s, 110%, 0.25 mm); the levels and scores saved with the design; no page errors.
+
+#### A50
+
+**A molecule on the Print step: its labels printed by their bonds, One copy showing them, and the structure turned** · `app/A50-molecule-print.test.js`
+
+- **Why:** Nicolaas (30 October 2026): drawn molecules lost their letters on the Print step. Every label piece was placed from its own corner, so all of them printed on top of each other at the molecule's corner. He also asked to turn structures so they read well, and for an aldehyde's H to be drawn.
+- **How:** Opens theobromine, goes through the structure editor's Use it, then Print. Reads every piece's line on the plate against the bonds' box, and how far apart the labels are. Turns the structure −30° and reads it saved and undone. Opens vanillin and counts its labels.
+- **Pass when:** 7 pieces; the labels spread over at least half the bonds' width and depth and no two labels at the same place; the 3D view's One copy says it shows the whole molecule; Turn −30° gives a −30° structure, saved with the design, and Undo takes it back to 0°; vanillin has 4 labels (the aldehyde's O and H, the ether's O, OH); no page errors.
+
+#### A51
+
+**Spirograph: more wheels from the Pattern card, a centre path drawn on its pad, and the frame** · `app/A51-spirograph-path.test.js`
+
+- **Why:** v127: the Spirograph's centre can follow a path drawn by hand (Draw the path… opens a pad over the preview), with up to six wheels and an optional crop.
+- **How:** Opens the Spirograph example (plotted as drawn), sets Wheels to 3, opens the pad, drags a wave across it, and uses it; reads the pattern; turns on Crop; undoes; then Clear.
+- **Pass when:** The settings show in groups, Ring, Wheel 1 to 3, Figure and Frame, at 3 wheels; 3 wheels in the pattern; the pad opens over the preview and shows the drag's points; Use it puts the path in the pattern (over 20 points) and the line opens; the design keeps it; Frame Crop shows its width and height; Undo takes the crop back but keeps the path; Clear removes the path and closes the line again; no page errors.
+
+#### A52
+
+**Font picker: fonts that can write the text, style filter, Cyrillic and accents** · `app/A52-font-filters.test.js` · slow
+
+- **Why:** Most fonts only have the basic Latin letters, so Cyrillic or accented text (ё, ü, é) would print as “?”. The font list sets apart and greys the fonts missing a letter of the typed text, says which letters, and the Style buttons narrow the list, while every font stays pickable for saved designs and presets.
+- **How:** Types Cyrillic with Sans picked, reads the menu and the hint, picks Pebble and Bad Script and traces each, tries the Script style, then traces accented Latin.
+- **Pass when:** With Cyrillic, Sans warns and names the missing letters, the Latin-only fonts sit greyed under “Missing letters” while Pebble and Bad Script stay enabled; both trace the Cyrillic with zero crossings; Script puts Bad Script first and the rest under “Other styles”; accented Latin in Pebble traces with no warning; no page errors.
 
 <!-- catalogue:end -->
 

@@ -81,7 +81,11 @@ Tests:
 
 - A text's pieces use the automatic term count and aren't shown on the Trace tab (it draws the text joined, as the
   2D tab plots it). If a piece needs looking after on its own, show the pieces there too.
-- More fonts for lettering (raised 18 October; Chocolate and Dune Rise came in v98).
+- More fonts for lettering (raised 18 October; Chocolate and Dune Rise came in v98; Pebble and Bad Script, with
+  Cyrillic and accents, in v130). Decided 2 November: cover accented Latin, Cyrillic and Greek; Hebrew and Arabic
+  maybe later (right to left, and Arabic letters change shape by their neighbours); Chinese, Japanese and similar
+  scripts are skipped (too many strokes for a needle): import them as a picture and trace it. Dune Rise's dots
+  could be redone with the new center-font.py (they come out as specks).
 
 ## 4 · Data and accounts (the big picture)
 

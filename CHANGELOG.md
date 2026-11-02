@@ -3,6 +3,21 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v130 · 2026-11-02
+
+- **Two new fonts with Cyrillic and accents**: **Pebble** (rounded; a single-stroke version of Comfortaa, renamed as
+  its licence asks) writes Latin with accents, Greek and Cyrillic, Ukrainian letters included; **Bad Script**
+  (handwriting) writes accented Latin and Cyrillic. The older fonts have only the basic Latin letters. Bad Script's
+  smallest readable letter height is 10 line widths, like the other thin scripts.
+- **The font list follows the text**: a font missing a letter you typed (ё, ü, é…) is set apart under "Missing letters
+  in this text" and greyed, with the letters it lacks; if the font picked is one of them, a warning says they'd print
+  as "?" and how many fonts can write the text. Chinese, Japanese and similar scripts: import them as a picture and
+  trace that.
+- **Style buttons** above the font list (All, Plain, Rounded, Script, Display) bring that style's fonts to the top;
+  the others stay below under "Other styles", so saved designs and presets can still pick any font.
+- **center-font.py draws dots**: a dot (i, ё, ü, !) has a single point for a middle line and used to vanish; it's now
+  a small loop, as in the Hershey and EMS fonts. Test A52.
+
 ## v129 · 2026-10-30
 
 - **Spirograph settings in groups**: Ring, Wheel 1, each further wheel, Figure and Frame, each under a small heading

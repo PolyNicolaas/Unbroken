@@ -499,7 +499,15 @@
       <div class="row" id="textBox">
         <textarea id="textIn" rows="3" spellcheck="false" aria-label="Text to trace (up to 5 lines)">Happy Birthday</textarea>
         <span class="val" id="lineCount" style="justify-self:end">1 of 5 lines</span>
+        <div class="seg small font-styles" role="radiogroup" aria-label="Font style" title="Narrow the font list to one style">
+          <input type="radio" name="fontStyle" id="fsAll" value="all" checked><label for="fsAll">All</label>
+          <input type="radio" name="fontStyle" id="fsPlain" value="plain"><label for="fsPlain">Plain</label>
+          <input type="radio" name="fontStyle" id="fsRounded" value="rounded"><label for="fsRounded">Rounded</label>
+          <input type="radio" name="fontStyle" id="fsHand" value="hand"><label for="fsHand">Script</label>
+          <input type="radio" name="fontStyle" id="fsDisplay" value="display"><label for="fsDisplay">Display</label>
+        </div>
         <label class="field"><span>Font</span><select id="font"></select></label>
+        <p class="hint" id="fontHint"></p>
         <div class="two">
           <label class="field"><span>Letter spacing</span>
             <select id="txtSpacing"><option value="auto" selected>Font default</option><option value="even">Even gaps</option><option value="font">Font's own (joined)</option></select>

@@ -247,7 +247,7 @@ window.UNB_SETTINGS = {
   // (used) Fixed rules the app follows.
   rules: {
     maxTextLines: 5,                  // lines of typed text
-    minLetterHeight: { default: 8, allure: 10, elfin: 10 },   // smallest readable letter height, in line widths, per font
+    minLetterHeight: { default: 8, allure: 10, elfin: 10, badscript: 10 },   // smallest readable letter height, in line widths, per font
     letterGapShare: 0.15,             // default letter gap, × letter height
     minLetterGap: 1.2,                // letters never closer than this × line width
     wordGapShare: 0.5,                // default word gap, × letter height
