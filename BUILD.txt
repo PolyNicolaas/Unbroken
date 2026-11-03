@@ -1,5 +1,5 @@
-Unbroken · web app build v133
-Built:  2026-11-03T23:18:37.274Z
+Unbroken · web app build v134
+Built:  2026-11-03T23:46:04.963Z
 Tests:  107 of 107 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
@@ -21,17 +21,17 @@ Files (sha1, first 12):
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   c58b27214155  16-molecule.js
-  f10da4407bd0  core.js
+  a3e870657a23  core.js
   0e91e1c804a2  css/app.css
   0be9d7ad7cf8  css/theme.css
   4b134bbd36e2  fonts.js
-  2f0b4bfff78d  index.html
+  6442dc602bc5  index.html
   04742756d25f  js/art.js
   01da455a1225  js/camera.js
   a4eda5dec3a1  js/config.js
   bfd81ea732b7  js/controls.js
   419f0a9223bc  js/cutout.js
-  e666f8bf0b57  js/engine-bridge.js
+  f99937366b5f  js/engine-bridge.js
   65f719c0af2b  js/examples.js
   d38a95d1cdb9  js/export.js
   9351b61ce05c  js/history.js
@@ -63,4 +63,4 @@ Files (sha1, first 12):
   7c48c854ce75  js/workflow.js
   53b02936e233  js/zoom.js
   92c7afb18c08  settings.js
-  85d8193792d8  worker.js
+  3b45e2b3c531  worker.js
