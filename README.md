@@ -78,7 +78,7 @@ Unbroken/
 | Web application | [`web-app/README.md`](web-app/README.md) — open `web-app/index.html` in a browser |
 | Tests | [`source/tests/README.md`](source/tests/README.md): the test plan |
 | Challenges | [`source/challenges/README.md`](source/challenges/README.md): `node source/challenges/run.js`, then `compare.js` to check a run against another |
-| Publishing | `node web-app/build.js` runs every test and only then builds `web-app/dist/`, the copy to publish |
+| Publishing | `node web-app/build.js` runs every test and only then builds `web-app/dist/`, the copy to publish; the published page is the `gh-pages` branch (see web-app/README.md, Build for publishing) |
 
 The engine in `source/engine/` has no page code, so it can also run in Node (tests) or in another app later. The
 October 2026 code audit and review are kept in [`docs/history/`](docs/history/): what was checked, fixed and left,
@@ -86,7 +86,7 @@ and the slow spots. Anything still open from them is in [`ROADMAP.md`](ROADMAP.m
 
 ## Pipeline
 
-0. **Source** (the Art tab): an image (a pattern is drawn as one), or typed text laid out in a single-stroke font (letter height in mm, even gaps, minimum readable height of 8–10 stroke widths depending on the font; a stroke is two lines one spacing apart, so 2 × needle + gap).
+0. **Source** (the Art tab): an image (a pattern is drawn as one), or typed text laid out in a single-stroke font (letter height in mm, even gaps; a stroke is two lines one spacing apart, so 2 × needle + gap). For a printer the smallest readable height is measured from the letters typed (or a fixed 8–10 stroke widths per font), and the letters can be joined along the baseline, near-misses closed and i/j dots left out: see [Lettering](#lettering).
 1. **Prep**: brightness, contrast, even-out lighting, plain-background removal.
 2. **Lines**: Centerline (skeleton of strokes; thick shapes are outlined; strokes packed closer than the blur can resolve are split along the light gaps between them) or Outline (Canny edges).
 3. **Edit**: area selection (rectangle / freehand), erase pieces or brush, chosen start point. For changes to the line
@@ -138,7 +138,7 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
 - **Picture**: a photo (**Take a picture**, below), a sample, an image of yours (Choose an image…, or drop one anywhere
   on the page) or a sketch (Draw your own, on the preview). **Turn left / Turn right** and **Straighten** (±20°) turn it first; the corners that come in
   are white. The **still life** sample (flat greys) shows off grey levels and the picture patterns.
-- **Text**: lettering in a single-stroke font (the Text card).
+- **Text**: lettering in a single-stroke font (the Text card; see [Lettering](#lettering)).
 - **Pattern**: a geometric pattern, or a pattern that draws a picture's light and dark as one line (see
   [Geometric art](#geometric-art)).
 - **Molecule** (`web-app/js/molecule.js`, engine `16-molecule.js`; [`docs/CHEM-PLAN.md`](docs/CHEM-PLAN.md)): a
@@ -280,7 +280,7 @@ The needle can't stop and can't go back over a line it has just laid. So every s
 - **Why r ≥ d/2.** Round the turn the inner chocolate edge has radius r − w/2, so opposite inner edges are 2r − w apart; that is at least the gap g exactly when r ≥ d/2. r = d/2 is the tightest legal turn (a plain half circle, no bulb).
 - **Junctions.** Every strand at a junction sits in the corner it turns round, half a spacing from the strokes on both sides. Strokes drawn once (like a leaf's outline) ease half a spacing into their corner near a junction and back to their centre further out, so two of them meeting at a junction don't touch. With every strand in its own corner the minimum spacing holds at junctions too: there is no slack there.
 - **Short stubs.** A full loop needs r + w/2 + r·cos α of stroke (2.9 mm at the defaults). On shorter stubs r shrinks, down to d/2.
-- **Text.** Letter strokes are loops too, so the smallest readable letter height counts stroke widths of 2w + g (17.4 mm for the sans font at 18G + 0.5 mm, 8 stroke widths).
+- **Text.** Letter strokes are loops too, so the smallest readable letter height counts stroke widths of 2w + g (17.4 mm for the sans font at 18G + 0.5 mm, 8 stroke widths; the measured height, [Lettering](#lettering), is often more).
 - **Size.** See [Size and detail](#size-and-detail): the smallest size the app allows is worked out with the strands and loops in place.
 
 Test E16 measures every stroke end: loop width, where the tip lands, the gap and crossings.
@@ -366,10 +366,43 @@ The 3D tab builds the object up from the drawing (`UNB.layerStack`, `web-app/js/
 - **Layer height** comes from the chocolate (`layerHeight` on a chocolate in `settings.js`) or else the printer (0.3 mm). Height = layers × layer height; the first layer prints at Z = one layer height (First-layer Z in Fine-tuning, which follows the layer height).
 - **Readout and preview.** Layers, height, metres of line and print time at the feed; a warning when a layer takes less than the printer's minimum layer time (20 s), since each layer must set before the next lands on it. The preview shows the stack from the front, tilted back, with the height exaggerated (blue: filled base, brown: walls).
 - **G-code.** Each copy prints all its layers, then the needle lifts to the lift height above everything printed so far before travelling to the next copy. E is the flow per mm times the per-point flow multiplier.
-- **A piece for each line of text.** A text of several lines (a list of names, say) prints each line as a piece of its own by default (Plate card, **Lines of text**: A piece for each line / One piece, lines joined; `settings.js` defaults.textLines). The Trace and 2D tabs keep the text as one drawing; for the printer every line is traced again from its own letters (`UNB.rasterText`'s `lines`), with the automatic term count, so each piece is one continuous line with no strand to the next line. The pieces are laid out together (`UNB.plateLayoutPieces`: all turned the same way, straight or a quarter turn when that fits more, packed in reading order in rows from the back, Copies = sets of every line), each gets its own layers, and the G-code prints them one after another like copies. **One copy shows** picks the piece the One copy views show; the layers readout counts metres and minutes for all of them. Tests E31, A29.
+- **A piece for each line of text.** A text of several lines prints each line as a piece of its own by default (Plate card, **Lines of text**: A piece for each line, in place / A piece for each line, packed / One piece, lines joined; `settings.js` defaults.textLines). **In place** (the default) keeps the layout as typed, one line under the other, so a card or message reads top to bottom, and copies are whole messages (test A54); **packed** puts each line wherever it fits to save room, for a list of names. The Trace and 2D tabs keep the text as one drawing; for the printer every line is traced again from its own letters (`UNB.rasterText`'s `lines`), with the automatic term count, so each piece is one continuous line with no strand to the next line. The pieces are laid out together (`UNB.plateLayoutPieces`: all turned the same way, straight or a quarter turn when that fits more; in place as one block keeping their places, packed in reading order in rows from the back; Copies = sets of every line), each gets its own layers, and the G-code prints them one after another like copies. **One copy shows** picks the piece the One copy views show; the layers readout counts metres and minutes for all of them. Tests E31, A29, A54.
 - **Copies one at a time.** Each copy is finished before the next starts (a rule, see PLAN.md). The G-code follows choc OS's recipe: the printer's start and end lines, the purge line, a retract before travelling, and an unretract and a wipe for each copy (test E28).
 
 Test E21 (the stack and the G-code) and A14 (the controls).
+
+## Lettering
+
+The Text card lays typed text out in a single-stroke font (`source/engine/fonts.js`, `UNB.textLayout` in
+`03-text.js`).
+
+- **Fonts.** Each has a style and the scripts it writes. Sans, Readability (and Italic), Nixish, Script, Allure, Tech,
+  Osmotron, Elfin and Dune Rise are basic Latin. **Pebble** (rounded, a single-stroke Comfortaa) writes accented Latin,
+  Greek and Cyrillic; **Bad Script** (handwriting) accented Latin and Cyrillic; **Chocolate** (choc OS's lettering,
+  each letter its printed outline) Latin and Cyrillic: Russian, Ukrainian, Belarusian Ў, and , : ; ' " « ».
+  Chinese, Japanese and similar scripts aren't planned (too many strokes for a needle): import them as a picture and
+  trace that.
+- **The font list follows the text.** A font missing a letter you typed is set apart under "Missing letters in this
+  text", greyed, with the letters it lacks; if the font picked is one, a warning says they'd print as "?" and how many
+  fonts can write the text. The **Style** buttons (All, Plain, Rounded, Script, Display) bring a style's fonts to the
+  top. Every font stays pickable, so saved designs and presets still work. Test A52.
+- **Lettering for a printer** (the Text card's switches; on for a printer, hidden for a pen plotter, whose letters
+  stay as the font draws them):
+  - *Join letters along the baseline*: a word's letters linked from the rightmost point of one letter's lowest third
+    to the leftmost of the next's, so each word is one piece, like handwriting.
+  - *Close near-misses*: a stroke end within a stroke's width of its own letter (and at most 7% of the letter height)
+    is drawn on to meet it, one turn less; a letter's openings (э's) stay open.
+  - *Leave out i and j dots*: no connector up to the dot and back; ü's, ё's and ї's dots stay.
+  - *Measure the smallest height*: each letter drawn as wide as the printed stroke plus its gap at smaller and smaller
+    sizes, until a hole (at least a stroke wide, and 1.5% of the letter's square) fills in or a dot runs into its stem
+    (`UNB.textShapeMin`, cached per letter by `UNB.glyphShapeMin`); the hint names the letter that sets it. Never
+    below `rules.minLetterStrokes` (4). Off, or for the Chocolate font: `rules.minLetterHeight` (8, or 10 for the thin
+    scripts) stroke widths.
+  Tests E54, A53.
+- **Font tools** (`source/tools/`): `center-font.py` turns an outline font with even, thin strokes into single strokes
+  (the middle line; dots as small loops), `line-font.py` a font whose letters are already the line,
+  `chocolate-cyrillic.py` draws the Chocolate font's Cyrillic in Quicksand Bold's style (the font choc OS's lettering
+  is) and writes it into `fonts.js`. Test E55.
 
 ## 3D models
 

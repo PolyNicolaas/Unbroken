@@ -13,9 +13,9 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `css/app.css` | Layout and styling, built entirely on the names in `theme.css`. |
 | `js/state.js` | Shared state (`st`: the current design and its trace), the `$` helper, and the print-settings signal (`printSettingsChanged` / `onPrintSettings`: the printer, chocolate, needle or layer height applied). |
 | `js/ui.js` | Small page helpers every file uses: `fmt`, `clamp`, `intIn`, `hexRGB`, `toast`, `setStatus`, theme colours (`css`, `cssRGBA`), `fitCanvas`, `saveFile` / `saveError`, and `busyFor` (the "working…" label, one reason per job). |
-| `js/config.js` | Reads and checks `settings.js`, falls back to built-in values for anything missing or wrong, and applies it: needle menu, chocolate menu and details, printer menu, starting defaults. |
+| `js/config.js` | Reads and checks `settings.js`, falls back to built-in values for anything missing or wrong, and applies it: needle menu, chocolate menu and details, printer menu, starting defaults.; the font menu (fonts that can't write the typed text set apart, the Style buttons). |
 | `js/engine-bridge.js` | Background engines: runs engine calls in Web Workers with cancellation, or on the page when workers aren't allowed. Four of them: `PIPE` (the trace), `AUX` (the term chart), `OPT` (Optimize tracing), `LAY` (the 3D and 2D tabs' lines and model slicing). |
-| `js/source.js` | Which source is in use (`isModel`, `textMode`), built-in samples, reading the settings, setting the source image, and the Text source. |
+| `js/source.js` | Which source is in use (`isModel`, `textMode`), built-in samples, reading the settings, setting the source image, and the Text source (layout, the measured smallest height, the lettering-for-a-printer switches). |
 | `js/pipeline.js` | The trace pipeline: line map → walk → spectrum → series → final line, the smallest-size search and the term chart. |
 | `js/preview.js` | Drawing the preview, in layers (`render`: under the line, the line, marks on it, the turning circles), the size box and the error chart. |
 | `js/tools.js` | Hand tools (select area, erase, set start, draw, crossing areas, connector paths), auto threshold, drag-and-drop and paste. |
@@ -37,7 +37,7 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/views.js` | The printer menu, the plate, copies and mini-map, the View menu, the Trace / 2D / 3D tabs, the big view's tabs and collapsible sections. |
 | `js/zoom.js` | Zoom and pan in each view of the big view, and the One copy / Whole plate switch. |
 | `js/layers.js` | Layers on the 3D tab: Filled base and walls stacked into one 3D path (`UNB.layerStack`), the base / wall line variants (own background engine), readout, preview and the per-copy paths for G-code. |
-| `js/pieces.js` | A text of several lines printed as a piece per line (Plate card, Lines of text): each line traced again on its own, the pieces packed on the plate (`UNB.plateLayoutPieces`), each with its own layers; One copy shows the piece picked. |
+| `js/pieces.js` | A text of several lines printed as a piece per line (Plate card, Lines of text): each line traced again on its own, the pieces laid on the plate in place (the layout as typed) or packed (`UNB.plateLayoutPieces`), each with its own layers; One copy shows the piece picked (in place: the whole text). |
 | `js/plot.js` | The 2D tab: the pen version of the line (no strands or loops), paper, margins and pens, shapes (gap closing, smallest shape), fill pens (click or drag across shapes to fill them; hatch or contours, following the image's tone; colour from image), the page preview, and the SVG for Saxi (one layer per pen) and flat DXF. |
 | `js/model.js` | 3D models as a source: STL loading (and the sample vase), quarter turns, the shaded preview you can look round, the footprint on the plate, slicing for the 3D tab (`UNB.modelStack` in the layers engine), and the line drawing of a view (`UNB.hiddenLines`) that Draw this view hands to the tracer. |
 | `js/notes.js` | The Suggestion box at the bottom of every tab: ideas and bugs written down while using the app, kept with the published page (its database) or, elsewhere, in the browser. |
@@ -129,9 +129,9 @@ copying a whole `{ … },` block and giving it a new `id`.
 | `chocolates` | Each chocolate: colour, print speed, needle, cost per 100 g, density, temperatures, product and dietary details, links |
 | `needles` | The Needle menu: gauge, hub colour, inside diameter |
 | `printers` | Each printer: bed, build height, print height, lift, layer height, speed, minimum layer time, retraction and wipe, travel speed, cartridge diameter (sets E per mm with the needle), start and end G-code (choc OS's purge line). The first is the default (or `defaults.printer`). |
-| `defaults` | Every control's starting value, panel by panel: source, tracing, lines and size, text, plate, layers, paper and pen, export formats, view, tools |
+| `defaults` | Every control's starting value, panel by panel: source, tracing, lines and size, text (font, lettering for a printer: `joinLetters`, `closeNearMisses`, `leaveOutIJDots`, `measuredHeight`), plate (`textLines`: in place, packed or one piece), layers, paper and pen, export formats, view, tools |
 | `presets` | What the Start-from buttons (Line drawing, Photo, Logo) set |
-| `rules` | Text limits (lines, readable letter height per font, letter and word gaps) and how many steps Undo remembers |
+| `rules` | Text limits (lines, readable letter height per font, the measured height's floor `minLetterStrokes`, letter and word gaps) and how many steps Undo remembers |
 | `engine` | Deeper tracing numbers: term-count tolerance, minimum strand gap, packed-stroke splitting, far-group size. Change with care and run the tests. |
 
 - Picking a chocolate in the 3D tab sets its preview colour, the G-code feed (print speed × 60) and its
@@ -156,6 +156,10 @@ Open `index.html` in Chrome, Safari, Edge or Firefox. Everything runs in the bro
 5. writes `dist/BUILD.txt`: when it was built, the test result, and a checksum per file.
 
 If any step fails the build stops with the reason, and the previous `dist/` stays as it was. `dist/` is not kept in git.
+
+**Publishing.** GitHub Pages serves the `gh-pages` branch, which holds only the built copy: after the build, replace
+that branch's files with `dist/`'s and commit them as the version ("v133: …"), then push both `main` and `gh-pages`.
+Pushing `main` alone doesn't change the published page.
 
 ## Version 1 plan: embeddable web app
 
