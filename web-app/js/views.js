@@ -346,7 +346,9 @@ function piecePlateText(lay, pl, ok) {
       : `piece${k === 1 ? "" : "s"}: ${bonds ? (k > 1 ? "the bonds and the labels" : "the bonds") : k === 1 ? "the label" : "the labels"}`,
     what = `${lay.copies} piece${lay.copies === 1 ? "" : "s"} (${lay.sets > 1 ? `${lay.sets} × ` : ""}${k} ${lines})`,
     how = st.text
-      ? "Each line prints as its own piece, one after another."
+      ? piecesTogether()
+        ? "Each line prints as its own piece, one after another, in its place: the layout as typed."
+        : "Each line prints as its own piece, one after another, packed to save room."
       : bonds
         ? "The bonds print as one line, then each label as its own piece, in their places."
         : k === 1

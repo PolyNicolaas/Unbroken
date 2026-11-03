@@ -631,7 +631,7 @@ for (const q of CFG.printers) {
     ["copies", range(1, 200), (v) => set("copies", Math.round(v))],
     ["copySpacing", range(0, 200), (v) => set("copyGap", v)],
     ["rotation", list("auto", "straight"), (v) => set("plateRot", v)],
-    ["textLines", list("each", "one"), (v) => set("textPieces", v)],
+    ["textLines", list("in-place", "each", "one"), (v) => set("textPieces", v === "in-place" ? "place" : v)],
     [
       "printer",
       (v) => CFG.printers.some((q) => q.id === v),

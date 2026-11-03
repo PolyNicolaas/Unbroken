@@ -23,11 +23,14 @@ const textLines = () => (st.text && st.text.lines ? st.text.lines.length : 0);
 function piecesOn() {
   return (
     !isModel() &&
-    ((!!st.text && textLines() > 1 && $("textPieces").value === "each") ||
+    ((!!st.text && textLines() > 1 && $("textPieces").value !== "one") ||
       (typeof moleculePiecesOn === "function" && moleculePiecesOn()))
   ); // (molecule.js: loaded after this file)
 }
 const moleculePieces = () => !st.text && typeof moleculePiecesOn === "function" && moleculePiecesOn();
+// the pieces keep their places, laid on the plate as one block: a molecule's bonds and labels, or a text's lines "in
+// place" (the layout as typed, one line under the other); packed, each line goes wherever it fits
+const piecesTogether = () => moleculePieces() || (!!st.text && $("textPieces").value === "place");
 // everything a piece's line depends on: the text and its hand edits, the line settings, the size (letters per mm)
 function piecesKeyNow() {
   const s = settings();
@@ -158,10 +161,10 @@ function piecePlate(n, gap, straight) {
     piecesSoon();
     return null;
   }
-  const key = [P.key, n, gap, straight, lineWidthMM(), BED.w, BED.h].join("|");
+  const key = [P.key, n, gap, straight, lineWidthMM(), BED.w, BED.h, piecesTogether()].join("|");
   if (piecePlateCache && piecePlateCache.key === key && piecePlateCache.P === P) return piecePlateCache.lay;
-  // (a molecule's pieces keep their places: one frame for all of them)
-  const together = moleculePieces(),
+  // (a molecule's pieces, or a text's lines in place, keep their places: one frame for all of them)
+  const together = piecesTogether(),
     U = together
       ? {
           x0: Math.min(...P.list.map((D) => D.fb.x0)),
@@ -190,7 +193,7 @@ function piecePlate(n, gap, straight) {
     together,
   });
   lay.pieces.forEach((q, i) => (q.open = P.list[i].open));
-  lay.frame = U; // (a molecule's pieces: their lines go on the plate from this common corner, not their own)
+  lay.frame = U; // (pieces kept together: their lines go on the plate from this common corner, not their own)
   piecePlateCache = { key, P, lay };
   return lay;
 }
@@ -230,8 +233,8 @@ function pieceMenuUI() {
   $("piecesRow").hidden = !many && !molLabels;
   $("textPieces").closest(".field").hidden = !many;
   $("molPiecesField").hidden = !molLabels;
-  $("pieceShownField").hidden = !on || moleculePieces(); // (a molecule's One copy is every piece: molecule.js)
-  $("copiesLab").textContent = on && many ? "Copies of each line" : "Copies";
+  $("pieceShownField").hidden = !on || piecesTogether(); // (pieces kept together: One copy is every piece)
+  $("copiesLab").textContent = on && many && !piecesTogether() ? "Copies of each line" : "Copies";
   const P = piecesNow(),
     el = $("pieceShown");
   if (P) {

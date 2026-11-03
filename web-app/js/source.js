@@ -493,7 +493,7 @@ function limitLines() {
   }
   const n = el.value.split("\n").length;
   $("lineCount").textContent =
-    `${n} of ${MAX_LINES} lines` + (n > 1 && $("textPieces").value === "each" ? ` · ${n} pieces` : "");
+    `${n} of ${MAX_LINES} lines` + (n > 1 && $("textPieces").value !== "one" ? ` · ${n} pieces` : "");
   $("lineCount").title =
     n > 1
       ? "On the Print step each line prints as a piece of its own, or joined into one (Plate card, Lines of text)"

@@ -3,6 +3,14 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v133 · 2026-11-02
+
+- **Lines of text in place** (Plate card, Lines of text): a new choice, and now the default, "A piece for each line, in
+  place": each line still prints as its own piece (no strand of chocolate between lines), but the lines keep the
+  layout as typed, one under the other and aligned as the Text card says, so a card or message reads top to bottom.
+  "A piece for each line, packed" is the old way (each line wherever it fits, to save room: a set of name labels).
+  In place, copies are whole messages. Settings: `textLines` "in-place" (new default), "each" or "one". Test A54.
+
 ## v132 · 2026-11-02
 
 - **The Chocolate font writes Cyrillic**: all of Russian (А–Я, а–я, Ёё), Ukrainian (Єє Іі Її Ґґ) and Belarusian Ўў,

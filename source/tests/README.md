@@ -177,8 +177,9 @@ report.
 | [A49](#a49) | Test matrix: the skull cup as nine copies, each with its own speed, flow and layer height (L9), scored for the best levels | copies printed with the wrong settings, a layer height that doesn't change the slicing, a comb that doesn't count its copy, a flow that doesn't reach the plunger, scores that don't pick the best levels, and levels or scores lost from the design | – |
 | [A50](#a50) | A molecule on the Print step: its labels printed by their bonds, One copy showing them, and the structure turned | labels piled up at the molecule's corner in the G-code (each laid out from its own corner instead of the molecule's), One copy showing only the bonds, a Turn that doesn't turn or isn't saved, and an aldehyde without its H | – |
 | [A51](#a51) | Spirograph: more wheels from the Pattern card, a centre path drawn on its pad, and the frame | the Wheels setting not reaching the drawing, the path pad not taking a drag, a path that isn't saved or undone, Clear not clearing, and the frame settings not showing | – |
-| [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | 12.0 s |
+| [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | – |
 | [A53](#a53) | Text card: lettering toggles for a printer (join letters, close near-misses, i and j dots, measured smallest height) | lettering toggles that don't reach the print, or change a pen plotter's letters | – |
+| [A54](#a54) | A text's lines printed in place: a piece for each line, keeping the layout as typed | a card or message whose lines get shuffled round the plate to save room, so it no longer reads top to bottom | 11.3 s |
 
 #### E01
 
@@ -841,7 +842,7 @@ report.
 **A text of several lines prints a piece for each line, all on one plate, in one G-code file** · `app/A29-text-pieces.test.js`
 
 - **Why:** A list of names (or any text of several lines) should come off the printer as separate pieces: one continuous line each, with no strand of chocolate from one line to the next. From the Suggestion box (18 October 2026). The Trace and 2D tabs keep the text as one drawing; the 3D tab's Plate card decides how it prints (Lines of text: a piece for each line, or one piece with the lines joined).
-- **How:** Opens the app, picks Text and types three names on three lines, notes the Trace tab's line, goes to the 3D tab and waits for the pieces. Reads the Plate card, the placements and the ready list; exports G-code and reads it back move by move (lib/gcode.js). Sets 2 copies of each line and reads the plate again; picks the second piece for One copy; then switches Lines of text to One piece.
+- **How:** Opens the app, picks Text and types three names on three lines, notes the Trace tab's line, goes to the 3D tab and waits for the pieces. Reads the Plate card (in place to start with), picks A piece for each line, packed, and reads the placements and the ready list; exports G-code and reads it back move by move (lib/gcode.js). Sets 2 copies of each line and reads the plate again; picks the second piece for One copy; then switches Lines of text to One piece.
 - **Pass when:** The Plate card offers Lines of text with A piece for each line chosen; three pieces named after the lines, each traced on its own (no connector between lines), different widths; all three on the plate, none overlapping; the G-code has three copies, each one continuous line (no travel inside) printed inside its own footprint; the Trace tab's line is unchanged; 2 copies of each line gives six pieces; One copy shows the piece picked; One piece goes back to one copy of the joined text; no page errors.
 
 #### A31
@@ -1027,6 +1028,14 @@ report.
 - **Why:** Joined letters, closed near-misses and dotless i and j make chocolate lettering cleaner, and the measured smallest height keeps holes from filling in; but on a pen plotter the pen lifts between strokes, so its letters must stay as the font draws them. Each toggle has to change the traced line, and say what it did.
 - **How:** Types "Choco jelly" in Sans for a printer: traces with every toggle off, then joining on, then leaving out i and j dots, reading the connectors and the hint; asks for 3 mm letters with the measured height on and off; switches to A pen plotter and checks the toggles are hidden and the text traces as with them off.
 - **Pass when:** The toggles show for a printer; joining cuts the connectors by at least half and the hint counts the joins; leaving out dots drops connectors further with the j and says so; the measured smallest height names the letter that sets it and differs from the fixed rule; for a pen plotter the toggles are hidden and the connectors match all-off; no page errors.
+
+#### A54
+
+**A text's lines printed in place: a piece for each line, keeping the layout as typed** · `app/A54-text-lines-in-place.test.js` · slow
+
+- **Why:** Printing each line of a text as its own piece keeps strands of chocolate from running between the lines (A29); packing the pieces to save room suits a set of name labels but scrambles a message ("Ты и красавица, / и Зверева, / …" came out with line 2 beside line 1). In place, the lines keep their layout as typed: one under the other, centred as the Text card says, with the needle lifted between them. Raised 2 November 2026.
+- **How:** Types a four-line message, goes to the 3D tab with the default Lines of text, reads the placements and the plate hint, exports the G-code and checks each piece prints inside its footprint, then sets 2 copies.
+- **Pass when:** In place is the default; four pieces, one per line, each placed below the one before it with the lines' centres within 1 mm of each other (centred text), none overlapping and all on the plate; the hint says in its place; the G-code has four pieces, each one continuous line inside its footprint; 2 copies make two whole messages (8 pieces in two sets) and Copies isn't per line; no page errors.
 
 <!-- catalogue:end -->
 

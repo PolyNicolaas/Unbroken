@@ -3,7 +3,7 @@ module.exports = {
   id: "A29", title: "A text of several lines prints a piece for each line, all on one plate, in one G-code file",
   guards: "lines of a text joined by a connector strand when they should print apart, a line left off the plate or out of the file, pieces laid over each other, a piece that isn't one continuous line, and the Trace tab's drawing changing because of how the 3D tab prints it",
   why: "A list of names (or any text of several lines) should come off the printer as separate pieces: one continuous line each, with no strand of chocolate from one line to the next. From the Suggestion box (18 October 2026). The Trace and 2D tabs keep the text as one drawing; the 3D tab's Plate card decides how it prints (Lines of text: a piece for each line, or one piece with the lines joined).",
-  how: "Opens the app, picks Text and types three names on three lines, notes the Trace tab's line, goes to the 3D tab and waits for the pieces. Reads the Plate card, the placements and the ready list; exports G-code and reads it back move by move (lib/gcode.js). Sets 2 copies of each line and reads the plate again; picks the second piece for One copy; then switches Lines of text to One piece.",
+  how: "Opens the app, picks Text and types three names on three lines, notes the Trace tab's line, goes to the 3D tab and waits for the pieces. Reads the Plate card (in place to start with), picks A piece for each line, packed, and reads the placements and the ready list; exports G-code and reads it back move by move (lib/gcode.js). Sets 2 copies of each line and reads the plate again; picks the second piece for One copy; then switches Lines of text to One piece.",
   pass: "The Plate card offers Lines of text with A piece for each line chosen; three pieces named after the lines, each traced on its own (no connector between lines), different widths; all three on the plate, none overlapping; the G-code has three copies, each one continuous line (no travel inside) printed inside its own footprint; the Trace tab's line is unchanged; 2 copies of each line gives six pieces; One copy shows the piece picked; One piece goes back to one copy of the joined text; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
@@ -12,7 +12,9 @@ module.exports = {
     const trace0 = await page.evaluate(() => ({ n: st.final.re.length, N: st.N, ver: st.finalVer }));
     await A.print(page); await A.idle(page);
     await page.waitForFunction(() => st.pieces && st.layers && st.layers.pieces, null, { timeout: 60000 }); await A.idle(page);
-    checks.push(check("Plate card: Lines of text shown, A piece for each line chosen", +((await page.isVisible("#textPieces")) && (await page.inputValue("#textPieces")) === "each"), "==", 1));
+    checks.push(check("Plate card: Lines of text shown, A piece for each line, in place, to start with", +((await page.isVisible("#textPieces")) && (await page.inputValue("#textPieces")) === "place"), "==", 1));
+    await page.selectOption("#textPieces", "each"); await A.idle(page); await A.idle(page); // packed: each line where it fits
+    await page.waitForFunction(() => st.pieces && st.layers && st.layers.pieces, null, { timeout: 60000 }); await A.idle(page);
     const P = await page.evaluate(() => st.pieces.list.map((d) => ({ name: d.name, w: d.fb.x1 - d.fb.x0, N: d.N })));
     checks.push(check("three pieces, named after the lines", P.map((p) => p.name).join(","), "==", "Anna,Ben,Chloe"),
       check("the pieces differ in width (each its own line)", +(new Set(P.map((p) => Math.round(p.w))).size === 3), "==", 1));

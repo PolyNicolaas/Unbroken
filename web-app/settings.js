@@ -215,7 +215,7 @@ window.UNB_SETTINGS = {
     copies: 1,
     copySpacing: 5,                   // mm between copies on the plate
     rotation: "auto",                 // "auto" (rotate to fit) or "straight"
-    textLines: "each",                // a text of several lines: "each" (a piece for each line) or "one" (one piece, lines joined)
+    textLines: "in-place",            // a text of several lines: "in-place" (a piece for each line, the layout as typed), "each" (a piece for each line, packed to save room) or "one" (one piece, lines joined)
 
     // --- Export
     smoothCurves: false,              // 2D SVG: smooth curves instead of straight segments

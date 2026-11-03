@@ -58,7 +58,7 @@ module.exports = {
       needle: (x) => nIds.has(x), lineWidth: rng(0.05, 5), gapBetweenLines: rng(0, 20), limitToPlate: isBool,
       text: (x) => typeof x === "string", font: (x) => !!FONTS[x], letterHeight: rng(1, 500), letterSpacing: oneOf("font-default", "even", "joined"),
       letterGap: nullOr(rng(0, 100)), wordGap: nullOr(rng(0, 200)), lineGap: rng(1, 5), align: oneOf("left", "center", "right"), joinLetters: isBool, closeNearMisses: isBool, leaveOutIJDots: isBool, measuredHeight: isBool,
-      chocolate: (x) => cIds.has(x), copies: rng(1, 200), copySpacing: rng(0, 200), rotation: oneOf("auto", "straight"), textLines: oneOf("each", "one"),
+      chocolate: (x) => cIds.has(x), copies: rng(1, 200), copySpacing: rng(0, 200), rotation: oneOf("auto", "straight"), textLines: oneOf("in-place", "each", "one"),
       wallCount: (x) => num(x, 1, 5), closeGaps: (x) => num(x, 0, 10), smallestShape: (x) => num(x, 0, 100), drawBridges: isBool, showShapes: isBool, penColors: (x) => Array.isArray(x) && x.length >= 1 && x.length <= 8 && x.every(hex), smoothCurves: isBool, printer: (x) => (S.printers || []).some((q) => q.id === x), paper: oneOf("a6", "a5", "a4", "a3", "a2", "a1", "letter", "legal", "tabloid", "6x8", "9x12", "11x14", "18x24", "plate", "custom"), paperOrientation: oneOf("landscape", "portrait"), paperSize: (x) => Array.isArray(x) && x.length === 2 && x.every(rng(20, 2000)), paperMargin: rng(0, 100), penWidth: rng(0.05, 5), simplify: rng(0, 0.5),
       lineView: oneOf("centreline", "centerline", "width", "printed"), background: oneOf("source", "lines", "none"),
       circles: isBool, connectors: isBool, sizeBox: isBool, problems: isBool, movedLines: isBool, miniMap: isBool, animationSpeed: oneOf("slow", "normal", "fast"),

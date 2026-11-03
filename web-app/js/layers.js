@@ -595,7 +595,10 @@ function drawStack() {
   const c = { g, S, n, all, show, anim, solid, choc, acc, lw, B, cut, picked, mark, zCut, zLow, ...P };
   let { tip, note } = all ? drawPlateStack(c) : drawLapStack(c);
   const pc = st.layers.pieces && !all && st.pieces && st.pieces.list[st.layers.piece]; // a text's piece: say which
-  if (together) note = `the molecule: its ${st.layers.pieces.length} pieces, as the G-code prints them`;
+  if (together)
+    note = st.text
+      ? `the text: its ${st.layers.pieces.length} lines, each a piece, in place, as the G-code prints them`
+      : `the molecule: its ${st.layers.pieces.length} pieces, as the G-code prints them`;
   if (pc) note = `${pc.name} (piece ${st.layers.piece + 1} of ${st.layers.pieces.length})${note ? " · " + note : ""}`;
   if (tip) {
     const [X, Y] = tip;
