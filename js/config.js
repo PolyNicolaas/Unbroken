@@ -93,7 +93,8 @@ const BUILTIN = {
   },
   rules: {
     maxTextLines: 5,
-    minLetterHeight: { default: 8, allure: 10, elfin: 10 },
+    minLetterHeight: { default: 8, allure: 10, elfin: 10, badscript: 10 },
+    minLetterStrokes: 4,
     letterGapShare: 0.15,
     minLetterGap: 1.2,
     wordGapShare: 0.5,
@@ -293,6 +294,7 @@ const CFG = (() => {
     ["minLetterGap", 0, 10],
     ["wordGapShare", 0, 5],
     ["minWordGap", 0, 20],
+    ["minLetterStrokes", 1, 30],
     ["undoSteps", 1, 1000],
   ])
     if (!num(r[k], lo, hi)) {
@@ -353,13 +355,66 @@ const CFG = (() => {
 const needleById = (id) => CFG.needles.find((n) => n.id === id);
 const chocolateById = (id) => CFG.chocolates.find((c) => c.id === id) || CFG.chocolates[0];
 
-// ---- font menu (the Text source's fonts, from fonts.js)
-for (const [k, f] of Object.entries(window.UNB_FONTS || {})) {
-  const o = document.createElement("option");
-  o.value = k;
-  o.textContent = f.label;
-  $("font").appendChild(o);
+// ---- font menu (the Text source's fonts, from fonts.js), with two filters: the Style buttons narrow the list, and a
+// font missing a letter of the typed text (ё in a Latin-only font, say) is set apart and greyed. Every font stays in
+// the menu, so saved designs, presets and settings can still pick any of them; the one picked is never greyed.
+const FONT_STYLES = { plain: "Plain", rounded: "Rounded", hand: "Script and handwriting", display: "Display" };
+// the letters of the text a font has no glyph for (spaces and line breaks don't count)
+function fontMissing(font, text) {
+  const miss = [];
+  for (const ch of new Set(text)) if (!/\s/.test(ch) && !font.glyphs[ch] && !miss.includes(ch)) miss.push(ch);
+  return miss;
 }
+function fontMenu() {
+  const sel = $("font"),
+    pick = sel.value || (CFG.raw && CFG.raw.defaults && CFG.raw.defaults.font) || "sans",
+    text = $("textIn") ? $("textIn").value : "",
+    want = (document.querySelector('input[name="fontStyle"]:checked') || {}).value || "all";
+  const fits = [],
+    other = [],
+    cant = [];
+  for (const [k, f] of Object.entries(window.UNB_FONTS || {})) {
+    const miss = fontMissing(f, text),
+      o = document.createElement("option");
+    o.value = k;
+    o.textContent = f.label;
+    o.title = `${FONT_STYLES[f.style] || ""}${f.scripts ? " · " + f.scripts : ""}`;
+    if (miss.length) {
+      o.textContent += ` · no ${miss.slice(0, 4).join(" ")}${miss.length > 4 ? " …" : ""}`;
+      o.disabled = k !== pick;
+      cant.push(o);
+    } else (want === "all" || f.style === want ? fits : other).push(o);
+  }
+  sel.textContent = "";
+  const group = (label, opts) => {
+    if (!opts.length) return;
+    const g = label ? document.createElement("optgroup") : sel;
+    if (label) g.label = label;
+    for (const o of opts) g.appendChild(o);
+    if (label) sel.appendChild(g);
+  };
+  group(null, fits);
+  group(want === "all" ? null : "Other styles", other);
+  group("Missing letters in this text", cant);
+  sel.value = UNB_FONTS[pick] ? pick : "sans";
+  // the hint: what the picked font can't write, and how many can
+  const can = fits.length + other.length,
+    miss = fontMissing(UNB_FONTS[sel.value], text),
+    hint = $("fontHint");
+  if (!hint) return;
+  if (miss.length) {
+    hint.className = "hint warn";
+    hint.textContent =
+      `${UNB_FONTS[sel.value].label.split(" (")[0]} has no ${miss.join(" ")}: ` +
+      (can
+        ? `they print as “?”. ${can === 1 ? "One font can" : can + " fonts can"} write this text (top of the list).`
+        : "no font here can write all of this text; import it as a picture to trace instead.");
+  } else {
+    hint.className = "hint";
+    hint.textContent = cant.length ? `${can} of ${can + cant.length} fonts can write this text.` : "";
+  }
+}
+fontMenu();
 
 // ---- needle menu
 (() => {
@@ -563,6 +618,10 @@ for (const q of CFG.printers) {
     ["letterGap", (v) => v === null || num(v, 0, 100), (v) => set("letterGap", v === null ? "" : v)],
     ["wordGap", (v) => v === null || num(v, 0, 200), (v) => set("wordGap", v === null ? "" : v)],
     ["lineGap", range(1, 5), (v) => set("lineGap", v)],
+    ["joinLetters", bool, (v) => ($("txtJoin").checked = v)],
+    ["closeNearMisses", bool, (v) => ($("txtSnap").checked = v)],
+    ["leaveOutIJDots", bool, (v) => ($("txtNoDots").checked = v)],
+    ["measuredHeight", bool, (v) => ($("txtMeasured").checked = v)],
     [
       "align",
       list("left", "center", "right"),
@@ -572,7 +631,7 @@ for (const q of CFG.printers) {
     ["copies", range(1, 200), (v) => set("copies", Math.round(v))],
     ["copySpacing", range(0, 200), (v) => set("copyGap", v)],
     ["rotation", list("auto", "straight"), (v) => set("plateRot", v)],
-    ["textLines", list("each", "one"), (v) => set("textPieces", v)],
+    ["textLines", list("in-place", "each", "one"), (v) => set("textPieces", v === "in-place" ? "place" : v)],
     [
       "printer",
       (v) => CFG.printers.some((q) => q.id === v),

@@ -14,7 +14,7 @@
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v129</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v133</span></p>
 </header>
 
 <div class="wrap">
@@ -295,7 +295,7 @@
         <label class="field"><span>Rotation</span><select id="plateRot"><option value="auto" selected>Auto (to fit)</option><option value="straight">Straight only</option></select></label>
       </div>
       <div class="two" id="piecesRow" hidden>
-        <label class="field" title="A piece for each line: every line of the text is traced on its own and printed as a separate piece, one continuous line each, with no strand joining one line to the next. One piece: the lines print joined, as the Line step draws them."><span>Lines of text</span><select id="textPieces"><option value="each" selected>A piece for each line</option><option value="one">One piece, lines joined</option></select></label>
+        <label class="field" title="A piece for each line: every line of the text is traced on its own and printed as a separate piece, one continuous line each, with no strand joining one line to the next. In place: the lines keep the layout you typed, one under the other (a card or a message); packed: they're moved wherever they fit, to save room (a set of name labels). One piece: the lines print joined, as the Line step draws them."><span>Lines of text</span><select id="textPieces"><option value="place" selected>A piece for each line, in place</option><option value="each">A piece for each line, packed</option><option value="one">One piece, lines joined</option></select></label>
         <label class="field" id="molPiecesField" title="One piece: all of it as one continuous line, as the Line step draws it, connectors and all. Bonds and labels apart: the bonds print as one continuous line and each atom's letters as a small piece of their own, in their places, so no strand joins a label to the bonds."><span>Molecule</span><select id="molPieces"><option value="one" selected>One piece</option><option value="apart">Bonds and labels apart</option></select></label>
         <label class="field" id="pieceShownField" title="The piece One copy shows, in the Plate and 3D layers views"><span>One copy shows</span><select id="pieceShown"><option value="0">line 1</option></select></label>
       </div>
@@ -499,7 +499,15 @@
       <div class="row" id="textBox">
         <textarea id="textIn" rows="3" spellcheck="false" aria-label="Text to trace (up to 5 lines)">Happy Birthday</textarea>
         <span class="val" id="lineCount" style="justify-self:end">1 of 5 lines</span>
+        <div class="seg small font-styles" role="radiogroup" aria-label="Font style" title="Narrow the font list to one style">
+          <input type="radio" name="fontStyle" id="fsAll" value="all" checked><label for="fsAll">All</label>
+          <input type="radio" name="fontStyle" id="fsPlain" value="plain"><label for="fsPlain">Plain</label>
+          <input type="radio" name="fontStyle" id="fsRounded" value="rounded"><label for="fsRounded">Rounded</label>
+          <input type="radio" name="fontStyle" id="fsHand" value="hand"><label for="fsHand">Script</label>
+          <input type="radio" name="fontStyle" id="fsDisplay" value="display"><label for="fsDisplay">Display</label>
+        </div>
         <label class="field"><span>Font</span><select id="font"></select></label>
+        <p class="hint" id="fontHint"></p>
         <div class="two">
           <label class="field"><span>Letter spacing</span>
             <select id="txtSpacing"><option value="auto" selected>Font default</option><option value="even">Even gaps</option><option value="font">Font's own (joined)</option></select>
@@ -515,6 +523,14 @@
           <input type="radio" name="align" id="alLeft" value="left"><label for="alLeft">Left</label>
           <input type="radio" name="align" id="alCenter" value="center" checked><label for="alCenter">Center</label>
           <input type="radio" name="align" id="alRight" value="right"><label for="alRight">Right</label>
+        </div>
+        <div class="pgroup" id="txtPrintOpts">
+          <span class="pgroup-h">Lettering for a printer</span>
+          <label class="check" title="The letters of a word are linked along the baseline, like joined handwriting, instead of by the tracer's short hops wherever they fall"><input type="checkbox" id="txtJoin" checked> <span>Join letters along the baseline</span></label>
+          <label class="check" title="A stroke end that stops within a stroke's width of another part of its letter would run into it in chocolate anyway: draw it on to meet it, one turn less"><input type="checkbox" id="txtSnap" checked> <span>Close near-misses</span></label>
+          <label class="check" title="The smallest letter height from the letters you typed: the size where none of their holes fills in and no dot runs into its stem. Off: a fixed number of stroke widths per font (settings.js)"><input type="checkbox" id="txtMeasured" checked> <span>Measure the smallest height</span></label>
+          <label class="check" title="An i's or j's dot is a piece of its own: the line needs a connector up to it and back, and it's the first thing to run into its stem when letters are small. Dots that make a letter (ü, ё, ї) stay"><input type="checkbox" id="txtNoDots" checked> <span>Leave out i and j dots</span></label>
+          <p class="hint" id="letteringHint"></p>
         </div>
         <p class="hint help" id="textHint">Single-stroke lettering: every letter is drawn with the same stroke at the same height. Even gaps keep the closest point between neighbouring letters at exactly the letter gap.</p>
       </div>

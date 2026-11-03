@@ -1,13 +1,13 @@
-Unbroken · web app build v129
-Built:  2026-10-31T00:20:23.165Z
-Tests:  102 of 102 tests passed
+Unbroken · web app build v133
+Built:  2026-11-03T23:18:37.274Z
+Tests:  107 of 107 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
   0902e2e523fa  00-util.js
   2584db84594f  01-image.js
   825b635d53a8  02-lines.js
-  941b223d9657  03-text.js
+  89bab9bf3725  03-text.js
   814ea8379376  04-walk.js
   326b5f6077c5  05-fill.js
   340aeaecfe87  06-fourier.js
@@ -24,18 +24,18 @@ Files (sha1, first 12):
   f10da4407bd0  core.js
   0e91e1c804a2  css/app.css
   0be9d7ad7cf8  css/theme.css
-  666f911d2119  fonts.js
-  9db35c15a88c  index.html
+  4b134bbd36e2  fonts.js
+  2f0b4bfff78d  index.html
   04742756d25f  js/art.js
   01da455a1225  js/camera.js
-  efcccd4e81ab  js/config.js
+  a4eda5dec3a1  js/config.js
   bfd81ea732b7  js/controls.js
   419f0a9223bc  js/cutout.js
   e666f8bf0b57  js/engine-bridge.js
   65f719c0af2b  js/examples.js
   d38a95d1cdb9  js/export.js
-  79abe79cfa8b  js/history.js
-  133443c1dd1d  js/layers.js
+  9351b61ce05c  js/history.js
+  6d56804403c6  js/layers.js
   430a29c664e0  js/levels.js
   7510c8db4a05  js/main.js
   e04ad77f8f92  js/matrix.js
@@ -46,21 +46,21 @@ Files (sha1, first 12):
   0d0910778259  js/optimize.js
   8344d7117344  js/pathpad.js
   e5316bce512f  js/patterns.js
-  0fd3b2bb7e19  js/pieces.js
+  74d5862f00ea  js/pieces.js
   b3a227544182  js/pipeline.js
   f877d34b57d8  js/plot.js
   e1f5ad88a908  js/preview.js
   ede50da03b92  js/readouts.js
   ce0678154019  js/sample-skull.js
   90c1c8639014  js/scroll.js
-  cc3deb898c4f  js/source.js
+  17a4623c311e  js/source.js
   78f5450a22d9  js/state.js
   49125f92bd01  js/steppers.js
   3c01d085cc08  js/testprint.js
   ffb18c999901  js/tools.js
   e651a30c34d9  js/ui.js
-  939b0f349ff7  js/views.js
+  e658b885006d  js/views.js
   7c48c854ce75  js/workflow.js
   53b02936e233  js/zoom.js
-  6ef4f6682653  settings.js
+  92c7afb18c08  settings.js
   85d8193792d8  worker.js
