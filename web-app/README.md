@@ -152,7 +152,9 @@ Open `index.html` in Chrome, Safari, Edge or Firefox. Everything runs in the bro
 1. runs the full test suite and stops if any test fails (`--quick` runs the quick set, `--no-tests` skips them for a try-out build);
 2. copies the page, `settings.js`, `css/`, `js/` and the three engine files into one flat folder, so it works on its own;
 3. checks every file the page loads is in the folder and nothing still points at `../source/`;
-4. opens the built copy in a headless browser and checks it traces the sample with its background engine and no errors;
+4. opens the built copy in a headless browser and checks it traces the sample with its background engine and no errors
+   (every file the page and the engine load carries `?v=<version>`, so a browser never mixes a new page with old files it
+   kept: GitHub Pages lets it keep them 10 minutes);
 5. writes `dist/BUILD.txt`: when it was built, the test result, and a checksum per file.
 
 If any step fails the build stops with the reason, and the previous `dist/` stays as it was. `dist/` is not kept in git.

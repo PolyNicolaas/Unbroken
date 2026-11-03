@@ -3,6 +3,13 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v134 · 2026-11-03
+
+- **No more old files after an update**: every file the page and its background engine load now carries the
+  version (`fonts.js?v=v134`). GitHub Pages lets a browser keep files for 10 minutes, so right after v133 went out a
+  browser could run the new page with the old fonts.js, and every Cyrillic letter printed as "?". A new version is
+  now a new address, so a browser always fetches the files that go with the page (web-app/build.js).
+
 ## v133 · 2026-11-02
 
 - **Lines of text in place** (Plate card, Lines of text): a new choice, and now the default, "A piece for each line, in

@@ -51,12 +51,20 @@ const fail = (msg) => { console.error(`\nBuild stopped: ${msg}`); fs.rmSync(TMP,
   for (const dir of ["css", "js"]) for (const f of fs.readdirSync(path.join(APP, dir)))
     copy(path.join(APP, dir, f), path.join(TMP, dir, f), dir === "js");
   for (const f of fs.readdirSync(ENGINE).filter((f) => f.endsWith(".js"))) copy(path.join(ENGINE, f), path.join(TMP, f));   // every engine part, core.js, fonts.js, worker.js
+  // every file the page and the background engine load gets ?v=<version>: GitHub Pages lets browsers keep a file for
+  // 10 minutes, so right after a release a browser could run the new page with an old file (the new fonts missing,
+  // every letter a "?"). A new version is a new address, so nothing old is mixed in.
+  const tag = (f, edit) => { const p = path.join(TMP, f), s = fs.readFileSync(p, "utf8"), t = edit(s); if (t === s) fail(`couldn't add the version to the files ${f} loads`); fs.writeFileSync(p, t); };
+  tag("index.html", (s) => s.replace(/(<(?:script|link)[^>]+(?:src|href)=")(?!https?:)([^"?]+\.(?:js|css))"/g, `$1$2?v=${top}"`));
+  tag("js/engine-bridge.js", (s) => s.replace('const WORKER_URL = "worker.js";', `const WORKER_URL = "worker.js?v=${top}";`));
+  tag("worker.js", (s) => s.replace('importScripts("core.js");', `importScripts("core.js?v=${top}");`));
+  tag("core.js", (s) => s.replace("importScripts(...PARTS);", `importScripts(...PARTS.map((p) => p + "?v=${top}"));`));
 
   // 3 ---------- every file the page asks for exists, and nothing still points outside dist/
   step(3, "Check the page's files");
   const html = fs.readFileSync(path.join(TMP, "index.html"), "utf8");
   const refs = [...html.matchAll(/<(?:script|link)[^>]+(?:src|href)="([^"]+)"/g)].map((m) => m[1]).filter((u) => !/^https?:/.test(u));
-  const missing = refs.filter((u) => !fs.existsSync(path.join(TMP, u)));
+  const missing = refs.filter((u) => !fs.existsSync(path.join(TMP, u.split("?")[0])));
   if (missing.length) fail(`index.html loads files that aren't in dist/: ${missing.join(", ")}`);
   const outside = walk(TMP).filter((f) => /\.(html|js|css)$/.test(f) && fs.readFileSync(f, "utf8").includes("../source/"));
   if (outside.length) fail(`still pointing at ../source/: ${outside.map((f) => path.relative(TMP, f)).join(", ")}`);
