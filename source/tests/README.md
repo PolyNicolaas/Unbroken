@@ -121,6 +121,7 @@ report.
 | [E52](#e52) | Spirograph: up to six wheels, a centre path drawn by hand, and a frame that crops | a third wheel and on doing nothing, a design with Second wheel ticked losing it, a centre path that doesn't move the figure or closes a line that should be open, and a crop that draws outside its frame or sizes the canvas by the drawing instead of the frame | – |
 | [E53](#e53) | Spirograph: the figure's size changes along the line (Size at start → Size at end) | a size that doesn't change the figure, a growing figure left closed (its ends joined across the drawing), a figure that grows the wrong way, and designs from before v128 drawn differently | – |
 | [E54](#e54) | Lettering for a printer: letters joined along the baseline, near-misses closed, i and j dots, the measured smallest height | lettering full of connectors, stroke ends that blob into their letter, dots that run into their stems, letters printed too small to read | – |
+| [E55](#e55) | Chocolate font: Cyrillic in choc OS's style (Russian, Ukrainian, Belarusian Ў) and its missing punctuation | Cyrillic lettering in the Chocolate font printing as “?”, or new letters that don't sit with choc OS's own | – |
 
 ### App tests
 
@@ -129,7 +130,7 @@ report.
 | [A01](#a01) | The app opens and traces the sample | a blank or broken page | – |
 | [A02](#a02) | The page stays responsive while tracing | the page freezing while a trace is worked out | – |
 | [A03](#a03) | Line width, gap and needle settings hold in the trace | needle sizes and gaps not reaching the trace; the 3D tab's needle and the Trace tab's line width disagreeing | – |
-| [A04](#a04) | Text source: fonts, readable height, five-line limit | unreadable or unprintable lettering | 21.7 s |
+| [A04](#a04) | Text source: fonts, readable height, five-line limit | unreadable or unprintable lettering | – |
 | [A05](#a05) | Plate, copies and G-code export, end to end | the plate view, copies or the exported G-code disagreeing with the design | – |
 | [A06](#a06) | View menu works on desktop and phone widths | display options unreachable, or the menu cut off on a phone | – |
 | [A07](#a07) | Undo, redo, and saving and opening designs | lost work; a saved design that doesn't come back the same | – |
@@ -176,8 +177,8 @@ report.
 | [A49](#a49) | Test matrix: the skull cup as nine copies, each with its own speed, flow and layer height (L9), scored for the best levels | copies printed with the wrong settings, a layer height that doesn't change the slicing, a comb that doesn't count its copy, a flow that doesn't reach the plunger, scores that don't pick the best levels, and levels or scores lost from the design | – |
 | [A50](#a50) | A molecule on the Print step: its labels printed by their bonds, One copy showing them, and the structure turned | labels piled up at the molecule's corner in the G-code (each laid out from its own corner instead of the molecule's), One copy showing only the bonds, a Turn that doesn't turn or isn't saved, and an aldehyde without its H | – |
 | [A51](#a51) | Spirograph: more wheels from the Pattern card, a centre path drawn on its pad, and the frame | the Wheels setting not reaching the drawing, the path pad not taking a drag, a path that isn't saved or undone, Clear not clearing, and the frame settings not showing | – |
-| [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | 10.9 s |
-| [A53](#a53) | Text card: lettering toggles for a printer (join letters, close near-misses, i and j dots, measured smallest height) | lettering toggles that don't reach the print, or change a pen plotter's letters | 12.2 s |
+| [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | 12.0 s |
+| [A53](#a53) | Text card: lettering toggles for a printer (join letters, close near-misses, i and j dots, measured smallest height) | lettering toggles that don't reach the print, or change a pen plotter's letters | – |
 
 #### E01
 
@@ -603,6 +604,14 @@ report.
 - **How:** Lays out words in Sans, Pebble and Bad Script with each option, counts pieces and joins, checks the joins sit on the baseline, finds the near-misses Bad Script's letters close and that э stays open, drops i and j dots but keeps ü's, and measures the smallest height for an o, an e and a dotted i.
 - **Pass when:** Joined, each word is one piece (Sans "Choco love": 2, Pebble "Шоколад ёж": 2 plus ё's dots) and every join's ends sit in the lowest third of the letters (within 30% of the letter height of the baseline); joining off, more pieces. Bad Script "dhkqrvxy" closes near-misses at 12 mm, э closes none at any size; "jüi" without i and j dots keeps 2 of its 4 dots (ü's). The measured height: an o is at least 4 stroke widths and at most 8; an i with its dot needs more than without; the measured heights are cached; every font's every basic letter measures in under 45 stroke widths.
 
+#### E55
+
+**Chocolate font: Cyrillic in choc OS's style (Russian, Ukrainian, Belarusian Ў) and its missing punctuation** · `engine/E55-chocolate-cyrillic.test.js`
+
+- **Why:** choc OS's lettering is Quicksand Bold, each letter rescaled on its own and printed as its outline; Quicksand has no Cyrillic, so source/tools/chocolate-cyrillic.py draws it in that style. The letters must all be there, be closed outlines like the rest, sit at choc OS's heights (capitals 700 units, small letters 400, descenders to about −145), and the letters Cyrillic shares with Latin must be Chocolate's own.
+- **How:** Checks every Russian, Ukrainian and Belarusian letter and the added punctuation are in the font; that every outline is closed; the heights of the capitals, small letters, ascenders and descenders; that А, О, Р, а, о, р are Chocolate's A, O, P, a, o, p; and lays out and rasterizes a Russian sentence.
+- **Pass when:** All 76 letters and 7 marks present; every ring closed (first point = last); capitals without marks or descenders 700 tall (±1), x-height letters 400 (±2), descenders to −120…−170, Ё's and Й's marks above the cap; the shared letters identical; the sentence lays out with no “?” and rasterizes.
+
 #### A01
 
 **The app opens and traces the sample** · `app/A01-loads-and-traces.test.js`
@@ -1009,7 +1018,7 @@ report.
 
 - **Why:** Most fonts only have the basic Latin letters, so Cyrillic or accented text (ё, ü, é) would print as “?”. The font list sets apart and greys the fonts missing a letter of the typed text, says which letters, and the Style buttons narrow the list, while every font stays pickable for saved designs and presets.
 - **How:** Types Cyrillic with Sans picked, reads the menu and the hint, picks Pebble and Bad Script and traces each, tries the Script style, then traces accented Latin.
-- **Pass when:** With Cyrillic, Sans warns and names the missing letters, the Latin-only fonts sit greyed under “Missing letters” while Pebble and Bad Script stay enabled; both trace the Cyrillic with zero crossings; Script puts Bad Script first and the rest under “Other styles”; accented Latin in Pebble traces with no warning; no page errors.
+- **Pass when:** With Cyrillic, Sans warns and names the missing letters, the Latin-only fonts sit greyed under “Missing letters” while Pebble, Bad Script and Chocolate stay enabled; both trace the Cyrillic with zero crossings; Script puts the script fonts that can write it (Bad Script, Chocolate) at the top and the rest under “Other styles”; accented Latin in Pebble traces with no warning; no page errors.
 
 #### A53
 

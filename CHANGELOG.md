@@ -3,6 +3,17 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v132 · 2026-11-02
+
+- **The Chocolate font writes Cyrillic**: all of Russian (А–Я, а–я, Ёё), Ukrainian (Єє Іі Її Ґґ) and Belarusian Ўў,
+  plus the punctuation choc OS's lettering lacked (, : ; ' " « »). choc OS's lettering is Quicksand Bold, each letter
+  rescaled on its own (capitals 700 units tall, a small letter's x-height 400) and printed as its outline; Quicksand
+  has no Cyrillic, so `source/tools/chocolate-cyrillic.py` draws it in that style. The letters Cyrillic shares with
+  Latin are Chocolate's own; И, Я, Л, Э, Є are Quicksand's N, R, V, C mirrored or flipped; the rest are built from
+  strokes along centre lines with Quicksand's own round-ended stroke, then rescaled the way choc OS does. "Ты и
+  красавица, и Зверева, но станешь ли ты моей девушкой?" prints as outlined letters, 157 × 124 mm at 20 mm letters with
+  a 0.84 mm needle (smaller and the trace has to move lines apart). Test E55.
+
 ## v131 · 2026-11-02
 
 - **Lettering for a printer** (Text card): four switches, on when making it for a printer; for a pen plotter they're
