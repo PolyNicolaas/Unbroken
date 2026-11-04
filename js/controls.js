@@ -252,14 +252,17 @@ function lineUI() {
   const w = artForPlot() ? Math.max(0.05, +$("penW").value || 0.5) : lineWidthMM(),
     g = Math.max(0, +$("lineGapMM").value || 0);
   st.spacing = w + g;
-  const o = [...$("needle").options].find((x) => x.value !== "custom" && Math.abs(+x.value - w) < 0.005);
+  // (Custom… picked from the menu stays picked until a needle is: the width is typed on the Line step)
+  const o = st.needleCustom ? null : [...$("needle").options].find((x) => x.value !== "custom" && Math.abs(+x.value - w) < 0.005);
   $("needle").value = o ? o.value : "custom";
   const opt = $("needle").selectedOptions[0];
   $("needleDot").style.background = opt.dataset.c;
   $("needleDot").title = opt.textContent;
   $("needleHint").textContent = o
     ? `Sets the line width on the Line step (${fmt(w, 2)} mm) and, with the ${CFG.printer.cartridge || "cartridge"}, how fast the plunger pushes (E per mm, Fine-tuning).`
-    : `Custom: the Line step's line width (${fmt(w, 2)} mm) doesn't match a needle in settings.js.`;
+    : st.needleCustom
+      ? `Custom: type the width in Line width (mm) on the Line step (now ${fmt(w, 2)} mm).`
+      : `Custom: the Line step's line width (${fmt(w, 2)} mm) doesn't match a needle in settings.js.`;
   if (!$("spacingHint").classList.contains("warn")) $("spacingHint").textContent = spacingText();
 }
 const spacingText = () =>
@@ -272,7 +275,8 @@ function lineChanged() {
   printSettingsChanged();
 } // the needle or line width (also after a chocolate change)
 $("needle").addEventListener("change", () => {
-  if ($("needle").value !== "custom") $("lineW").value = $("needle").value;
+  st.needleCustom = $("needle").value === "custom"; // Custom… picked: kept until a needle is picked
+  if (!st.needleCustom) $("lineW").value = $("needle").value;
   lineChanged();
 });
 for (const id of ["lineW", "lineGapMM"]) $(id).addEventListener("input", lineChanged);

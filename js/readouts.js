@@ -11,11 +11,21 @@ function readouts() {
   $("rScore").textContent = fmt(e.score * mm);
   $("rStray").textContent = fmt(e.stray * mm);
   $("rMiss").textContent = fmt(e.missing * mm);
-  const j = st.connRuns || 0; // jumps between separate parts: always drawn, the flow can't stop
-  setChip(`${st.N} terms · error ${fmt(e.score * mm)} mm` + (j ? ` · ${j} connector${j === 1 ? "" : "s"}` : ""));
-  $("chip").title = j
-    ? `${j} connector${j === 1 ? "" : "s"} between separate parts. Always drawn: the printer can't stop the flow.`
-    : "";
+  // jumps between separate parts: always drawn, the flow can't stop; but between the lines of a text printed as a
+  // piece per line the needle lifts instead (pieces.js)
+  const lifted = (typeof lineLifts === "function" && lineLifts()) || null,
+    up = lifted ? lifted.n : 0,
+    j = Math.max(0, (st.connRuns || 0) - up);
+  setChip(
+    `${st.N} terms · error ${fmt(e.score * mm)} mm` +
+      (j ? ` · ${j} connector${j === 1 ? "" : "s"}` : "") +
+      (up ? " · lines print apart" : ""),
+  );
+  $("chip").title =
+    (j ? `${j} connector${j === 1 ? "" : "s"} between separate parts. Always drawn: the printer can't stop the flow.` : "") +
+    (up
+      ? `${j ? " " : ""}Each line of the text prints as a piece of its own: between lines the needle lifts (dashed), no chocolate.`
+      : "");
   const sc = scale(),
     d = st.spacing;
   const gapU = st.gap * sc;

@@ -439,6 +439,7 @@ function selectNeedle(id) {
   if (o) {
     $("needle").value = o.value;
     $("lineW").value = o.value;
+    st.needleCustom = false;
   }
 } // the needle sets the line width
 
