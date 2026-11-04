@@ -3,6 +3,21 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v135 · 2026-11-03
+
+- **Fix: Height's − and + did nothing** (Print step, Layers): they stepped 0.05 mm, but the height snaps to whole
+  layers, so 0.3 + 0.05 snapped straight back to 0.3. They now step one layer (0.3 → 0.6 → 0.9 mm), and − stops at the
+  base layers (or one layer). Test A55.
+- **The Line step shows a text's lines printing apart**: with Lines of text set to a piece for each line, the
+  connectors the joined trace draws from one line to the next aren't printed (the needle lifts between pieces). They
+  are now drawn as a dashed lift, not chocolate, left out of the connector count, and the corner label says "lines
+  print apart". One piece, lines joined, shows them as connectors again. Test A54.
+- **Fix: Needle → Custom… snapped back** to the needle matching the line width, with nothing to say what to do. It
+  now stays picked, and the hint says to type the width in Line width (mm) on the Line step.
+- Bug sweep (3 November): every − and + button, every menu and every switch on every step, for a picture and a text
+  on a printer and a picture on a pen plotter, pressed or changed once and read back: those three were all it found,
+  with no page errors.
+
 ## v134 · 2026-11-03
 
 - **No more old files after an update**: every file the page and its background engine load now carries the

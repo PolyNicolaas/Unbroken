@@ -301,11 +301,16 @@ function renderLine({ g, k, ox, oy, dpr, ink, accent }) {
   // line width in screen px (needle width, or 80% of the spacing)
   const lv = $("lineView").value,
     widthPx = Math.max(1.15 * dpr, (lineWidthMM() / scale()) * k);
+  // a text printed as a piece per line: the connectors from one line to the next aren't printed (pieces.js)
+  const lifts = !animating && !baseView && curve === st.final ? lineLifts() : null,
+    up = (s) => !!lifts && lifts.lift[s % S] && lifts.lift[(s + 1) % S];
   const tracePath = () => {
     g.beginPath();
+    let pen = false;
     for (let s = 0; s <= upto; s++) {
       const [x, y] = T(curve.re[s % S], curve.im[s % S]);
-      s ? g.lineTo(x, y) : g.moveTo(x, y);
+      pen && s && !up(s - 1) ? g.lineTo(x, y) : g.moveTo(x, y);
+      pen = true;
     }
   };
   g.lineJoin = "round";
@@ -333,7 +338,7 @@ function renderLine({ g, k, ox, oy, dpr, ink, accent }) {
     g.beginPath();
     let pen = false;
     for (let s = 0; s <= upto; s++) {
-      const on = st.jumpF[s % S] && st.jumpF[(s + 1) % S];
+      const on = st.jumpF[s % S] && st.jumpF[(s + 1) % S] && !up(s);
       if (on && s < upto) {
         const [x, y] = T(curve.re[s % S], curve.im[s % S]),
           [x2, y2] = T(curve.re[(s + 1) % S], curve.im[(s + 1) % S]);
@@ -343,6 +348,23 @@ function renderLine({ g, k, ox, oy, dpr, ink, accent }) {
       } else pen = false;
     }
     g.stroke();
+  }
+  if (lifts) {
+    // the needle lifted between lines: a thin dashed move, like the travel on the Print step
+    g.save();
+    g.strokeStyle = css("--muted");
+    g.lineWidth = 1.2 * dpr;
+    g.setLineDash([2 * dpr, 6 * dpr]);
+    g.beginPath();
+    for (let s = 0; s < upto; s++)
+      if (up(s)) {
+        const [x, y] = T(curve.re[s % S], curve.im[s % S]),
+          [x2, y2] = T(curve.re[(s + 1) % S], curve.im[(s + 1) % S]);
+        g.moveTo(x, y);
+        g.lineTo(x2, y2);
+      }
+    g.stroke();
+    g.restore();
   }
   if (!animating) {
     // start ring (and end dot for open paths)

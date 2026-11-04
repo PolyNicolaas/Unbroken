@@ -3,13 +3,17 @@ module.exports = {
   id: "A54", title: "A text's lines printed in place: a piece for each line, keeping the layout as typed",
   guards: "a card or message whose lines get shuffled round the plate to save room, so it no longer reads top to bottom",
   why: "Printing each line of a text as its own piece keeps strands of chocolate from running between the lines (A29); packing the pieces to save room suits a set of name labels but scrambles a message (\"Ты и красавица, / и Зверева, / …\" came out with line 2 beside line 1). In place, the lines keep their layout as typed: one under the other, centred as the Text card says, with the needle lifted between them. Raised 2 November 2026.",
-  how: "Types a four-line message, goes to the 3D tab with the default Lines of text, reads the placements and the plate hint, exports the G-code and checks each piece prints inside its footprint, then sets 2 copies.",
-  pass: "In place is the default; four pieces, one per line, each placed below the one before it with the lines' centres within 1 mm of each other (centred text), none overlapping and all on the plate; the hint says in its place; the G-code has four pieces, each one continuous line inside its footprint; 2 copies make two whole messages (8 pieces in two sets) and Copies isn't per line; no page errors.",
+  how: "Types a four-line message, reads the Line step's corner label, goes to the 3D tab with the default Lines of text, reads the placements and the plate hint, exports the G-code and checks each piece prints inside its footprint, then sets 2 copies.",
+  pass: "On the Line step the connectors from one line to the next are marked as lifts (\"lines print apart\"), not counted; one piece counts them again. In place is the default; four pieces, one per line, each placed below the one before it with the lines' centres within 1 mm of each other (centred text), none overlapping and all on the plate; the hint says in its place; the G-code has four pieces, each one continuous line inside its footprint; 2 copies make two whole messages (8 pieces in two sets) and Copies isn't per line; no page errors.",
   slow: true,
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
     await A.source(page, "text"); await A.idle(page);
     await page.fill("#textIn", "Happy\nbirthday\ndear\nAnna"); await page.dispatchEvent("#textIn", "input"); await A.idle(page); await A.idle(page);
+    // the Line step: the connectors between lines aren't printed, so they aren't counted or drawn as chocolate
+    await page.click("label[for=viewDesign]"); await A.idle(page); await A.idle(page);
+    const chipIn = await page.textContent("#chip"), lifts = await page.evaluate(() => (lineLifts() || { n: 0 }).n);
+    checks.push(check("Line step: lines print apart (corner label)", +/lines print apart/.test(chipIn), "==", 1), check("Line step: connectors between lines found", lifts, ">=", 3));
     await A.print(page); await A.idle(page);
     await page.waitForFunction(() => st.pieces && st.layers && st.layers.pieces, null, { timeout: 60000 }); await A.idle(page);
     checks.push(check("Lines of text: in place to start with", await page.inputValue("#textPieces"), "==", "place"));
@@ -34,6 +38,9 @@ module.exports = {
     });
     await A.setValue(page, "#copies", 2); await A.idle(page); await A.idle(page);
     const two = await page.evaluate(() => { const L = plateNow(); return { copies: L.copies, sets: L.sets, n: placements(L).length }; });
+    await page.selectOption("#textPieces", "one"); await A.idle(page); await A.idle(page);
+    checks.push(check("One piece: no lifts, every connector counted", +(!(await page.evaluate(() => lineLifts())) && !/print apart/.test(await page.textContent("#chip"))), "==", 1));
+    await page.selectOption("#textPieces", "place"); await A.idle(page); await A.idle(page);
     checks.push(check("2 copies: two whole messages", `${two.n}:${two.sets}`, "==", "8:2"), check("Copies isn't per line", await page.textContent("#copiesLab"), "==", "Copies"), check("page errors", errors.length, "==", 0));
     await close(); return { checks, notes: errors.join(" | ") };
   },

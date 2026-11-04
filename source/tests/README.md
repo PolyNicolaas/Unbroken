@@ -81,7 +81,7 @@ report.
 | [E11](#e11) | Every export format is a complete, readable file | truncated or malformed exports | – |
 | [E12](#e12) | Background engine gives the same answers as the page | the worker and the page computing different traces | – |
 | [E13](#e13) | Tracing time stays within budget | a change making tracing several times slower | – |
-| [E14](#e14) | The settings file is complete and consistent | a typo or wrong value in settings.js | – |
+| [E14](#e14) | The settings file is complete and consistent | a typo or wrong value in settings.js | 0.0 s |
 | [E15](#e15) | The theme file defines everything the app draws with | a renamed or deleted colour in theme.css leaving parts of the app unstyled | – |
 | [E16](#e16) | Stroke ends turn in a round loop, never back over the line | the needle retracing its own line at the end of a stroke, or a stroke end printing past where it was drawn | – |
 | [E17](#e17) | The line is three real series, x(t), y(t) and z(t) | the X/Y/Z series drifting from what is drawn, exported or printed, or Z changing a flat print | – |
@@ -94,7 +94,7 @@ report.
 | [E24](#e24) | 3D → 2D: a model drawn as lines, hidden lines removed | hidden edges drawn through the model, outlines lost on curved surfaces, the flat-face diagonals of a mesh drawn as lines, and a fold angle that doesn't thin the drawing | – |
 | [E25](#e25) | The engine's parts load in the same order everywhere, and share helpers only through 00-util.js | a part missing from the page or the worker, parts loaded in a different order in different places, and a part quietly using another part's private helper (which would break as soon as the files are reordered) | – |
 | [E26](#e26) | Edge cases found in the October 2026 bug hunt stay fixed | NaN lines from a one-pixel drawing, straight lines measured as a dot, closed walks offset differently at their seam, open slices split in two, line ends that don't join across a grid boundary, padded STL files rejected, and small mm drawings or many small shapes that take seconds | – |
-| [E27](#e27) | Each field of the app's shared state is set by its owner | a file quietly changing state another file is responsible for, which is how stale views and "who changed this?" bugs start | – |
+| [E27](#e27) | Each field of the app's shared state is set by its owner | a file quietly changing state another file is responsible for, which is how stale views and "who changed this?" bugs start | 0.0 s |
 | [E28](#e28) | G-code starts, stops and moves between copies the way choc OS does | a blob or a string of chocolate at the end of each copy, an empty needle at the start of the next, no purge line, and a plunger speed that ignores the needle | – |
 | [E29](#e29) | Engine fixes from the October 2026 code review stay fixed, and models can be cut | a kink in the line beside a junction on small prints, an error readout that reports the strands' deliberate offset as fitting error, connector lanes that slow to seconds on a drawing with many loose ends, a model cut that slices the wrong part, a hollow model whose inside surface is traced too, a sparse fill that leaves out an inner ring, and a model of overlapping shells whose body is taken for a hole | – |
 | [E30](#e30) | Support: overhangs measured, and held up by the print's own wall (a flared skirt or a thin wall) | a model that reaches out over nothing without a warning, a support that still leaves a layer stepping out too far, a skirt that ends in the air under a thin arm, a support that leaves a slit beside the model or stands apart from it (the line would have to join a second loop on every layer), a skirt that shrinks an arm from its sides instead of bracing it back into the model, and a thin wall that fills the whole space under an overhang | – |
@@ -179,7 +179,8 @@ report.
 | [A51](#a51) | Spirograph: more wheels from the Pattern card, a centre path drawn on its pad, and the frame | the Wheels setting not reaching the drawing, the path pad not taking a drag, a path that isn't saved or undone, Clear not clearing, and the frame settings not showing | – |
 | [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | – |
 | [A53](#a53) | Text card: lettering toggles for a printer (join letters, close near-misses, i and j dots, measured smallest height) | lettering toggles that don't reach the print, or change a pen plotter's letters | – |
-| [A54](#a54) | A text's lines printed in place: a piece for each line, keeping the layout as typed | a card or message whose lines get shuffled round the plate to save room, so it no longer reads top to bottom | 11.3 s |
+| [A54](#a54) | A text's lines printed in place: a piece for each line, keeping the layout as typed | a card or message whose lines get shuffled round the plate to save room, so it no longer reads top to bottom | – |
+| [A55](#a55) | Layers card: Height's − and + move a whole layer | a Height button that does nothing | – |
 
 #### E01
 
@@ -1034,8 +1035,16 @@ report.
 **A text's lines printed in place: a piece for each line, keeping the layout as typed** · `app/A54-text-lines-in-place.test.js` · slow
 
 - **Why:** Printing each line of a text as its own piece keeps strands of chocolate from running between the lines (A29); packing the pieces to save room suits a set of name labels but scrambles a message ("Ты и красавица, / и Зверева, / …" came out with line 2 beside line 1). In place, the lines keep their layout as typed: one under the other, centred as the Text card says, with the needle lifted between them. Raised 2 November 2026.
-- **How:** Types a four-line message, goes to the 3D tab with the default Lines of text, reads the placements and the plate hint, exports the G-code and checks each piece prints inside its footprint, then sets 2 copies.
-- **Pass when:** In place is the default; four pieces, one per line, each placed below the one before it with the lines' centres within 1 mm of each other (centred text), none overlapping and all on the plate; the hint says in its place; the G-code has four pieces, each one continuous line inside its footprint; 2 copies make two whole messages (8 pieces in two sets) and Copies isn't per line; no page errors.
+- **How:** Types a four-line message, reads the Line step's corner label, goes to the 3D tab with the default Lines of text, reads the placements and the plate hint, exports the G-code and checks each piece prints inside its footprint, then sets 2 copies.
+- **Pass when:** On the Line step the connectors from one line to the next are marked as lifts ("lines print apart"), not counted; one piece counts them again. In place is the default; four pieces, one per line, each placed below the one before it with the lines' centres within 1 mm of each other (centred text), none overlapping and all on the plate; the hint says in its place; the G-code has four pieces, each one continuous line inside its footprint; 2 copies make two whole messages (8 pieces in two sets) and Copies isn't per line; no page errors.
+
+#### A55
+
+**Layers card: Height's − and + move a whole layer** · `app/A55-height-buttons.test.js`
+
+- **Why:** The height snaps to whole layers (layers × layer height), but its buttons stepped 0.05 mm: + went 0.3 → 0.35, which snapped straight back to 0.3, so pressing + did nothing (found 3 November 2026). The buttons now step one layer, and − stops at the base (or one layer).
+- **How:** Opens the Print step with the sample, presses Height's + three times and − once, reading the height and the layer count; then sets 2 base layers and reads the box's lowest value.
+- **Pass when:** + goes 0.3 → 0.6 → 0.9 → 1.2 mm (1 → 4 layers), − back to 0.9; with 2 base layers the lowest height is 0.6 mm; no page errors.
 
 <!-- catalogue:end -->
 

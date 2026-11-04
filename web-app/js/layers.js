@@ -122,6 +122,12 @@ function showHeight() {
     ? ""
     : `${n} layer${n === 1 ? "" : "s"}: ${S.N ? `${S.N} base + ${S.M} above` : "no base"} · ${fmt(S.h, 2)} mm each`;
   if (!model) lastHeight = n * S.h;
+  // the − and + buttons move a whole layer (the height snaps to whole layers, so a 0.05 mm step came straight back);
+  // a model scales freely
+  const box = $("printHeightMM"),
+    step = model ? 0.05 : +S.h.toFixed(3);
+  box.step = String(step);
+  box.min = String(model ? 0.05 : +(Math.max(1, S.N) * S.h).toFixed(3)); // at least the base, or one layer
   if (document.activeElement === $("printHeightMM")) return;
   if (model) {
     if (st.model) $("printHeightMM").value = +printedMM().toFixed(2);

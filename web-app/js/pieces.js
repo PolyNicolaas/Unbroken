@@ -31,6 +31,57 @@ const moleculePieces = () => !st.text && typeof moleculePiecesOn === "function" 
 // the pieces keep their places, laid on the plate as one block: a molecule's bonds and labels, or a text's lines "in
 // place" (the layout as typed, one line under the other); packed, each line goes wherever it fits
 const piecesTogether = () => moleculePieces() || (!!st.text && $("textPieces").value === "place");
+// The Line step draws a text as one joined line, but printed as a piece per line the connectors from one line to the
+// next are never printed: the needle lifts between pieces. Which samples of the line are such a connector (lift),
+// and how many runs (n); null when the text isn't printed in pieces. Each sample's line of text is the one whose
+// letters' rows (st.text.lines) its height falls in, or the nearest.
+let liftsCache = null;
+function lineLifts() {
+  if (!st.text || !st.final || !st.jumpF || !piecesOn() || !st.text.lines || st.text.lines.length < 2) return null;
+  if (liftsCache && liftsCache.final === st.final && liftsCache.text === st.text) return liftsCache.r;
+  const T = st.text,
+    W = T.w,
+    bands = T.lines.map((m) => {
+      let y0 = Infinity,
+        y1 = -Infinity;
+      for (let i = 0; i < m.length; i++)
+        if (m[i]) {
+          const y = (i / W) | 0;
+          if (y < y0) y0 = y;
+          if (y > y1) y1 = y;
+        }
+      return [y0, y1];
+    });
+  const lineAt = (s) => {
+    const y = fromWork(st.final.re[s], st.final.im[s])[1] * st.source.height;
+    let best = 0,
+      bd = Infinity;
+    bands.forEach(([a, b], i) => {
+      const d = y < a ? a - y : y > b ? y - b : 0;
+      if (d < bd) (bd = d), (best = i);
+    });
+    return best;
+  };
+  const F = st.jumpF,
+    S = st.final.re.length,
+    lift = new Uint8Array(S);
+  let n = 0;
+  for (let s = 0; s < S; s++) {
+    if (!F[s] || (s > 0 && F[s - 1])) continue; // the start of a connector run
+    let e = s;
+    while (e + 1 < S && F[e + 1]) e++;
+    const a = Math.max(0, s - 1),
+      b = Math.min(S - 1, e + 1);
+    if (lineAt(a) !== lineAt(b)) {
+      for (let k = s; k <= e; k++) lift[k] = 1;
+      n++;
+    }
+    s = e;
+  }
+  const r = n ? { lift, n } : null;
+  liftsCache = { final: st.final, text: st.text, r };
+  return r;
+}
 // everything a piece's line depends on: the text and its hand edits, the line settings, the size (letters per mm)
 function piecesKeyNow() {
   const s = settings();
@@ -249,6 +300,8 @@ function pieceMenuUI() {
 }
 $("textPieces").addEventListener("change", () => {
   pieceMenuUI();
+  if (st.final && st.err) readouts(); // the corner label: connectors between lines, or lifts
+  render(); // the Line step: lifts between lines drawn dashed, or as connectors
   limitLines(); // source.js: the Text card's line count says how the lines print
   drawPlate();
   drawMini();
