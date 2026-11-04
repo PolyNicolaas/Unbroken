@@ -1,6 +1,6 @@
-Unbroken · web app build v135
-Built:  2026-11-04T02:00:56.178Z
-Tests:  108 of 108 tests passed
+Unbroken · web app build v136
+Built:  2026-11-04T23:10:45.232Z
+Tests:  109 of 109 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -14,27 +14,27 @@ Files (sha1, first 12):
   e88cd163925f  07-measure.js
   d0cc374de0d6  08-shape.js
   76b9687b61c1  09-plate.js
-  5d6faec33c27  10-export.js
+  9a2d1eac44ab  10-export.js
   ac3de470b974  11-stages.js
   c1e0e2851039  12-models.js
   f384302a9e33  13-patterns.js
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   c58b27214155  16-molecule.js
-  bc80a1965224  core.js
-  0e91e1c804a2  css/app.css
+  90728a29e0a9  core.js
+  2c3df9d4d6dd  css/app.css
   0be9d7ad7cf8  css/theme.css
   4b134bbd36e2  fonts.js
-  e56e4c270ea0  index.html
+  42d1e2ea7588  index.html
   04742756d25f  js/art.js
   01da455a1225  js/camera.js
-  2b5d98f51c7b  js/config.js
+  ab89f4e6011a  js/config.js
   60537ade964a  js/controls.js
   419f0a9223bc  js/cutout.js
-  4039e488b14e  js/engine-bridge.js
+  2b37150ffc41  js/engine-bridge.js
   65f719c0af2b  js/examples.js
-  d38a95d1cdb9  js/export.js
-  9351b61ce05c  js/history.js
+  eefcd146d7fb  js/export.js
+  24d915688436  js/history.js
   3fa46b5ee37c  js/layers.js
   430a29c664e0  js/levels.js
   7510c8db4a05  js/main.js
@@ -50,10 +50,10 @@ Files (sha1, first 12):
   b3a227544182  js/pipeline.js
   f877d34b57d8  js/plot.js
   b3ebdd62a275  js/preview.js
-  2893e7203498  js/readouts.js
+  a3b710cab742  js/readouts.js
   ce0678154019  js/sample-skull.js
   90c1c8639014  js/scroll.js
-  17a4623c311e  js/source.js
+  b886e48b6ab9  js/source.js
   78f5450a22d9  js/state.js
   49125f92bd01  js/steppers.js
   3c01d085cc08  js/testprint.js
@@ -62,5 +62,5 @@ Files (sha1, first 12):
   e658b885006d  js/views.js
   7c48c854ce75  js/workflow.js
   53b02936e233  js/zoom.js
-  92c7afb18c08  settings.js
-  c8af38cf1ed4  worker.js
+  7364c5202e85  settings.js
+  63e5553235ed  worker.js

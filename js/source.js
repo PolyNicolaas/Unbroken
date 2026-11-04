@@ -481,8 +481,9 @@ function textPicture() {
   };
 }
 const MAX_LINES = CFG.rules.maxTextLines;
+$("textIn").setAttribute("aria-label", `Text to trace (up to ${MAX_LINES} lines)`);
 function limitLines() {
-  // text is limited to 5 lines; extra line breaks are dropped
+  // text is limited to rules.maxTextLines lines (settings.js, 12); extra line breaks are dropped
   const el = $("textIn"),
     lines = el.value.split("\n");
   if (lines.length > MAX_LINES) {

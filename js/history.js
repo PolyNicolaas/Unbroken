@@ -8,6 +8,7 @@
 // A design = the source (image, or typed text), every setting that shapes the line or the plate, and the
 // hand edits (selection, erasing, start point, painted areas). View options (line view, box, …) are not part of it.
 const DESIGN_IDS = [
+  "designName",
   "srcImage",
   "srcText",
   "srcPattern",

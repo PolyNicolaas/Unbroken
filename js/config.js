@@ -92,7 +92,7 @@ const BUILTIN = {
     },
   },
   rules: {
-    maxTextLines: 5,
+    maxTextLines: 12,
     minLetterHeight: { default: 8, allure: 10, elfin: 10, badscript: 10 },
     minLetterStrokes: 4,
     letterGapShare: 0.15,
