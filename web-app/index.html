@@ -15,6 +15,7 @@
 <header class="top">
   <h1>Unbroken</h1>
   <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">dev</span></p>
+  <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
 <div class="wrap">
@@ -497,8 +498,8 @@
     <section class="card art-only art-text" aria-labelledby="h-text">
       <h2 id="h-text">Text</h2>
       <div class="row" id="textBox">
-        <textarea id="textIn" rows="3" spellcheck="false" aria-label="Text to trace (up to 5 lines)">Happy Birthday</textarea>
-        <span class="val" id="lineCount" style="justify-self:end">1 of 5 lines</span>
+        <textarea id="textIn" rows="3" spellcheck="false" aria-label="Text to trace (up to 12 lines)">Happy Birthday</textarea>
+        <span class="val" id="lineCount" style="justify-self:end">1 of 12 lines</span>
         <div class="seg small font-styles" role="radiogroup" aria-label="Font style" title="Narrow the font list to one style">
           <input type="radio" name="fontStyle" id="fsAll" value="all" checked><label for="fsAll">All</label>
           <input type="radio" name="fontStyle" id="fsPlain" value="plain"><label for="fsPlain">Plain</label>

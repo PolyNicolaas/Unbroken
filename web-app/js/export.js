@@ -138,24 +138,63 @@ function gcodeSettings() {
     travelSpeed: P.travelSpeed,
     zTravelSpeed: P.zTravelSpeed,
     zApproachSpeed: P.zApproachSpeed,
+    name: ($("designName").value || "").trim() || autoName(), // (a comment at the top of the G-code)
   };
 }
 // File names say what's in them: the design's name, and for G-code the needle and the copies, e.g.
 // welcome_084_2x-gcode.zip (0.84 mm needle, 2 copies). Letters, numbers and dashes only, for printer screens and USB
 // sticks. A project number joins them once designs are kept in a database (ROADMAP.md, Later).
+// The print's name (the box at the top) names every file; empty, the design's own name does.
 // name: what to name it after instead of the traced source (the art plotted as drawn)
 function designSlug(max = 20, name) {
+  const own = ($("designName").value || "").trim();
+  return slugOf(own || autoName(name), own ? Math.max(max, 40) : max);
+}
+// the name a design has without one typed: its text's first line, the pattern, the molecule or the picture
+function autoName(name) {
   // (the art as drawn is never traced, so the traced source's name may be an earlier one's: the art names it)
-  const k = st.art.kind,
-    raw =
-      name ||
-      (st.text || k === "text"
-        ? $("textIn").value.split("\n")[0] || "text"
-        : k === "pattern"
-          ? patternName(st.art.pattern)
-          : (k === "molecule" && moleculeName()) || st.srcLabel || "design");
+  const k = st.art.kind;
   return (
-    raw
+    name ||
+    (st.text || k === "text"
+      ? $("textIn").value.split("\n")[0] || "text"
+      : k === "pattern"
+        ? patternName(st.art.pattern)
+        : (k === "molecule" && moleculeName()) || st.srcLabel || "design")
+  );
+}
+// Cyrillic and Greek letters spelled in Latin ones for file names (Шоколад → shokolad), so a name in either still
+// names the file instead of leaving it "design"
+const TRANSLIT = Object.fromEntries(
+  [
+    ..."абвгдезийклмнопрстуфыэ".split("").map((c, i) => [c, "abvgdeziyklmnoprstufye"[i]]),
+    ["ё", "yo"], ["ж", "zh"], ["х", "kh"], ["ц", "ts"], ["ч", "ch"], ["ш", "sh"], ["щ", "shch"], ["ъ", ""], ["ь", ""],
+    ["ю", "yu"], ["я", "ya"], ["є", "ye"], ["і", "i"], ["ї", "yi"], ["ґ", "g"], ["ў", "u"],
+    ..."αβγδεζηθικλμνξοπρστυφχψω".split("").map((c, i) => [c, ["a","v","g","d","e","z","i","th","i","k","l","m","n","x","o","p","r","s","t","y","f","ch","ps","o"][i]]),
+    ["ς", "s"],
+  ],
+);
+const translit = (t) =>
+  t.replace(/[\u0370-\u03ff\u0400-\u04ff]/g, (c) => {
+    const l = c.toLowerCase(),
+      r = TRANSLIT[l];
+    return r === undefined ? c : c === l ? r : r.charAt(0).toUpperCase() + r.slice(1);
+  });
+// the name box shows the name the files get when it's left empty
+function namePlaceholder() {
+  try {
+    $("designName").placeholder = `Name this print (now: ${slugOf(autoName())})`;
+  } catch (e) {
+    $("designName").placeholder = "Name this print";
+  }
+}
+$("designName").addEventListener("input", () => {
+  const box = $("designName");
+  box.title = box.value.trim() ? `Files: ${designSlug()}…` : box.title;
+});
+function slugOf(raw, max = 20) {
+  return (
+    translit(raw.normalize("NFC"))
       .replace(/\.[a-z0-9]+$/i, "")
       .normalize("NFKD")
       .replace(/[^\w\- ]+/g, "")

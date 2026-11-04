@@ -3,6 +3,19 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v136 · 2026-11-04
+
+- **Name the print**: a Name box at the top of the page, on every step. Every file saved or exported is named after
+  it: the G-code (`card-for-anna_084_2x-gcode.zip`, with the needle and copies as before), the saved design
+  (`card-for-anna.unbroken.json`), the SVG and DXF, and the G-code's first lines say it (`; name: Card for Anna`).
+  Left empty, files are named after the text, pattern or picture as before, and the box shows that name in grey. The
+  name is saved with the design and undoable.
+- **Up to 12 lines of text** (was 5): each can still print as a piece of its own, in place or packed. The limit is
+  `rules.maxTextLines` in settings.js.
+- **Fix: a Cyrillic or Greek text's files were all called "design"**: names keep to Latin letters, numbers and
+  dashes, and those letters were dropped. They're now spelled in Latin letters (Ты и красавица → ty-i-krasavitsa).
+  Test A56.
+
 ## v135 · 2026-11-03
 
 - **Fix: Height's − and + did nothing** (Print step, Layers): they stepped 0.05 mm, but the height snaps to whole

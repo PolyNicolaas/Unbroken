@@ -51,7 +51,7 @@ module.exports = {
     swap(/lineView: "width",/, 'lineView: "printed",'); swap(/threshold: 0,/, "threshold: 10,");
     swap(/smoothing: 1.2,( +)\/\/ blur/, "smoothing: 2.0,$1// blur"); swap(/crossings: "remove-all",/, 'crossings: "keep",'); swap(/copies: 1,/, "copies: 4,");
     swap(/animationSpeed: "normal",/, 'animationSpeed: "fast",'); swap(/sample: "none",/, 'sample: "smiley",'); swap(/problems: false,/, "problems: true,");
-    swap(/workingResolution: 500,/, "workingResolution: 720,"); swap(/simplify: 0.05,/, "simplify: 0.1,"); swap(/maxTextLines: 5,/, "maxTextLines: 3,");
+    swap(/workingResolution: 500,/, "workingResolution: 720,"); swap(/simplify: 0.05,/, "simplify: 0.1,"); swap(/maxTextLines: 12,/, "maxTextLines: 3,");
     swap(/selectShape: "rect",/, 'selectShape: "lasso",'); swap(/font: "sans",/, 'font: "script",');
     await pd.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body: bodyD }));
     await pd.goto(ctx.url); await A.idle(pd, 2500);

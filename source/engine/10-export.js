@@ -224,6 +224,7 @@
       }
     const lines = [
       `; Unbroken — ${paths.length === 1 ? "one continuous path" : `${paths.length} paths, travel moves between them`}`,
+      ...(g.name ? [`; name: ${String(g.name).replace(/[\r\n]+/g, " ")}`] : []),
       `; size ${bx1 >= bx0 ? `${f3(bx1 - bx0)} x ${f3(by1 - by0)}` : "0 x 0"} mm`,
       ...((g.start || []).length ? ["; printer start", ...g.start.map(sub)] : []),
       "G21 ; mm",

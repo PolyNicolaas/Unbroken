@@ -6,6 +6,7 @@
 
 // ---------- readouts + math ----------
 function readouts() {
+  if (typeof namePlaceholder === "function") namePlaceholder(); // export.js: the name the files get
   const e = st.err;
   const mm = scale(); // the engine measures in working pixels; everything shown is mm
   $("rScore").textContent = fmt(e.score * mm);
