@@ -86,11 +86,12 @@ Tests:
   maybe later (right to left, and Arabic letters change shape by their neighbours); Chinese, Japanese and similar
   scripts are skipped (too many strokes for a needle): import them as a picture and trace it. Dune Rise's dots
   could be redone with the new center-font.py (they come out as specks).
-- Chocolate Cyrillic (v132): printed 5 November 2026, the "Ты и красавица…" card in the Chocolate font, 5 mm letters
-  with the 1.19 mm needle: printed great. That is far below the app's smallest height for this font (8 stroke widths,
-  about 17 mm with that needle), so the Chocolate font's rule is too cautious: its letters are already the printed
-  outline, not strokes drawn out and back. Next: work out its real limit from prints and set it. choc OS's full stop
-  is blank and its hyphen a wide pill: worth checking whether that's what Nicolaas wants in the font.
+- Chocolate Cyrillic (v132): printed 5 November 2026, the "Ты и красавица…" card in the Chocolate font with the
+  1.19 mm needle, 5 mm tall (stacked layers), letters at the app's own letter height: printed great. The drawn
+  Cyrillic letters hold up in chocolate as well as choc OS's own. Still open: how small the Chocolate font can go
+  (its smallest height is the fixed 8 stroke widths, though its letters are already the printed outline, not strokes
+  drawn out and back); choc OS's full stop is blank and its hyphen a wide pill: worth checking whether that's what
+  Nicolaas wants in the font.
 - Lettering for a printer (v131): check the measured smallest height against real prints (a few letters at three
   sizes per font, e.g. a comb in the test-print matrix), and whether joins along the baseline print clean. Ideas not
   built yet: sort the font list by how well a font prints (free stroke ends and separate pieces per letter; the
