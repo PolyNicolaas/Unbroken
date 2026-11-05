@@ -3,6 +3,31 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v137 · 2026-11-04
+
+Bug hunt (4 November): a code review of v130–v136, G-code from all 11 examples and text in all 13 fonts checked
+move by move (plate, height, numbers, extrusion, copies), and 70 settings and sliders each changed, saved, opened
+again and undone. Fixed:
+
+- **Older designs opened changed**: a setting added after a design was saved stayed as it was on screen, so a
+  lettering design from before v131 opened with its letters joined, its i and j dots dropped and its height
+  measured, and every design from before v136 kept the last print's name. Such settings now come back as they were
+  (lettering switches off, no name). Test A57.
+- **Opening a design didn't refresh the Text card**: the font list (fonts that can't write the text), the printer-only
+  lettering switches (shown for a pen-plotter design) and a Custom… needle stayed as before. Test A57.
+- **Height − and + stuck for some layer heights**: the box showed 2 decimals (0.38 for 0.375 mm), so with 0.125 mm
+  layers some presses landed on the same layer. It shows 3 now. Test A55.
+- **File names**: accented Greek letters were dropped (Καλημέρα → kalimra, now kalimera), and a typed name lost
+  everything after its last dot (Anna 2.0 → anna-2, now anna-2-0). Test A56.
+- **G-code header is plain ASCII**: the first line's dash and the name line (Cyrillic spelled in Latin letters,
+  anything else dropped), as the printer's screen and older hosts expect. Test A56.
+- **j didn't join along the baseline in Sans** (its stem has no point near the baseline): the join now also looks
+  where a stroke crosses the band. Test E54.
+- **An emoji like ❤️ printed an extra "?"**: the invisible variation selector after it was laid out as a missing
+  letter. Variation selectors and zero-width joiners are left out now.
+- The corner label's connector count could be one off when a connector ran across the line's start; the Name box's
+  tooltip stayed on an old file name after clearing it.
+
 ## v136 · 2026-11-04
 
 - **Name the print**: a Name box at the top of the page, on every step. Every file saved or exported is named after

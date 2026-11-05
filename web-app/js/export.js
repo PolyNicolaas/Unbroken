@@ -139,6 +139,7 @@ function gcodeSettings() {
     zTravelSpeed: P.zTravelSpeed,
     zApproachSpeed: P.zApproachSpeed,
     name: ($("designName").value || "").trim() || autoName(), // (a comment at the top of the G-code)
+    nameAscii: asciiName(($("designName").value || "").trim() || autoName()),
   };
 }
 // File names say what's in them: the design's name, and for G-code the needle and the copies, e.g.
@@ -160,7 +161,7 @@ function autoName(name) {
       ? $("textIn").value.split("\n")[0] || "text"
       : k === "pattern"
         ? patternName(st.art.pattern)
-        : (k === "molecule" && moleculeName()) || st.srcLabel || "design")
+        : (k === "molecule" && moleculeName()) || (st.srcLabel || "").replace(/\.[a-z0-9]{2,4}$/i, "") || "design")
   );
 }
 // Cyrillic and Greek letters spelled in Latin ones for file names (Шоколад → shokolad), so a name in either still
@@ -180,6 +181,12 @@ const translit = (t) =>
       r = TRANSLIT[l];
     return r === undefined ? c : c === l ? r : r.charAt(0).toUpperCase() + r.slice(1);
   });
+// a name in plain ASCII for the G-code's comment: Cyrillic and Greek spelled, accents off, anything else dropped
+const asciiName = (t) =>
+  translit(translit(String(t).normalize("NFC")).normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+    .replace(/[^\x20-\x7e]+/g, "")
+    .replace(/\s+/g, " ")
+    .trim();
 // the name box shows the name the files get when it's left empty
 function namePlaceholder() {
   try {
@@ -188,14 +195,17 @@ function namePlaceholder() {
     $("designName").placeholder = "Name this print";
   }
 }
+const NAME_TIP = $("designName").title;
 $("designName").addEventListener("input", () => {
   const box = $("designName");
-  box.title = box.value.trim() ? `Files: ${designSlug()}…` : box.title;
+  box.title = box.value.trim() ? `Files: ${designSlug()}…` : NAME_TIP;
 });
 function slugOf(raw, max = 20) {
+  // Cyrillic first, letters whole (й, ё); then accents come off (é → e, ά → α) and Greek is spelled too
+  const t = translit(translit(raw.normalize("NFC")).normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
   return (
-    translit(raw.normalize("NFC"))
-      .replace(/\.[a-z0-9]+$/i, "")
+    t
+      .replace(/\./g, " ")
       .normalize("NFKD")
       .replace(/[^\w\- ]+/g, "")
       .replace(/_/g, "-")

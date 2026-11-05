@@ -120,7 +120,7 @@ report.
 | [E51](#e51) | A base denser than 100% (up to 125%): rows closer than a line width, for a surely solid base | a base density over 100% clamped back to 100% (no denser), or no limit (a base packed far past what the needle can lay) | – |
 | [E52](#e52) | Spirograph: up to six wheels, a centre path drawn by hand, and a frame that crops | a third wheel and on doing nothing, a design with Second wheel ticked losing it, a centre path that doesn't move the figure or closes a line that should be open, and a crop that draws outside its frame or sizes the canvas by the drawing instead of the frame | – |
 | [E53](#e53) | Spirograph: the figure's size changes along the line (Size at start → Size at end) | a size that doesn't change the figure, a growing figure left closed (its ends joined across the drawing), a figure that grows the wrong way, and designs from before v128 drawn differently | – |
-| [E54](#e54) | Lettering for a printer: letters joined along the baseline, near-misses closed, i and j dots, the measured smallest height | lettering full of connectors, stroke ends that blob into their letter, dots that run into their stems, letters printed too small to read | – |
+| [E54](#e54) | Lettering for a printer: letters joined along the baseline, near-misses closed, i and j dots, the measured smallest height | lettering full of connectors, stroke ends that blob into their letter, dots that run into their stems, letters printed too small to read | 0.4 s |
 | [E55](#e55) | Chocolate font: Cyrillic in choc OS's style (Russian, Ukrainian, Belarusian Ў) and its missing punctuation | Cyrillic lettering in the Chocolate font printing as “?”, or new letters that don't sit with choc OS's own | – |
 
 ### App tests
@@ -133,11 +133,11 @@ report.
 | [A04](#a04) | Text source: fonts, readable height, twelve-line limit | unreadable or unprintable lettering | – |
 | [A05](#a05) | Plate, copies and G-code export, end to end | the plate view, copies or the exported G-code disagreeing with the design | – |
 | [A06](#a06) | View menu works on desktop and phone widths | display options unreachable, or the menu cut off on a phone | – |
-| [A07](#a07) | Undo, redo, and saving and opening designs | lost work; a saved design that doesn't come back the same | – |
+| [A07](#a07) | Undo, redo, and saving and opening designs | lost work; a saved design that doesn't come back the same | 25.9 s |
 | [A08](#a08) | Optimize tracing improves or keeps the trace, and undoes cleanly | the optimizer making things worse, or leaving settings changed after Undo | – |
 | [A09](#a09) | Select area and erase tools | hand edits not reaching the trace | – |
 | [A10](#a10) | Works without background workers, with the same result | the app breaking when opened straight from disk | – |
-| [A11](#a11) | The app follows settings.js, and survives a broken one | edited settings not reaching the app; a typo in settings.js breaking the app | 41.9 s |
+| [A11](#a11) | The app follows settings.js, and survives a broken one | edited settings not reaching the app; a typo in settings.js breaking the app | – |
 | [A12](#a12) | One interface: every control on its tab, less-used cards start folded, one level only | a control that can't be reached, a 'More…' group that doesn't open, a panel wider than its card on a phone, and a Simple / Advanced switch coming back | – |
 | [A13](#a13) | One size slider: never below the smallest that fits, marks for detail, bigger prints traced finer | a print sized below what the needle can keep apart, marks out of order or in the wrong place, typed sizes slipping under the minimum, and big prints traced no finer than small ones | – |
 | [A14](#a14) | Layers: a base and an infill on the 3D tab, walls as Design draws them; the G-code climbs | infill leaking back into the Design trace, a base or infill whose fill doesn't show or reach the G-code, a density that doesn't change the fill, a layer readout that doesn't follow the settings, and G-code that stays flat | – |
@@ -180,8 +180,9 @@ report.
 | [A52](#a52) | Font picker: fonts that can write the text, style filter, Cyrillic and accents | lettering that silently prints “?” for letters the font doesn't have | – |
 | [A53](#a53) | Text card: lettering toggles for a printer (join letters, close near-misses, i and j dots, measured smallest height) | lettering toggles that don't reach the print, or change a pen plotter's letters | – |
 | [A54](#a54) | A text's lines printed in place: a piece for each line, keeping the layout as typed | a card or message whose lines get shuffled round the plate to save room, so it no longer reads top to bottom | – |
-| [A55](#a55) | Layers card: Height's − and + move a whole layer | a Height button that does nothing | – |
-| [A56](#a56) | The print's name: typed at the top, it names every file saved or exported, and is saved with the design | files named after the wrong thing, or all called "design" (a Cyrillic text's name used to come out empty) | – |
+| [A55](#a55) | Layers card: Height's − and + move a whole layer | a Height button that does nothing | 15.6 s |
+| [A56](#a56) | The print's name: typed at the top, it names every file saved or exported, and is saved with the design | files named after the wrong thing, or all called "design" (a Cyrillic text's name used to come out empty) | 16.9 s |
+| [A57](#a57) | Opening a design: settings it was saved without come back as they were then, and the Text card follows it | an older design opening changed (new options switched on, the last print's name kept), and a Text card left showing the design before | 18.5 s |
 
 #### E01
 
@@ -1045,7 +1046,7 @@ report.
 
 - **Why:** The height snaps to whole layers (layers × layer height), but its buttons stepped 0.05 mm: + went 0.3 → 0.35, which snapped straight back to 0.3, so pressing + did nothing (found 3 November 2026). The buttons now step one layer, and − stops at the base (or one layer).
 - **How:** Opens the Print step with the sample, presses Height's + three times and − once, reading the height and the layer count; then sets 2 base layers and reads the box's lowest value.
-- **Pass when:** + goes 0.3 → 0.6 → 0.9 → 1.2 mm (1 → 4 layers), − back to 0.9; with 2 base layers the lowest height is 0.6 mm; no page errors.
+- **Pass when:** + goes 0.3 → 0.6 → 0.9 → 1.2 mm (1 → 4 layers), − back to 0.9; with 0.125 mm layers every press moves exactly a layer (the box once showed 0.38 for 0.375, and the next step landed on the same layer); with 2 base layers the lowest height is 0.6 mm; no page errors.
 
 #### A56
 
@@ -1054,6 +1055,14 @@ report.
 - **Why:** A print needs a name of its own, and the files it makes should carry it (asked 4 November 2026). The box at the top of the page is on every step. Left empty, files are named after the design's text, pattern or picture, as before, and the box shows that name in grey. File names keep to letters, numbers and dashes for printer screens and USB sticks, so Cyrillic and Greek are spelled in Latin letters (ты → ty) instead of being dropped.
 - **How:** Types a Cyrillic text, reads the name box's grey name and exports G-code; types "Card for Anna" and exports G-code and saves the design, reading both names and the G-code's first lines; then opens the saved design again in a fresh page.
 - **Pass when:** Empty: the grey name and the G-code are named ty-i-krasavitsa (…_084_1x-gcode.zip); named: card-for-anna_084_1x-gcode.zip, the G-code says "; name: Card for Anna", the design saves as card-for-anna.unbroken.json; opened again, the box says Card for Anna; no page errors.
+
+#### A57
+
+**Opening a design: settings it was saved without come back as they were then, and the Text card follows it** · `app/A57-design-reopen.test.js` · slow
+
+- **Why:** A design file holds the settings the app had when it was saved. A setting added later (the lettering switches in v131, the print's name in v136) used to stay as it was on screen, so an older lettering design opened with its letters joined and dots dropped, and under the last print's name. Found in the bug hunt of 4 November 2026, with the font list and the printer-only switches not following a design opened, and Custom… staying in the needle menu.
+- **How:** Saves a text design, removes the newer settings from the file as an older version would have saved it, types a name and turns the switches on, then opens the file; opens a pen-plotter design and a Cyrillic one; picks Custom… and opens a design.
+- **Pass when:** The older design opens with the lettering switches off and no name; a pen-plotter design hides the printer switches; a Cyrillic design in Sans warns and sets the Latin-only fonts apart; after Custom…, an opened design's needle shows; no page errors.
 
 <!-- catalogue:end -->
 

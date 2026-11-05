@@ -28,6 +28,8 @@ module.exports = {
       checks.push(check(`${font}: join ends from the baseline (× letter height)`, worst / base.cap, "<=", 0.3, 3));
       notes.push(`${font} "${text}": ${pOff} pieces → ${pOn} joined`);
     }
+    // a j joins too (Sans's j stem has no point near the baseline: the join finds where it crosses the band)
+    checks.push(check("Sans \"enjoy\": joins", UNB.textLayout("enjoy", FONTS.sans, { ...base, join: true }).joins, "==", 4));
     // near-misses
     const BS = FONTS.badscript;
     const snapped = [..."dhkqrvxy"].filter((c) => UNB.textLayout(c, BS, { cap: 12, snap: 1.68 }).snaps > 0).length;

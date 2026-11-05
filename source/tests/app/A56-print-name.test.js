@@ -21,6 +21,12 @@ module.exports = {
     await page.click("#fileMenu summary, details:has(#saveDesign) > summary").catch(() => {});
     const s = await dl("#saveDesign"), file = await s.path();
     checks.push(check("named: saved design file", s.suggestedFilename(), "==", "card-for-anna.unbroken.json"));
+    const slugs = await page.evaluate(() => ["Καλημέρα", "Anna 2.0", "Mr.Smith", "Ёлка й", "Café Über"].map((t) => slugOf(t, 40)).join(" "));
+    checks.push(check("names: accents, dots and Cyrillic letters kept", slugs, "==", "kalimera anna-2-0 mr-smith yolka-y cafe-uber"));
+    await page.fill("#designName", "Ёлка; М84"); await page.dispatchEvent("#designName", "input");
+    const g2 = await dl("#gcodeBtn"), head = execSync(`unzip -p "${await g2.path()}" | head -5`).toString();
+    checks.push(check("G-code header is plain ASCII", +!/[^\x09\x0a\x0d\x20-\x7e]/.test(head), "==", 1), check("G-code name spelled", +/^; name: Yolka; M84$/m.test(head), "==", 1));
+    await page.fill("#designName", "Card for Anna"); await page.dispatchEvent("#designName", "input");
     const second = await A.open(ctx);
     await second.page.setInputFiles("#designFile", file); await A.idle(second.page); await A.idle(second.page);
     checks.push(check("opened again: the name is back", await second.page.inputValue("#designName"), "==", "Card for Anna"), check("page errors", errors.length + second.errors.length, "==", 0));
