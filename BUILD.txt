@@ -1,41 +1,41 @@
-Unbroken · web app build v136
-Built:  2026-11-04T23:10:45.232Z
-Tests:  109 of 109 tests passed
+Unbroken · web app build v137
+Built:  2026-11-05T01:26:28.293Z
+Tests:  110 of 110 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
   0902e2e523fa  00-util.js
   2584db84594f  01-image.js
   825b635d53a8  02-lines.js
-  89bab9bf3725  03-text.js
+  4f71d67e1c54  03-text.js
   814ea8379376  04-walk.js
   326b5f6077c5  05-fill.js
   340aeaecfe87  06-fourier.js
   e88cd163925f  07-measure.js
   d0cc374de0d6  08-shape.js
   76b9687b61c1  09-plate.js
-  9a2d1eac44ab  10-export.js
+  69b025cefbe5  10-export.js
   ac3de470b974  11-stages.js
   c1e0e2851039  12-models.js
   f384302a9e33  13-patterns.js
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   c58b27214155  16-molecule.js
-  90728a29e0a9  core.js
+  19557242f5ce  core.js
   2c3df9d4d6dd  css/app.css
   0be9d7ad7cf8  css/theme.css
   4b134bbd36e2  fonts.js
-  42d1e2ea7588  index.html
+  a28a9a8091b8  index.html
   04742756d25f  js/art.js
   01da455a1225  js/camera.js
-  ab89f4e6011a  js/config.js
+  568c63091e3a  js/config.js
   60537ade964a  js/controls.js
   419f0a9223bc  js/cutout.js
-  2b37150ffc41  js/engine-bridge.js
+  18e4d10c255d  js/engine-bridge.js
   65f719c0af2b  js/examples.js
-  eefcd146d7fb  js/export.js
-  24d915688436  js/history.js
-  3fa46b5ee37c  js/layers.js
+  23280e186875  js/export.js
+  4e0c54ff7869  js/history.js
+  60a97fadfdbb  js/layers.js
   430a29c664e0  js/levels.js
   7510c8db4a05  js/main.js
   e04ad77f8f92  js/matrix.js
@@ -46,7 +46,7 @@ Files (sha1, first 12):
   0d0910778259  js/optimize.js
   8344d7117344  js/pathpad.js
   e5316bce512f  js/patterns.js
-  a41e34e1eb93  js/pieces.js
+  5f756e4a591f  js/pieces.js
   b3a227544182  js/pipeline.js
   f877d34b57d8  js/plot.js
   b3ebdd62a275  js/preview.js
@@ -63,4 +63,4 @@ Files (sha1, first 12):
   7c48c854ce75  js/workflow.js
   53b02936e233  js/zoom.js
   7364c5202e85  settings.js
-  63e5553235ed  worker.js
+  92a0e4bee835  worker.js

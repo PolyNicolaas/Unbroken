@@ -133,7 +133,7 @@ function showHeight() {
     if (st.model) $("printHeightMM").value = +printedMM().toFixed(2);
     return;
   }
-  $("printHeightMM").value = +(n * S.h).toFixed(2);
+  $("printHeightMM").value = +(n * S.h).toFixed(3); // (3 decimals: a whole number of layer steps for − and +)
 }
 function forgetHeightGoal() {
   heightGoal = null;

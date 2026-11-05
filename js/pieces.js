@@ -66,18 +66,23 @@ function lineLifts() {
     S = st.final.re.length,
     lift = new Uint8Array(S);
   let n = 0;
-  for (let s = 0; s < S; s++) {
-    if (!F[s] || (s > 0 && F[s - 1])) continue; // the start of a connector run
-    let e = s;
-    while (e + 1 < S && F[e + 1]) e++;
-    const a = Math.max(0, s - 1),
-      b = Math.min(S - 1, e + 1);
-    if (lineAt(a) !== lineAt(b)) {
-      for (let k = s; k <= e; k++) lift[k] = 1;
-      n++;
+  // the line is a loop: start just after a sample that isn't a connector, so a run across the seam (sample S−1 → 0)
+  // is one run, and the samples either side of every run are on letters
+  const z = F.findIndex((v) => !v);
+  if (z >= 0)
+    for (let i = 1; i <= S; i++) {
+      const s = (z + i) % S;
+      if (!F[s] || F[(s - 1 + S) % S]) continue; // the start of a connector run
+      let len = 0;
+      while (len + 1 < S && F[(s + len + 1) % S]) len++;
+      const a = (s - 1 + S) % S,
+        b = (s + len + 1) % S;
+      if (lineAt(a) !== lineAt(b)) {
+        for (let k = 0; k <= len; k++) lift[(s + k) % S] = 1;
+        n++;
+      }
+      i += len;
     }
-    s = e;
-  }
   const r = n ? { lift, n } : null;
   liftsCache = { final: st.final, text: st.text, r };
   return r;

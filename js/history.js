@@ -220,6 +220,9 @@ function histButtons() {
 }
 function syncDesignUI() {
   const t = textMode();
+  st.needleCustom = false; // (lineUI shows Custom… again if the width matches no needle)
+  if (typeof letteringShown === "function") letteringShown(); // source.js: the Text card's printer-only switches
+  if (typeof fontMenu === "function") fontMenu(); // config.js: fonts that can't write the text set apart
   document.body.dataset.src = $("srcModel").checked ? "model" : t ? "text" : "image";
   document.body.dataset.art = st.art.kind;
   textSizeUI(t);
@@ -259,7 +262,11 @@ function applyDesign(d, src, imageSource, pics, picMore) {
       d.v = { ...d.v, traceOn: !d.v.lineDrawn };
       if (d.v.lineDrawn) d.v.lineStrokes = true;
     }
-    for (let [id, val] of Object.entries(d.v || {})) {
+    // controls added after a design was saved come back as the app was before them (v131: lettering for a printer
+    // off; v136: no name), not as they happen to be now; an undo step always has them all
+    const BEFORE = { designName: "", txtJoin: false, txtSnap: false, txtNoDots: false, txtMeasured: false };
+    const saved = { ...BEFORE, ...(d.v || {}) };
+    for (let [id, val] of Object.entries(saved)) {
       const el = $(id);
       if (!el) continue;
       if (id === "support" && val === "wall") val = "thin"; // Straight wall became Thin wall (v88)

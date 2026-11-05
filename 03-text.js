@@ -84,7 +84,8 @@
       return (cache[ch] = { adv: g[0], strokes, dot, L, R, x0, x1, ink: strokes.length > 0 });
     };
     const lines = [];
-    for (const raw of String(text).replace(/\r/g, "").split("\n")) {
+    // (variation selectors and zero-width joiners after an emoji are no letters: left out, not a "?")
+    for (const raw of String(text).replace(/\r|[\ufe00-\ufe0f\u200b-\u200d]/g, "").split("\n")) {
       const placed = [];
       let pen = 0,
         prev = null,
@@ -207,11 +208,26 @@
   }
   // the lowest point near the baseline on one side of a letter (side 1: right, -1: left), mm, y down: the letter's
   // points within its lowest third (above the baseline down to a little below it), the furthest out on that side
+  // (a letter with no point in the band, like Sans's j with its long straight stem, joins where a stroke crosses it)
   function lowEnd(strokes, base, cap, side) {
     let best = null;
+    const lo = base - 0.3 * cap,
+      hi = base + 0.12 * cap,
+      take = (q) => {
+        if (q[1] <= hi && q[1] >= lo && (!best || (q[0] - best[0]) * side > 0)) best = q;
+      };
+    for (const st of strokes) for (const q of st) take(q);
+    if (best) return best;
     for (const st of strokes)
-      for (const q of st)
-        if (q[1] <= base + 0.12 * cap && q[1] >= base - 0.3 * cap && (!best || (q[0] - best[0]) * side > 0)) best = q;
+      for (let i = 0; i + 1 < st.length; i++) {
+        const a = st[i],
+          b = st[i + 1];
+        for (const y of [lo, base])
+          if ((a[1] - y) * (b[1] - y) < 0) {
+            const t = (y - a[1]) / (b[1] - a[1]);
+            take([a[0] + t * (b[0] - a[0]), y]);
+          }
+      }
     return best;
   }
   // Close near-misses: a free end of a stroke (one touching nothing) that comes within `snap` mm of another stroke of

@@ -362,7 +362,8 @@ const FONT_STYLES = { plain: "Plain", rounded: "Rounded", hand: "Script and hand
 // the letters of the text a font has no glyph for (spaces and line breaks don't count)
 function fontMissing(font, text) {
   const miss = [];
-  for (const ch of new Set(text)) if (!/\s/.test(ch) && !font.glyphs[ch] && !miss.includes(ch)) miss.push(ch);
+  for (const ch of new Set(text))
+    if (!/[\s\ufe00-\ufe0f\u200b-\u200d]/.test(ch) && !font.glyphs[ch] && !miss.includes(ch)) miss.push(ch);
   return miss;
 }
 function fontMenu() {
