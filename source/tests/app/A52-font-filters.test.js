@@ -18,7 +18,7 @@ module.exports = {
     checks.push(
       check("Sans: warning names ё", +(/warn/.test(cls) && hint.includes("ё")), "==", 1),
       check("Sans stays picked and enabled", +(!m.sans.disabled && (await page.inputValue("#font")) === "sans"), "==", 1),
-      check("Readability greyed under Missing letters", +(m.readability.disabled && /Missing/.test(m.readability.group)), "==", 1),
+      check("Dune Rise greyed under Missing letters", +(m.dune.disabled && /Missing/.test(m.dune.group)), "==", 1),
       check("Pebble can write it", +(!m.pebble.disabled && !m.pebble.group), "==", 1),
       check("Bad Script can write it", +(!m.badscript.disabled && !m.badscript.group), "==", 1),
       check("Chocolate can write it", +(!m.chocolate.disabled && !m.chocolate.group), "==", 1),

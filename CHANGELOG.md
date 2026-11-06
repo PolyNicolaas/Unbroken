@@ -3,6 +3,24 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v138 · 2026-11-06
+
+Traced text that didn't read: a sheet of "Hello world" and "Happy Birthday" in every font, drawn at the needle's width,
+read "Helo world" in most of them, with r's closed into a's and bars across y's.
+
+- **Every letter stroke is a pair of strands** (for a printer): the tracer drew some strokes once, up one l, across the
+  top and down the next, and two single strands a pair's width apart read as one l. Now every stroke prints out and
+  back; a letter's own loops (o, the bowl of e) go once round. The Chocolate font's letters are already the printed
+  line and stay as they were. Fewer connectors too ("Hello world" in Sans: 4 → 2). Test A58.
+- **Connectors run along the baseline** (for a printer): straight, they ran between the nearest points of two words,
+  often across a letter's top or middle. Now they follow the line the letters stand on, like an underline. Painted
+  connector paths take over from it. `rules.textLaneShare` in settings.js sets the band. Test A58.
+- **Seven fonts removed** that printed hard to read: Elfin, Nixish, Tech, Allure, Readability, Readability Italic and
+  Osmotron. Six are left: Sans, Script, Chocolate, Dune Rise, Pebble and Bad Script (all the Cyrillic and Greek is in
+  Chocolate, Pebble and Bad Script). A design saved in a removed font opens in Sans and says so. Test A58.
+- Found on the way: the last few mm of every print are the wipe (the chocolate pulled back while the needle finishes
+  the line), so a connector at the very end of the line isn't laid. The preview still draws it.
+
 ## v137 · 2026-11-04
 
 Bug hunt (4 November): a code review of v130–v136, G-code from all 11 examples and text in all 13 fonts checked

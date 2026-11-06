@@ -377,8 +377,8 @@ Test E21 (the stack and the G-code) and A14 (the controls).
 The Text card lays typed text out in a single-stroke font (`source/engine/fonts.js`, `UNB.textLayout` in
 `03-text.js`).
 
-- **Fonts.** Each has a style and the scripts it writes. Sans, Readability (and Italic), Nixish, Script, Allure, Tech,
-  Osmotron, Elfin and Dune Rise are basic Latin. **Pebble** (rounded, a single-stroke Comfortaa) writes accented Latin,
+- **Fonts.** Six, kept for how they read as a printed line. Each has a style and the scripts it writes. Sans, Script
+  and Dune Rise are basic Latin. **Pebble** (rounded, a single-stroke Comfortaa) writes accented Latin,
   Greek and Cyrillic; **Bad Script** (handwriting) accented Latin and Cyrillic; **Chocolate** (choc OS's lettering,
   each letter its printed outline) Latin and Cyrillic: Russian, Ukrainian, Belarusian Ў, and , : ; ' " « ».
   Chinese, Japanese and similar scripts aren't planned (too many strokes for a needle): import them as a picture and
@@ -400,6 +400,15 @@ The Text card lays typed text out in a single-stroke font (`source/engine/fonts.
     below `rules.minLetterStrokes` (4). Off, or for the Chocolate font: `rules.minLetterHeight` (8, or 10 for the thin
     scripts) stroke widths.
   Tests E54, A53.
+- **How a printer's letters are traced** (always, for a printer; a pen plotter draws the letters as the font has
+  them): every letter stroke is printed out and back, a pair of strands, and a letter's own loops (an o, the bowl of
+  an e) once round (`UNB.buildWalk`'s `doubleOpen`: the strokes that aren't on a loop of the letters, and every
+  connector, drawn twice; where loops meet with an odd number of loop edges, the fewest loop edges doubled). Left to
+  the fewest doubled strokes, the tracer drew some strokes once (up one l, across the top, down the next), and two
+  single strands read as one letter. Connectors run along the baselines, as if a connector path were painted under
+  each line of text (`textLanes`, a band `rules.textLaneShare` × letter height either side); painted connector paths
+  take over. The Chocolate font's letters are already the printed line, so they stay once round (its connectors still
+  follow the baseline). Test A58.
 - **Font tools** (`source/tools/`): `center-font.py` turns an outline font with even, thin strokes into single strokes
   (the middle line; dots as small loops), `line-font.py` a font whose letters are already the line,
   `chocolate-cyrillic.py` draws the Chocolate font's Cyrillic in Quicksand Bold's style (the font choc OS's lettering

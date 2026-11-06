@@ -32,7 +32,7 @@ module.exports = {
     await page.fill("#textIn", "Hello"); await page.dispatchEvent("#textIn", "input"); await A.idle(page);
     await open(cyr);
     checks.push(check("Cyrillic design: the font hint warns", +/warn/.test(await page.getAttribute("#fontHint", "class")), "==", 1),
-      check("Cyrillic design: Readability set apart", await page.$eval("#font option[value=readability]", (o) => +o.disabled), "==", 1));
+      check("Cyrillic design: Dune Rise set apart", await page.$eval("#font option[value=dune]", (o) => +o.disabled), "==", 1));
     // Custom… then a design: its needle shows
     await A.print(page); await A.idle(page);
     await page.selectOption("#needle", "custom"); await A.idle(page);

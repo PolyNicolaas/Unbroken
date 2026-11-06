@@ -93,12 +93,13 @@ const BUILTIN = {
   },
   rules: {
     maxTextLines: 12,
-    minLetterHeight: { default: 8, allure: 10, elfin: 10, badscript: 10 },
+    minLetterHeight: { default: 8, badscript: 10 },
     minLetterStrokes: 4,
     letterGapShare: 0.15,
     minLetterGap: 1.2,
     wordGapShare: 0.5,
     minWordGap: 2,
+    textLaneShare: 0.08,
     undoSteps: 100,
   },
   engine: {
@@ -294,6 +295,7 @@ const CFG = (() => {
     ["minLetterGap", 0, 10],
     ["wordGapShare", 0, 5],
     ["minWordGap", 0, 20],
+    ["textLaneShare", 0, 1],
     ["minLetterStrokes", 1, 30],
     ["undoSteps", 1, 1000],
   ])

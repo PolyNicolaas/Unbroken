@@ -368,7 +368,7 @@
     // Anything left unmatched falls back to the spanning-tree T-join below.
     // (doubleAll: no connectors, so the lines drawn once are whole loops of the drawing, and doubling them keeps it
     // walkable)
-    const jumpCost = opt.doubleAll ? 0 : opt.jumpCost === undefined ? 2 : opt.jumpCost;
+    const jumpCost = opt.doubleAll || opt.doubleOpen ? 0 : opt.jumpCost === undefined ? 2 : opt.jumpCost;
     const diag = Math.hypot(w, h),
       toggled = [];
     {
@@ -493,6 +493,84 @@
     }
     return toggled;
   }
+  // doubleOpen (lettering): which edges are drawn twice, chosen again so every open stroke is a pair of strands. The
+  // T-join above doubles as little as it can, so it may leave strokes drawn once wherever connectors close a loop
+  // through them (up one l, across the top, down the next): two single strands a pair's width apart, read as one
+  // letter. Here every stroke of the drawing that isn't part of one of its own loops (a bridge of the line edges:
+  // stems, arms, tails) and every connector is drawn twice, out and back. The loops (an o, the bowl of an e) are drawn
+  // once round where they can be; where loops meet with an odd number of loop edges at a point (a B, an 8), the
+  // fewest loop edges are doubled, along a spanning tree of each set of joined loops. Every vertex ends up even.
+  function evenStrokes(G, adj, cnt) {
+    const { eu, ev, ej } = G,
+      V = G.V,
+      E = eu.length,
+      other = (e, v) => (eu[e] === v ? ev[e] : eu[e]);
+    // bridges of the line edges (connector edges left out): iterative Tarjan
+    const disc = new Int32Array(V).fill(-1),
+      low = new Int32Array(V),
+      bridge = new Uint8Array(E);
+    let t = 0;
+    for (let r = 0; r < V; r++) {
+      if (disc[r] >= 0) continue;
+      const stack = [[r, -1, 0]];
+      disc[r] = low[r] = t++;
+      while (stack.length) {
+        const top = stack[stack.length - 1],
+          [v, pe] = top;
+        if (top[2] < adj[v].length) {
+          const e = adj[v][top[2]++];
+          if (ej[e] || e === pe) continue;
+          const u = other(e, v);
+          if (disc[u] < 0) {
+            disc[u] = low[u] = t++;
+            stack.push([u, e, 0]);
+          } else if (disc[u] < low[v]) low[v] = disc[u];
+        } else {
+          stack.pop();
+          if (pe >= 0) {
+            const p = other(pe, v);
+            if (low[v] < low[p]) low[p] = low[v];
+            if (low[v] > disc[p]) bridge[pe] = 1;
+          }
+        }
+      }
+    }
+    // strokes and connectors twice; loop edges once, then parity fixed along each set of joined loops
+    const odd = new Uint8Array(V);
+    for (let e = 0; e < E; e++) {
+      if (ej[e] || bridge[e]) cnt[e] = 2;
+      else {
+        cnt[e] = 1;
+        odd[eu[e]] ^= 1;
+        odd[ev[e]] ^= 1;
+      }
+    }
+    const pe = new Int32Array(V).fill(-2);
+    for (let r = 0; r < V; r++) {
+      if (pe[r] !== -2) continue;
+      pe[r] = -1;
+      const order = [r];
+      for (let qi = 0; qi < order.length; qi++) {
+        const v = order[qi];
+        for (const e of adj[v]) {
+          if (ej[e] || bridge[e]) continue;
+          const u = other(e, v);
+          if (pe[u] === -2) {
+            pe[u] = e;
+            order.push(u);
+          }
+        }
+      }
+      for (let i = order.length - 1; i > 0; i--) {
+        const v = order[i];
+        if (!odd[v]) continue;
+        const e = pe[v];
+        cnt[e] = cnt[e] > 1 ? 1 : 2;
+        odd[v] = 0;
+        odd[other(e, v)] ^= 1;
+      }
+    }
+  }
   // 5. Which edges are drawn twice (every vertex even), where the walk starts, and for an open path its two ends.
   // null for a single dot.
   function walkDouble(G, P, w, opt, toggled) {
@@ -501,7 +579,7 @@
       V0 = G.V0,
       { lab, rootComp } = P,
       startAt = opt.startAt || null,
-      open = !!opt.open && !opt.doubleAll; // (every edge doubled: the line ends where it starts)
+      open = !!opt.open && !opt.doubleAll && !opt.doubleOpen; // (every edge doubled: the line ends where it starts)
     const E = eu.length;
     if (!E) return null; // a single dot: no line to walk
     const adj = Array.from({ length: V }, () => []);
@@ -550,7 +628,9 @@
     // doubleAll (a molecule: every bond a matching pair of strands): the edges still drawn once are the drawing's own
     // loops (a ring), where every vertex meets an even number of them, so drawing them twice too keeps every vertex
     // even
-    if (opt.doubleAll) for (let e = 0; e < E; e++) if (cnt[e] === 1) cnt[e] = 2;
+    if (opt.doubleAll) {
+      for (let e = 0; e < E; e++) if (cnt[e] === 1) cnt[e] = 2;
+    } else if (opt.doubleOpen) evenStrokes(G, adj, cnt);
     // nearest vertex to a requested start point
     let pinned = -1;
     if (startAt) {
@@ -836,8 +916,8 @@
   // Slow on big line maps: the connector searches are shortest-route (Dijkstra) runs over the pixel graph.
   UNB.buildWalk = function (lines, w, h, opt) {
     // (doubleAll: every edge drawn twice, out and back; the line closes, since an open one leaves its way from start
-    // to end drawn once)
-    const open = !!opt.open && !opt.doubleAll,
+    // to end drawn once; doubleOpen the same, for lettering)
+    const open = !!opt.open && !opt.doubleAll && !opt.doubleOpen,
       N = w * h;
     const R = walkRouter(w, h, opt);
     const P = walkParts(lines, w, h, opt, R);
@@ -963,6 +1043,7 @@
       dropped,
       jumpLen,
       doubledFrac: doubled / Math.max(1, m - 1),
+      nonCrossing: !!tour, // the non-crossing tour joined every loop (else Hierholzer: it may cross at junctions)
       bbox: { minX, minY, maxX, maxY },
       linePix: V0,
     };

@@ -249,7 +249,8 @@ function syncDesignUI() {
 }
 // Returns a note when part of the design couldn't come back (a 3D model that isn't the one loaded), else "".
 function applyDesign(d, src, imageSource, pics, picMore) {
-  let note = "";
+  let note = "",
+    fontGone = "";
   restoring = true;
   try {
     clearTimeout(textTimer);
@@ -273,9 +274,14 @@ function applyDesign(d, src, imageSource, pics, picMore) {
       // the Speed box was mm/min until v92
       if (id === "gFeed" && s.feedUnit !== "mm/s" && val !== "") val = String(Math.round((+val / 60) * 10) / 10);
       if (el.type === "checkbox" || el.type === "radio") el.checked = !!val;
-      else if (el.tagName === "SELECT" && ![...el.options].some((o) => o.value === String(val)))
-        continue; // e.g. a font this version doesn't have
-      else el.value = val;
+      else if (el.tagName === "SELECT" && ![...el.options].some((o) => o.value === String(val))) {
+        // a font this version doesn't have (v138 removed seven that printed hard to read): Sans, and say so
+        if (id === "font" && $("font").querySelector('option[value="sans"]')) {
+          el.value = "sans";
+          fontGone = String(val);
+        }
+        continue;
+      } else el.value = val;
     }
     for (const k of ["outW", "spacing", "simplify", "N"]) if (s[k] !== undefined) st[k] = s[k];
     // older design files: keep the width they were saved at
@@ -357,6 +363,7 @@ function applyDesign(d, src, imageSource, pics, picMore) {
     syncDesignUI();
     st.autoPending = false; // keep the saved number of terms
     launch(extract);
+    if (fontGone && textMode()) note = `its font (${fontGone}) isn't in this version: set in Sans`;
     return note;
   } finally {
     restoring = false;

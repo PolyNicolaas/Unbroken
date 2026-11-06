@@ -145,6 +145,13 @@ function detect(W, sens) {
   return sp.lines || UNB.stageLines(sp.blurred, W.w, W.h, sp);
 }
 
+// A text for a printer: every letter stroke drawn out and back, the same pair of strands everywhere (a letter's own
+// loops, an o or the bowl of an e, once round: UNB.buildWalk's doubleOpen). Left to itself the tracer draws some
+// strokes only once (up one l, across, down the next), and two single strands a pair's width apart read as one
+// letter: "Hello" printed as "Helo". The Chocolate font's letters are already the printed line (closed
+// outlines), so it keeps them once round; a pen plotter draws the letters as the font has them.
+const textForPrinter = () => !!st.text && !artForPlot(),
+  textEven = () => textForPrinter() && !UNB_FONTS[$("font").value].hairline;
 function traceArgs(W, s, textMask, region) {
   // what stageTrace needs for one working image (textMask: one line of a text; region: the part of the picture a
   // piece is traced from, a molecule's bonds or one of its labels: pieces.js; a piece starts where it likes)
@@ -163,7 +170,9 @@ function traceArgs(W, s, textMask, region) {
       jumpCost: s.loose,
       // a molecule: every bond out and back, a matching pair of strands (a ring's bonds too, not once round)
       doubleAll: st.art.kind === "molecule" && !textMask,
-      lanes: zoneMask("lane", w, h, W.crop),
+      // a text for a printer: every letter stroke out and back, its loops (o, e) once round (textEven)
+      doubleOpen: textEven(),
+      lanes: zoneMask("lane", w, h, W.crop) || textLanes(w, h, W.crop),
     },
     { blurred: W.blurred, edges: !st.text && (s.mode === "edges" || !!W.levels) },
   ]; // traced line moved onto the middle of the ink (or the edge), below a pixel
@@ -288,6 +297,27 @@ function zoneMask(kind, w, h, crop = st.crop) {
     }
   st.zm[kind] = { key, m: any ? m : null, tint: null };
   return st.zm[kind].m;
+}
+// A text for a printer: its connectors routed along the baselines, as if a connector path were painted
+// under every line of text. Straight, a connector runs between the two nearest points of two words, often at the top
+// of a letter or across its middle, where it reads as part of a letter (an r closed into an a, a bar across a y). Along
+// the baseline it reads as the line the letters stand on. Painted connector paths take over from these.
+function textLanes(w, h, crop) {
+  const T = st.text;
+  if (!textForPrinter() || !T || !T.layout || !T.layout.baselines || !T.layout.baselines.length || !crop) return null;
+  const key = [w, h, JSON.stringify(crop)].join("|"),
+    z = st.zm.textLane;
+  if (z && z.text === T && z.key === key) return z.m;
+  const m = new Uint8Array(w * h),
+    half = Math.max(1.5, CFG.rules.textLaneShare * T.cap * T.ppm * crop.ky);
+  for (const b of T.layout.baselines) {
+    const y = ((b.y + T.margin) * T.ppm - crop.sy) * crop.ky,
+      y0 = Math.max(0, Math.floor(y - half)),
+      y1 = Math.min(h - 1, Math.ceil(y + half));
+    m.fill(1, y0 * w, (y1 + 1) * w);
+  }
+  st.zm.textLane = { text: T, key, m };
+  return m;
 }
 function zoneTint(kind) {
   // coloured overlay canvas for the preview

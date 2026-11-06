@@ -21,7 +21,7 @@ module.exports = {
       await page.selectOption("#font", f); await A.idle(page, 800);
       checks.push(check(`${f}: crossings`, +((await page.textContent("#uncrossVal")).split("→").pop()), "==", 0));
     }
-    checks.push(check("fonts available", fonts.length, ">=", 9), check("page errors", errors.length, "==", 0));
+    checks.push(check("fonts available (v138: six kept)", fonts.length, "==", 6), check("page errors", errors.length, "==", 0));
     await close(); return { checks };
   },
 };
