@@ -1136,10 +1136,10 @@ report.
 | 2026-10-15 | One drop area for every input file: A24 added; A07 and A17 open files through it | 52 tests |
 | 2026-10-15 | Height = layers × layer height, the first layer at Z 0.3: A14 and A17 expect the new heights; A14 checks 0 filled layers without a filled base and one layer reading 0.3 mm | 52 tests |
 | 2026-10-18 | v97, from the Suggestion box: a piece for each line of text (E31 the line maps and the pieces' plate layout, A29 the app and the G-code); A14 checks the layer slider goes back to every layer after a change; A13 checks the size marks alternate below and above the track | all 60 pass; the model and lettering challenges come out byte for byte the same as v96 |
+| 2026-11-06 | v138 readable lettering: every letter stroke a pair of strands (`doubleOpen`), connectors along the baselines, seven fonts removed; E56 and A58 added; A04's font count is now exactly 6 (was at least 9, the fonts were removed on purpose), A52 and A57 use Dune Rise instead of Readability | engine 56 pass; app 57 pass |
 
 ## Related
 
 - [`../bench/`](../bench/README.md) is the place to explore and measure, with free-form benchmarks, comparison
   images and history. These tests are the pass/fail gate; a benchmark finding becomes a test once it describes
   something the app must always do.
-| 2026-11-06 | v138 readable lettering: every letter stroke a pair of strands (`doubleOpen`), connectors along the baselines, seven fonts removed; E56 and A58 added; A04's font count is now exactly 6 (was at least 9, the fonts were removed on purpose), A52 and A57 use Dune Rise instead of Readability | engine 56 pass; app 57 pass |
