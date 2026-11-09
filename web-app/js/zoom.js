@@ -96,7 +96,13 @@ $("zoomFit").addEventListener("click", zoomFit);
   box.addEventListener(
     "wheel",
     (e) => {
-      if (isModel() && stageNow() === "line") return; // the model's own view
+      // with the map of the steps (map.js) the preview has a fixed place on the page: scrolling over it never moves the
+      // page; a plain scroll zooms (fitted) or pans (zoomed in)
+      const held = typeof mapOn === "function" && mapOn();
+      if (isModel() && stageNow() === "line") {
+        if (held) e.preventDefault();
+        return;
+      } // the model's own view
       const Z = zoomOf(stageNow());
       if (e.ctrlKey || e.metaKey) {
         e.preventDefault();
@@ -104,6 +110,12 @@ $("zoomFit").addEventListener("click", zoomFit);
         zoomBy(Math.exp(-e.deltaY * 0.01), x, y);
         return;
       } // pinch or Ctrl / ⌘ + scroll
+      if (Z.z <= 1 && held) {
+        e.preventDefault();
+        const [x, y] = at(e);
+        zoomBy(Math.exp(-(e.deltaY || e.deltaX) * 0.004), x, y);
+        return;
+      }
       if (Z.z <= 1) return; // fitted: the page scrolls as usual
       e.preventDefault();
       const cv = stageCanvas(),
@@ -134,7 +146,10 @@ $("zoomFit").addEventListener("click", zoomFit);
   box.addEventListener(
     "pointerdown",
     (e) => {
-      if (!(space || e.button === 1) || zoomOf(stageNow()).z <= 1) return;
+      // (with the map, a plain drag on the line view pans too, when no tool is in use)
+      const drag =
+        e.button === 0 && typeof mapOn === "function" && mapOn() && stageNow() === "line" && !st.tool && !isModel();
+      if (!(space || e.button === 1 || drag) || zoomOf(stageNow()).z <= 1) return;
       e.preventDefault();
       e.stopPropagation();
       const Z = zoomOf(stageNow());

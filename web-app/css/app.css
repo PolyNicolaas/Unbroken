@@ -636,3 +636,5 @@ body[data-ui="map"] .copies-seg label { white-space: nowrap; }
 body[data-ui="map"] .layerbar { top: 110px; }
 body[data-ui="map"] .pane-tip { display: none; }
 body[data-ui="map"] .pathbar { max-width: calc(100% - 96px); }
+/* the map's preview keeps its gestures: dragging, pinching and scrolling over it never move the page */
+body[data-ui="map"] .canvas-box { touch-action: none; overscroll-behavior: contain; }
