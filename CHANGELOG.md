@@ -26,6 +26,8 @@ The steps as a map, in place of the step tabs (View ▸ Map of the steps turns i
   "default: centred" notes; The math opens with the Line step instead of under everything; the drop area shows only
   for loading a 3D model. Every step's cards now read as rows like Material's: one setting per line, name left,
   value right, the card's title as the group's heading.
+- **Denser**: with the map on, less space round text and between rows (theme.css `--map-space` and `--map-text`),
+  a lower band with smaller chips, shorter rows, and pairs of settings (Angle, Turn every…) as rows like the rest.
 
 ## v139 · 2026-11-09
 

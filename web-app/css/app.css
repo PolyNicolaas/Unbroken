@@ -660,3 +660,34 @@ body[data-ui="map"] .panel section.card[data-map] .card-body label.field > small
 body[data-ui="map"] .panel section.card[data-map] .card-body > :is(div.row, .seg, label.check, .inline, p.hint, p.status, .dropzone, ul, textarea, details, .lab, label.field:has(textarea), table, .chart, .tiles) { margin: 0; padding: 8px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
 body[data-ui="map"] .panel section.card[data-map] .card-body > .seg { margin: 8px 16px; padding: 3px; border-bottom: none; }
 body[data-ui="map"] .panel section.card[data-map] .card-body > :is(.two, .three) > :not(label.field) { padding: 8px 16px; }
+
+/* the map, dense (Nicolaas, 9 November 2026: "there are lots of settings so it being a little dense is not a terrible
+   idea"): less space round the text everywhere in the map layout, a lower band, shorter rows */
+body[data-ui="map"] { --space: var(--map-space, .7); --text: var(--map-text, .94); }
+body[data-ui="map"] .map { height: 124px; }
+body[data-ui="map"] .canvas-box { height: calc(100vh - 290px); height: calc(100svh - 290px); min-height: 420px; }
+body[data-ui="map"] .map-node { gap: 0; }
+body[data-ui="map"] .map-node .map-cap, body[data-ui="map"] .map-node .map-val { line-height: 1.25; }
+body[data-ui="map"] .map-node.chip { font-size: calc(12.5px * var(--text)); }
+body[data-ui="map"] .map-group h3,
+body[data-ui="map"] .panel section.card[data-map] > h2 { padding: 9px 12px 3px; }
+body[data-ui="map"] :is(.map-group > label.field, .map-group > .map-calc, .panel section.card[data-map] .card-body label.field:not(:has(textarea))) { min-height: 32px; padding-top: 1px; padding-bottom: 1px; padding-left: 12px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field:not(:has(textarea)) { padding-right: 12px; }
+body[data-ui="map"] :is(.map-group > label.field, .panel section.card[data-map] .card-body label.field) > span:first-child { font-size: calc(13.5px * var(--text)); }
+body[data-ui="map"] .panel section.card[data-map] .card-body > :is(div.row, .seg, label.check, .inline, p.hint, p.status, .dropzone, ul, textarea, details, .lab, label.field:has(textarea), table, .chart, .tiles) { padding: 5px 12px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body > .seg { margin: 5px 12px; padding: 2px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body > :is(.two, .three) > :not(label.field) { padding: 5px 12px; }
+body[data-ui="map"] .panel :is(select, input[type="number"], input[type="text"]) { padding-top: 3px; padding-bottom: 3px; min-height: 0; }
+body[data-ui="map"] .panel .num-btn { min-height: 0; width: 26px; }
+body[data-ui="map"] .panel .hint, body[data-ui="map"] .panel small { line-height: 1.35; }
+body[data-ui="map"] .map-group > label.field.changed::before { top: 14px; }
+body[data-ui="map"] .map-group > :is(div.row, div.two, .choc-pick, label.check, p, .inline, button) { padding: 5px 12px; }
+body[data-ui="map"] :is(.map-group, .panel section.card[data-map] .card-body) div.row > :is(label, span):first-child { font-weight: 400; font-size: calc(13.5px * var(--text)); }
+/* a pair of settings side by side (Angle, Turn every…) reads as two rows like the rest */
+body[data-ui="map"] .map-group > div.two { display: block; padding: 0; border-bottom: none; }
+body[data-ui="map"] .map-group > div.two > label.field { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; min-height: 32px; margin: 0; padding: 1px 12px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
+body[data-ui="map"] .map-group > div.two > label.field > span:first-child { font-size: calc(13.5px * var(--text)); color: var(--ink); }
+body[data-ui="map"] .map-group > div.two > label.field :is(input, .num) { justify-self: end; }
+body[data-ui="map"] .map-group > div.two > label.field .num { width: 136px; }
+body[data-ui="map"] :is(.map-group, .panel section.card[data-map] .card-body) .num { max-width: 136px; justify-self: end; }
+body[data-ui="map"] .map-node.chip { padding: 0 5px; }

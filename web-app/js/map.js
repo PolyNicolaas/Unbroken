@@ -183,8 +183,8 @@ function mapShape() {
 let mapOpenId = null,
   mapTrayOpen = false;
 // the band fits its width (no sideways scrolling): the steps share it, and each step's chips share the room under
-// (or over) it and the gap to the next step, so nothing overlaps; chips are at least 34 px tall to tap
-const MAP_CHIP_H = 34;
+// (or over) it and the gap to the next step, so nothing overlaps; chips 28 px tall (the map is dense: many settings)
+const MAP_CHIP_H = 28;
 function mapRender() {
   if (!mapOn()) return;
   const box = $("map"),
@@ -200,10 +200,11 @@ function mapRender() {
     sw = Math.min(250, (W - 2 * side - (n - 1) * 28) / n),
     gap = n > 1 ? (W - 2 * side - n * sw) / (n - 1) : 0,
     midY = Math.round(H / 2),
-    nh = 60;
+    nh = 46;
   S.spine.forEach((id, i) => (pos[id] = { x: side + i * (sw + gap), y: midY - nh / 2, w: sw, h: nh, big: true, i }));
   const chips = (list, parent, y) => {
-    const room = Math.min(sw + gap - 12, W - side - pos[parent].x),
+    // (the last step's chips may lean left into the gap before it, so they aren't cut short)
+    const room = Math.min(sw + gap - 12, W - 2 * side),
       w = Math.min(132, (room - 8 * (list.length - 1)) / list.length);
     // (centred on their step, within its room)
     const x0 = Math.max(
@@ -212,8 +213,8 @@ function mapRender() {
     );
     list.forEach((id, k) => (pos[id] = { x: x0 + k * (w + 8), y, w, h: MAP_CHIP_H }));
   };
-  for (const [p, list] of Object.entries(S.up)) chips(list, p, 10);
-  for (const [p, list] of Object.entries(S.down)) chips(list, p, H - 10 - MAP_CHIP_H);
+  for (const [p, list] of Object.entries(S.up)) chips(list, p, 6);
+  for (const [p, list] of Object.entries(S.down)) chips(list, p, H - 6 - MAP_CHIP_H);
   // the nodes: made once each, moved and refreshed
   const want = new Set(Object.keys(pos));
   for (const el of [...nodes.children]) if (!want.has(el.dataset.node)) el.remove();
