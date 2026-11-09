@@ -554,22 +554,22 @@ body:not([data-vase="1"]) .vase-only, body[data-vase="1"] .stl-only { display: n
 /* a band across the top; under it the preview (the biggest) and the settings (a narrow column) */
 .map, .map-head, .map-rows { display: none; }
 body[data-ui="map"] .wrap { max-width: 1680px; grid-template-columns: minmax(0, 1fr); }
-body[data-ui="map"] .map { display: block; position: relative; height: 150px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); overflow-x: auto; overflow-y: hidden; background-image: radial-gradient(var(--grid) 1px, transparent 1px); background-size: 24px 24px; }
-@media (min-width: 1100px) {
-  body[data-ui="map"] .wrap { grid-template-columns: minmax(0, 1fr) 420px; grid-template-areas: "map map" "left panel" "math math"; }
+body[data-ui="map"] .map { display: block; position: relative; height: 170px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); overflow: hidden; background-image: radial-gradient(var(--grid) 1px, transparent 1px); background-size: 24px 24px; }
+@media (min-width: 640px) {
+  body[data-ui="map"] .wrap { grid-template-columns: minmax(0, 1fr) clamp(300px, 34%, 420px); grid-template-areas: "map map" "left panel" "math math"; }
   body[data-ui="map"] .map { grid-area: map; }
   body[data-ui="map"] .left { grid-area: left; }
   body[data-ui="map"] .panel { grid-area: panel; align-self: start; }
   body[data-ui="map"] .math { grid-area: math; }
-  body[data-ui="map"] .canvas-box { aspect-ratio: auto; height: calc(100vh - 330px); height: calc(100svh - 330px); min-height: 440px; max-height: none; }
 }
+body[data-ui="map"] .canvas-box { aspect-ratio: auto; height: calc(100vh - 360px); height: calc(100svh - 360px); min-height: 460px; max-height: none; }
 body[data-ui="map"] :is(.output-row, .view-tabs.steps, .nextbar, .more-print, [data-examples], #examplesRow) { display: none !important; }
 body[data-ui="map"] .panel section.card:not([data-map]) { display: none !important; }
 body[data-ui="map"] .map-head { display: flex; flex-direction: column; gap: calc(10px * var(--space)); }
 body[data-ui="map"] .map-rows:not([hidden]) { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding-bottom: 6px; }
-.map-top { position: absolute; left: 16px; top: 14px; height: 28px; display: flex; align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
+.map-top { display: none; height: 34px; flex: none; margin-left: calc(24px * var(--space)); align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
 .map-top .name { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
-body[data-ui="map"] .map-top { left: 20px; top: 8px; }
+body[data-ui="map"] .map-top { display: flex; }
 .map-for[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
 .map-lines { position: absolute; left: 0; top: 0; pointer-events: none; }
 .map-lines path { fill: none; stroke-linecap: round; }
@@ -577,19 +577,20 @@ body[data-ui="map"] .map-top { left: 20px; top: 8px; }
 .map-thin { stroke: var(--rule); stroke-width: 2; }
 .map-nodes { position: absolute; left: 0; top: 0; bottom: 0; }
 .map-node { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; padding: 0 calc(12px * var(--space)); background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgb(0 0 0 / .05); transition: opacity .15s; }
-.map-node.chip { flex-direction: row; align-items: center; border-radius: 999px; background: color-mix(in srgb, var(--paper) 45%, var(--surface)); box-shadow: none; }
+.map-node.chip { flex-direction: row; align-items: center; justify-content: center; padding: 0 8px; border-radius: 999px; background: color-mix(in srgb, var(--paper) 45%, var(--surface)); box-shadow: none; }
 .map-node.chip .map-val { display: none; }
-.map-node.quiet { opacity: .45; }
+.map-node.quiet { opacity: .5; }
 .map-node.quiet:hover, .map-node.quiet:focus-visible { opacity: 1; }
 .map-node:hover { border-color: var(--accent); }
 .map-node.open { border: 2px solid var(--accent); background: var(--accent-soft); opacity: 1; }
 .map-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.map-cap { font: 600 calc(10.5px * var(--text))/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.map-cap { font: 600 calc(11.5px * var(--text))/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.map-node.chip .map-cap { font: 500 calc(12.5px * var(--text))/1.2 var(--font-body); letter-spacing: 0; text-transform: none; color: var(--ink); }
 .map-node.open .map-cap { color: var(--accent); }
-.map-val { font: 400 calc(12px * var(--text))/1.3 var(--font-mono); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.map-val { font: 400 calc(13px * var(--text))/1.3 var(--font-mono); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .map-val:empty { display: none; }
 .map-node .map-dot { position: absolute; right: 9px; top: 9px; }
-.map-node.chip .map-dot { top: 9px; right: 8px; }
+.map-node.chip .map-dot { position: static; flex: none; margin-left: 6px; }
 .map-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: transparent; }
 .map-dot.warn { background: var(--warn); }
 .map-dot.bad { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 30%, transparent); }
@@ -628,3 +629,10 @@ label.field.changed > .map-reset { display: block; }
 /* the empty preview: the map's examples are in their own tray */
 .es-map, body[data-ui="map"] .es-classic { display: none; }
 body[data-ui="map"] .es-map { display: inline; }
+/* the map's preview is narrower than the window: its overlays take the compact arrangement at every width, so the
+   view's own label, the zoom, One copy / Whole plate and the Layer slider never sit on each other */
+body[data-ui="map"] .zoombar { flex-direction: column; align-items: flex-end; top: 34px; }
+body[data-ui="map"] .copies-seg label { white-space: nowrap; }
+body[data-ui="map"] .layerbar { top: 110px; }
+body[data-ui="map"] .pane-tip { display: none; }
+body[data-ui="map"] .pathbar { max-width: calc(100% - 96px); }

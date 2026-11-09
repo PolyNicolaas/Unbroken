@@ -165,28 +165,38 @@ function mapShape() {
 // ---------- drawing it ----------
 let mapOpenId = null,
   mapTrayOpen = false;
-const MAP_CHIP_W = 104;
+// the band fits its width (no sideways scrolling): the steps share it, and each step's chips share the room under
+// (or over) it and the gap to the next step, so nothing overlaps; chips are at least 34 px tall to tap
+const MAP_CHIP_H = 34;
 function mapRender() {
   if (!mapOn()) return;
   const box = $("map"),
-    W = Math.max(box.clientWidth, 960),
+    W = box.clientWidth,
     H = box.clientHeight,
     S = mapShape(),
     nodes = $("mapNodes"),
     pos = {};
-  if (!(H > 0)) return;
+  if (!(H > 0 && W > 0)) return;
   nodes.style.width = `${W}px`;
   const n = S.spine.length,
-    side = 20,
-    sw = Math.min(230, (W - 2 * side - (n - 1) * 56) / n),
+    side = 16,
+    sw = Math.min(250, (W - 2 * side - (n - 1) * 28) / n),
     gap = n > 1 ? (W - 2 * side - n * sw) / (n - 1) : 0,
     midY = Math.round(H / 2),
-    nh = 56;
+    nh = 60;
   S.spine.forEach((id, i) => (pos[id] = { x: side + i * (sw + gap), y: midY - nh / 2, w: sw, h: nh, big: true, i }));
-  const chips = (list, parent, y) =>
-    list.forEach((id, k) => (pos[id] = { x: pos[parent].x + k * (MAP_CHIP_W + 8), y, w: MAP_CHIP_W, h: 28 }));
-  for (const [p, list] of Object.entries(S.up)) chips(list, p, 8);
-  for (const [p, list] of Object.entries(S.down)) chips(list, p, H - 36);
+  const chips = (list, parent, y) => {
+    const room = Math.min(sw + gap - 12, W - side - pos[parent].x),
+      w = Math.min(132, (room - 8 * (list.length - 1)) / list.length);
+    // (centred on their step, within its room)
+    const x0 = Math.max(
+      side,
+      Math.min(W - side - room, pos[parent].x + pos[parent].w / 2 - (list.length * (w + 8) - 8) / 2)
+    );
+    list.forEach((id, k) => (pos[id] = { x: x0 + k * (w + 8), y, w, h: MAP_CHIP_H }));
+  };
+  for (const [p, list] of Object.entries(S.up)) chips(list, p, 10);
+  for (const [p, list] of Object.entries(S.down)) chips(list, p, H - 10 - MAP_CHIP_H);
   // the nodes: made once each, moved and refreshed
   const want = new Set(Object.keys(pos));
   for (const el of [...nodes.children]) if (!want.has(el.dataset.node)) el.remove();
@@ -218,12 +228,11 @@ function mapRender() {
   S.spine.forEach((id, i) => {
     if (i) spine += `M${pos[S.spine[i - 1]].x + pos[S.spine[i - 1]].w} ${midY} L${pos[id].x} ${midY} `;
   });
+  const mid = (id) => pos[id].x + pos[id].w / 2;
   for (const [p, list] of Object.entries(S.up))
-    for (const id of list)
-      thin += `M${pos[id].x + MAP_CHIP_W / 2} ${pos[id].y + 28} L${pos[id].x + MAP_CHIP_W / 2} ${pos[p].y} `;
+    for (const id of list) thin += `M${mid(id)} ${pos[id].y + MAP_CHIP_H} L${mid(id)} ${pos[p].y} `;
   for (const [p, list] of Object.entries(S.down))
-    for (const id of list)
-      thin += `M${pos[id].x + MAP_CHIP_W / 2} ${pos[p].y + nh} L${pos[id].x + MAP_CHIP_W / 2} ${pos[id].y} `;
+    for (const id of list) thin += `M${mid(id)} ${pos[p].y + nh} L${mid(id)} ${pos[id].y} `;
   const svg = $("mapLines");
   svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
   svg.setAttribute("width", W);
@@ -439,6 +448,20 @@ function mapSet(on, store = true) {
   window.dispatchEvent(new Event("resize")); // (the preview's canvas sizes itself to its new box)
 }
 $("mapUI").addEventListener("change", () => mapSet($("mapUI").checked));
+// the For chips sit in the page's header, beside the name
+document
+  .querySelector("header.top")
+  .insertBefore(document.querySelector(".map-top"), document.querySelector("header.top .design-name"));
+{
+  let raf = 0;
+  new ResizeObserver(() => {
+    if (!mapOn() || raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      window.dispatchEvent(new Event("resize")); // (the preview's canvases size themselves to their box on a resize)
+    });
+  }).observe($("box"));
+}
 document.querySelectorAll(".map-for").forEach((b) =>
   b.addEventListener("click", () => {
     const lab = document.querySelector(`label[for="${b.dataset.for === "plot" ? "artForPlot" : "artForPrint"}"]`);
