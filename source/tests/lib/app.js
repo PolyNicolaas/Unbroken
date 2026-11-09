@@ -73,6 +73,8 @@ async function open(ctx, opts = {}) {
   if (!opts.folded) await page.evaluate(() => { document.body.dataset.notes = "1"; });
   // More print settings (v119) folded away: shown, as the tests written before expect
   if (!opts.folded) await page.evaluate(() => { if (typeof morePrintSet === "function") morePrintSet(true, false); });
+  // the map of the steps (v140) replaces the step tabs: the tests written before it use the tabs (opts.map: keep the map)
+  if (!opts.map) await page.evaluate(() => { if (typeof mapSet === "function") mapSet(false, false); });
   // the app opens on the Art tab; most tests work on the Trace tab, so they start there (opts.art: stay on Art)
   if (!opts.art && (await page.$("label[for=viewDesign]"))) {
     await page.click("label[for=viewDesign]");

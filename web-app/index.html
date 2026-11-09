@@ -19,6 +19,16 @@
 </header>
 
 <div class="wrap">
+  <section class="map" id="map" aria-label="The steps, as a map: tap a step to open its settings">
+    <div class="map-top">
+      <span class="name">For</span>
+      <button class="chip-btn map-for" type="button" data-for="print">A printer</button>
+      <button class="chip-btn map-for" type="button" data-for="plot">A pen plotter</button>
+    </div>
+    <svg class="map-lines" id="mapLines" aria-hidden="true"></svg>
+    <div class="map-nodes" id="mapNodes"></div>
+    <p class="map-legend">The thick line is the way your design goes · tap a step to open its settings · <span class="map-dot warn"></span> needs a look</p>
+  </section>
   <div class="left">
     <div class="stage">
       <div class="seg small stage-tabs" role="radiogroup" aria-label="What the big view shows">
@@ -169,6 +179,7 @@
             <label class="check" title="Small plate in the corner of the preview"><input type="checkbox" id="showMini" checked> <span>Plate mini-map</span></label>
             <hr>
             <span class="vhead">The settings</span>
+            <label class="check" title="The steps as a map: the line from the art to the print, each step a node you tap to open its settings. Off: the step tabs"><input type="checkbox" id="mapUI" checked> <span>Map of the steps</span></label>
             <label class="check wheel-sw" title="The settings as a wheel: the card you scroll to opens, the others fold to their headers"><input type="checkbox" id="wheel" checked> <span>Wheel: open the card scrolled to</span></label>
             <span class="fold-all"><button class="btn mini" type="button" id="collapseAll">Collapse all</button><button class="btn mini" type="button" id="expandAll">Expand all</button></span>
           </div>
@@ -981,6 +992,7 @@
 <script src="js/vase.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/history.js"></script>
+<script src="js/map.js"></script>
 <script src="js/main.js"></script>
 
 </body>

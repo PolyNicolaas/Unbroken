@@ -3,6 +3,21 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v140 · 2026-11-09 (experiment, branch claude/map-ui)
+
+The steps as a map: a try-out of a mind-map interface in place of the step tabs.
+
+- **Map of the steps** (on by default; View ▸ Map of the steps turns it off; `web-app/js/map.js`): one thick line
+  runs from the art to the output through every step the design takes (Art, Line, Size, Print or Plot), with the
+  settings hanging off it as branches (Picture prep, Fit, Plate, Layers, Fine-tuning and tests, Fills, Export) and the
+  printer, chocolate and needle as one node at the top. Each node shows its result, taken from the cards' readouts,
+  and a dot when the ready list has something for it.
+- **Tap a node** and only its cards show, beside the preview, on its step; the step tabs and the Next bar go away.
+- **The map follows the design**: a 3D model or a vase goes straight from Art to Print (a vase's branches are its
+  Profile, Surface texture and Movement), and a pen plotter ends in Plot with no printer node.
+- The cards are the same as before: the map only chooses which show, and the tests use the step tabs (the map off)
+  except A60, which tests the map.
+
 ## v139 · 2026-11-09
 
 Make a vase, after a look at clay printing apps: a vase from a profile curve you edit, a texture on its wall, and a

@@ -549,3 +549,43 @@ body:not([data-vase="1"]) .vase-only, body[data-vase="1"] .stl-only { display: n
 #vaseBox:not([data-tex="ribs"]) .vt-ribs, #vaseBox:not([data-tex="rings"]) .vt-rings, #vaseBox[data-tex="none"] .vt-on, #vaseBox[data-move="none"] .vm-on { display: none; }
 .vase-profile { display: block; width: 100%; height: calc(230px * var(--space)); background: var(--paper); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); touch-action: none; cursor: crosshair; }
 .vase-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- the steps as a map (map.js; View ▸ Map of the steps) ---------- */
+.map { display: none; }
+body[data-ui="map"] .wrap { max-width: 1640px; grid-template-columns: minmax(0, 1fr); }
+body[data-ui="map"] .map { display: block; position: relative; height: 460px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); overflow: hidden; background-image: radial-gradient(var(--grid) 1px, transparent 1px); background-size: 24px 24px; }
+@media (min-width: 1100px) {
+  body[data-ui="map"] .wrap { grid-template-columns: minmax(0, 1fr) 520px; grid-template-areas: "map left" "map panel" "math math"; }
+  body[data-ui="map"] .map { grid-area: map; position: sticky; top: 12px; height: calc(100vh - 110px); min-height: 600px; align-self: start; }
+  body[data-ui="map"] .left { grid-area: left; }
+  body[data-ui="map"] .panel { grid-area: panel; }
+  body[data-ui="map"] .math { grid-area: math; }
+}
+body[data-ui="map"] :is(.output-row, .view-tabs.steps, .nextbar, .more-print) { display: none !important; }
+body[data-ui="map"] .panel section.card:not([data-map]) { display: none !important; }
+.map-top { position: absolute; left: 16px; top: 14px; display: flex; align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
+.map-top .name { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+.map-for[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+.map-lines { position: absolute; left: 0; top: 0; pointer-events: none; }
+.map-lines path { fill: none; stroke-linecap: round; }
+.map-spine { stroke: var(--choc); stroke-width: 5; }
+.map-thin { stroke: var(--rule); stroke-width: 2; }
+.map-dash { stroke: var(--rule); stroke-width: 2; stroke-dasharray: 5 6; }
+.map-nodes { position: absolute; inset: 0; }
+.map-node { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: calc(9px * var(--space)) calc(12px * var(--space)); background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgb(0 0 0 / .05); }
+.map-node:not(.big) { background: color-mix(in srgb, var(--paper) 45%, var(--surface)); }
+.map-node:hover { border-color: var(--accent); }
+.map-node.open { border: 2px solid var(--accent); background: var(--accent-soft); }
+.map-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.map-cap { font: 600 calc(10.5px * var(--text))/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.map-node.open .map-cap { color: var(--accent); }
+.map-name { font: 600 calc(15px * var(--text))/1.25 var(--font-body); }
+.map-name:empty { display: none; }
+.map-val { font: 400 calc(12px * var(--text))/1.35 var(--font-mono); color: var(--muted); overflow-wrap: anywhere; }
+.map-val:empty { display: none; }
+.map-node .map-dot { position: absolute; right: 10px; top: 10px; }
+.map-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: transparent; }
+.map-dot.warn { background: var(--warn); }
+.map-dot.bad { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 30%, transparent); }
+.map-legend { position: absolute; left: 16px; bottom: 10px; margin: 0; font-size: calc(12px * var(--text)); color: var(--muted); }
+.map-legend .map-dot { width: 8px; height: 8px; vertical-align: middle; }
