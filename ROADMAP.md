@@ -52,6 +52,29 @@ Tests:
 - Make a vase (v139), next steps once it has printed: a polygon or star cross-section, image relief on the wall
   (Potterware's texture), the movement's size varying up the vase, and a cooling pause for narrow necks (their laps are
   short). Loops cross themselves: watch how chocolate takes the crossings on the first prints.
+- **Ideas from clay printing tools** (looked at 9 November, after Make a vase; each with its use):
+  - *Image relief on the wall* (Potterware's texture tab, Eazao's texture mapping): a picture's light and dark push
+    the vase's wall in and out, so a name, a logo or a face becomes part of the wall. Plays to what Unbroken already
+    does with pictures. **Next.**
+  - *Movement that changes up the vase* (CoilCAM's shaping functions): the size, count or shift of the movement follow
+    a small curve from bottom to rim, edited like the profile, so a texture can grow, fade or tighten towards the neck.
+    **Next.**
+  - *A cross-section editor* (DigitalClay3D, printpal's vase generator): a polygon, star or SVG outline in place of the
+    circle, with symmetry, and lofting between outlines at different heights. Shapes beyond round vases.
+  - *Texture on an STL's wall* (Eazao maps textures onto G-code it didn't make): the vase's ribs, waves and loops on a
+    sliced model's outer wall, e.g. a knitted skull cup.
+  - *Draw the movement* (SketchPath's hand-drawn toolpaths): sketch one repeat on a pad, like the Spirograph's path pad,
+    and it repeats round every lap. A hand-made look the presets can't give.
+  - *Height-dependent settings* (Claywoven's modifiers): speed or flow changing with height, e.g. slower round a narrow
+    neck so short laps still get their setting time. Ties into the time-per-layer item above.
+  - *Woven walls with Z* (WeaveSlicer): the movement goes up and down as well as in and out, so laps dip over each other
+    like a basket. Uses the Z series planned since October (one Fourier series per axis). Maybe later: test how
+    chocolate takes it first.
+  - *Shape the vase on the 3D preview* (Clay ARtools' rib tool): drag the silhouette in the model view instead of the
+    profile editor. Maybe later, if the editor feels too indirect.
+  - *Scan a thrown pot* (Craft-Aligned Scanner): needs scanning hardware. Maybe later.
+  - Already here: Potterware's bead-by-bead preview is the 3D layers view's Solid (as printed); clay printer profiles
+    are the item above.
 - STL: a solid top skin over sparse fill.
 - Split a complex model into printable parts to glue (PLAN.md; first test: the tree).
 - **Clay printers** (planned 19 October): add clay (paste-extrusion) 3D printers alongside the choc mate 2. Same

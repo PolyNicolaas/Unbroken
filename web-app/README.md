@@ -140,8 +140,8 @@ copying a whole `{ … },` block and giving it a new `id`.
 | `engine` | Deeper tracing numbers: term-count tolerance, minimum strand gap, packed-stroke splitting, far-group size. Change with care and run the tests. |
 
 - Picking a chocolate in the 3D tab sets its preview colour, the G-code feed (print speed × 60) and its
-  preferred needle (E per mm follows the needle and layer height), and shows its details: cocoa, price per 100 g, working temperature,
-  dietary flags, allergens, notes and a link. Cost and density are stored for the planned chocolate and cost estimates.
+  preferred needle (E per mm follows the needle and layer height), and shows its details: cocoa, working temperature,
+  print speed and notes. Cost and density are stored (not shown) for the planned chocolate database and cost estimates.
 - The chosen chocolate is saved with a design file.
 - If the file has a mistake, the app still opens on built-in values and says what's wrong in the 3D tab.
   Run the tests (`npm test` in `source/tests`) after editing: test E14 names any wrong entry.

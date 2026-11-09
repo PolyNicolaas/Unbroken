@@ -5,7 +5,7 @@ module.exports = {
   guards: "edited settings not reaching the app; a typo in settings.js breaking the app",
   why: "settings.js is where chocolates, needles, the printer and the starting defaults are edited. The app must show what the file says, apply a chocolate's print speed and needle when it's picked, and E per mm from the needle, and keep working (on built-in values, with a clear message) if the file has a mistake.",
   how: "Opens the app and compares the needle and chocolate menus, the default chocolate and its G-code feed with settings.js; checks E per mm against choc OS's for the 0.84 mm needle and that it scales with the needle; picks each chocolate in turn and checks the feed, line colour and details line; then serves a settings.js with a syntax error, one with a bad chocolate entry, and one with fourteen starting defaults and a rule changed.",
-  pass: "Menus match the file; each chocolate sets feed = print speed × 60, changes the preview colour and shows its price per 100 g; with a broken file the app still traces, uses the built-in needles and says settings.js couldn't be read; a bad entry is skipped and named in the 3D tab; every changed default shows up on its control and the changed rule is followed; no other page errors.",
+  pass: "Menus match the file; each chocolate sets feed = print speed × 60, changes the preview colour and shows its details without the price (kept in settings.js for cost estimates later); with a broken file the app still traces, uses the built-in needles and says settings.js couldn't be read; a bad entry is skipped and named in the 3D tab; every changed default shows up on its control and the changed rule is followed; no other page errors.",
   async run(ctx) {
     const S = settings(), checks = [];
     const { page, errors, close } = await A.open(ctx);
@@ -16,7 +16,7 @@ module.exports = {
       const before = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--choc"));
       await A.print(page); await page.selectOption("#chocolate", c.id); await page.waitForTimeout(200);
       if (c.printSpeed) checks.push(check(`${c.id}: speed (mm/s)`, +(await page.inputValue("#gFeed")), "==", c.printSpeed));
-      if (c.costPer100g != null) checks.push(check(`${c.id}: price shown`, +/per 100 g/.test(await page.textContent("#chocInfo")), "==", 1));
+      checks.push(check(`${c.id}: no price on the card`, +!/per 100 g|USD/.test(await page.textContent("#chocInfo")), "==", 1));
       const after = await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--choc"));
       if (c.id !== S.defaults.chocolate) checks.push(check(`${c.id}: preview colour changed`, +(after !== before), "==", 1));
     }

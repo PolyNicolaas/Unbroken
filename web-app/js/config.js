@@ -494,7 +494,7 @@ function applyChocolateLook() {
   $("chocSwatch").style.background = c.color;
   const bits = [];
   if (c.cocoaPercent != null) bits.push(`${c.cocoaPercent}% cocoa`);
-  if (c.costPer100g != null) bits.push(`${c.costPer100g.toFixed(2)} ${CFG.currency} per 100 g`);
+  // (the price stays in settings.js for the chocolate database and cost estimates to come, not on the card)
   if (Array.isArray(c.workingTempC) && c.workingTempC.length === 2)
     bits.push(`works at ${c.workingTempC[0]}–${c.workingTempC[1]} °C`);
   if (c.printSpeed) bits.push(`prints at ${c.printSpeed} mm/s`);
