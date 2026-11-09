@@ -2,10 +2,11 @@
 
 What the tracer should do next, what it might do one day, and what was taken out. This is the one list of open work:
 the past audits and reviews in docs/history/ are kept as written, and whatever they left open is carried here. New
-ideas and bugs come in as comments in the chat and go straight into this file. Every item says who it's for and what it's used for: an idea without a use stays in
-"Maybe later".
+ideas and bugs come in as comments in the chat and go straight into this file. Every item says who it's for and what
+it's used for: an idea without a use stays in "Maybe later".
 
-Last sorted: 19 October 2026 (v99: grouped into areas; the data and accounts plan added). Decisions made together are in PLAN.md.
+Last sorted: 9 November 2026 (v143: the map of the steps and its next steps added; what's done since October moved to
+"Done since the last sort"). Decisions made together are in PLAN.md.
 
 ## Now
 
@@ -88,6 +89,18 @@ Tests:
   first; Art → Line → Print or Plot; one switch for the line (One continuous line, Separate strokes, As drawn); the
   preview follows the step. v107.
 
+- **The map of the steps** (v140–v141, 9 November: the interface; a band of steps on top, the preview biggest,
+  settings as rows beside it). Next, each for finding and keeping settings now that there are many:
+  - *Search the settings*: type "thin line" and get Flow, with the step it's on.
+  - *Save as recipe*: keep this print's changed values (the blue dots) as the chocolate and needle's recipe. Needs
+    the chocolate database (DATA-PLAN.md stage 3) or the browser's storage until then.
+  - *Keep or drop on a chocolate switch*: after changing Flow by hand, switching chocolate asks whether to keep the
+    change or take the new recipe's value.
+  - *Retire the step tabs*: View ▸ Map of the steps still turns the map off, and almost every app test runs on the
+    tabs. Decide whether to keep both; if the tabs go, the tests move to the map first, then workflow.js's Next bar,
+    the tabs and their styles can go.
+  - Small: the last chips' names are tight at about 900 px wide; sliders' names are bold where other rows' aren't.
+
 - **Image prep and grey levels** (decided 27 October, [`docs/PREP-PLAN.md`](docs/PREP-PLAN.md)): a still-life sample;
   the picture reduced to 2–6 flat greys, each traced, filled or both; smooth blocks, crop and rotate, background by
   tapping (v105); fills per level on the 2D tab, hatch, cross-hatch, rings or a pattern, one pen each (v108 ✓).
@@ -145,7 +158,10 @@ design, never G-code: the owner makes the G-code with his own printer and chocol
 - Publish GitHub Pages automatically on every push to `main` (a GitHub Action, after the tests pass); for now each
   update is built and published by hand.
 
-Done since the last sort: Edit line (push, smooth, straighten the traced line by hand) and the Geometric art card
+Done since the last sort (9 November): Make a vase (v139); the map of the steps (v140–v141); the Suggestion box taken
+out (v141, see Removed); a solid base however big (v142); the weekly tidy-up (docs/TIDY.md).
+
+Done before that: Edit line (push, smooth, straighten the traced line by hand) and the Geometric art card
 (v100, 26 October); the desktop app taken out for now (19 October, see Removed); the 4000-term limit lifted to
 what the samples allow (v99, 19 October); the move to GitHub and the GitHub Pages site (19 October); v92's review
 fixes (painted areas after a re-trace, cancelling stale layer runs, a saved model design matched by its model, the

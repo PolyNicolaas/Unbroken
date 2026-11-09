@@ -7,7 +7,7 @@
 
 const $ = (id) => document.getElementById(id);
 const PX_MM = 25.4 / 96;
-// The browser's own storage (the folded cards, Suggestion box notes without a database): keys are "unbroken-…". They
+// The browser's own storage (the folded cards, the map on or off): keys are "unbroken-…". They
 // were "flt-…" until v94, so anything saved under the old name is moved across the first time it's asked for.
 function storeKey(name) {
   const key = "unbroken-" + name,

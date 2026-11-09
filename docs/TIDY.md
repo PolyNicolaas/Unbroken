@@ -4,8 +4,8 @@ A recurring clean-up, so the code and the docs don't go stale or bloated between
 It runs every Monday morning as a scheduled task, and can be run by hand any time ("tidy up Unbroken"). It follows
 DESIGN.md's principles: build for the uses we have, one copy of each idea, delete rather than hide.
 
-Last tidied: 9 November 2026 (v139): formatting, the shared segment and loop-start helpers, the web-app README's
-file table, the test catalogue.
+Last tidied: 9 November 2026 (v143): the map's styles as one definition of a row (no overrides stacked on overrides),
+map.js's one way to move a part into the panel, the Suggestion box's last traces, ROADMAP.md sorted.
 
 ## 1 · Look
 

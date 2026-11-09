@@ -3,6 +3,19 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v143 · 2026-11-09
+
+A tidy-up after the map of the steps, and two bugs it turned up.
+
+- **A vase's Layers and Tests chips sat on Movement** (Layers couldn't be clicked): the chips under the last step were
+  pushed further left than they needed. They now lean in only as far as the band's edge. A60 checks no step or chip
+  sits on another.
+- **The 3D preview kept its old height when the window got smaller**, and crept taller with every redraw (on a big
+  vase: a page that stopped answering). It's sized from its pane now, like the page and the plate. A60 checks it.
+- **Tidied, nothing to see**: the map's styles say what a row is once (they were three layers of overrides); map.js
+  moves parts into the panel one way; the last traces of the Suggestion box; ROADMAP.md sorted, with the map's next
+  steps (search, save as recipe, keep or drop on a chocolate switch, whether the step tabs stay).
+
 ## v142 · 2026-11-09
 
 - **A solid base, however big** (a vase's or a model's): the base's fill kept the drawing's line spacing (line width
