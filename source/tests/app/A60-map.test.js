@@ -1,10 +1,10 @@
 const A = require("../lib/app.js"), { check } = require("../lib/check.js");
 module.exports = {
-  id: "A60", title: "The map of the steps: the line through the steps the design takes, a node's cards on tap, its shape following the design",
-  guards: "a map whose line doesn't follow the design (a model sent through the Line step, a plotter ending in Print), a node that opens the wrong cards or other cards beside them, a warning from the ready list that doesn't reach its node, and the step tabs not coming back when the map is switched off",
-  why: "Nicolaas (9 November 2026) wanted to try the steps as a mind map: one interface, settings opened by tapping a node. The map only chooses which of the usual cards show, so this checks the choosing.",
-  how: "Opens the leaf with the map on (View ▸ Map of the steps): reads the spine and its branches; taps Size, then Layers. Picks the Wavy vase: reads the spine, taps Movement. Makes it for a pen plotter. Turns the map off.",
-  pass: "Leaf: the spine is Art, Line, Size, Print with Picture prep, Fit, Plate, Layers and the printer node; Size shows only the Size card and the Line step's preview; Layers shows Layers, Base and Infill on the Print step; the vase: Art then Print, with Profile, Surface texture and Movement, the Layers node dotted for the ready list's warning, Movement opening the 3D model card; a pen plotter ends in Plot, with no printer node; off: the step tabs and the Next bar back, every card of the step showing; no page errors.",
+  id: "A60", title: "The map of the steps: a band through the steps the design takes, settings as rows, examples in their own tray",
+  guards: "a map whose line doesn't follow the design (a model sent through the Line step, a plotter ending in Print), a node that opens the wrong settings, a row moved out of its card and not put back (the step tabs would lose it), a warning from the ready list that doesn't reach its node, and the examples tray opening by itself",
+  why: "Nicolaas (9 November 2026) chose the steps as a map: a band on top, the preview biggest, settings in a narrow column as one row each (like a slicer), Material first, quiet steps faded, and examples as a module of the map that opens only when asked. The map moves the real controls into its rows while a node is open, so this checks they come back.",
+  how: "Opens the leaf with the map on: reads the spine and the chips, checks the tray is closed and no example chips show in the settings. Opens Material, sets Flow to 110 and reads its row, presses ↺. Opens Size, then Layers. Opens Examples and picks the Wavy vase: reads the spine, opens Movement. Makes it for a pen plotter. Turns the map off and finds every moved control in its card.",
+  pass: "Leaf: the spine is Material, Art, Line, Size, Print, with Examples, Picture prep, Tracing, Plate, Machine, Layers and Tests as chips, Tracing and Tests faded; the tray closed and no example chips in the settings; Material: its settings as rows (printer, chocolate, needle, line width, gap, layer height, speed, flow), Flow 110 marked changed with ↺, which puts back 100; Size: only the Size card; Layers: Print height and Seconds per layer as rows, the Walls and support group hidden for a drawing; the tray lists every example and the Wavy vase from it gives Material, Art, Print with Profile, Texture and Movement chips and a dot on Layers; Movement opens the 3D model card; a pen plotter: Art, Line, Size, Plot, no Material; off: every control back in its card; no page errors.",
   slow: true,
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { map: true, art: true }), checks = [];
@@ -12,24 +12,37 @@ module.exports = {
     const nodes = () => page.$$eval("#mapNodes .map-node", (els) => els.map((e) => e.dataset.node).sort().join(","));
     const spine = () => page.$$eval("#mapNodes .map-node.big", (els) => els.sort((a, b) => a.offsetLeft - b.offsetLeft).map((e) => e.dataset.node).join(","));
     const cards = () => page.$$eval(".panel section.card", (els) => els.filter((c) => c.getClientRects().length).map((c) => c.querySelector("h2").id).join(","));
-    checks.push(check("leaf: the spine", await spine(), "==", "art,line,size,print"));
-    checks.push(check("leaf: every node", await nodes(), "==", "art,fit,layers,line,machine,plate,prep,print,size,tune"));
-    checks.push(check("the step tabs and the Next bar hidden", +(await page.$eval(".view-tabs.steps", (e) => !e.getClientRects().length)) + +(await page.$eval(".nextbar", (e) => !e.getClientRects().length)), "==", 2));
+    const inRows = (ids) => page.evaluate((ids) => ids.filter((i) => document.getElementById(i).closest("#mapRows")).length, ids);
+    checks.push(check("leaf: the spine", await spine(), "==", "material,art,line,size,print"));
+    checks.push(check("leaf: every node", await nodes(), "==", "art,examples,layers,line,machine,material,plate,prep,print,size,tests,tracing"));
+    checks.push(check("leaf: Tracing and Tests faded", +(await page.$eval('[data-node="tracing"]', (e) => e.classList.contains("quiet"))) + +(await page.$eval('[data-node="tests"]', (e) => e.classList.contains("quiet"))), "==", 2));
+    checks.push(check("the examples tray closed, no example chips in the settings", +!(await page.$("#mapTray:not([hidden])")) + +(await page.$$eval("[data-examples] .chip-btn", (els) => els.every((e) => !e.getClientRects().length))), "==", 2));
+    await page.click('[data-node="material"]'); await A.idle(page, 1200);
+    const mat = ["printer", "chocolate", "needle", "lineW", "lineGapMM", "layerH", "gFeed", "gFlow"];
+    checks.push(check("Material: its settings as rows", await inRows(mat), "==", mat.length), check("… no cards beside them", await cards(), "==", ""));
+    await page.fill("#gFlow", "110"); await page.dispatchEvent("#gFlow", "input"); await A.idle(page, 600);
+    checks.push(check("Flow 110: marked changed, with ↺", +(await page.$eval("#gFlow", (e) => { const l = e.closest("label"); return l.classList.contains("changed") && !!l.querySelector(".map-reset").getClientRects().length; })), "==", 1));
+    await page.click("#gFlow >> xpath=ancestor::label//button[contains(@class,'map-reset')]"); await A.idle(page, 600);
+    checks.push(check("↺ puts back the recipe's flow", await page.inputValue("#gFlow"), "==", "100"));
     await page.click('[data-node="size"]'); await A.idle(page, 800);
     checks.push(check("Size: only the Size card", await cards(), "==", "h-size"), check("… on the Line step", await page.evaluate(() => document.body.dataset.view), "==", "design"));
     await page.click('[data-node="layers"]'); await A.idle(page, 3000);
-    checks.push(check("Layers: its cards", await cards(), "==", "h-layers,h-base,h-infill"), check("… on the Print step", await page.evaluate(() => document.body.dataset.view), "==", "choc"));
-    await page.evaluate(() => vaseExample()); await A.idle(page, 1500);
+    checks.push(check("Layers: height and time as rows", await inRows(["printHeightMM", "layerTime"]), "==", 2), check("… Walls and support hidden for a drawing", +(await page.$$eval("#mapRows .map-group", (gs) => gs.filter((g) => !g.hidden).map((g) => g.querySelector("h3").textContent)).then((t) => !t.includes("Walls and support"))), "==", 1));
+    await page.click('[data-node="examples"]'); await A.idle(page, 400);
+    checks.push(check("Examples: the tray lists every example", await page.$$eval("#mapTray .map-ex", (els) => els.length), "==", await page.evaluate(() => EXAMPLES.length)));
+    await page.click('#mapTray .map-ex[data-example="wavyvase"]'); await A.idle(page, 1500);
     await page.click('[data-node="print"]'); await A.idle(page, 4000); await page.waitForTimeout(700);
-    checks.push(check("vase: the spine", await spine(), "==", "art,print"), check("vase: its branches", +/vmove/.test(await nodes()) + +/vprofile/.test(await nodes()) + +/vtexture/.test(await nodes()) + +!/line|size/.test(await nodes()), "==", 4));
-    checks.push(check("vase: the ready list's warning on Layers (too short to set)", await page.$eval('[data-node="layers"] .map-dot', (e) => e.className), "==", "map-dot warn"));
+    checks.push(check("vase: the spine", await spine(), "==", "material,art,print"), check("vase: its parts as chips", +/vmove/.test(await nodes()) + +/vprofile/.test(await nodes()) + +/vtexture/.test(await nodes()) + +!/line|size/.test(await nodes()), "==", 4));
+    checks.push(check("vase: the ready list's warning on Layers", await page.$eval('[data-node="layers"] .map-dot', (e) => e.className), "==", "map-dot warn"));
     await page.click('[data-node="vmove"]'); await A.idle(page, 600);
-    checks.push(check("Movement: the 3D model card, at the movement", +(/h-model/.test(await cards())) + +(await page.$eval("#vmWave", (e) => { const r = e.closest(".seg").getBoundingClientRect(); return r.top >= 0 && r.bottom <= innerHeight; })), "==", 2));
+    checks.push(check("Movement: the 3D model card", +/h-model/.test(await cards()), "==", 1));
     await page.click('.map-for[data-for="plot"]'); await A.idle(page, 1500); await page.waitForTimeout(700);
-    checks.push(check("pen plotter: the line ends in Plot, no printer node", +/plot$/.test(await spine()) + +!/machine/.test(await nodes()), "==", 2));
+    checks.push(check("pen plotter: the line ends in Plot, no Material", +/plot$/.test(await spine()) + +!/material|machine/.test(await nodes()), "==", 2));
     await page.click('.map-for[data-for="print"]'); await A.idle(page, 800);
+    await page.click('[data-node="material"]'); await A.idle(page, 800);
     await page.evaluate(() => { $("mapUI").checked = false; $("mapUI").dispatchEvent(new Event("change")); }); await A.idle(page, 500);
-    checks.push(check("off: the step tabs back", +(await page.$eval(".view-tabs.steps", (e) => e.getClientRects().length > 0)), "==", 1), check("off: the map hidden", +(await page.$eval("#map", (e) => !e.getClientRects().length)), "==", 1));
+    const home = await page.evaluate(() => ({ flow: !!$("gFlow").closest("#card-h-machine"), printer: !!$("printer").closest("#card-h-choc"), gap: !!$("lineGapMM").closest("#card-h-line"), height: !!$("printHeightMM").closest("#card-h-layers") }));
+    checks.push(check("off: every control back in its card", +home.flow + +home.printer + +home.gap + +home.height, "==", 4), check("off: the step tabs back", +(await page.$eval(".view-tabs.steps", (e) => e.getClientRects().length > 0)), "==", 1));
     checks.push(check("page errors", errors.length, "==", 0));
     await close();
     return { checks, notes: errors.join("  \n") };

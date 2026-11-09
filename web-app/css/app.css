@@ -551,41 +551,80 @@ body:not([data-vase="1"]) .vase-only, body[data-vase="1"] .stl-only { display: n
 .vase-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
 /* ---------- the steps as a map (map.js; View ▸ Map of the steps) ---------- */
-.map { display: none; }
-body[data-ui="map"] .wrap { max-width: 1640px; grid-template-columns: minmax(0, 1fr); }
-body[data-ui="map"] .map { display: block; position: relative; height: 460px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); overflow: hidden; background-image: radial-gradient(var(--grid) 1px, transparent 1px); background-size: 24px 24px; }
+/* a band across the top; under it the preview (the biggest) and the settings (a narrow column) */
+.map, .map-head, .map-rows { display: none; }
+body[data-ui="map"] .wrap { max-width: 1680px; grid-template-columns: minmax(0, 1fr); }
+body[data-ui="map"] .map { display: block; position: relative; height: 150px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); overflow-x: auto; overflow-y: hidden; background-image: radial-gradient(var(--grid) 1px, transparent 1px); background-size: 24px 24px; }
 @media (min-width: 1100px) {
-  body[data-ui="map"] .wrap { grid-template-columns: minmax(0, 1fr) 520px; grid-template-areas: "map left" "map panel" "math math"; }
-  body[data-ui="map"] .map { grid-area: map; position: sticky; top: 12px; height: calc(100vh - 110px); min-height: 600px; align-self: start; }
+  body[data-ui="map"] .wrap { grid-template-columns: minmax(0, 1fr) 420px; grid-template-areas: "map map" "left panel" "math math"; }
+  body[data-ui="map"] .map { grid-area: map; }
   body[data-ui="map"] .left { grid-area: left; }
-  body[data-ui="map"] .panel { grid-area: panel; }
+  body[data-ui="map"] .panel { grid-area: panel; align-self: start; }
   body[data-ui="map"] .math { grid-area: math; }
+  body[data-ui="map"] .canvas-box { aspect-ratio: auto; height: calc(100vh - 330px); height: calc(100svh - 330px); min-height: 440px; max-height: none; }
 }
-body[data-ui="map"] :is(.output-row, .view-tabs.steps, .nextbar, .more-print) { display: none !important; }
+body[data-ui="map"] :is(.output-row, .view-tabs.steps, .nextbar, .more-print, [data-examples], #examplesRow) { display: none !important; }
 body[data-ui="map"] .panel section.card:not([data-map]) { display: none !important; }
-.map-top { position: absolute; left: 16px; top: 14px; display: flex; align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
+body[data-ui="map"] .map-head { display: flex; flex-direction: column; gap: calc(10px * var(--space)); }
+body[data-ui="map"] .map-rows:not([hidden]) { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding-bottom: 6px; }
+.map-top { position: absolute; left: 16px; top: 14px; height: 28px; display: flex; align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
 .map-top .name { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+body[data-ui="map"] .map-top { left: 20px; top: 8px; }
 .map-for[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
 .map-lines { position: absolute; left: 0; top: 0; pointer-events: none; }
 .map-lines path { fill: none; stroke-linecap: round; }
 .map-spine { stroke: var(--choc); stroke-width: 5; }
 .map-thin { stroke: var(--rule); stroke-width: 2; }
-.map-dash { stroke: var(--rule); stroke-width: 2; stroke-dasharray: 5 6; }
-.map-nodes { position: absolute; inset: 0; }
-.map-node { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; align-items: flex-start; gap: 3px; padding: calc(9px * var(--space)) calc(12px * var(--space)); background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgb(0 0 0 / .05); }
-.map-node:not(.big) { background: color-mix(in srgb, var(--paper) 45%, var(--surface)); }
+.map-nodes { position: absolute; left: 0; top: 0; bottom: 0; }
+.map-node { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; padding: 0 calc(12px * var(--space)); background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgb(0 0 0 / .05); transition: opacity .15s; }
+.map-node.chip { flex-direction: row; align-items: center; border-radius: 999px; background: color-mix(in srgb, var(--paper) 45%, var(--surface)); box-shadow: none; }
+.map-node.chip .map-val { display: none; }
+.map-node.quiet { opacity: .45; }
+.map-node.quiet:hover, .map-node.quiet:focus-visible { opacity: 1; }
 .map-node:hover { border-color: var(--accent); }
-.map-node.open { border: 2px solid var(--accent); background: var(--accent-soft); }
+.map-node.open { border: 2px solid var(--accent); background: var(--accent-soft); opacity: 1; }
 .map-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.map-cap { font: 600 calc(10.5px * var(--text))/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.map-cap { font: 600 calc(10.5px * var(--text))/1.2 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
 .map-node.open .map-cap { color: var(--accent); }
-.map-name { font: 600 calc(15px * var(--text))/1.25 var(--font-body); }
-.map-name:empty { display: none; }
-.map-val { font: 400 calc(12px * var(--text))/1.35 var(--font-mono); color: var(--muted); overflow-wrap: anywhere; }
+.map-val { font: 400 calc(12px * var(--text))/1.3 var(--font-mono); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
 .map-val:empty { display: none; }
-.map-node .map-dot { position: absolute; right: 10px; top: 10px; }
+.map-node .map-dot { position: absolute; right: 9px; top: 9px; }
+.map-node.chip .map-dot { top: 9px; right: 8px; }
 .map-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: transparent; }
 .map-dot.warn { background: var(--warn); }
 .map-dot.bad { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 30%, transparent); }
-.map-legend { position: absolute; left: 16px; bottom: 10px; margin: 0; font-size: calc(12px * var(--text)); color: var(--muted); }
-.map-legend .map-dot { width: 8px; height: 8px; vertical-align: middle; }
+.map-legend { display: none; }
+/* the panel's head and the rows */
+.map-head-t { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.map-head-t h2 { margin: 0; font: 600 calc(20px * var(--text))/1.2 var(--font-body); }
+.map-recipe { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); padding: 9px 12px; }
+.map-recipe:not([hidden]) { display: flex; }
+.map-recipe-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; margin-right: auto; }
+.map-group h3 { margin: 0; padding: 14px 16px 6px; font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.map-group > label.field, .map-group > .map-calc { display: grid; grid-template-columns: minmax(0, 1fr) auto 24px; align-items: center; column-gap: 8px; min-height: 42px; margin: 0; padding: 2px 4px 2px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); position: relative; }
+.map-group > label.field > span:first-child, .map-group > .map-calc > span:first-child { font-size: calc(14px * var(--text)); color: var(--ink); }
+.map-group > label.field :is(input, select, .needle-pick, .stepper) { justify-self: end; max-width: 200px; }
+.map-group > label.field input[type="number"] { width: 84px; text-align: right; }
+.map-group > label.field > small.from { grid-column: 1 / -1; margin: -4px 0 6px; }
+.map-group > label.field:not(.changed) > small.from:is(#fromLayerH, #fromFeed, #fromZ, #fromLift, #fromFlow, #fromOver) { display: none; }
+.map-group > label.field.changed::before { content: ""; position: absolute; left: 6px; top: 20px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.map-reset { display: none; grid-column: 3; grid-row: 1; width: 24px; height: 24px; border: none; background: none; color: var(--accent); font-size: 15px; cursor: pointer; padding: 0; }
+label.field.changed > .map-reset { display: block; }
+.map-group > :is(div.row, div.two, .choc-pick, label.check, p, .inline, button) { margin: 0; padding: 8px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
+.map-group > div.two { display: grid; gap: 8px; }
+.map-group > .choc-pick { display: flex; align-items: center; gap: 10px; }
+.map-group > .choc-pick label.field { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; margin: 0; }
+.map-calc .val { font: 400 13px var(--font-mono); color: var(--muted); grid-column: 2 / 4; justify-self: end; padding-right: 4px; }
+/* the examples tray, over the preview */
+.map-tray { position: absolute; left: 12px; right: 12px; top: 12px; z-index: 6; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); box-shadow: var(--shadow-menu); padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px; max-height: calc(100% - 24px); overflow: auto; }
+.map-tray-head { display: flex; align-items: baseline; gap: 10px; }
+.map-tray-head h2 { margin: 0; font: 600 calc(17px * var(--text)) var(--font-body); }
+.map-tray-x { margin-left: auto; border: none; background: none; font-size: 20px; color: var(--muted); cursor: pointer; }
+.map-tray-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.map-ex { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); background: color-mix(in srgb, var(--paper) 45%, var(--surface)); color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.map-ex b { font-weight: 600; }
+.map-ex span { font-size: calc(12px * var(--text)); color: var(--muted); }
+.map-ex:hover { border-color: var(--accent); }
+/* the empty preview: the map's examples are in their own tray */
+.es-map, body[data-ui="map"] .es-classic { display: none; }
+body[data-ui="map"] .es-map { display: inline; }

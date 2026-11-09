@@ -5,18 +5,21 @@ the page's title (it shows "dev" when the page runs from the source folder). Add
 
 ## v140 · 2026-11-09 (experiment, branch claude/map-ui)
 
-The steps as a map: a try-out of a mind-map interface in place of the step tabs.
+The steps as a map, in place of the step tabs (View ▸ Map of the steps turns it off; `web-app/js/map.js`).
 
-- **Map of the steps** (on by default; View ▸ Map of the steps turns it off; `web-app/js/map.js`): one thick line
-  runs from the art to the output through every step the design takes (Art, Line, Size, Print or Plot), with the
-  settings hanging off it as branches (Picture prep, Fit, Plate, Layers, Fine-tuning and tests, Fills, Export) and the
-  printer, chocolate and needle as one node at the top. Each node shows its result, taken from the cards' readouts,
-  and a dot when the ready list has something for it.
-- **Tap a node** and only its cards show, beside the preview, on its step; the step tabs and the Next bar go away.
-- **The map follows the design**: a 3D model or a vase goes straight from Art to Print (a vase's branches are its
-  Profile, Surface texture and Movement), and a pen plotter ends in Plot with no printer node.
-- The cards are the same as before: the map only chooses which show, and the tests use the step tabs (the map off)
-  except A60, which tests the map.
+- **A band across the top** with one thick line through the steps the design takes: for a printer Material, Art,
+  Line, Size, Print; for a pen plotter Art, Line, Size, Plot; a 3D model or a vase straight from Art to Print. The
+  less-used settings are chips above and below their step (Picture prep, Tracing, Plate, Machine, Layers, Tests; a
+  vase's Profile, Texture and Movement), faded until you change something there or the ready list has something for
+  them. Each node shows its result and a dot for the ready list's warnings.
+- **The preview is the biggest thing on the screen**, under the band; the settings are a narrow column beside it.
+- **Settings as rows, like a slicer** (Material, Machine, Layers): one row per setting, name on the left, value and
+  unit on the right. Material starts with the recipe (the chocolate and needle's values) and says how many settings
+  differ from it; a changed setting has a blue dot and ↺ to put it back. Defaults show only when changed. Groups that
+  don't apply (walls and support for a drawing) aren't shown. The rows are the app's own controls, moved in while the
+  node is open and put back after, so the step tabs still have them.
+- **Examples are a module of the map**: the Examples chip above Art opens a tray of every example over the preview.
+  It never opens by itself; the settings no longer list examples. The tests still start from an example by address.
 
 ## v139 · 2026-11-09
 

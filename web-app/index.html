@@ -110,7 +110,7 @@
         <div class="empty-state" id="emptyState" hidden>
           <p class="es-title">Start with a picture, text, a pattern or a 3D model</p>
           <p class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
-          <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>. Or try an example:</p>
+          <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>.<span class="es-classic"> Or try an example:</span><span class="es-map"> Not sure where to start? Tap Examples on the map.</span></p>
           <div class="chips" data-examples></div>
         </div>
         <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
@@ -263,6 +263,18 @@
   </div>
 
   <div class="panel">
+    <div class="map-head" id="mapHead">
+      <div class="map-head-t"><h2 id="mapHeadTitle"></h2><span class="hint" id="mapHeadSub"></span></div>
+      <div class="map-recipe" id="mapRecipe" hidden>
+        <span class="choc-swatch" id="mapRecipeSwatch" aria-hidden="true"></span>
+        <span class="map-recipe-t"><b id="mapRecipeName"></b><span class="hint" id="mapRecipeNote"></span></span>
+        <button class="btn mini" type="button" id="mapRecipeReset" title="Every setting back to the chocolate's and printer's values">Back to the recipe</button>
+      </div>
+    </div>
+    <section class="map-rows" id="mapRows" aria-label="Settings" hidden>
+      <div id="mapRowsBody"></div>
+      <div hidden><div class="map-calc" id="mapSpacing"><span>Line spacing <small class="from">width + gap</small></span><span class="val"></span></div></div>
+    </section>
     <div class="output-row">
       <span class="name">For</span>
       <div class="seg output-seg" role="radiogroup" aria-label="Making it for">
