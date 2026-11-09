@@ -19,7 +19,7 @@ let layerTok = 0,
 // big model's height five times doesn't queue five full slices; an export waiting on the layers is never cancelled.
 let layerSig = null,
   layerExports = 0;
-const isLayerJob = (c) => c.fn === "modelStack" || (c.fn === "stagePrint" && !!(c.args[4] && c.args[4].fill));
+const isLayerJob = (c) => c.fn === "modelStack" || c.fn === "vaseStack" || (c.fn === "stagePrint" && !!(c.args[4] && c.args[4].fill));
 function layerSigNow() {
   const M = isModel() && st.model;
   return JSON.stringify([
@@ -465,6 +465,12 @@ function layerReadout() {
       hint = $("layerHint");
     hint.className = lf.short ? "hint warn" : "hint";
     hint.hidden = false;
+    if (L.vase) {
+      hint.textContent =
+        timing +
+        `The vase's path is written lap by lap from its profile, texture and movement (no slicing): the profile is the middle of the bead${S.N ? `; the first ${S.N} layer${S.N === 1 ? " is" : "s are"} filled at ${dens}% for the base` : "; no base, so the bottom is open"}. The layers spiral up with no seam; the top is open.`;
+      return;
+    }
     hint.textContent =
       timing +
       `Sliced every ${fmt(S.h, 2)} mm through the model (the first at ${fmt(z0 / 2, 2)} mm); each layer's outside contour is moved in half a line width${L.walls > 1 ? ` with ${L.walls} walls` : ""} (inside surfaces and holes aren't traced; separate parts are joined by connector strands), ${S.N ? `filled at ${dens}% for the base, ` : ""}${S.F.infillDensity > 0 ? `filled at ${Math.round(S.F.infillDensity * 100)}% above it, ` : ""}and fitted with a Fourier series (${lo === hi ? lo : `${lo}–${hi}`} terms). The layers spiral up with no seam${S.F.infillDensity > 0 ? "" : "; the top is open"}.` +

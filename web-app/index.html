@@ -310,7 +310,7 @@
         <label class="field" title="Chocolate needs time to set before the next layer lands on it. Layers that would print faster are slowed down (not below the printer's slowest speed)."><span>Seconds per layer (at least)</span><input type="number" id="layerTime" min="0" max="300" step="1" value="20"></label>
       </div>
       <input type="hidden" id="wallLayers" value="1">
-      <div class="row model-only" id="cutRow">
+      <div class="row model-only stl-only" id="cutRow">
         <div class="lab"><span class="name">Cut off</span><span class="val" id="cutInfo"></span></div>
         <div class="two">
           <label class="field"><span>Bottom (mm)</span><input type="number" id="cutBottom" min="0" step="0.5" value="0"></label>
@@ -318,10 +318,10 @@
         </div>
         <p class="hint help">Only the part of the model between the two cuts is printed. Cut the top where it stops being flat (a dome or a point ends in a few tiny, wobbly last layers that don't hold their shape in chocolate), or the bottom of a round model so it stands on a flat first layer. The model's preview on the Line step fades the parts cut off and outlines the cuts; the Height above is the part that's left. Turning the model clears the cuts.</p>
       </div>
-      <label class="field model-only" title="How many walls, one line spacing inside each other"><span>Walls</span><input type="number" id="wallCount" min="1" max="5" step="1" value="1"></label>
-      <p class="hint help model-only" data-anchor="wallCount">A model prints its outside contour only: the inside surface of a hollow model (a cup's inner wall) and any hole are not traced. Walls adds lines inside the outside contour, one spacing apart; how much of the inside gets chocolate is up to Base and Infill.</p>
-      <label class="field model-only" title="Holds up parts that reach out further than a bead can step: the support is part of the same line, from the plate up"><span>Support</span><select id="support"><option value="off" selected>Off</option><option value="skirt">Flared skirt</option><option value="thin">Thin wall</option><option value="slope">Slope</option></select></label>
-      <p class="hint help model-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, in Fine-tuning) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Slope: the model's own ledges turned into short slopes, so no layer steps out more than a bead holds, nor in further than its wall (on a hollow print a layer that steps in hangs over the empty inside, like the bottom of a skull's nose): only the layers round a ledge change. Each layer stays one loop. The ready list says how far the model steps out, or in, with Support off.</p>
+      <label class="field model-only stl-only" title="How many walls, one line spacing inside each other"><span>Walls</span><input type="number" id="wallCount" min="1" max="5" step="1" value="1"></label>
+      <p class="hint help model-only stl-only" data-anchor="wallCount">A model prints its outside contour only: the inside surface of a hollow model (a cup's inner wall) and any hole are not traced. Walls adds lines inside the outside contour, one spacing apart; how much of the inside gets chocolate is up to Base and Infill.</p>
+      <label class="field model-only stl-only" title="Holds up parts that reach out further than a bead can step: the support is part of the same line, from the plate up"><span>Support</span><select id="support"><option value="off" selected>Off</option><option value="skirt">Flared skirt</option><option value="thin">Thin wall</option><option value="slope">Slope</option></select></label>
+      <p class="hint help model-only stl-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, in Fine-tuning) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Slope: the model's own ledges turned into short slopes, so no layer steps out more than a bead holds, nor in further than its wall (on a hollow print a layer that steps in hangs over the empty inside, like the bottom of a skull's nose): only the layers round a ledge change. Each layer stays one loop. The ready list says how far the model steps out, or in, with Support off.</p>
       <p class="hint" id="layerCount"></p>
       <p class="hint" id="layerHint"></p>
       <p class="hint" id="cartHint" hidden></p>
@@ -575,18 +575,52 @@
     <section class="card art-only art-model" aria-labelledby="h-model">
       <h2 id="h-model">3D model</h2>
       <div class="row" id="modelBox">
+        <div class="seg small" role="radiogroup" aria-label="Where the model comes from">
+          <input type="radio" name="modelFrom" id="mfStl" value="stl" checked><label for="mfStl">An STL file</label>
+          <input type="radio" name="modelFrom" id="mfVase" value="vase"><label for="mfVase">Make a vase</label>
+        </div>
         <div class="inline">
           <span class="val" id="modelInfo"></span>
         </div>
         <p class="hint" id="modelCredit" hidden></p>
-        <div class="lab"><span class="name">Which way up it prints</span></div>
-        <div class="inline">
+        <div class="row vase-only" id="vaseBox">
+          <div class="lab"><span class="name">Profile</span><span class="val" id="vaseProfileVal"></span></div>
+          <canvas id="vaseProfile" class="vase-profile" tabindex="0" aria-label="The vase's profile: the radius at each height. Drag a point to shape it; tap beside the curve to add one; arrow keys move the picked point"></canvas>
+          <div class="inline"><button class="btn mini" type="button" id="vasePtDel" disabled title="Remove the picked point (the bottom and the rim stay)">Remove point</button></div>
+          <div class="lab"><span class="name">Start from</span></div>
+          <div class="chips" id="vaseShapes" role="group" aria-label="Start the profile from a shape"></div>
+          <label class="field" title="From the plate to the rim. The profile's points keep their share of the height; their radii stay."><span>Height (mm)</span><input type="number" id="vaseH" min="2" max="500" step="1" value="40"></label>
+          <div class="lab"><span class="name">Surface texture</span><span class="val" id="vaseTexVal"></span></div>
+          <div class="seg small" role="radiogroup" aria-label="Surface texture">
+            <input type="radio" name="vaseTex" id="vtNone" value="none" checked><label for="vtNone">None</label>
+            <input type="radio" name="vaseTex" id="vtRibs" value="ribs"><label for="vtRibs">Ribs</label>
+            <input type="radio" name="vaseTex" id="vtRings" value="rings"><label for="vtRings">Rings</label>
+          </div>
+          <div class="row vt-ribs"><div class="lab"><label for="vtCount">Ribs round</label><span class="val" id="vtCountVal"></span></div><input type="range" id="vtCount" min="2" max="60" step="1" value="12"></div>
+          <div class="row vt-ribs"><div class="lab"><label for="vtTwist">Twist, bottom to rim</label><span class="val" id="vtTwistVal"></span></div><input type="range" id="vtTwist" min="-360" max="360" step="5" value="0"></div>
+          <div class="row vt-rings"><div class="lab"><label for="vtSpacing">Rings apart</label><span class="val" id="vtSpacingVal"></span></div><input type="range" id="vtSpacing" min="1" max="20" step="0.5" value="4"></div>
+          <div class="row vt-on"><div class="lab"><label for="vtDepth">Depth</label><span class="val" id="vtDepthVal"></span></div><input type="range" id="vtDepth" min="0.2" max="6" step="0.1" value="1.5"></div>
+          <div class="lab"><span class="name">Movement along the path</span><span class="val" id="vaseMoveVal"></span></div>
+          <div class="seg small" role="radiogroup" aria-label="Movement along the path">
+            <input type="radio" name="vaseMove" id="vmNone" value="none"><label for="vmNone">None</label>
+            <input type="radio" name="vaseMove" id="vmWave" value="wave" checked><label for="vmWave">Wave</label>
+            <input type="radio" name="vaseMove" id="vmZigzag" value="zigzag"><label for="vmZigzag">Zigzag</label>
+            <input type="radio" name="vaseMove" id="vmLoops" value="loops"><label for="vmLoops">Loops</label>
+          </div>
+          <div class="row vm-on"><div class="lab"><label for="vmSize">Size</label><span class="val" id="vmSizeVal"></span></div><input type="range" id="vmSize" min="0.1" max="4" step="0.1" value="0.5"></div>
+          <div class="row vm-on"><div class="lab"><label for="vmCount">How many round</label><span class="val" id="vmCountVal"></span></div><input type="range" id="vmCount" min="2" max="120" step="1" value="16"></div>
+          <div class="row vm-on"><div class="lab"><label for="vmShift">Shift each layer</label><span class="val" id="vmShiftVal"></span></div><input type="range" id="vmShift" min="-50" max="50" step="1" value="0"></div>
+          <p class="hint" id="vaseHint" role="status"></p>
+          <p class="hint help">The profile is the radius from the middle to the middle of the bead, from the plate (bottom) to the rim (top); the vase is that curve turned round. Surface texture shapes the wall itself: ribs run up it (twisting if you like), rings go round it. Movement is what the needle does as it goes round: a wave or a zigzag in and out of the wall, or loops. Shift each layer moves the movement on by a share of one, so 0 stacks it in straight columns, a little twists them into spirals, and 50% alternates them. Every lap has to sit on the one below, so a big shift needs a small size: the hint above and the Print step's ready list check it. The path prints exactly as made, one lap per layer, spiralling up with no seam.</p>
+        </div>
+        <div class="lab stl-only"><span class="name">Which way up it prints</span></div>
+        <div class="inline stl-only">
           <button class="btn mini" type="button" id="turnX" title="Tip it a quarter turn forward (about the left–right axis)">Tip forward</button>
           <button class="btn mini" type="button" id="turnY" title="Tip it a quarter turn sideways (about the front–back axis)">Tip sideways</button>
           <button class="btn mini" type="button" id="turnZ" title="Turn it a quarter turn on the plate">Turn</button>
           <button class="btn mini" type="button" id="turnReset">As loaded</button>
         </div>
-        <p class="hint help"><span class="slow">Big models (hundreds of thousands of triangles) load, turn and slice slowly.</span> Drag the preview to look around it. The Print step slices it into layers and fits each one with a Fourier series; set its height there. The Line step's line spacing is the wall's.</p>
+        <p class="hint help stl-only"><span class="slow">Big models (hundreds of thousands of triangles) load, turn and slice slowly.</span> Drag the preview to look around it. The Print step slices it into layers and fits each one with a Fourier series; set its height there. The Line step's line spacing is the wall's.</p>
         <div class="row" id="drawViewRow">
           <div class="lab"><span class="name">Line drawing of this view</span><span class="val" id="creaseVal">folds over 20°</span></div>
           <label class="check"><input type="checkbox" id="hlPreview"> <span>Show the preview as a drawing</span></label>
@@ -907,6 +941,7 @@
 <script src="../source/engine/14-photo.js"></script>
 <script src="../source/engine/15-cutout.js"></script>
 <script src="../source/engine/16-molecule.js"></script>
+<script src="../source/engine/17-vase.js"></script>
 <script src="../source/engine/core.js"></script>
 <script src="../source/engine/fonts.js"></script>
 <script src="settings.js"></script>
@@ -943,6 +978,7 @@
 <script src="js/scroll.js"></script>
 <script src="js/sample-skull.js"></script>
 <script src="js/model.js"></script>
+<script src="js/vase.js"></script>
 <script src="js/notes.js"></script>
 <script src="js/history.js"></script>
 <script src="js/main.js"></script>

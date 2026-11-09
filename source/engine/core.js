@@ -75,6 +75,10 @@
                       UNB.molBondLength, bondAt, molNbrs, VALENCE, valences, UNB.molHydrogens, UNB.molHit, freeDir,
                       atomAt, molLink, UNB.molGrow, UNB.molRing, UNB.molCycleBond, UNB.molSetAtom, UNB.molErase,
                       UNB.molBlock
+    17-vase.js    16. Vases — a profile curve turned round the middle, a surface texture (ribs, rings) and a movement
+                      pattern along the path (wave, zigzag, loops), written straight to one lap per layer; the checks.
+                      UNB.VASE_SHAPES, UNB.vaseDefaults, VASE_MIN_R, UNB.vaseRadius, UNB.vaseProfile, vaseWiggle,
+                      vaseRing, vaseLap, vaseLapPoints, vaseStacking, vaseTightest, UNB.vaseStack, UNB.vaseMesh
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
@@ -102,6 +106,7 @@
     "14-photo.js",
     "15-cutout.js",
     "16-molecule.js",
+    "17-vase.js",
   ];
   if (typeof module !== "undefined" && module.exports) {
     // Node

@@ -3,6 +3,27 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v139 · 2026-11-09
+
+Make a vase, after a look at clay printing apps: a vase from a profile curve you edit, a texture on its wall, and a
+movement the needle makes as it goes round.
+
+- **Make a vase** (Art step, 3D model card: *An STL file* or *Make a vase*; `web-app/js/vase.js`, engine
+  `17-vase.js`). The **profile** is the radius from the middle to the middle of the bead at each height, drawn as the
+  vase's outline: drag a point to shape it, tap beside the curve to add one, Remove point takes the picked one away
+  (arrow keys move it too). Start from a Cylinder, Bulb, Tulip or Bowl. **Surface texture** shapes the wall: ribs up
+  it (with a twist from bottom to rim) or rings round it. **Movement along the path** is what the needle does going
+  round: a wave or a zigzag in and out of the wall, or loops. **Shift each layer** moves the movement on by a share of
+  one: 0 stacks it in columns, a little twists it into a spiral, 50% alternates it.
+- **The path is the print**: the Print step writes it straight from the settings (`UNB.vaseStack`), one lap per layer
+  spiralling up with no seam, with the base filled as for a model. Nothing is sliced or moved in, so the vase prints
+  exactly as made. Height on the Print step makes it taller and keeps its widths.
+- **Checks**: the card's hint says how far apart the movements are where the vase is narrowest and widest, whether
+  loops close, and how far a shift moves each layer. The Print step's ready list measures every lap against the one
+  below (out and in, against Overhang per layer) and the tightest turn against the bead's width.
+- The cuts, walls, support and turns are an STL's and hide for a vase; a design file keeps the vase's settings and
+  makes it again. A **Wavy vase** example chip. Tests E57 and A59.
+
 ## v138 · 2026-11-06
 
 Traced text that didn't read: a sheet of "Hello world" and "Happy Birthday" in every font, drawn at the needle's width,

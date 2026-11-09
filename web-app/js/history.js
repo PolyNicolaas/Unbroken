@@ -166,6 +166,7 @@ function designState() {
             turns: { ...st.model.turns },
             heightMM: st.model.heightMM,
             cut: { ...modelCut() },
+            vase: st.model.vase ? structuredClone(st.model.vase) : undefined, // (a vase made here: made again from this)
           }
         : null,
       srcLabel: st.srcLabel,
@@ -309,17 +310,23 @@ function applyDesign(d, src, imageSource, pics, picMore) {
     if ($("srcModel").checked) {
       // a 3D model: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
       // Designs saved before the fingerprint also match by id, but only when the model's name is the same too.
-      const m = s.model,
-        same =
+      const m = s.model;
+      if (m && m.vase) {
+        // a vase made here: made again from its settings
+        useVase(m.vase, false); // model.js
+        vaseUI(); // vase.js
+      } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
+      const same =
           st.model &&
           m &&
+          !m.vase &&
           (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
       if (same) {
         st.model.turns = { ...m.turns };
         st.model.om = UNB.orientMesh(st.model.tri, st.model.turns);
         st.model.heightMM = m.heightMM;
         st.model.cut = m.cut ? { ...m.cut } : { bottom: 0, top: 0 };
-      } else if (m && st.model)
+      } else if (m && st.model && !m.vase)
         note = `made with ${s.srcLabel ? `“${s.srcLabel}”` : "another model"}: load that STL to get its turns and height back`;
       // the image to go back to from the model
       st.imageSource = imageSource || (src ? { canvas: src, label: s.srcLabel } : st.imageSource);

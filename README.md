@@ -38,7 +38,7 @@ maker's paid slicer (choc OS) for these prints.
 |---|---|
 | choc mate 2 (chocolate) | Supported: profile in `source/printer/choc-mate-2/` |
 | AxiDraw pen plotter (via Saxi) | Supported: 2D SVG export |
-| Clay printers | Planned |
+| Clay printers | Planned (Make a vase is the first clay-style feature: profile, texture, movement) |
 
 **Planned: clay printers.** Unbroken will add clay (paste-extrusion) 3D printers. They have the same limitation as the
 chocolate printer: the material can't be stopped or lifted mid-print, so every print must be one continuous line,
@@ -148,7 +148,11 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   charges, Erase, Undo, Clean up (RDKit). Exact lines, like a pattern: plotted as drawn or traced. Tests E39, E40, A40,
   A41.
 - **3D model**: an STL (or the sample skull cup), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
-  makes its line drawing the picture to trace.
+  makes its line drawing the picture to trace. Or **Make a vase** (`web-app/js/vase.js`, engine `17-vase.js`): a
+  profile curve you edit (the radius at each height, turned round the middle), a surface texture (ribs, twisting if
+  you like, or rings) and a movement along the path (a wave, a zigzag or loops, shifted from layer to layer: columns,
+  spirals or alternating). The Print step writes its path straight from those settings (`UNB.vaseStack`, no slicing)
+  and checks that every lap sits on the one below and that the bead can follow its turns. Tests E57, A59.
 
 **Take a picture** (`web-app/js/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
 phone) outlines the page it finds (`UNB.findPage`: the largest light, plain area on a small copy of the frame, its four

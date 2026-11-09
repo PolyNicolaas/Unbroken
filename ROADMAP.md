@@ -49,6 +49,9 @@ Tests:
   at a time).
 - Several different designs on one plate: a text's lines can print as separate pieces since v97 (the plate packs
   pieces of different sizes, `UNB.plateLayoutPieces`); drawings and models still print copies of one design.
+- Make a vase (v139), next steps once it has printed: a polygon or star cross-section, image relief on the wall
+  (Potterware's texture), the movement's size varying up the vase, and a cooling pause for narrow necks (their laps are
+  short). Loops cross themselves: watch how chocolate takes the crossings on the first prints.
 - STL: a solid top skin over sparse fill.
 - Split a complex model into printable parts to glue (PLAN.md; first test: the tree).
 - **Clay printers** (planned 19 October): add clay (paste-extrusion) 3D printers alongside the choc mate 2. Same

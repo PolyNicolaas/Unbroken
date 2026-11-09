@@ -33,6 +33,7 @@ function useSampleModel() {
 }
 // (cut, heightMM: the sample's own; otherwise uncut, and the model's own height kept on the plate)
 function setModel(mesh, name, cut, heightMM) {
+  vaseStl = null; // (an STL in use: nothing to go back to)
   const om = UNB.orientMesh(mesh.tri, {});
   st.model = {
     name,
@@ -66,6 +67,12 @@ const printedMM = () => (st.model ? st.model.heightMM * (1 - modelCut().bottom -
 // is
 // that tall
 function setModelHeight(H) {
+  if (st.model.vase) {
+    // a vase grows taller, its radii kept (the profile's heights are shares of the height)
+    useVase(Object.assign({}, st.model.vase, { height: Math.min(500, Math.max(2, H)) }), true);
+    if (typeof vaseUI === "function") vaseUI(); // vase.js: its Height box
+    return;
+  }
   const c = modelCut();
   st.model.heightMM = Math.min(500, Math.max(0.5, H)) / Math.max(0.05, 1 - c.bottom - c.top);
   modelChanged(true);
@@ -99,7 +106,12 @@ function modelChanged(record) {
   const M = st.model;
   if (!M) return;
   const [w, d, h] = M.om.size.map((v) => v * modelScale());
-  $("modelInfo").textContent = `${M.n.toLocaleString()} triangles · ${fmt(w, 1)} × ${fmt(d, 1)} × ${fmt(h, 1)} mm`;
+  $("modelInfo").textContent = M.vase
+    ? `${fmt(w, 1)} × ${fmt(d, 1)} × ${fmt(h, 1)} mm`
+    : `${M.n.toLocaleString()} triangles · ${fmt(w, 1)} × ${fmt(d, 1)} × ${fmt(h, 1)} mm`;
+  document.body.dataset.vase = M.vase ? "1" : "";
+  $("mfVase").checked = !!M.vase;
+  $("mfStl").checked = !M.vase;
   // the sample's credit (its licence asks for it wherever it's used)
   const credit = $("modelCredit"),
     S = SAMPLE_SKULL;
@@ -160,6 +172,43 @@ function enterModel() {
   if (!st.model) useSampleModel();
   else modelChanged(false);
   drawPage(); // plot.js: the 2D page no longer shows the last picture's drawing
+}
+
+// ---------- a vase made here (the Vase switch in the 3D model card; vase.js edits it) ----------
+// st.model.vase holds its settings (UNB.vaseStack). Its mesh (UNB.vaseMesh) is for the plate, the preview and Draw
+// this view; the Print step writes its path straight from the settings (buildModelLayers), not by slicing the mesh.
+// centre: the middle of the mesh's footprint (the mesh is centred on it, so the path is too); rows: laps as printed,
+// drawn by the preview.
+let vaseStl = null; // the STL that was in use before the vase, to go back to
+function useVase(V, record) {
+  const prev = st.model;
+  if (prev && !prev.vase) vaseStl = prev;
+  const mesh = UNB.vaseMesh(V, { h: layerHmm() });
+  st.model = {
+    name: "vase",
+    tri: mesh.tri,
+    n: mesh.n,
+    turns: { x: 0, y: 0, z: 0 },
+    om: UNB.orientMesh(mesh.tri, {}),
+    heightMM: V.height,
+    cut: { bottom: 0, top: 0 },
+    yaw: prev ? prev.yaw : -0.6,
+    pitch: prev ? prev.pitch : 0.55,
+    id: ++modelSeq,
+    vase: structuredClone(V),
+    centre: [mesh.cx, mesh.cy],
+    rows: mesh.rows,
+  };
+  modelChanged(record);
+}
+// back to the STL that was in use (or the sample)
+function leaveVase() {
+  if (!st.model || !st.model.vase) return;
+  if (vaseStl) {
+    st.model = vaseStl;
+    vaseStl = null;
+    modelChanged(true);
+  } else useSampleModel();
 }
 
 // ---------- the plate: the model's footprint ----------
@@ -250,12 +299,14 @@ async function buildModelLayers(o = {}) {
     },
     S0.F
   ); // the base and infill (UNB.fillPlan)
-  const key = JSON.stringify([M.id, M.turns, opt]);
+  if (M.vase) Object.assign(opt, { cx: M.centre[0], cy: M.centre[1] }); // (the path centred as the mesh is)
+  const key = JSON.stringify([M.id, M.turns, opt, M.vase || null]);
   let R = modelStacks.get(key);
   if (!R) {
-    if (!o.h) $("layerInfo").textContent = "slicing… (can take a while for a big or solid model)";
-    R = await LAY.call("modelStack", [M.om.tri, opt], (p) => {
-      if (!o.h) $("layerInfo").textContent = `slicing ${p.done} / ${p.of}`;
+    const verb = M.vase ? "writing the vase's path" : "slicing";
+    if (!o.h) $("layerInfo").textContent = M.vase ? `${verb}…` : "slicing… (can take a while for a big or solid model)";
+    R = await LAY.call(M.vase ? "vaseStack" : "modelStack", M.vase ? [M.vase, opt] : [M.om.tri, opt], (p) => {
+      if (!o.h) $("layerInfo").textContent = `${verb} ${p.done} / ${p.of}`;
     });
     modelStacks.set(key, R);
     if (modelStacks.size > 6) modelStacks.delete(modelStacks.keys().next().value);
@@ -283,6 +334,8 @@ async function buildModelLayers(o = {}) {
     walls: opt.walls,
     overhang: R.overhang,
     support: R.support,
+    vase: !!M.vase,
+    tightest: R.tightest || null,
   };
 }
 
@@ -354,6 +407,10 @@ function drawModel() {
     drawModelLines(g, cv);
     return;
   } // the line drawing this view would make
+  if (M.vase) {
+    drawVaseRows(g, M, P, s, cx, cy, choc, dpr);
+    return;
+  }
   // shaded triangles, back to front (painter's order), lit from the upper left
   const t = M.om.tri,
     n = t.length / 9,
@@ -428,6 +485,49 @@ function drawModel() {
       }
     g.stroke();
   }
+}
+// A vase: its laps as they print (every layer, or every few), the far side faint and the near side shaded by how it
+// faces the light, so the texture and the movement read
+function drawVaseRows(g, M, P, s, cx, cy, choc, dpr) {
+  const rows = M.rows,
+    lx = -0.62,
+    lz = 0.53;
+  g.lineWidth = Math.max(0.7, 0.8 * dpr);
+  g.lineJoin = g.lineCap = "round";
+  const col = (f) =>
+    `rgb(${Math.min(255, choc[0] * f + 12)}, ${Math.min(255, choc[1] * f + 10)}, ${Math.min(255, choc[2] * f + 8)})`;
+  for (const near of [false, true])
+    rows.forEach((r) => {
+      const n = r.x.length,
+        Q = [];
+      for (let i = 0; i < n; i++) Q.push(P(r.x[i], r.y[i], r.z));
+      // a run of points on one side (near: the outward normal turned towards you), drawn as one path per shade band
+      for (let band = 0; band < (near ? 4 : 1); band++) {
+        g.beginPath();
+        let open = false;
+        for (let i = 0; i <= n; i++) {
+          const a = Q[i % n],
+            b = Q[(i + 1) % n],
+            ex = b[0] - a[0],
+            ey = b[2] - a[2],
+            el = Math.hypot(ex, ey) || 1,
+            nx = -ey / el, // outward normal on screen (x) and towards you (depth), for anticlockwise laps
+            nz = ex / el,
+            front = nz > 0,
+            lit = Math.max(0, nx * lx + nz * lz),
+            want = near ? front && Math.min(3, Math.floor(lit * 4)) === band : !front;
+          if (want) {
+            if (!open) g.moveTo(cx + a[0] * s, cy + a[1] * s);
+            g.lineTo(cx + b[0] * s, cy + b[1] * s);
+            open = true;
+          } else open = false;
+        }
+        g.strokeStyle = near ? col(0.45 + 0.3 * band) : col(0.9);
+        g.globalAlpha = near ? 1 : 0.18;
+        g.stroke();
+      }
+    });
+  g.globalAlpha = 1;
 }
 // dragging the preview turns the model (the image tools' handlers are in tools.js; tools are off for a model)
 let orbit = null;
