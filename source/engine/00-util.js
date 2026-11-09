@@ -375,6 +375,45 @@
     return f[i] * (1 - a) * (1 - b) + f[i + 1] * a * (1 - b) + f[i + w] * (1 - a) * b + f[i + w + 1] * a * b;
   }
 
+  // ---------- line segments and loops ----------
+  // where along segment a → a + (dx, dy) the point (px, py) is nearest: 0 at a, 1 at the far end (clamped)
+  function segParam(px, py, ax, ay, dx, dy) {
+    const L2 = dx * dx + dy * dy;
+    return L2 > 0 ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L2)) : 0;
+  }
+  // squared distance from (px, py) to segment a → b
+  function segDist2(px, py, ax, ay, bx, by) {
+    const dx = bx - ax,
+      dy = by - ay,
+      t = segParam(px, py, ax, ay, dx, dy),
+      ex = ax + t * dx - px,
+      ey = ay + t * dy - py;
+    return ex * ex + ey * ey;
+  }
+  // a closed line { x, y } turned to start at its point nearest (px, py): a new line, or the same one if it already
+  // does
+  function startNearest(L, px, py) {
+    const { x, y } = L,
+      n = x.length;
+    let bi = 0,
+      bd = Infinity;
+    for (let i = 0; i < n; i++) {
+      const dd = (x[i] - px) ** 2 + (y[i] - py) ** 2;
+      if (dd < bd) {
+        bd = dd;
+        bi = i;
+      }
+    }
+    if (!bi) return L;
+    const rx = new Float64Array(n),
+      ry = new Float64Array(n);
+    for (let i = 0; i < n; i++) {
+      rx[i] = x[(i + bi) % n];
+      ry[i] = y[(i + bi) % n];
+    }
+    return { x: rx, y: ry };
+  }
+
   // a number for a file: rounded to 0.001, no trailing zeros
   const f3 = (v) => (Math.round(v * 1000) / 1000).toString();
   // SVG path data for flat polylines [x0, y0, x1, y1, …], X and Y mapping each coordinate to text; returned as
@@ -408,5 +447,8 @@
     bilinear,
     f3,
     svgPolylines,
+    segParam,
+    segDist2,
+    startNearest,
   });
 })(typeof window !== "undefined" ? window : globalThis);

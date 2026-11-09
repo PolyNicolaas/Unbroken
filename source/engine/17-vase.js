@@ -6,7 +6,8 @@
    One part of the engine (no DOM), loaded after 16-molecule.js; core.js lists every part and what's in it. */
 (function (root) {
   "use strict";
-  const UNB = root.UNB;
+  const UNB = root.UNB,
+    { segDist2, startNearest } = UNB._u; // shared helpers (00-util.js)
 
   // ---------- the vase's settings ----------
   // V = { height (mm), profile: [[t, r], …] (t: share of the height, 0 at the plate to 1 at the rim, rising; r: mm
@@ -16,10 +17,40 @@
   // radius), count (how many round each lap), shift (share of one movement each layer moves on: 0 stacks them in
   // columns, 0.5 alternates them) } }
   UNB.VASE_SHAPES = {
-    cylinder: { name: "Cylinder", profile: [[0, 15], [0.5, 15], [1, 15]] },
-    bulb: { name: "Bulb", profile: [[0, 12], [0.35, 19], [0.8, 10], [1, 11]] },
-    tulip: { name: "Tulip", profile: [[0, 9], [0.4, 14], [0.75, 15], [1, 18]] },
-    bowl: { name: "Bowl", profile: [[0, 10], [0.5, 19], [1, 24]] },
+    cylinder: {
+      name: "Cylinder",
+      profile: [
+        [0, 15],
+        [0.5, 15],
+        [1, 15],
+      ],
+    },
+    bulb: {
+      name: "Bulb",
+      profile: [
+        [0, 12],
+        [0.35, 19],
+        [0.8, 10],
+        [1, 11],
+      ],
+    },
+    tulip: {
+      name: "Tulip",
+      profile: [
+        [0, 9],
+        [0.4, 14],
+        [0.75, 15],
+        [1, 18],
+      ],
+    },
+    bowl: {
+      name: "Bowl",
+      profile: [
+        [0, 10],
+        [0.5, 19],
+        [1, 24],
+      ],
+    },
   };
   UNB.vaseDefaults = function () {
     return {
@@ -198,16 +229,13 @@
         for (let d = -win; d <= win; d++) {
           const a = (((c + d) % na) + na) % na,
             b = (a + 1) % na,
-            ex = A.x[b] - A.x[a],
-            ey = A.y[b] - A.y[a],
-            ll = ex * ex + ey * ey || 1e-12,
-            q = Math.min(1, Math.max(0, ((B.x[i] - A.x[a]) * ex + (B.y[i] - A.y[a]) * ey) / ll)),
-            qx = A.x[a] + q * ex - B.x[i],
-            qy = A.y[a] + q * ey - B.y[i],
-            dd = qx * qx + qy * qy;
+            dd = segDist2(B.x[i], B.y[i], A.x[a], A.y[a], A.x[b], A.y[b]);
           if (dd < best) {
             best = dd;
-            side = qy * ex - qx * ey > 0 ? 1 : -1; // the point right of the lap below (outside) or left (inside)
+            // the point right of that piece of the lap below (outside) or left of it (inside)
+            const ex = A.x[b] - A.x[a],
+              ey = A.y[b] - A.y[a];
+            side = ex * (B.y[i] - A.y[a]) - ey * (B.x[i] - A.x[a]) < 0 ? 1 : -1;
           }
         }
         const dist = Math.sqrt(best);
@@ -257,7 +285,8 @@
   // ---------- the whole vase ----------
   // Every layer (generator: yields { done, of } after each). Layer k's nozzle height is z0 + k·h. The first `base`
   // layers are filled (UNB.modelLayer on the bottom's outline, the base settings of UNB.fillPlan); the rest are the
-  // wall, one lap each. opt: z0, h, base, w, d, tol, overhang (the step a bead holds, mm), cx, cy (subtracted from every
+  // wall, one lap each. opt: z0, h, base, w, d, tol, overhang (the step a bead holds, mm), cx, cy (subtracted from
+  // every
   // point: the middle of the footprint, as the preview's mesh is centred), and UNB.fillPlan's base settings. Returns
   // { base: [lines], walls: [lines], T, N, terms, joins, empty: 0, height, overhang: { worst, at, inWorst, inAt }
   // (as UNB.modelStack: inWorst is how far a step inwards goes past what a bead holds), support: null,
@@ -313,22 +342,7 @@
             fillMinArea: F.minArea,
           });
         if (!L) continue;
-        let bi = 0,
-          bd = Infinity;
-        for (let i = 0; i < L.x.length; i++) {
-          const dd = (L.x[i] - goal[0]) ** 2 + (L.y[i] - goal[1]) ** 2;
-          if (dd < bd) {
-            bd = dd;
-            bi = i;
-          }
-        }
-        const m = L.x.length,
-          x = new Float64Array(m),
-          y = new Float64Array(m);
-        for (let i = 0; i < m; i++) {
-          x[i] = L.x[(i + bi) % m];
-          y[i] = L.y[(i + bi) % m];
-        }
+        const { x, y } = startNearest(L, goal[0], goal[1]);
         base.unshift({ x, y });
         terms.unshift(L.N);
         joins.unshift(L.connectors);

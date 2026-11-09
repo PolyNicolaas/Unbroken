@@ -253,7 +253,9 @@ function lineUI() {
     g = Math.max(0, +$("lineGapMM").value || 0);
   st.spacing = w + g;
   // (Custom… picked from the menu stays picked until a needle is: the width is typed on the Line step)
-  const o = st.needleCustom ? null : [...$("needle").options].find((x) => x.value !== "custom" && Math.abs(+x.value - w) < 0.005);
+  const o = st.needleCustom
+    ? null
+    : [...$("needle").options].find((x) => x.value !== "custom" && Math.abs(+x.value - w) < 0.005);
   $("needle").value = o ? o.value : "custom";
   const opt = $("needle").selectedOptions[0];
   $("needleDot").style.background = opt.dataset.c;

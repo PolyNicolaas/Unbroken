@@ -72,7 +72,10 @@ function vaseLabels() {
       : T.kind === "rings"
         ? `rings ${fmt(T.spacing, 1)} mm apart`
         : "smooth";
-  $("vaseMoveVal").textContent = M.kind === "none" ? "straight along the wall" : `${M.count} ${M.kind === "loops" ? "loops" : M.kind === "zigzag" ? "zigzags" : "waves"} round`;
+  $("vaseMoveVal").textContent =
+    M.kind === "none"
+      ? "straight along the wall"
+      : `${M.count} ${M.kind === "loops" ? "loops" : M.kind === "zigzag" ? "zigzags" : "waves"} round`;
   $("vasePtDel").disabled = !(vasePick > 0 && vasePick < V.profile.length - 1);
 }
 // What the settings will do, worked out on the spot (the Print step's ready list checks the path itself): the widths,
@@ -111,7 +114,9 @@ function vaseHint() {
     } else if (M.kind === "wave") {
       const r = (lo * lo) / (4 * Math.PI * Math.PI * M.size); // the tightest bend of a sine wave
       if (r < bead / 2) {
-        parts.push(`its bends (${fmt(r, 2)} mm) are tighter than the bead (${fmt(bead, 2)} mm wide), so they round off`);
+        parts.push(
+          `its bends (${fmt(r, 2)} mm) are tighter than the bead (${fmt(bead, 2)} mm wide), so they round off`
+        );
         warn = true;
       }
     } else parts.push("the bead rounds the corners");
@@ -119,7 +124,9 @@ function vaseHint() {
     const s = Math.abs(M.shift),
       off = M.kind === "zigzag" ? 4 * M.size * Math.min(s, 0.5) : 2 * M.size * Math.sin(Math.PI * Math.min(s, 0.5));
     if (s > 0) {
-      parts.push(`the shift moves each layer up to ${fmt(off, 2)} mm off the one below (a bead holds ${fmt(step, 2)}; the Print step checks the whole wall)`);
+      parts.push(
+        `the shift moves each layer up to ${fmt(off, 2)} mm off the one below (a bead holds ${fmt(step, 2)}; the Print step checks the whole wall)`
+      );
       if (off > step) warn = true;
     }
   }

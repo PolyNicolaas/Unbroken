@@ -78,10 +78,16 @@ const section = (title, rows, ok) => R.sections.push({ title, rows, ok });
   };
   const unused = [];
   for (const f of ENGINE)
-    for (const m of read(f).matchAll(/^\s*UNB\.(\w+)\s*=/gm)) if (!uses(m[1], f)) unused.push(`UNB.${m[1]} (${path.basename(f)})`);
+    for (const m of read(f).matchAll(/^\s*UNB\.(\w+)\s*=/gm))
+      if (!uses(m[1], f)) unused.push(`UNB.${m[1]} (${path.basename(f)})`);
   for (const f of APP)
-    for (const m of read(f).matchAll(/^(?:async )?function\*?\s+(\w+)/gm)) if (!uses(m[1], f)) unused.push(`${m[1]} (${path.basename(f)})`);
-  section("Functions nothing calls (dead code, or called only by name from a string)", unused.length ? unused : ["none"], !unused.length);
+    for (const m of read(f).matchAll(/^(?:async )?function\*?\s+(\w+)/gm))
+      if (!uses(m[1], f)) unused.push(`${m[1]} (${path.basename(f)})`);
+  section(
+    "Functions nothing calls (dead code, or called only by name from a string)",
+    unused.length ? unused : ["none"],
+    !unused.length
+  );
 }
 
 // 5. size: long files are harder to find things in (a hint to split by job, not a rule)
@@ -115,14 +121,20 @@ const section = (title, rows, ok) => R.sections.push({ title, rows, ok });
     nA = TESTS.length - nE,
     m = design.match(/\((\d+) engine\s+tests, (\d+) app tests/);
   if (!m || +m[1] !== nE || +m[2] !== nA)
-    rows.push(`DESIGN.md says ${m ? `${m[1]} engine and ${m[2]} app` : "no count of the"} tests; there are ${nE} and ${nA}`);
+    rows.push(
+      `DESIGN.md says ${m ? `${m[1]} engine and ${m[2]} app` : "no count of the"} tests; there are ${nE} and ${nA}`
+    );
   const lastEngine = path.basename(ENGINE[ENGINE.length - 1]);
   if (!design.includes(lastEngine)) rows.push(`DESIGN.md's engine range doesn't reach ${lastEngine}`);
-  for (const f of APP) if (!webReadme.includes("`js/" + path.basename(f) + "`")) rows.push(`web-app/README.md's file table misses js/${path.basename(f)}`);
-  for (const f of ENGINE) if (!core.includes(path.basename(f) + " ")) rows.push(`core.js's header misses ${path.basename(f)}`);
+  for (const f of APP)
+    if (!webReadme.includes("`js/" + path.basename(f) + "`"))
+      rows.push(`web-app/README.md's file table misses js/${path.basename(f)}`);
+  for (const f of ENGINE)
+    if (!core.includes(path.basename(f) + " ")) rows.push(`core.js's header misses ${path.basename(f)}`);
   for (const t of TESTS) {
     const id = path.basename(t).split("-")[0];
-    if (!testsReadme.includes(`#### ${id}`)) rows.push(`source/tests/README.md's catalogue misses ${id} (node source/tests/run.js --doc)`);
+    if (!testsReadme.includes(`#### ${id}`))
+      rows.push(`source/tests/README.md's catalogue misses ${id} (node source/tests/run.js --doc)`);
   }
   const sorted = roadmap.match(/Last sorted: (\d+ \w+ \d{4})/);
   if (sorted) {
@@ -139,5 +151,6 @@ if (process.argv.includes("--json")) {
   process.exit(0);
 }
 let md = `# Tidy report · ${R.date}\n\nWhat \`source/tools/tidy-report.js\` found; what to do with it is in docs/TIDY.md.\n`;
-for (const s of R.sections) md += `\n## ${s.ok ? "✓" : "•"} ${s.title}\n\n` + s.rows.map((r) => `- ${r}`).join("\n") + "\n";
+for (const s of R.sections)
+  md += `\n## ${s.ok ? "✓" : "•"} ${s.title}\n\n` + s.rows.map((r) => `- ${r}`).join("\n") + "\n";
 console.log(md);

@@ -166,15 +166,57 @@ function autoName(name) {
 }
 // Cyrillic and Greek letters spelled in Latin ones for file names (Шоколад → shokolad), so a name in either still
 // names the file instead of leaving it "design"
-const TRANSLIT = Object.fromEntries(
-  [
-    ..."абвгдезийклмнопрстуфыэ".split("").map((c, i) => [c, "abvgdeziyklmnoprstufye"[i]]),
-    ["ё", "yo"], ["ж", "zh"], ["х", "kh"], ["ц", "ts"], ["ч", "ch"], ["ш", "sh"], ["щ", "shch"], ["ъ", ""], ["ь", ""],
-    ["ю", "yu"], ["я", "ya"], ["є", "ye"], ["і", "i"], ["ї", "yi"], ["ґ", "g"], ["ў", "u"],
-    ..."αβγδεζηθικλμνξοπρστυφχψω".split("").map((c, i) => [c, ["a","v","g","d","e","z","i","th","i","k","l","m","n","x","o","p","r","s","t","y","f","ch","ps","o"][i]]),
-    ["ς", "s"],
-  ],
-);
+const TRANSLIT = Object.fromEntries([
+  ..."абвгдезийклмнопрстуфыэ".split("").map((c, i) => [c, "abvgdeziyklmnoprstufye"[i]]),
+  ["ё", "yo"],
+  ["ж", "zh"],
+  ["х", "kh"],
+  ["ц", "ts"],
+  ["ч", "ch"],
+  ["ш", "sh"],
+  ["щ", "shch"],
+  ["ъ", ""],
+  ["ь", ""],
+  ["ю", "yu"],
+  ["я", "ya"],
+  ["є", "ye"],
+  ["і", "i"],
+  ["ї", "yi"],
+  ["ґ", "g"],
+  ["ў", "u"],
+  ..."αβγδεζηθικλμνξοπρστυφχψω"
+    .split("")
+    .map((c, i) => [
+      c,
+      [
+        "a",
+        "v",
+        "g",
+        "d",
+        "e",
+        "z",
+        "i",
+        "th",
+        "i",
+        "k",
+        "l",
+        "m",
+        "n",
+        "x",
+        "o",
+        "p",
+        "r",
+        "s",
+        "t",
+        "y",
+        "f",
+        "ch",
+        "ps",
+        "o",
+      ][i],
+    ]),
+  ["ς", "s"],
+]);
 const translit = (t) =>
   t.replace(/[\u0370-\u03ff\u0400-\u04ff]/g, (c) => {
     const l = c.toLowerCase(),
@@ -183,7 +225,11 @@ const translit = (t) =>
   });
 // a name in plain ASCII for the G-code's comment: Cyrillic and Greek spelled, accents off, anything else dropped
 const asciiName = (t) =>
-  translit(translit(String(t).normalize("NFC")).normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+  translit(
+    translit(String(t).normalize("NFC"))
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+  )
     .replace(/[^\x20-\x7e]+/g, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -202,7 +248,11 @@ $("designName").addEventListener("input", () => {
 });
 function slugOf(raw, max = 20) {
   // Cyrillic first, letters whole (й, ё); then accents come off (é → e, ά → α) and Greek is spelled too
-  const t = translit(translit(raw.normalize("NFC")).normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+  const t = translit(
+    translit(raw.normalize("NFC"))
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+  );
   return (
     t
       .replace(/\./g, " ")

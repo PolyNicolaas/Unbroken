@@ -166,7 +166,8 @@ function designState() {
             turns: { ...st.model.turns },
             heightMM: st.model.heightMM,
             cut: { ...modelCut() },
-            vase: st.model.vase ? structuredClone(st.model.vase) : undefined, // (a vase made here: made again from this)
+            // (a vase made here: made again from this)
+            vase: st.model.vase ? structuredClone(st.model.vase) : undefined,
           }
         : null,
       srcLabel: st.srcLabel,
@@ -317,10 +318,10 @@ function applyDesign(d, src, imageSource, pics, picMore) {
         vaseUI(); // vase.js
       } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
       const same =
-          st.model &&
-          m &&
-          !m.vase &&
-          (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
+        st.model &&
+        m &&
+        !m.vase &&
+        (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
       if (same) {
         st.model.turns = { ...m.turns };
         st.model.om = UNB.orientMesh(st.model.tri, st.model.turns);

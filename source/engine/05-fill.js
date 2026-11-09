@@ -5,8 +5,19 @@
 (function (root) {
   "use strict";
   const UNB = root.UNB,
-    { bilinear, label4, labelBoxes, rasterPolyline, isoContours, bbox, cumLength, resampleLoop, makeUF, cellGrid } =
-      UNB._u; // shared helpers (00-util.js)
+    {
+      bilinear,
+      label4,
+      labelBoxes,
+      rasterPolyline,
+      isoContours,
+      bbox,
+      cumLength,
+      resampleLoop,
+      makeUF,
+      cellGrid,
+      segParam,
+    } = UNB._u; // shared helpers (00-util.js)
 
   // Infill: every closed area the printed line encloses, filled with more of the same line, one spacing d apart.
   // The fill stays part of the one continuous line: each area's fill is built as closed loops one spacing apart,
@@ -558,8 +569,7 @@
             ay = line.y[a],
             dx = line.x[b] - ax,
             dy = line.y[b] - ay,
-            L2 = dx * dx + dy * dy || 1e-12,
-            t = Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / L2));
+            t = segParam(px, py, ax, ay, dx, dy);
           const qx = ax + t * dx,
             qy = ay + t * dy,
             vx = qx - px,

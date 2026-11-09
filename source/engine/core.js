@@ -6,7 +6,8 @@
 
     00-util.js Shared helpers (UNB._u): labelComponents, label4, labelBoxes, rasterPolyline, isoContours, cellGrid,
     bbox,
-                      cumLength, resampleLoop, makeUF, makeHeap, gaussKernel, plotLine, bilinear, f3, svgPolylines
+                      cumLength, resampleLoop, makeUF, makeHeap, gaussKernel, plotLine, bilinear, f3, svgPolylines,
+                      segParam, segDist2, startNearest
     01-image.js    1. Image in — RGBA pixels → a clean grayscale image.
                       UNB.toGray, UNB.blur, boxBlur, UNB.prep, smoothLabels, UNB.levels, toLab, UNB.colourLevels,
                       boxSum,

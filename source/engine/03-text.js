@@ -85,7 +85,9 @@
     };
     const lines = [];
     // (variation selectors and zero-width joiners after an emoji are no letters: left out, not a "?")
-    for (const raw of String(text).replace(/\r|[\ufe00-\ufe0f\u200b-\u200d]/g, "").split("\n")) {
+    for (const raw of String(text)
+      .replace(/\r|[\ufe00-\ufe0f\u200b-\u200d]/g, "")
+      .split("\n")) {
       const placed = [];
       let pen = 0,
         prev = null,
@@ -275,7 +277,8 @@
   // holes (the eye of an e, the inside of an o filling in), each still at least a stroke's width across. A V's crotch
   // filling a little changes neither, so it doesn't count; nor do holes under 1.5% of the letter's square (a sliver
   // where a font draws over its own stroke, a script's small loop): they can fill without the letter reading wrong.
-  // Openings closing (a script's loop, or э becoming ө) aren't checked: thickening strokes can't tell them apart. Returns the letter height in mm (searched between 3
+  // Openings closing (a script's loop, or э becoming ө) aren't checked: thickening strokes can't tell them apart.
+  // Returns the letter height in mm (searched between 3
   // and 30 × thick; 30 × thick if even that loses its shape).
   UNB.textShapeMin = function (layout, thick) {
     if (!layout.strokes.length) return 0;

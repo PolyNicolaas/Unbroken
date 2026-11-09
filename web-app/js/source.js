@@ -338,7 +338,7 @@ function buildText() {
     for (const ch of new Set(text))
       if (!/\s/.test(ch) && font.glyphs[ch]) {
         const r = UNB.glyphShapeMin(font, ch, L.dots);
-        if (r > worst) (worst = r), (limit = ch);
+        if (r > worst) ((worst = r), (limit = ch));
       }
     minCap = Math.max(CFG.rules.minLetterStrokes * band, worst * thick);
     if (minCap === CFG.rules.minLetterStrokes * band) limit = null;
@@ -507,10 +507,12 @@ $("textIn").addEventListener("keydown", (e) => {
 $("textIn").addEventListener("input", limitLines);
 for (const id of ["textIn", "capH", "letterGap", "wordGap", "lineGap"]) $(id).addEventListener("input", textChanged);
 for (const id of ["font", "txtSpacing"]) $(id).addEventListener("change", textChanged);
-document.querySelectorAll('input[name="fontStyle"]').forEach((r) => r.addEventListener("change", fontMenu)); // config.js
+// config.js
+document.querySelectorAll('input[name="fontStyle"]').forEach((r) => r.addEventListener("change", fontMenu));
 for (const id of ["txtJoin", "txtSnap", "txtMeasured", "txtNoDots"]) $(id).addEventListener("change", textChanged);
 // the lettering toggles are for a printer: hidden (and not applied) when making it for a pen plotter
-const letteringShown = () => ($("txtPrintOpts").hidden = $("artForPlot").checked); // (artForPlot is defined later, in patterns.js)
+// (artForPlot is defined later, in patterns.js)
+const letteringShown = () => ($("txtPrintOpts").hidden = $("artForPlot").checked);
 document.querySelectorAll('input[name="artFor"]').forEach((r) =>
   r.addEventListener("change", () => {
     letteringShown();

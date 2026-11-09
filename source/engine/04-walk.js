@@ -482,7 +482,7 @@
         // retrace the shortest stretch between each matched pair
         dijkstra(a, lineReach);
         for (const b of bs)
-          for (let v = b; v !== a; ) {
+          for (let v = b; v !== a;) {
             const e = pred[v];
             flip[e] ^= 1;
             v = eu[e] === v ? ev[e] : eu[e];
@@ -775,7 +775,7 @@
           let n = 0;
           for (let x0 = 0; x0 < 2 * nQ; x0++) {
             if (loopOf[x0] >= 0) continue;
-            for (let x = x0; loopOf[x] < 0; ) {
+            for (let x = x0; loopOf[x] < 0;) {
               loopOf[x] = n;
               const y = x ^ 1;
               loopOf[y] = n;

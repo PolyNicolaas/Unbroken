@@ -19,7 +19,8 @@ let layerTok = 0,
 // big model's height five times doesn't queue five full slices; an export waiting on the layers is never cancelled.
 let layerSig = null,
   layerExports = 0;
-const isLayerJob = (c) => c.fn === "modelStack" || c.fn === "vaseStack" || (c.fn === "stagePrint" && !!(c.args[4] && c.args[4].fill));
+const isLayerJob = (c) =>
+  c.fn === "modelStack" || c.fn === "vaseStack" || (c.fn === "stagePrint" && !!(c.args[4] && c.args[4].fill));
 function layerSigNow() {
   const M = isModel() && st.model;
   return JSON.stringify([
@@ -433,7 +434,8 @@ function layerReadout() {
   layerSliderUI();
   readyOverride = false;
   readyUI();
-  $("fromOver").textContent = `default ${fmt(Math.round((lineWidthMM() / 3) * 100) / 100, 2)}`; // (a third of the line width)
+  // (a third of the line width)
+  $("fromOver").textContent = `default ${fmt(Math.round((lineWidthMM() / 3) * 100) / 100, 2)}`;
   $("layerInfo").textContent =
     `${layers} layer${layers === 1 ? "" : "s"} · ${fmt(tall, 1)} mm · ${L.pieces ? `${all.length} lines: ` : ""}${fmt(len / 1000, len < 10000 ? 2 : 1)} m · ~${fmt(mins, mins < 10 ? 1 : 0)} min`;
   const F = L.fillInfo,

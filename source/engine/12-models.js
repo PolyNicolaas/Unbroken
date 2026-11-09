@@ -4,7 +4,8 @@
 (function (root) {
   "use strict";
   const UNB = root.UNB,
-    { f3, svgPolylines, cumLength, resampleLoop, isoContours, labelComponents } = UNB._u; // shared helpers (00-util.js)
+    // shared helpers (00-util.js)
+    { f3, svgPolylines, cumLength, resampleLoop, isoContours, labelComponents, segDist2, startNearest } = UNB._u;
 
   // a mesh corner as a text key, matched to 0.0001 units so float noise between neighbouring triangles doesn't split it
   const cornerKey = (tri, i) =>
@@ -364,7 +365,8 @@
   // spacing, angle }.
   UNB.fillPlan = function (opt, base, j) {
     const p = base ? "base" : "infill",
-      // (the base may go past 1, up to 1.25: rows closer than a line width, overlapping, for a base that's surely solid)
+      // (the base may go past 1, up to 1.25: rows closer than a line width, overlapping, for a base that's surely
+      // solid)
       dens = Math.min(base ? 1.25 : 1, Math.max(0, +opt[p + "Density"] || 0));
     if (!(dens > 0.001)) return { pattern: null, spacing: 0, angle: 0, minArea: 0 };
     const pattern = opt[p + "Pattern"] === "rings" ? "rings" : "lines",
@@ -525,14 +527,8 @@
           for (const Q of below)
             for (let i = 0; i < Q.length; i++) {
               const a = Q[i],
-                b = Q[(i + 1) % Q.length],
-                ux = b[0] - a[0],
-                uy = b[1] - a[1],
-                L2 = ux * ux + uy * uy || 1e-12;
-              const t = Math.max(0, Math.min(1, ((x - a[0]) * ux + (y - a[1]) * uy) / L2)),
-                dx = a[0] + t * ux - x,
-                dy = a[1] + t * uy - y;
-              if (dx * dx + dy * dy < d2) d2 = dx * dx + dy * dy;
+                b = Q[(i + 1) % Q.length];
+              d2 = Math.min(d2, segDist2(x, y, a[0], a[1], b[0], b[1]));
             }
           const dd = Math.sqrt(d2);
           if (!inside) m = Math.max(m, dd);
@@ -909,30 +905,7 @@
         continue;
       }
       // start nearest the previous layer's start
-      let x = L.x,
-        y = L.y;
-      if (prev) {
-        let bi = 0,
-          bd = Infinity;
-        for (let i = 0; i < x.length; i++) {
-          const dd = (x[i] - prev[0]) ** 2 + (y[i] - prev[1]) ** 2;
-          if (dd < bd) {
-            bd = dd;
-            bi = i;
-          }
-        }
-        if (bi) {
-          const n = x.length,
-            rx = new Float64Array(n),
-            ry = new Float64Array(n);
-          for (let i = 0; i < n; i++) {
-            rx[i] = x[(i + bi) % n];
-            ry[i] = y[(i + bi) % n];
-          }
-          x = rx;
-          y = ry;
-        }
-      }
+      const { x, y } = prev ? startNearest(L, prev[0], prev[1]) : L;
       prev = [x[0], y[0]];
       (baseL ? base : walls).push({ x, y });
       terms.push(L.N);

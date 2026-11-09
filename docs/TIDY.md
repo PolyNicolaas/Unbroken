@@ -4,7 +4,8 @@ A recurring clean-up, so the code and the docs don't go stale or bloated between
 It runs every Monday morning as a scheduled task, and can be run by hand any time ("tidy up Unbroken"). It follows
 DESIGN.md's principles: build for the uses we have, one copy of each idea, delete rather than hide.
 
-Last tidied: 9 November 2026 (v139).
+Last tidied: 9 November 2026 (v139): formatting, the shared segment and loop-start helpers, the web-app README's
+file table, the test catalogue.
 
 ## 1 · Look
 
