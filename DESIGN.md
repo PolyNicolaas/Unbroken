@@ -1,8 +1,8 @@
 # How the code is built, and where it should go
 
 A review of the code from the point of view of good software design, first written in October 2026 (after the audit
-in docs/history/AUDIT.md and the removals in ROADMAP.md) and brought up to date on 17 October (v91, after the
-clean-up). Read it as a map: the principles we want, how far the code is from them in each direction, and the plan.
+in docs/history/AUDIT.md and the removals in ROADMAP.md), brought up to date on 17 October (v91, after the
+clean-up) and again on 9 November (v139, the vase and a tidy-up). Read it as a map: the principles we want, how far the code is from them in each direction, and the plan.
 
 ## Two ways to get it wrong
 
@@ -30,13 +30,16 @@ In practice:
 
 ### Already in the middle (keep doing this)
 
-- **The engine is pure and split by stage** (`source/engine/00-util.js` … `12-models.js`): data in, data out, no
-  page. It runs the same in the page, a background worker and Node, which is why it can be tested properly. Shared
-  helpers live in `00-util.js` only (test E25): the spatial grid (`cellGrid`), contours, labelling, heaps.
+- **The engine is pure and split by stage** (`source/engine/00-util.js` … `17-vase.js`, 18 parts): data in, data
+  out, no page. It runs the same in the page, a background worker and Node, which is why it can be tested properly.
+  Shared helpers live in `00-util.js` only (test E25): the spatial grid (`cellGrid`), contours, labelling, heaps, and
+  since v139 the distance to a line segment (`segParam`, `segDist2`, used by the fill, the measuring, the overhang
+  check and the vase) and starting a loop nearest a point (`startNearest`, the model's and the vase's layers). No
+  helper is defined in two parts (checked 9 November).
 - **Background workers with cancellation** keep the page responsive. That is real complexity, but it's justified:
   tracing and slicing take seconds.
-- **The tests describe intent.** Each one says why it exists, how it checks and what counts as passing (30 engine
-  tests, 28 app tests). App tests wait on the app's own "settled" signal, not the clock.
+- **The tests describe intent.** Each one says why it exists, how it checks and what counts as passing (56 engine
+  tests, 58 app tests on 9 November). App tests wait on the app's own "settled" signal, not the clock.
 - **Challenges** (`source/challenges/`): practical prints taken through the app with every version, their renders
   reviewed. `compare.js` checks two runs file by file, so a change that shouldn't change the output (a refactor, a
   rename) is proved byte for byte: the v91 clean-up left all 35 files of 30 jobs, and the screenshots, identical.
@@ -57,14 +60,18 @@ In practice:
     don't grow it.
   - **Extras with a narrow use:** connector-path painting, the sketch pad, the circles
     animation and the math panel. You chose to keep them; each should still earn its place over time.
-  - **New in v100:** the ten pattern styles (`13-patterns.js`); watch which get used. *Removed in v102:* Edit line,
+  - **New in v100:** the ten pattern styles (`13-patterns.js`); watch which get used. **New in v139:** Make a vase
+    (`17-vase.js`, `vase.js`): one input inside the 3D model card, its path written straight from its settings rather
+    than a mesh sliced; watch which textures and movements get printed. *Removed in v102:* Edit line,
     Shading and v101's layered Art tab (not used, or too complicated: ROADMAP.md, Removed).
 
 ### Badly engineered (the real risks left)
 
 - **Logic reads the page directly.** The pipeline, layers, plot and model code read controls by id in the middle of
   their work (`$("…").value`). That ties the logic to the page, so it can only be tested in a browser, and the same
-  control is read in several places. (Step 4.)
+  control is read in several places. Counted on 9 November: plot.js 78 reads, export.js 64, pipeline.js 56,
+  layers.js 44, vase.js 40 (its own controls, read where they change), model.js 33. (Step 4: start with layers.js
+  and export.js, the Print step's.)
 - **Hidden dependencies.** The app files call each other's functions with no imports; the only map is the load order
   in `index.html`. Eased in v91: the printer, chocolate, needle and layer height announce a change once
   (`printSettingsChanged`, state.js) and what depends on them subscribes, instead of listening to those controls in
