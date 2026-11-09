@@ -110,3 +110,5 @@ more than they save.
 - **docs/history/** (AUDIT.md, REVIEW.md): what the audits found and fixed, kept as written; whatever they left open
   moves to ROADMAP.md. CHANGELOG.md says what each version changed.
 - **PLAN.md**: decisions made together, the rules, later and not doing.
+- **docs/TIDY.md**: the recurring tidy-up (every Monday, a scheduled task): `source/tools/tidy-report.js` looks,
+  the mechanical fixes go on a branch, and anything that removes or restructures is proposed first.
