@@ -8,8 +8,8 @@ module.exports = {
   id: "E57", title: "Vases: a profile turned round, ribs and rings on the wall, a wave, zigzag or loops along the path, and the stacking check",
   guards: "a profile that misses its own points, a vase whose path doesn't follow its settings (radius, how many waves, twist), a jump between laps, loops that don't loop, and a shift that moves a lap off the one below without the check saying so",
   why: "Nicolaas (9 November 2026), after looking at clay printing apps: a vase from a profile curve you edit, with a surface texture and a movement pattern on the extrusion path. The path is written straight from the settings (no slicing), so the settings are the print: this test checks that the path is what was asked for, and that the check catches a lap that wouldn't sit on the one below.",
-  how: "Makes 12 mm vases with 0.3 mm layers: a 15 mm cylinder (plain, with a 0.5 mm wave of 16, with 8 ribs 2 mm deep twisted 20°, with loops of 1 mm, 30 round); the wave shifted half a wave a layer; a 3-layer filled base; and a bulb's profile. Measures each lap's radius round it, counts the waves and the loops (runs where the needle goes backwards), finds the top rib's crest, and stacks the laps into the printed 3D path.",
-  pass: "The profile passes through every point (to 0.001 mm); the plain cylinder is 15 mm all round on every lap (0.01) with 40 layers and nothing off the lap below; the wave spans 15 ± 0.5 mm with 16 waves a lap, and stacked straight is within 0.01 mm; shifted half a wave the check finds about 1 mm (2 × size) both ways; the ribs span 14–16 mm and the top rib's crest is at 20° (±2); loops: 30 backward runs a lap and a tight turn under half the bead; no step along the stacked path longer than 0.5 mm; the base: 3 filled layers inside the wall; the mesh is centred on its footprint.",
+  how: "Makes 12 mm vases with 0.3 mm layers: a 15 mm cylinder (plain, with a 0.5 mm wave of 16, with 8 ribs 2 mm deep twisted 20°, with loops of 1 mm, 30 round); the wave shifted half a wave a layer; a 3-layer filled base; a wide base (a 100 mm vase three times the bulb's width), how much of the band just inside its rim line it covers; and a bulb's profile. Measures each lap's radius round it, counts the waves and the loops (runs where the needle goes backwards), finds the top rib's crest, and stacks the laps into the printed 3D path.",
+  pass: "The wide base covers at least 85% of the band inside its rim line (60% before 9 November 2026, when the fill stopped a line spacing in); the profile passes through every point (to 0.001 mm); the plain cylinder is 15 mm all round on every lap (0.01) with 40 layers and nothing off the lap below; the wave spans 15 ± 0.5 mm with 16 waves a lap, and stacked straight is within 0.01 mm; shifted half a wave the check finds about 1 mm (2 × size) both ways; the ribs span 14–16 mm and the top rib's crest is at 20° (±2); loops: 30 backward runs a lap and a tight turn under half the bead; no step along the stacked path longer than 0.5 mm; the base: 3 filled layers inside the wall; the mesh is centred on its footprint.",
   run() {
     const checks = [];
     // the profile: a smooth curve through its points
@@ -58,6 +58,15 @@ module.exports = {
     const M = UNB.vaseMesh(vase({ kind: "ribs", count: 3 }, { kind: "none" }), { h: 0.3 });
     const xs = M.rows.flatMap((r) => Array.from(r.x)), ys = M.rows.flatMap((r) => Array.from(r.y));
     checks.push(check("mesh rows centred (mm)", +Math.max(Math.abs(Math.max(...xs) + Math.min(...xs)), Math.abs(Math.max(...ys) + Math.min(...ys))).toFixed(3), "<=", 0.01));
+    // a wide base (36 mm across the bottom, as a 100 mm vase three times the bulb's width): where the base meets its
+    // rim line it's solid (the fill used to stop a line spacing in, a ring of nothing round the rim, worse the
+    // bigger the base)
+    { const W = Object.assign(UNB.vaseDefaults(), { height: 100, move: { kind: "none" } }); W.profile = W.profile.map(([t, r]) => [t, r * 3]);
+      const B = run(W, { base: 1, baseDensity: 1, basePattern: "lines" }).base[0], R0 = UNB.vaseRadius(UNB.vaseProfile(W.profile), 0.3 / 100);
+      const near = (x, y) => { let m = 9; for (let i = 1; i < B.x.length; i++) { const ax = B.x[i - 1], ay = B.y[i - 1], dx = B.x[i] - ax, dy = B.y[i] - ay, l = dx * dx + dy * dy || 1, t = Math.max(0, Math.min(1, ((x - ax) * dx + (y - ay) * dy) / l)); m = Math.min(m, Math.hypot(ax + t * dx - x, ay + t * dy - y)); } return m; };
+      let n = 0, hit = 0;
+      for (const f of [0.25, 0.5, 0.75]) { const rr = R0 - 0.42 - f * 0.57; for (let i = 0; i < 360; i++) { const a = (2 * Math.PI * i) / 360; n++; if (near(rr * Math.cos(a), rr * Math.sin(a)) <= 0.43) hit++; } }
+      checks.push(check("wide base: the band inside the rim line covered (%)", +((100 * hit) / n).toFixed(1), ">=", 85)); }
     return { checks, notes: `wave peaks ${peaks}; shifted ½: out ${alt.stacking.out.toFixed(2)}, in ${alt.stacking.in.toFixed(2)} mm; top rib at ${ang.toFixed(1)}° (twist ${twistAt.toFixed(1)}°); loops ${back} a lap, tightest ${loops.tightest.r.toFixed(2)} mm; longest step ${jump.toFixed(3)} mm; ${plain.points} points a lap` };
   },
 };

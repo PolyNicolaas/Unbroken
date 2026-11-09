@@ -3,6 +3,14 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v142 · 2026-11-09
+
+- **A solid base, however big** (a vase's or a model's): the base's fill kept the drawing's line spacing (line width
+  plus the gap between lines, 1.34 mm with the 18G needle) from its rim line and at every join, so it left a ring of
+  nothing just inside the rim and a hole at each join, more of them the bigger the base. It now uses its own row
+  spacing there (lines touching, never under a line width): on a 72 mm base the band inside the rim went from 60%
+  to 91% covered. Test E57 checks it.
+
 ## v141 · 2026-11-09
 
 The map of the steps is the app's interface (merged from the v140 experiment), and the Suggestion box is gone.

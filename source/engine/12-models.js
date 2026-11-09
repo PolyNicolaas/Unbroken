@@ -313,15 +313,21 @@
       filled = 0,
       skipped = 0;
     if (o.fill) {
+      // the fill's distance from the wall and the width of its joins: the rows' own spacing when that's closer than
+      // the line spacing. The line spacing keeps a drawing's lines apart (the gap between lines); a solid base wants
+      // its lines touching the wall and each other, and the gap left a ring of nothing round the rim and a hole at
+      // every join (more of them the bigger the base)
+      // (never under a line width: a base over 100% packs its rows closer, not its edge and joins)
+      const fd = Math.max(w, Math.min(d, o.fillSpacing || d));
       const f = UNB.infill(
         { x: Float64Array.from(x), y: Float64Array.from(y), idx: Int32Array.from(x, (_, i) => i) },
-        d * 1.05,
+        fd * 1.05,
         {
           rows: (o.fillSpacing || d) * 1.05,
           pattern: o.fill,
           angle: o.fillAngle || 0,
           minArea: o.fillMinArea || 0,
-          bridge: d,
+          bridge: fd,
         }
       );
       x = Array.from(f.x);
