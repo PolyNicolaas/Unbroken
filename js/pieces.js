@@ -58,7 +58,7 @@ function lineLifts() {
       bd = Infinity;
     bands.forEach(([a, b], i) => {
       const d = y < a ? a - y : y > b ? y - b : 0;
-      if (d < bd) (bd = d), (best = i);
+      if (d < bd) ((bd = d), (best = i));
     });
     return best;
   };

@@ -20,10 +20,12 @@ function readouts() {
   setChip(
     `${st.N} terms · error ${fmt(e.score * mm)} mm` +
       (j ? ` · ${j} connector${j === 1 ? "" : "s"}` : "") +
-      (up ? " · lines print apart" : ""),
+      (up ? " · lines print apart" : "")
   );
   $("chip").title =
-    (j ? `${j} connector${j === 1 ? "" : "s"} between separate parts. Always drawn: the printer can't stop the flow.` : "") +
+    (j
+      ? `${j} connector${j === 1 ? "" : "s"} between separate parts. Always drawn: the printer can't stop the flow.`
+      : "") +
     (up
       ? `${j ? " " : ""}Each line of the text prints as a piece of its own: between lines the needle lifts (dashed), no chocolate.`
       : "");

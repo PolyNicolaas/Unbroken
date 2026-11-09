@@ -3,7 +3,8 @@
    One part of the engine (no DOM), loaded after 06-fourier.js; core.js lists every part and what's in it. */
 (function (root) {
   "use strict";
-  const UNB = root.UNB;
+  const UNB = root.UNB,
+    { segDist2 } = UNB._u; // shared helpers (00-util.js)
 
   // A curve (closed unless closed === false) drawn into a w × h pixel grid, 1 where it passes
   function rasterize(re, im, w, h, closed) {
@@ -99,15 +100,7 @@
           if (!L) continue;
           for (const s of L) {
             const t = (s + 1) % n,
-              ax = x[s],
-              ay = y[s],
-              dx = x[t] - ax,
-              dy = y[t] - ay,
-              ll = dx * dx + dy * dy;
-            const u = ll > 0 ? Math.max(0, Math.min(1, ((px - ax) * dx + (py - ay) * dy) / ll)) : 0;
-            const ex = ax + u * dx - px,
-              ey = ay + u * dy - py,
-              d2 = ex * ex + ey * ey;
+              d2 = segDist2(px, py, x[s], y[s], x[t], y[t]);
             if (d2 < best) best = d2;
           }
         }

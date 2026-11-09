@@ -241,16 +241,6 @@ th:first-child, td:first-child { text-align: left; }
 .lab-r { display: flex; align-items: center; gap: calc(8px * var(--space)); }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 
-/* suggestion box (notes.js) */
-.note-form { display: grid; gap: calc(4px * var(--space)); margin: 0; }
-.note-form input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: calc(7px * var(--corner)); padding: calc(7px * var(--space)) calc(9px * var(--space)); width: 100%; min-width: 0; box-sizing: border-box; }
-.note-list { list-style: none; margin: 0 0 calc(8px * var(--space)); padding: 0; display: grid; gap: calc(4px * var(--space)); max-height: 320px; overflow: auto; }
-.note-list li { display: grid; grid-template-columns: auto auto 1fr auto; gap: calc(6px * var(--space)); align-items: baseline; font-size: calc(13px * var(--text)); }
-.note-list li.done .txt { text-decoration: line-through; color: var(--muted); }
-.note-list small { color: var(--muted); white-space: nowrap; }
-.note-list .tag { font-size: calc(11px * var(--text)); padding: 0 6px; border-radius: 999px; border: 1px solid var(--rule); color: var(--muted); }
-.note-list .tag.bug { color: var(--warn); border-color: var(--warn); }
-.note-list .txt { overflow-wrap: anywhere; }
 
 .version { font-family: var(--font-mono); font-size: calc(11px * var(--text)); color: var(--muted); margin-left: 6px; }   /* the build writes the version from CHANGELOG.md; "dev" when run from the source */
 /* the Input card's drop area: click to choose, or drop an image, STL or design file (anywhere on the page works too) */
@@ -453,16 +443,12 @@ body[data-empty="1"] .pv-size { display: none; }
 .trace-needed[hidden] { display: none; }
 .trace-needed p { margin: 0; max-width: 40ch; font-weight: 550; }
 
-/* ---------- v113: the Next bar, the photo in the Picture card, the suggestion box put away ---------- */
+/* ---------- v113: the Next bar, the photo in the Picture card ---------- */
 .nextbar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) calc(12px * var(--space)) max(calc(10px * var(--space)), env(safe-area-inset-bottom)); margin-top: calc(4px * var(--space)); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)) calc(10px * var(--corner)) 0 0; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(6px); box-shadow: 0 -4px 14px rgb(0 0 0 / .06); }
 .nextbar .nb-hint { flex: 1; min-width: 0; color: var(--muted); font-size: calc(12.5px * var(--text)); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nextbar .btn.primary { white-space: nowrap; }
 .photo-box { display: grid; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) 0 0; margin-top: calc(4px * var(--space)); border-top: 1px solid var(--rule); }
 .photo-box[hidden] { display: none; }
-body:not([data-notes="1"]) .card.notes { display: none !important; }
-.card.notes h2 { padding-right: 110px; }
-.notes-close { position: absolute; top: calc(10px * var(--space)); right: calc(44px * var(--space)); }
-.card.notes { position: relative; }
 /* the examples, once something is in: one row that scrolls sideways */
 body:not([data-empty="1"]) .examples .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding-bottom: 2px; }
 body:not([data-empty="1"]) .examples .chips .chip-btn { flex: none; }
@@ -543,3 +529,151 @@ body:not([data-moreprint="1"]) .print-more { display: none !important; }
 body[data-empty="1"] :is(#examplesRow, #dropZone) { display: none; }
 /* a printer makes one continuous line: the Line step has nothing to choose there (unless Trace is off, to say so) */
 body[data-out="print"]:not([data-line="drawn"]):not([data-line="none"]) #card-h-src { display: none; }
+
+/* Make a vase (vase.js): the vase's own controls, or the STL's */
+body:not([data-vase="1"]) .vase-only, body[data-vase="1"] .stl-only { display: none !important; }
+#vaseBox:not([data-tex="ribs"]) .vt-ribs, #vaseBox:not([data-tex="rings"]) .vt-rings, #vaseBox[data-tex="none"] .vt-on, #vaseBox[data-move="none"] .vm-on { display: none; }
+.vase-profile { display: block; width: 100%; height: calc(230px * var(--space)); background: var(--paper); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); touch-action: none; cursor: crosshair; }
+.vase-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* ---------- the steps as a map (map.js; View ▸ Map of the steps) ---------- */
+/* a band across the top; under it the preview (the biggest) and the settings (a narrow column) */
+.map, .map-head, .map-rows { display: none; }
+body[data-ui="map"] .wrap { max-width: 1680px; grid-template-columns: minmax(0, 1fr); }
+body[data-ui="map"] .map { display: block; position: relative; height: 170px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); overflow: hidden; background-image: radial-gradient(var(--grid) 1px, transparent 1px); background-size: 24px 24px; }
+@media (min-width: 640px) {
+  body[data-ui="map"] .wrap { grid-template-columns: minmax(0, 1fr) clamp(300px, 34%, 420px); grid-template-areas: "map map" "left panel" "math math"; }
+  body[data-ui="map"] .map { grid-area: map; }
+  body[data-ui="map"] .left { grid-area: left; }
+  body[data-ui="map"] .panel { grid-area: panel; align-self: start; }
+  body[data-ui="map"] .math { grid-area: math; }
+}
+body[data-ui="map"] .canvas-box { aspect-ratio: auto; height: calc(100vh - 360px); height: calc(100svh - 360px); min-height: 460px; max-height: none; }
+body[data-ui="map"] :is(.output-row, .view-tabs.steps, .nextbar, .more-print, [data-examples], #examplesRow) { display: none !important; }
+body[data-ui="map"] .panel section.card:not([data-map]) { display: none !important; }
+body[data-ui="map"] .map-head { display: flex; flex-direction: column; gap: calc(10px * var(--space)); }
+body[data-ui="map"] .map-rows:not([hidden]) { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding-bottom: 6px; }
+.map-top { display: none; height: 34px; flex: none; margin-left: calc(24px * var(--space)); align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
+.map-top .name { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
+body[data-ui="map"] .map-top { display: flex; }
+.map-for[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
+.map-lines { position: absolute; left: 0; top: 0; pointer-events: none; }
+.map-lines path { fill: none; stroke-linecap: round; }
+.map-spine { stroke: var(--choc); stroke-width: 5; }
+.map-thin { stroke: var(--rule); stroke-width: 2; }
+.map-nodes { position: absolute; left: 0; top: 0; bottom: 0; }
+.map-node { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 2px; padding: 0 calc(12px * var(--space)); background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgb(0 0 0 / .05); transition: opacity .15s; }
+.map-node.chip { flex-direction: row; align-items: center; justify-content: center; padding: 0 8px; border-radius: 999px; background: color-mix(in srgb, var(--paper) 45%, var(--surface)); box-shadow: none; }
+.map-node.chip .map-val { display: none; }
+.map-node.quiet { opacity: .5; }
+.map-node.quiet:hover, .map-node.quiet:focus-visible { opacity: 1; }
+.map-node:hover { border-color: var(--accent); }
+.map-node.open { border: 2px solid var(--accent); background: var(--accent-soft); opacity: 1; }
+.map-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.map-cap { font: 600 calc(11.5px * var(--text))/1.2 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.map-node.chip .map-cap { font: 500 calc(12.5px * var(--text))/1.2 var(--font-body); letter-spacing: 0; text-transform: none; color: var(--ink); }
+.map-node.open .map-cap { color: var(--accent); }
+.map-val { font: 400 calc(13px * var(--text))/1.3 var(--font-mono); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
+.map-val:empty { display: none; }
+.map-node .map-dot { position: absolute; right: 9px; top: 9px; }
+.map-node.chip .map-dot { position: static; flex: none; margin-left: 6px; }
+.map-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: transparent; }
+.map-dot.warn { background: var(--warn); }
+.map-dot.bad { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 30%, transparent); }
+.map-legend { display: none; }
+/* the panel's head and the rows */
+.map-head-t { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.map-head-t h2 { margin: 0; font: 600 calc(20px * var(--text))/1.2 var(--font-body); }
+.map-recipe { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); padding: 9px 12px; }
+.map-recipe:not([hidden]) { display: flex; }
+.map-recipe-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; margin-right: auto; }
+.map-group h3 { margin: 0; padding: 14px 16px 6px; font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.map-group > label.field, .map-group > .map-calc { display: grid; grid-template-columns: minmax(0, 1fr) auto 24px; align-items: center; column-gap: 8px; min-height: 42px; margin: 0; padding: 2px 4px 2px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); position: relative; }
+.map-group > label.field > span:first-child, .map-group > .map-calc > span:first-child { font-size: calc(14px * var(--text)); color: var(--ink); }
+.map-group > label.field :is(input, select, .needle-pick, .stepper) { justify-self: end; max-width: 200px; }
+.map-group > label.field input[type="number"] { width: 84px; text-align: right; }
+.map-group > label.field > small.from { grid-column: 1 / -1; margin: -4px 0 6px; }
+.map-group > label.field:not(.changed) > small.from:is(#fromLayerH, #fromFeed, #fromZ, #fromLift, #fromFlow, #fromOver, #fromOx, #fromOy) { display: none; }
+.map-group > label.field.changed::before { content: ""; position: absolute; left: 6px; top: 20px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
+.map-reset { display: none; grid-column: 3; grid-row: 1; width: 24px; height: 24px; border: none; background: none; color: var(--accent); font-size: 15px; cursor: pointer; padding: 0; }
+label.field.changed > .map-reset { display: block; }
+.map-group > :is(div.row, div.two, .choc-pick, label.check, p, .inline, button) { margin: 0; padding: 8px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
+.map-group > div.two { display: grid; gap: 8px; }
+.map-group > .choc-pick { display: flex; align-items: center; gap: 10px; }
+.map-group > .choc-pick label.field { flex: 1; display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; margin: 0; }
+.map-calc .val { font: 400 13px var(--font-mono); color: var(--muted); grid-column: 2 / 4; justify-self: end; padding-right: 4px; }
+/* the examples tray, over the preview */
+.map-tray { position: absolute; left: 12px; right: 12px; top: 12px; z-index: 6; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); box-shadow: var(--shadow-menu); padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px; max-height: calc(100% - 24px); overflow: auto; }
+.map-tray-head { display: flex; align-items: baseline; gap: 10px; }
+.map-tray-head h2 { margin: 0; font: 600 calc(17px * var(--text)) var(--font-body); }
+.map-tray-x { margin-left: auto; border: none; background: none; font-size: 20px; color: var(--muted); cursor: pointer; }
+.map-tray-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.map-ex { display: flex; flex-direction: column; align-items: flex-start; gap: 4px; padding: 10px 12px; border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); background: color-mix(in srgb, var(--paper) 45%, var(--surface)); color: var(--ink); text-align: left; cursor: pointer; font: inherit; }
+.map-ex b { font-weight: 600; }
+.map-ex span { font-size: calc(12px * var(--text)); color: var(--muted); }
+.map-ex:hover { border-color: var(--accent); }
+/* the empty preview: the map's examples are in their own tray */
+.es-map, body[data-ui="map"] .es-classic { display: none; }
+body[data-ui="map"] .es-map { display: inline; }
+/* the map's preview is narrower than the window: its overlays take the compact arrangement at every width, so the
+   view's own label, the zoom, One copy / Whole plate and the Layer slider never sit on each other */
+body[data-ui="map"] .zoombar { flex-direction: column; align-items: flex-end; top: 34px; }
+body[data-ui="map"] .copies-seg label { white-space: nowrap; }
+body[data-ui="map"] .layerbar { top: 110px; }
+body[data-ui="map"] .pane-tip { display: none; }
+body[data-ui="map"] .pathbar { max-width: calc(100% - 96px); }
+/* the map's preview keeps its gestures: dragging, pinching and scrolling over it never move the page */
+body[data-ui="map"] .canvas-box { touch-action: none; overscroll-behavior: contain; }
+/* the map: line width and gap live in Material only; the math sits with the Line step; the drop area is for loading
+   a model (a picture has its own buttons, and a file can be dropped anywhere) */
+body[data-ui="map"] #card-h-line label.field:is(:has(#lineW), :has(#lineGapMM)) { display: none; }
+body[data-ui="map"] .math { display: none; }
+body[data-ui="map"] .map-extra .math { display: block; }
+body[data-ui="map"]:not([data-art="model"]) #dropZone { display: none; }
+
+/* the map's settings, every step alike: a step's cards read as groups of rows, like Material's */
+body[data-ui="map"] .panel section.card[data-map] { padding: 0 0 6px; }
+body[data-ui="map"] .panel section.card[data-map] > h2 { padding: 14px 16px 6px; }
+body[data-ui="map"] .panel section.card[data-map] .card-toggle { pointer-events: none; }
+body[data-ui="map"] .panel section.card[data-map] .card-toggle .t::before { display: none; }
+body[data-ui="map"] .panel section.card[data-map] > .card-body { gap: 0; padding: 0; }
+body[data-ui="map"] .panel section.card[data-map] .card-body :is(.two, .three) { display: block; }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field:not(:has(textarea)) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; min-height: 42px; margin: 0; padding: 2px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field > span:first-child { font-size: calc(14px * var(--text)); color: var(--ink); }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field:not(:has(textarea)) :is(input:not([type="checkbox"]), select) { justify-self: end; max-width: 200px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field input[type="number"] { width: 84px; text-align: right; }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field > small { grid-column: 1 / -1; margin: -4px 0 6px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body > :is(div.row, .seg, label.check, .inline, p.hint, p.status, .dropzone, ul, textarea, details, .lab, label.field:has(textarea), table, .chart, .tiles) { margin: 0; padding: 8px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
+body[data-ui="map"] .panel section.card[data-map] .card-body > .seg { margin: 8px 16px; padding: 3px; border-bottom: none; }
+body[data-ui="map"] .panel section.card[data-map] .card-body > :is(.two, .three) > :not(label.field) { padding: 8px 16px; }
+
+/* the map, dense (Nicolaas, 9 November 2026: "there are lots of settings so it being a little dense is not a terrible
+   idea"): less space round the text everywhere in the map layout, a lower band, shorter rows */
+body[data-ui="map"] { --space: var(--map-space, .7); --text: var(--map-text, .94); }
+body[data-ui="map"] .map { height: 124px; }
+body[data-ui="map"] .canvas-box { height: calc(100vh - 290px); height: calc(100svh - 290px); min-height: 420px; }
+body[data-ui="map"] .map-node { gap: 0; }
+body[data-ui="map"] .map-node .map-cap, body[data-ui="map"] .map-node .map-val { line-height: 1.25; }
+body[data-ui="map"] .map-node.chip { font-size: calc(12.5px * var(--text)); }
+body[data-ui="map"] .map-group h3,
+body[data-ui="map"] .panel section.card[data-map] > h2 { padding: 9px 12px 3px; }
+body[data-ui="map"] :is(.map-group > label.field, .map-group > .map-calc, .panel section.card[data-map] .card-body label.field:not(:has(textarea))) { min-height: 32px; padding-top: 1px; padding-bottom: 1px; padding-left: 12px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field:not(:has(textarea)) { padding-right: 12px; }
+body[data-ui="map"] :is(.map-group > label.field, .panel section.card[data-map] .card-body label.field) > span:first-child { font-size: calc(13.5px * var(--text)); }
+body[data-ui="map"] .panel section.card[data-map] .card-body > :is(div.row, .seg, label.check, .inline, p.hint, p.status, .dropzone, ul, textarea, details, .lab, label.field:has(textarea), table, .chart, .tiles) { padding: 5px 12px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body > .seg { margin: 5px 12px; padding: 2px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body > :is(.two, .three) > :not(label.field) { padding: 5px 12px; }
+body[data-ui="map"] .panel :is(select, input[type="number"], input[type="text"]) { padding-top: 3px; padding-bottom: 3px; min-height: 0; }
+body[data-ui="map"] .panel .num-btn { min-height: 0; width: 26px; }
+body[data-ui="map"] .panel .hint, body[data-ui="map"] .panel small { line-height: 1.35; }
+body[data-ui="map"] .map-group > label.field.changed::before { top: 14px; }
+body[data-ui="map"] .map-group > :is(div.row, div.two, .choc-pick, label.check, p, .inline, button) { padding: 5px 12px; }
+body[data-ui="map"] :is(.map-group, .panel section.card[data-map] .card-body) div.row > :is(label, span):first-child { font-weight: 400; font-size: calc(13.5px * var(--text)); }
+/* a pair of settings side by side (Angle, Turn every…) reads as two rows like the rest */
+body[data-ui="map"] .map-group > div.two { display: block; padding: 0; border-bottom: none; }
+body[data-ui="map"] .map-group > div.two > label.field { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; min-height: 32px; margin: 0; padding: 1px 12px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
+body[data-ui="map"] .map-group > div.two > label.field > span:first-child { font-size: calc(13.5px * var(--text)); color: var(--ink); }
+body[data-ui="map"] .map-group > div.two > label.field :is(input, .num) { justify-self: end; }
+body[data-ui="map"] .map-group > div.two > label.field .num { width: 136px; }
+body[data-ui="map"] :is(.map-group, .panel section.card[data-map] .card-body) .num { max-width: 136px; justify-self: end; }
+body[data-ui="map"] .map-node.chip { padding: 0 5px; }

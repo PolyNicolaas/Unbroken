@@ -9,6 +9,8 @@
   --corner: 1;                 /* roundness of corners on cards, buttons, menus */
   --text: 1;                   /* size of all text */
   --space: 1;                  /* padding and gaps around and between things */
+  --map-text: .94;             /* the same two with the map of the steps on: denser, for its many settings */
+  --map-space: .7;
 
   /* ---------- Fonts (loaded from Google Fonts in index.html; system fonts are used if they don't load) */
   --font-display: "Bricolage Grotesque", "Avenir Next", system-ui, sans-serif;   /* the title */

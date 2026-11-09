@@ -160,7 +160,7 @@ window.UNB_SETTINGS = {
 
     // --- Text source
     text: "Happy Birthday",           // up to rules.maxTextLines lines; use \n for a new line
-    font: "sans",                     // sans, readability, readability-italic, nixish, script, allure, tech, osmotron, elfin
+    font: "sans",                     // sans, script, chocolate, dune, pebble, badscript
     letterHeight: 15,                 // mm (raised automatically if too small to read; see rules)
     letterSpacing: "font-default",    // "font-default", "even" or "joined"
     letterGap: null,                  // mm between letters (null = rules.letterGapShare × letter height)
@@ -252,12 +252,13 @@ window.UNB_SETTINGS = {
   // (used) Fixed rules the app follows.
   rules: {
     maxTextLines: 12,                 // lines of typed text (each can print as a piece of its own)
-    minLetterHeight: { default: 8, allure: 10, elfin: 10, badscript: 10 },   // smallest readable letter height, in line widths, per font
+    minLetterHeight: { default: 8, badscript: 10 },   // smallest readable letter height, in line widths, per font
     minLetterStrokes: 4,              // with the measured smallest height (defaults.measuredHeight): never below this many stroke widths
     letterGapShare: 0.15,             // default letter gap, × letter height
     minLetterGap: 1.2,                // letters never closer than this × line width
     wordGapShare: 0.5,                // default word gap, × letter height
     minWordGap: 2,                    // words never closer than this × line width
+    textLaneShare: 0.08,              // a text's connectors run along its baselines, in a band this × letter height either side
     undoSteps: 100,                   // how many steps Undo remembers
   },
 

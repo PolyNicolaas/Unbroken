@@ -166,15 +166,57 @@ function autoName(name) {
 }
 // Cyrillic and Greek letters spelled in Latin ones for file names (Шоколад → shokolad), so a name in either still
 // names the file instead of leaving it "design"
-const TRANSLIT = Object.fromEntries(
-  [
-    ..."абвгдезийклмнопрстуфыэ".split("").map((c, i) => [c, "abvgdeziyklmnoprstufye"[i]]),
-    ["ё", "yo"], ["ж", "zh"], ["х", "kh"], ["ц", "ts"], ["ч", "ch"], ["ш", "sh"], ["щ", "shch"], ["ъ", ""], ["ь", ""],
-    ["ю", "yu"], ["я", "ya"], ["є", "ye"], ["і", "i"], ["ї", "yi"], ["ґ", "g"], ["ў", "u"],
-    ..."αβγδεζηθικλμνξοπρστυφχψω".split("").map((c, i) => [c, ["a","v","g","d","e","z","i","th","i","k","l","m","n","x","o","p","r","s","t","y","f","ch","ps","o"][i]]),
-    ["ς", "s"],
-  ],
-);
+const TRANSLIT = Object.fromEntries([
+  ..."абвгдезийклмнопрстуфыэ".split("").map((c, i) => [c, "abvgdeziyklmnoprstufye"[i]]),
+  ["ё", "yo"],
+  ["ж", "zh"],
+  ["х", "kh"],
+  ["ц", "ts"],
+  ["ч", "ch"],
+  ["ш", "sh"],
+  ["щ", "shch"],
+  ["ъ", ""],
+  ["ь", ""],
+  ["ю", "yu"],
+  ["я", "ya"],
+  ["є", "ye"],
+  ["і", "i"],
+  ["ї", "yi"],
+  ["ґ", "g"],
+  ["ў", "u"],
+  ..."αβγδεζηθικλμνξοπρστυφχψω"
+    .split("")
+    .map((c, i) => [
+      c,
+      [
+        "a",
+        "v",
+        "g",
+        "d",
+        "e",
+        "z",
+        "i",
+        "th",
+        "i",
+        "k",
+        "l",
+        "m",
+        "n",
+        "x",
+        "o",
+        "p",
+        "r",
+        "s",
+        "t",
+        "y",
+        "f",
+        "ch",
+        "ps",
+        "o",
+      ][i],
+    ]),
+  ["ς", "s"],
+]);
 const translit = (t) =>
   t.replace(/[\u0370-\u03ff\u0400-\u04ff]/g, (c) => {
     const l = c.toLowerCase(),
@@ -183,7 +225,11 @@ const translit = (t) =>
   });
 // a name in plain ASCII for the G-code's comment: Cyrillic and Greek spelled, accents off, anything else dropped
 const asciiName = (t) =>
-  translit(translit(String(t).normalize("NFC")).normalize("NFD").replace(/[\u0300-\u036f]/g, ""))
+  translit(
+    translit(String(t).normalize("NFC"))
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+  )
     .replace(/[^\x20-\x7e]+/g, "")
     .replace(/\s+/g, " ")
     .trim();
@@ -202,7 +248,11 @@ $("designName").addEventListener("input", () => {
 });
 function slugOf(raw, max = 20) {
   // Cyrillic first, letters whole (й, ё); then accents come off (é → e, ά → α) and Greek is spelled too
-  const t = translit(translit(raw.normalize("NFC")).normalize("NFD").replace(/[\u0300-\u036f]/g, ""));
+  const t = translit(
+    translit(raw.normalize("NFC"))
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+  );
   return (
     t
       .replace(/\./g, " ")
@@ -371,7 +421,34 @@ function readyItems() {
       "h-layers"
     );
   else add("ok", `Every layer takes at least ${need} s to set`, "h-layers");
-  if (L.model && L.overhang) {
+  if (L.vase && L.overhang) {
+    // a vase made here: does each lap sit on the one below, and can the bead follow its turns?
+    const step = overhangMM(),
+      zAt = (k) => fmt(firstZ() + k * L.S.h, 1),
+      fix = "a gentler profile there, a smaller movement or less shift";
+    if (L.overhang.worst > step + 0.02)
+      add(
+        "warn",
+        `The wall steps out ${fmt(L.overhang.worst, 2)} mm in a layer at ${zAt(L.overhang.at)} mm (a bead holds ${fmt(step, 2)}): ${fix}`,
+        "h-model"
+      );
+    if (L.overhang.inWorst > 0.02)
+      add(
+        "warn",
+        `The wall steps in ${fmt(L.overhang.inWorst + step, 2)} mm in a layer at ${zAt(L.overhang.inAt)} mm, over the empty inside (a bead holds ${fmt(step, 2)}): ${fix}`,
+        "h-model"
+      );
+    if (!(L.overhang.worst > step + 0.02) && !(L.overhang.inWorst > 0.02))
+      add("ok", `Every lap sits on the one below (within ${fmt(step, 2)} mm)`, "h-layers");
+    const T = L.tightest,
+      half = lineWidthMM() / 2;
+    if (T && T.r < half)
+      add(
+        "warn",
+        `Turns as tight as a ${fmt(T.r, 2)} mm radius at ${zAt(T.at)} mm, for a bead ${fmt(2 * half, 2)} mm wide: the chocolate rounds them off (fewer or smaller movements keep their shape)`,
+        "h-model"
+      );
+  } else if (L.model && L.overhang) {
     // a model: does any part reach out past what a bead can hold?
     const step = overhangMM(),
       S = L.support,

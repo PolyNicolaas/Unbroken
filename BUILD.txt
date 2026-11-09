@@ -1,66 +1,68 @@
-Unbroken · web app build v137
-Built:  2026-11-05T01:26:28.293Z
-Tests:  110 of 110 tests passed
+Unbroken · web app build v141
+Built:  2026-11-09T19:15:02.904Z
+Tests:  114 of 114 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
-  0902e2e523fa  00-util.js
+  5870f0ac0b43  00-util.js
   2584db84594f  01-image.js
   825b635d53a8  02-lines.js
-  4f71d67e1c54  03-text.js
-  814ea8379376  04-walk.js
-  326b5f6077c5  05-fill.js
+  e12fde15d834  03-text.js
+  4fe601a46001  04-walk.js
+  fe735dbb72bf  05-fill.js
   340aeaecfe87  06-fourier.js
-  e88cd163925f  07-measure.js
+  b867178253c0  07-measure.js
   d0cc374de0d6  08-shape.js
   76b9687b61c1  09-plate.js
-  69b025cefbe5  10-export.js
+  a6db241501bf  10-export.js
   ac3de470b974  11-stages.js
-  c1e0e2851039  12-models.js
+  c32e09d8a5d7  12-models.js
   f384302a9e33  13-patterns.js
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   c58b27214155  16-molecule.js
-  19557242f5ce  core.js
-  2c3df9d4d6dd  css/app.css
-  0be9d7ad7cf8  css/theme.css
-  4b134bbd36e2  fonts.js
-  a28a9a8091b8  index.html
+  2ca0391bde0f  17-vase.js
+  f86d9cae5b42  core.js
+  bad5ef1ddb7f  css/app.css
+  f2a0abd81100  css/theme.css
+  84cc740df42b  fonts.js
+  ca9f3f6e9efc  index.html
   04742756d25f  js/art.js
   01da455a1225  js/camera.js
-  568c63091e3a  js/config.js
-  60537ade964a  js/controls.js
+  a5b3fec619dd  js/config.js
+  65b40fc186b1  js/controls.js
   419f0a9223bc  js/cutout.js
-  18e4d10c255d  js/engine-bridge.js
-  65f719c0af2b  js/examples.js
-  23280e186875  js/export.js
-  4e0c54ff7869  js/history.js
-  60a97fadfdbb  js/layers.js
+  0a28a5a41e16  js/engine-bridge.js
+  9cba404a6796  js/examples.js
+  44f7c877cb4b  js/export.js
+  7a408170558e  js/history.js
+  255ad8424b9b  js/layers.js
   430a29c664e0  js/levels.js
   7510c8db4a05  js/main.js
+  27eacfab9190  js/map.js
   e04ad77f8f92  js/matrix.js
-  8a6348e8e816  js/model.js
+  7561c5a36bad  js/model.js
   4af0a8cd6be9  js/molecule.js
   7a0d068854d0  js/moleditor.js
-  e8b1737911e5  js/notes.js
   0d0910778259  js/optimize.js
   8344d7117344  js/pathpad.js
   e5316bce512f  js/patterns.js
-  5f756e4a591f  js/pieces.js
-  b3a227544182  js/pipeline.js
+  568f4e1474f2  js/pieces.js
+  61f2764d42fd  js/pipeline.js
   f877d34b57d8  js/plot.js
   b3ebdd62a275  js/preview.js
-  a3b710cab742  js/readouts.js
+  13a1993d3c1e  js/readouts.js
   ce0678154019  js/sample-skull.js
   90c1c8639014  js/scroll.js
-  b886e48b6ab9  js/source.js
+  13c042d46d81  js/source.js
   78f5450a22d9  js/state.js
   49125f92bd01  js/steppers.js
   3c01d085cc08  js/testprint.js
   ffb18c999901  js/tools.js
   e651a30c34d9  js/ui.js
+  7cca0253f8e3  js/vase.js
   e658b885006d  js/views.js
   7c48c854ce75  js/workflow.js
-  53b02936e233  js/zoom.js
-  7364c5202e85  settings.js
-  92a0e4bee835  worker.js
+  a6fb2284499f  js/zoom.js
+  38d35f195d41  settings.js
+  e8f41d7b7513  worker.js

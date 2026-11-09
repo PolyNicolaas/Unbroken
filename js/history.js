@@ -166,6 +166,8 @@ function designState() {
             turns: { ...st.model.turns },
             heightMM: st.model.heightMM,
             cut: { ...modelCut() },
+            // (a vase made here: made again from this)
+            vase: st.model.vase ? structuredClone(st.model.vase) : undefined,
           }
         : null,
       srcLabel: st.srcLabel,
@@ -249,7 +251,8 @@ function syncDesignUI() {
 }
 // Returns a note when part of the design couldn't come back (a 3D model that isn't the one loaded), else "".
 function applyDesign(d, src, imageSource, pics, picMore) {
-  let note = "";
+  let note = "",
+    fontGone = "";
   restoring = true;
   try {
     clearTimeout(textTimer);
@@ -273,9 +276,14 @@ function applyDesign(d, src, imageSource, pics, picMore) {
       // the Speed box was mm/min until v92
       if (id === "gFeed" && s.feedUnit !== "mm/s" && val !== "") val = String(Math.round((+val / 60) * 10) / 10);
       if (el.type === "checkbox" || el.type === "radio") el.checked = !!val;
-      else if (el.tagName === "SELECT" && ![...el.options].some((o) => o.value === String(val)))
-        continue; // e.g. a font this version doesn't have
-      else el.value = val;
+      else if (el.tagName === "SELECT" && ![...el.options].some((o) => o.value === String(val))) {
+        // a font this version doesn't have (v138 removed seven that printed hard to read): Sans, and say so
+        if (id === "font" && $("font").querySelector('option[value="sans"]')) {
+          el.value = "sans";
+          fontGone = String(val);
+        }
+        continue;
+      } else el.value = val;
     }
     for (const k of ["outW", "spacing", "simplify", "N"]) if (s[k] !== undefined) st[k] = s[k];
     // older design files: keep the width they were saved at
@@ -303,17 +311,23 @@ function applyDesign(d, src, imageSource, pics, picMore) {
     if ($("srcModel").checked) {
       // a 3D model: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
       // Designs saved before the fingerprint also match by id, but only when the model's name is the same too.
-      const m = s.model,
-        same =
-          st.model &&
-          m &&
-          (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
+      const m = s.model;
+      if (m && m.vase) {
+        // a vase made here: made again from its settings
+        useVase(m.vase, false); // model.js
+        vaseUI(); // vase.js
+      } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
+      const same =
+        st.model &&
+        m &&
+        !m.vase &&
+        (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
       if (same) {
         st.model.turns = { ...m.turns };
         st.model.om = UNB.orientMesh(st.model.tri, st.model.turns);
         st.model.heightMM = m.heightMM;
         st.model.cut = m.cut ? { ...m.cut } : { bottom: 0, top: 0 };
-      } else if (m && st.model)
+      } else if (m && st.model && !m.vase)
         note = `made with ${s.srcLabel ? `“${s.srcLabel}”` : "another model"}: load that STL to get its turns and height back`;
       // the image to go back to from the model
       st.imageSource = imageSource || (src ? { canvas: src, label: s.srcLabel } : st.imageSource);
@@ -357,6 +371,7 @@ function applyDesign(d, src, imageSource, pics, picMore) {
     syncDesignUI();
     st.autoPending = false; // keep the saved number of terms
     launch(extract);
+    if (fontGone && textMode()) note = `its font (${fontGone}) isn't in this version: set in Sans`;
     return note;
   } finally {
     restoring = false;

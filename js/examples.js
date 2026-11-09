@@ -21,6 +21,7 @@ const EXAMPLES = [
   ["lettering", "Lettering", "text in a single-stroke font", () => artUse("text")],
   ["theobromine", "Theobromine", "a molecule: chocolate's own", () => moleculeExample("theobromine")],
   ["skull", "Skull cup", "a 3D model", () => artUse("model")],
+  ["wavyvase", "Wavy vase", "a vase made here: profile, texture, movement", () => vaseExample()],
 ];
 function useExample(key) {
   const e = EXAMPLES.find(([k]) => k === key);
@@ -74,7 +75,7 @@ function startInput() {
   if (key === "vase") key = "skull"; // (the sample was a plain vase until v124)
   // a model starts as from empty then its chip: the blank picture first (the design's saved image, and undo, need a
   // source)
-  if (key === "skull") artUse("picture");
+  if (key === "skull" || key === "wavyvase") artUse("picture");
   if (useExample(key)) return;
   artUse("picture"); // empty: no picture yet
 }
