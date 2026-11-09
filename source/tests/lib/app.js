@@ -3,6 +3,8 @@
 // asks its background engines whether a job is running, so a test can wait until the app has finished its work
 // instead of sleeping for a guessed time. window.__settled() is true when nothing is pending.
 const SETTLE = () => {
+  // the tests written before the map of the steps (v140) use the step tabs: the map starts off unless a test saved it on
+  try { if (localStorage.getItem("unbroken-mapUI") === null) localStorage.setItem("unbroken-mapUI", "0"); } catch (e) {}
   const live = new Set(),
     st0 = window.setTimeout,
     ct0 = window.clearTimeout;
@@ -74,7 +76,7 @@ async function open(ctx, opts = {}) {
   // More print settings (v119) folded away: shown, as the tests written before expect
   if (!opts.folded) await page.evaluate(() => { if (typeof morePrintSet === "function") morePrintSet(true, false); });
   // the map of the steps (v140) replaces the step tabs: the tests written before it use the tabs (opts.map: keep the map)
-  if (!opts.map) await page.evaluate(() => { if (typeof mapSet === "function") mapSet(false, false); });
+  if (typeof opts.map === "boolean" || !opts.map) await page.evaluate((on) => { if (typeof mapSet === "function") mapSet(on, false); }, !!opts.map);
   // the app opens on the Art tab; most tests work on the Trace tab, so they start there (opts.art: stay on Art)
   if (!opts.art && (await page.$("label[for=viewDesign]"))) {
     await page.click("label[for=viewDesign]");
