@@ -33,8 +33,6 @@ Listed in the report back, with what each one is for, and done only when he says
 - Removing a function nothing calls, or a feature nobody uses: if it goes, a line in ROADMAP.md (Maybe later) says
   what use would bring it back.
 - Splitting a long file by job; DESIGN.md steps 4 (read the controls once) and 6 (ES modules).
-- Sorting the Suggestion box into ROADMAP.md, and closing what's done there (due when the report says so, every
-  three weeks or so).
 
 ## 4 · Prove and hand over
 

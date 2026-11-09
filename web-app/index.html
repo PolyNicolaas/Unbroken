@@ -145,7 +145,6 @@
           <div class="viewpanel menu" role="menu" aria-label="Design file">
             <button class="mitem" type="button" role="menuitem" id="saveDesign" title="Download this design as one file: the image or text, every setting, painted areas and erasing">Save design<small>one .unbroken.json file with the image or text and every setting (a big image takes a moment)</small></button>
             <button class="mitem" type="button" role="menuitem" id="openDesign" title="Open a design file saved from this app">Open design…<small>or drop the file on the page</small></button>
-            <button class="mitem" type="button" role="menuitem" id="notesOpen" title="Ideas and bugs, kept with the app">Suggestion box…<small><span id="notesMenuCount">notes</span> · ideas, bugs, anything to improve</small></button>
           </div>
         </details>
         <input type="file" id="designFile" accept=".json,application/json" hidden>
@@ -902,17 +901,6 @@
       <p class="hint help">The page at the paper size in mm, the drawing at its size from the Line step, centred within the margins. Pen 1 (the drawing) and each fill pen are separate Inkscape layers with their own stroke colour, so Saxi can split them by group or by colour. Saxi sets the pen speeds. In Saxi pick the same paper; if your Saxi build scales drawings to its margins, the size will follow Saxi.</p>
       <p class="status" id="exportMsg" role="status"></p>
     </section>
-
-    <section class="card notes" aria-labelledby="h-notes" data-fold="closed">
-      <h2 id="h-notes">Suggestion box <span class="hval" id="notesCount"></span></h2>
-      <button class="btn mini notes-close" type="button" id="notesClose" title="Put the suggestion box away (File menu, Suggestion box…, brings it back)">Close</button>
-      <form class="note-form" id="noteForm" autocomplete="off">
-        <input type="text" id="noteIn" maxlength="500" aria-label="Suggestion" placeholder="An idea, a bug, anything to improve… (Enter to save)" aria-describedby="noteHelp">
-      </form>
-      <p class="status" id="noteMsg" role="status"></p>
-      <ul class="note-list" id="noteList"></ul>
-      <p class="hint" id="noteHelp">Start with "bug:" or "idea:" to say which it is. Tick a note when it's done. Notes are <span id="notesWhere">kept in this browser</span>. <button class="btn mini" type="button" id="notesCopy">Copy open notes</button></p>
-    </section>
     <div class="map-extra" id="mapExtra"></div>
     <div class="nextbar" role="group" aria-label="The steps">
       <button class="btn design-only" type="button" id="toArt">← Art</button>
@@ -1003,7 +991,6 @@
 <script src="js/sample-skull.js"></script>
 <script src="js/model.js"></script>
 <script src="js/vase.js"></script>
-<script src="js/notes.js"></script>
 <script src="js/history.js"></script>
 <script src="js/map.js"></script>
 <script src="js/main.js"></script>

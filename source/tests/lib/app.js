@@ -66,13 +66,11 @@ async function open(ctx, opts = {}) {
   // before expect; opts.folded keeps them folded
   if (!opts.folded)
     await page.evaluate(() =>
-      ["h-fit", "h-base", "h-infill", "h-notes"].forEach((h) => {
+      ["h-fit", "h-base", "h-infill"].forEach((h) => {
         const b = document.querySelector(`#card-${h}.collapsed .card-toggle`);
         if (b) b.click();
       })
     );
-  // the suggestion box is put away since v113 (File menu, Suggestion box…): shown, as the tests written before expect
-  if (!opts.folded) await page.evaluate(() => { document.body.dataset.notes = "1"; });
   // More print settings (v119) folded away: shown, as the tests written before expect
   if (!opts.folded) await page.evaluate(() => { if (typeof morePrintSet === "function") morePrintSet(true, false); });
   // the map of the steps (v140) replaces the step tabs: the tests written before it use the tabs (opts.map: keep the map)

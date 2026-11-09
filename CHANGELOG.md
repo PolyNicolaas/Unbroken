@@ -3,7 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
-## v140 · 2026-11-09 (experiment, branch claude/map-ui)
+## v141 · 2026-11-09
+
+The map of the steps is the app's interface (merged from the v140 experiment), and the Suggestion box is gone.
+
+- **The map is on for everyone** from the start; View ▸ Map of the steps still turns it off for the old step tabs.
+- **No Suggestion box** (it was in the File menu, `web-app/js/notes.js`): comments come in the chat and go straight
+  into ROADMAP.md. Notes already typed into it stay in that browser's storage, unread.
+
+## v140 · 2026-11-09
 
 The steps as a map, in place of the step tabs (View ▸ Map of the steps turns it off; `web-app/js/map.js`).
 

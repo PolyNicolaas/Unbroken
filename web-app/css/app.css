@@ -241,16 +241,6 @@ th:first-child, td:first-child { text-align: left; }
 .lab-r { display: flex; align-items: center; gap: calc(8px * var(--space)); }
 @media (prefers-reduced-motion: reduce) { * { scroll-behavior: auto !important; } }
 
-/* suggestion box (notes.js) */
-.note-form { display: grid; gap: calc(4px * var(--space)); margin: 0; }
-.note-form input { font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: calc(7px * var(--corner)); padding: calc(7px * var(--space)) calc(9px * var(--space)); width: 100%; min-width: 0; box-sizing: border-box; }
-.note-list { list-style: none; margin: 0 0 calc(8px * var(--space)); padding: 0; display: grid; gap: calc(4px * var(--space)); max-height: 320px; overflow: auto; }
-.note-list li { display: grid; grid-template-columns: auto auto 1fr auto; gap: calc(6px * var(--space)); align-items: baseline; font-size: calc(13px * var(--text)); }
-.note-list li.done .txt { text-decoration: line-through; color: var(--muted); }
-.note-list small { color: var(--muted); white-space: nowrap; }
-.note-list .tag { font-size: calc(11px * var(--text)); padding: 0 6px; border-radius: 999px; border: 1px solid var(--rule); color: var(--muted); }
-.note-list .tag.bug { color: var(--warn); border-color: var(--warn); }
-.note-list .txt { overflow-wrap: anywhere; }
 
 .version { font-family: var(--font-mono); font-size: calc(11px * var(--text)); color: var(--muted); margin-left: 6px; }   /* the build writes the version from CHANGELOG.md; "dev" when run from the source */
 /* the Input card's drop area: click to choose, or drop an image, STL or design file (anywhere on the page works too) */
@@ -453,16 +443,12 @@ body[data-empty="1"] .pv-size { display: none; }
 .trace-needed[hidden] { display: none; }
 .trace-needed p { margin: 0; max-width: 40ch; font-weight: 550; }
 
-/* ---------- v113: the Next bar, the photo in the Picture card, the suggestion box put away ---------- */
+/* ---------- v113: the Next bar, the photo in the Picture card ---------- */
 .nextbar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) calc(12px * var(--space)) max(calc(10px * var(--space)), env(safe-area-inset-bottom)); margin-top: calc(4px * var(--space)); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)) calc(10px * var(--corner)) 0 0; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(6px); box-shadow: 0 -4px 14px rgb(0 0 0 / .06); }
 .nextbar .nb-hint { flex: 1; min-width: 0; color: var(--muted); font-size: calc(12.5px * var(--text)); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .nextbar .btn.primary { white-space: nowrap; }
 .photo-box { display: grid; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) 0 0; margin-top: calc(4px * var(--space)); border-top: 1px solid var(--rule); }
 .photo-box[hidden] { display: none; }
-body:not([data-notes="1"]) .card.notes { display: none !important; }
-.card.notes h2 { padding-right: 110px; }
-.notes-close { position: absolute; top: calc(10px * var(--space)); right: calc(44px * var(--space)); }
-.card.notes { position: relative; }
 /* the examples, once something is in: one row that scrolls sideways */
 body:not([data-empty="1"]) .examples .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding-bottom: 2px; }
 body:not([data-empty="1"]) .examples .chips .chip-btn { flex: none; }

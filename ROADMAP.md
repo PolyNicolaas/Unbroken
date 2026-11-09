@@ -2,8 +2,7 @@
 
 What the tracer should do next, what it might do one day, and what was taken out. This is the one list of open work:
 the past audits and reviews in docs/history/ are kept as written, and whatever they left open is carried here. New
-ideas and bugs start in the **Suggestion box** at the bottom of every tab; from time to time they're sorted into this
-file (and ticked off in the box). Every item says who it's for and what it's used for: an idea without a use stays in
+ideas and bugs come in as comments in the chat and go straight into this file. Every item says who it's for and what it's used for: an idea without a use stays in
 "Maybe later".
 
 Last sorted: 19 October 2026 (v99: grouped into areas; the data and accounts plan added). Decisions made together are in PLAN.md.
@@ -26,8 +25,6 @@ Known bugs:
 - Solid fills: where a second filled area is joined into the wall, the join can cross the line once or twice before
   the clean-up step untangles it (found measuring v92's infill; the same before v92). Join it on a stretch where it
   can't.
-- Suggestion box on GitHub Pages: notes stay in the browser that typed them, so notes from friends never reach this
-  file. Fixed for good by the shared notes in DATA-PLAN.md stage 2; until then, an "Export notes" button.
 
 Tests:
 - Left from the code review of 16 October (docs/history/REVIEW.md): cover painting areas, Draw your own, image prep,
@@ -136,7 +133,7 @@ design, never G-code: the owner makes the G-code with his own printer and chocol
   (`welcome_084_2x_U0007-gcode.zip`, planned 17 October); "Send for printing" (the bundle with the maker's
   name and request) and a print queue in the owner's browser.
 - **Stage 2, accounts and a cloud library**: sign-in, My designs with revisions, online submissions with the owner's
-  inbox and print queue, the Suggestion box shared by every user. Likely Supabase in front of the GitHub Pages site.
+  inbox and print queue. Likely Supabase in front of the GitHub Pages site.
 - **Stage 3, the workshop**: the chocolate and clay database with prices (grams and cost per print), print recipes,
   the print log with ratings and photos, sharing, personalized batches (PLAN.md).
 
@@ -183,11 +180,12 @@ wall), connectors through the middle of 3D models, the challenge runner, and the
 
 | When | What | Why |
 |---|---|---|
+| 2026-11-09 | The Suggestion box (notes.js, File ▸ Suggestion box…, v113) | Comments come in the chat instead; on GitHub Pages the notes stayed in the browser that typed them. Could come back with the shared database (DATA-PLAN.md stage 2) |
 | 2026-10-27 | Edit line (push, smooth, straighten the traced line by hand, v100) | Not very useful in practice: hand edits are better made in a drawing app (export the SVG, edit, drop it back in) |
 | 2026-10-27 | Shading in the Tracing card (hatch, cross-hatch, squiggle) | Didn't work well and was hard to use; patterns that draw a picture's tones replace it (v103) |
 | 2026-10-27 | The Art tab's layers (v101): stacking, pen colours per layer, placement, the Art view | Too complicated: one input at a time is clearer. Layered plotter art could come back for multi-pen plots |
 | 2026-10-19 | The desktop app (desktop/, the Electron Unbroken.app from v96) | Unbroken runs from GitHub Pages while it's still changing; a standalone app comes back when it's ready to roll out. The code is in the repo's history (commit 40a733b); its next steps were a Windows build, signing and notarising, opening designs from Finder and a `.dmg` |
 | 2026-10-17 | Straight wall and Skirt + small wall supports; bridging; printing copies layer by layer | Thin wall replaced the first; the second made a web the line had to cross on every layer; chocolate can't span a gap; copies print one at a time (PLAN.md) |
 | 2026-10-15 | The desktop-app track (taken up again in v96: desktop/) and the Simple / Advanced switch (one interface) | Not started / two views of one panel to maintain |
-| 2026-10-15 | PDF, EPS, HPGL and plain SVG exports; 3D DXF; chocolate product records; working-resolution menu; the static "Planned" list on the 3D tab (now this file and the Suggestion box) | Never used |
+| 2026-10-15 | PDF, EPS, HPGL and plain SVG exports; 3D DXF; chocolate product records; working-resolution menu; the static "Planned" list on the 3D tab (now this file) | Never used |
 | 2026-10-15 | `UNB.freqOf`, `UNB.closeOK` and group tags, `UNB.zLine`, text lane mask, units other than mm in exports, and other dead code (docs/history/AUDIT.md) | Never called |

@@ -54,8 +54,6 @@ source, the trace, the size, the copies wanted; the owner sets how it's printed.
 - **Exports** (G-code zip, SVG for Saxi, DXF for choc OS): downloaded separately. The G-code starts with a short
   header (`; Unbroken — one continuous path`, `; size …`); the file name has the design, needle and copies (v93).
   Nothing links an export back to the design file that made it.
-- **Suggestion box notes**: kept in the browser that typed them (localStorage) on GitHub Pages. Notes from friends
-  using the Pages site stay on their computers and never reach the roadmap.
 - **No accounts, no server.** GitHub Pages serves static files only.
 
 ## What a design record holds
@@ -118,7 +116,6 @@ it's useful straight away: one file holds everything about a print, and the firs
 - **Submissions online**: makers submit from the app; the owner gets an **inbox** (review, accept, ask for
   changes, decline) and a **print queue** (order, due dates, copies, material). Makers see their designs' status;
   email when it changes.
-- The Suggestion box moves into the same database, so notes from every user reach the roadmap.
 
 Tables, roughly:
 
@@ -134,7 +131,6 @@ Tables, roughly:
 | `jobs` | A submission: design revision, maker, request (copies, date wanted, note), status, owner's notes |
 | `job_events` | Each status change: job, from, to, who, when, note |
 | `prints` | Job (or the owner's own design), printer, material, date, settings stamped, rating, notes, photo |
-| `notes` | Suggestion box |
 
 ### Stage 3: the workshop
 

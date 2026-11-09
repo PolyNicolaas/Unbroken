@@ -100,10 +100,7 @@ more than they save.
 
 ## Keeping notes
 
-- **Suggestion box** (bottom of every tab): one line, whenever something comes to mind. Start with "bug:" or "idea:".
-  On the published page the notes are kept with the page and Claude can read them; opened anywhere else they stay
-  in that browser (Copy open notes moves them).
-- **ROADMAP.md**: the one list of open work. Notes sorted into Now / Next / Later / Maybe later, each with its use.
+- **ROADMAP.md**: the one list of open work. Ideas and bugs sorted into Now / Next / Later / Maybe later, each with its use.
   Removed features go to Maybe later with the use that would bring them back.
 - **DESIGN.md** (this file): the principles and the plan above. Update the "Where the code is today" section when a
   step is done.

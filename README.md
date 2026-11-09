@@ -118,7 +118,7 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
   Trace off and a picture as separate strokes, until you pick. The cards a line doesn't use are hidden.
 - **Print** (plate, layers, G-code) or **Plot** (the page, pens, SVG for Saxi).
 
-**The Next bar** at the foot of the settings goes on (and back) a step; the suggestion box is in the File menu.
+**The Next bar** at the foot of the settings goes on (and back) a step.
 Test A38.
 
 The preview follows the step: the art or the line on Art and Line (the page for as drawn), the page on Plot, the plate or
@@ -447,7 +447,6 @@ Tests E23 (slicing and fitting), E29 (cutting, outside only, overlapping shells)
 - [`PLAN.md`](PLAN.md): decisions made with Nicolaas, the rules (one line per copy; the technique's limits), later and not doing.
 - [`DESIGN.md`](DESIGN.md): how the code is meant to be built: the principles, where it is over- or under-engineered, and the plan.
 - [`docs/history/`](docs/history/): the October 2026 code audit (AUDIT.md) and code review (REVIEW.md), as written. Their open items are carried in ROADMAP.md.
-- The **Suggestion box** at the bottom of every tab: one line for an idea or a bug while using the app. Notes are sorted into ROADMAP.md from time to time.
 
 ## Credits
 

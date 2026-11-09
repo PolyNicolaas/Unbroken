@@ -8,7 +8,7 @@
 const fs = require("fs"), path = require("path");
 const args = process.argv.slice(2), flag = (f) => args.includes(f);
 const area = ["engine", "app", "all", "fast"].find((a) => args.includes(a)) || "engine";
-const FAST_APP = ["A01", "A12", "A19"];                         // opens and traces; every control reachable; the suggestion box
+const FAST_APP = ["A01", "A12", "A60"];                         // opens and traces; every control reachable; the map of the steps
 const only = (args[args.indexOf("--only") + 1] || "").split(",").filter((s) => args.includes("--only") && s);
 const HERE = __dirname, RESULTS = path.join(HERE, "results");
 
