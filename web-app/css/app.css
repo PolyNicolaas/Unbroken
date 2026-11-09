@@ -607,7 +607,7 @@ body[data-ui="map"] .map-top { display: flex; }
 .map-group > label.field :is(input, select, .needle-pick, .stepper) { justify-self: end; max-width: 200px; }
 .map-group > label.field input[type="number"] { width: 84px; text-align: right; }
 .map-group > label.field > small.from { grid-column: 1 / -1; margin: -4px 0 6px; }
-.map-group > label.field:not(.changed) > small.from:is(#fromLayerH, #fromFeed, #fromZ, #fromLift, #fromFlow, #fromOver) { display: none; }
+.map-group > label.field:not(.changed) > small.from:is(#fromLayerH, #fromFeed, #fromZ, #fromLift, #fromFlow, #fromOver, #fromOx, #fromOy) { display: none; }
 .map-group > label.field.changed::before { content: ""; position: absolute; left: 6px; top: 20px; width: 6px; height: 6px; border-radius: 50%; background: var(--accent); }
 .map-reset { display: none; grid-column: 3; grid-row: 1; width: 24px; height: 24px; border: none; background: none; color: var(--accent); font-size: 15px; cursor: pointer; padding: 0; }
 label.field.changed > .map-reset { display: block; }
@@ -638,3 +638,25 @@ body[data-ui="map"] .pane-tip { display: none; }
 body[data-ui="map"] .pathbar { max-width: calc(100% - 96px); }
 /* the map's preview keeps its gestures: dragging, pinching and scrolling over it never move the page */
 body[data-ui="map"] .canvas-box { touch-action: none; overscroll-behavior: contain; }
+/* the map: line width and gap live in Material only; the math sits with the Line step; the drop area is for loading
+   a model (a picture has its own buttons, and a file can be dropped anywhere) */
+body[data-ui="map"] #card-h-line label.field:is(:has(#lineW), :has(#lineGapMM)) { display: none; }
+body[data-ui="map"] .math { display: none; }
+body[data-ui="map"] .map-extra .math { display: block; }
+body[data-ui="map"]:not([data-art="model"]) #dropZone { display: none; }
+
+/* the map's settings, every step alike: a step's cards read as groups of rows, like Material's */
+body[data-ui="map"] .panel section.card[data-map] { padding: 0 0 6px; }
+body[data-ui="map"] .panel section.card[data-map] > h2 { padding: 14px 16px 6px; }
+body[data-ui="map"] .panel section.card[data-map] .card-toggle { pointer-events: none; }
+body[data-ui="map"] .panel section.card[data-map] .card-toggle .t::before { display: none; }
+body[data-ui="map"] .panel section.card[data-map] > .card-body { gap: 0; padding: 0; }
+body[data-ui="map"] .panel section.card[data-map] .card-body :is(.two, .three) { display: block; }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field:not(:has(textarea)) { display: grid; grid-template-columns: minmax(0, 1fr) auto; align-items: center; column-gap: 8px; min-height: 42px; margin: 0; padding: 2px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field > span:first-child { font-size: calc(14px * var(--text)); color: var(--ink); }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field:not(:has(textarea)) :is(input:not([type="checkbox"]), select) { justify-self: end; max-width: 200px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field input[type="number"] { width: 84px; text-align: right; }
+body[data-ui="map"] .panel section.card[data-map] .card-body label.field > small { grid-column: 1 / -1; margin: -4px 0 6px; }
+body[data-ui="map"] .panel section.card[data-map] .card-body > :is(div.row, .seg, label.check, .inline, p.hint, p.status, .dropzone, ul, textarea, details, .lab, label.field:has(textarea), table, .chart, .tiles) { margin: 0; padding: 8px 16px; border-bottom: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
+body[data-ui="map"] .panel section.card[data-map] .card-body > .seg { margin: 8px 16px; padding: 3px; border-bottom: none; }
+body[data-ui="map"] .panel section.card[data-map] .card-body > :is(.two, .three) > :not(label.field) { padding: 8px 16px; }

@@ -20,6 +20,12 @@ The steps as a map, in place of the step tabs (View ▸ Map of the steps turns i
   node is open and put back after, so the step tabs still have them.
 - **Examples are a module of the map**: the Examples chip above Art opens a tray of every example over the preview.
   It never opens by itself; the settings no longer list examples. The tests still start from an example by address.
+- **After a first review**: the empty start no longer says Print · ready (Line and Plot say nothing yet, Print nothing to
+  print yet, Size stays blank); for a pen plotter Size shows the drawing's size on the page; line width and gap are set
+  in Material only (no second copy in the Line card); Machine's rows no longer include the recipe button or the
+  "default: centred" notes; The math opens with the Line step instead of under everything; the drop area shows only
+  for loading a 3D model. Every step's cards now read as rows like Material's: one setting per line, name left,
+  value right, the card's title as the group's heading.
 
 ## v139 · 2026-11-09
 

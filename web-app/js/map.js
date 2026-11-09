@@ -63,7 +63,9 @@ const MAP_NODES = {
     cap: "Line",
     step: "design",
     cards: ["h-src", "h-line", "h-fit"],
+    extra: ["#math"],
     val: () => {
+      if (mapNothing()) return "nothing yet";
       const m = lineModeNow(),
         t = ($("chip").textContent.match(/(\d+) terms · error ([\d.]+) mm/) || []).slice(1);
       return m === "strokes"
@@ -81,6 +83,7 @@ const MAP_NODES = {
     step: "choc",
     cards: ["h-gexport"],
     val: () => {
+      if (mapNothing()) return "nothing to print yet";
       const n = mapReady.filter((r) => r.lvl !== "ok").length;
       return n ? `${n} to check` : "ready";
     },
@@ -89,7 +92,7 @@ const MAP_NODES = {
   machine: {
     cap: "Machine",
     step: "choc",
-    rows: [["Machine", ["gZ", "gLift", "gOx", "gOy", "#tuneReset"]]],
+    rows: [["Machine", ["gZ", "gLift", "gOx", "gOy"]]],
     cards: ["h-profile"],
     holds: ["h-machine"],
     quiet: () => !["gZ", "gLift"].some((i) => $(i).closest("label").classList.contains("changed")),
@@ -109,7 +112,13 @@ const MAP_NODES = {
     val: () => "",
   },
   tests: { cap: "Tests", step: "choc", cards: ["h-test", "h-matrix"], quiet: () => true, val: () => "" },
-  plot: { cap: "Plot", step: "plot", cards: ["h-plot"], val: () => "the page" },
+  plot: {
+    cap: "Plot",
+    step: "plot",
+    cards: ["h-plot"],
+    val: () => (mapNothing() ? "nothing yet" : "the page"),
+    extra: [],
+  },
   fills: { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" },
   pexport: { cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" },
 };
@@ -119,7 +128,15 @@ const selText = (id) => {
   const s = $(id);
   return s && s.selectedIndex >= 0 ? s.options[s.selectedIndex].textContent.trim() : "";
 };
+// nothing to work on yet: the empty start, or a picture still being traced
+const mapNothing = () => (typeof isEmpty === "function" && isEmpty()) || (!isModel() && !st.final);
+// the size the design is drawn at: on a pen plotter's page (the page card's readout), else the Size card's own
 const sizeText = () => {
+  if (mapNothing()) return "";
+  if (artForPlot()) {
+    const m = mapCardVal("h-plot").match(/^[\d.]+ × [\d.]+ mm/);
+    if (m) return m[0];
+  }
   const w = +$("outW").value,
     h = +$("outH").value;
   return w > 0 && h > 0 ? `${fmt(w, 1)} × ${fmt(h, 1)} mm` : "";
@@ -365,6 +382,15 @@ function mapOpen(id) {
     if (c.classList.contains("collapsed") && typeof cardSetOpen === "function") cardSetOpen(c, true, false);
   }
   $("mapRows").dataset.map = N.rows ? "1" : "";
+  // a node's extra parts (the math, for the Line step) move into the panel after its cards
+  for (const ref of N.extra || []) {
+    const el = mapFieldOf(ref);
+    if (!el) continue;
+    if (!el.__mapHome) el.__mapHome = document.createComment("map: its place");
+    if (el.parentNode) el.parentNode.insertBefore(el.__mapHome, el);
+    $("mapExtra").appendChild(el);
+    mapMoved.push(el);
+  }
   document.body.dataset.mapnode = id;
   mapRender();
   const part = N.at && $(N.at) && ($(N.at).closest(".seg") || $(N.at));
