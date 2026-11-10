@@ -41,7 +41,7 @@
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
         <div class="chip" id="chip">loading…</div>
-        <div class="moled" id="pathEd" hidden role="dialog" aria-modal="true" aria-label="Draw the centre's path">
+        <div data-feature="patterns" class="moled" id="pathEd" hidden role="dialog" aria-modal="true" aria-label="Draw the centre's path">
           <div class="me-top"><p class="hint" id="peHint">Drag the path the ring's centre should follow, from its start to its end. The faint figure is the ring at rest; the dashed box is the frame. Start outside it if you like.</p></div>
           <div class="me-stage"><canvas id="peView" aria-label="The centre's path being drawn"></canvas></div>
           <p class="me-msg" id="peMsg" role="status"></p>
@@ -948,7 +948,7 @@
 <script src="js/workflow.js"></script>
 <script>feature("molecule", "js/molecule.js");</script>
 <script>feature("molecule", "js/moleditor.js");</script>
-<script src="js/pathpad.js"></script>
+<script>feature("patterns", "js/pathpad.js");</script>
 <script>feature("camera", "js/camera.js");</script>
 <script src="js/steppers.js"></script>
 <script src="js/scroll.js"></script>

@@ -139,9 +139,8 @@ function lineModeChanged() {
 // ---------- Separate strokes: traced into strokes (pipeline.js extract hands over to this) ----------
 // traced at the page's size: the base resolution per 100 mm of the page's long side (inside the margins)
 function strokesRes() {
-  const P = paperSize(),
-    mg = Math.max(0, +$("paperMargin").value || 0),
-    long = Math.max(P.w, P.h) - 2 * mg,
+  const P = answer("pageBox"), // (plot.js: the paper, its margin and pen 1)
+    long = Math.max(P.w, P.h) - 2 * P.margin,
     src = st.source,
     r = Math.min(CFG.engine.maxWorkingResolution, Math.round((long * baseRes()) / 100));
   return src ? Math.min(r, Math.max(baseRes(), src.width, src.height)) : r;
@@ -157,10 +156,9 @@ async function traceStrokes(g) {
   const fills = (W.levels && answer("levelFills")) || [];
   let fillStrokes = [];
   if (fills.length) {
-    const P = paperSize(),
-      mg = Math.max(0, +$("paperMargin").value || 0),
-      k = Math.min((P.w - 2 * mg) / W.w, (P.h - 2 * mg) / W.h), // mm per px
-      pen = Math.max(0.05, +$("penW").value || 0.5),
+    const P = answer("pageBox"),
+      k = Math.min((P.w - 2 * P.margin) / W.w, (P.h - 2 * P.margin) / W.h), // mm per px
+      pen = P.pen,
       pat = (fills.some((f) => f.style === "pattern") && ask("fillPattern")[0]) || null;
     const res = await PIPE.call("levelFills", [
       W.levels.lab,

@@ -92,26 +92,6 @@ addSaved(
   "printer",
   "wallCount"
 );
-// A model is recognised by what it is, not by its id: the id is a counter that starts again every session, so a saved
-// design could put its turns and height on a different model loaded later. The fingerprint is the model's name, its
-// triangle count and its size as loaded (to 0.001), worked out once per mesh.
-const modelPrints = new WeakMap();
-function modelPrint(M) {
-  let p = modelPrints.get(M.tri);
-  if (!p) {
-    const t = M.tri,
-      lo = [Infinity, Infinity, Infinity],
-      hi = [-Infinity, -Infinity, -Infinity];
-    for (let i = 0; i < t.length; i++) {
-      const a = i % 3;
-      if (t[i] < lo[a]) lo[a] = t[i];
-      if (t[i] > hi[a]) hi[a] = t[i];
-    }
-    p = [M.name, M.n, ...hi.map((v, a) => (v - lo[a]).toFixed(3))].join("|");
-    modelPrints.set(M.tri, p);
-  }
-  return p;
-}
 function designState() {
   const v = {};
   for (const id of DESIGN_IDS) {
@@ -132,17 +112,6 @@ function designState() {
       bgAt: st.bgAt || null,
       lineChosen: !!st.lineChosen,
       zones: st.zones,
-      model: st.model
-        ? {
-            id: st.model.id,
-            print: modelPrint(st.model),
-            turns: { ...st.model.turns },
-            heightMM: st.model.heightMM,
-            cut: { ...modelCut() },
-            // (a vase made here: made again from this)
-            vase: st.model.vase ? structuredClone(st.model.vase) : undefined,
-          }
-        : null,
       srcLabel: st.srcLabel,
       art: artSaved(), // art.js: the layers (their pictures are kept apart)
       feedUnit: "mm/s",
@@ -199,7 +168,7 @@ function syncDesignUI() {
   st.needleCustom = false; // (lineUI shows Custom… again if the width matches no needle)
   if (typeof letteringShown === "function") letteringShown(); // source.js: the Text card's printer-only switches
   if (typeof fontMenu === "function") fontMenu(); // config.js: fonts that can't write the text set apart
-  document.body.dataset.src = $("srcModel").checked ? "model" : t ? "text" : "image";
+  document.body.dataset.src = isModel() ? "model" : t ? "text" : "image";
   document.body.dataset.art = st.art.kind;
   textSizeUI(t);
   if (!t) syncSizeUI();
@@ -274,34 +243,14 @@ function applyDesign(d, src, imageSource, pics, picMore) {
     ask("restore", s); // what a feature kept with the design
     // the Art step's input (art.js); a design from before the Art step comes back as its source was
     if (s.art) artRestore(s.art, pics || null, picMore || null);
-    else artFromOld($("srcModel").checked ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
-    if ($("srcModel").checked) {
-      // a 3D model: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
-      // Designs saved before the fingerprint also match by id, but only when the model's name is the same too.
-      const m = s.model;
-      if (m && m.vase) {
-        // a vase made here: made again from its settings
-        useVase(m.vase, false); // model.js
-        vaseUI(); // vase.js
-      } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
-      const same =
-        st.model &&
-        m &&
-        !m.vase &&
-        (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
-      if (same) {
-        st.model.turns = { ...m.turns };
-        st.model.om = UNB.orientMesh(st.model.tri, st.model.turns);
-        st.model.heightMM = m.heightMM;
-        st.model.cut = m.cut ? { ...m.cut } : { bottom: 0, top: 0 };
-      } else if (m && st.model && !m.vase)
-        note = `made with ${s.srcLabel ? `“${s.srcLabel}”` : "another model"}: load that STL to get its turns and height back`;
-      // the image to go back to from the model
+    else artFromOld(isModel() ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
+    if (isModel()) {
+      // a 3D model (model.js): what it kept comes back; the image to go back to from the model
+      note = answer("modelRestore", s) || "";
       st.imageSource = imageSource || (src ? { canvas: src, label: s.srcLabel } : st.imageSource);
       st.text = null;
       syncDesignUI();
-      document.body.dataset.src = "model";
-      enterModel();
+      ask("modelEnter");
       return note;
     }
     if (textMode()) {

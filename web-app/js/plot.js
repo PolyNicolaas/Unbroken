@@ -1049,3 +1049,13 @@ $("penW").addEventListener("input", () => {
   if (artForPlot()) lineChanged();
 });
 $("exportBtn").addEventListener("click", () => exportAs("svg", $("exportMsg")));
+// the paper inside its margin and pen 1's width, mm (Separate strokes are traced at the page's size: workflow.js)
+on("pageBox", () => {
+  const P = paperSize();
+  return {
+    w: P.w,
+    h: P.h,
+    margin: Math.max(0, +$("paperMargin").value || 0),
+    pen: Math.max(0.05, +$("penW").value || 0.5),
+  };
+});

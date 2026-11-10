@@ -160,9 +160,9 @@ function bgLayer(kind, accent) {
 // The preview, in layers: what's under the line, the line, marks on it, and the turning circles while it plays.
 function render() {
   if (isModel()) {
-    drawModel();
+    ask("modelDraw"); // (model.js)
     return;
-  } // model.js
+  }
   if (st.tool === "select") {
     renderSelect();
     return;

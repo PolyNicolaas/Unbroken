@@ -421,3 +421,12 @@ on("ready", (L, add) => {
       "h-model"
     );
 });
+
+// with a design (model.js keeps the model's part): a vase made here is kept as its settings and made again from them
+on("modelSave", () => ({ vase: st.model.vase ? structuredClone(st.model.vase) : undefined }));
+on("modelRestoring", (m) => {
+  if (m && m.vase) {
+    useVase(m.vase, false);
+    vaseUI();
+  } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
+});

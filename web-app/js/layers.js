@@ -131,7 +131,7 @@ function showHeight() {
   box.min = String(model ? 0.05 : +(Math.max(1, S.N) * S.h).toFixed(3)); // at least the base, or one layer
   if (document.activeElement === $("printHeightMM")) return;
   if (model) {
-    if (st.model) $("printHeightMM").value = +printedMM().toFixed(2);
+    if (st.model) $("printHeightMM").value = +answer("modelPrintedMM").toFixed(2);
     return;
   }
   $("printHeightMM").value = +(n * S.h).toFixed(3); // (3 decimals: a whole number of layer steps for − and +)
@@ -148,7 +148,7 @@ $("printHeightMM").addEventListener("change", () => {
       showHeight();
       return;
     }
-    setModelHeight(H);
+    ask("modelHeight", H);
     return;
   }
   if (!(H > 0)) {
@@ -240,7 +240,7 @@ function lineToPlate(f, xf, D = st) {
   return { x: s.x, y: s.y };
 }
 async function buildLayers() {
-  if (isModel()) return buildModelLayers(); // model.js: a sliced model
+  if (isModel()) return answer("modelLayers"); // (model.js: a sliced model)
   const pieces = answer("pieceLayers"); // (pieces.js: a piece for each line of a text)
   if (pieces) return pieces;
   const lay = plateNow();
@@ -313,7 +313,7 @@ function layersSoon(delay = 250) {
       // left on a few layers doesn't hide the rest of the new print
       if (!st.layers || st.layers.stack !== L.stack) showEveryLayer();
       st.layers = L;
-      if (typeof mxSoon === "function") mxSoon(); // matrix.js: the Test matrix's size, time and chocolate
+      ask("layersReady"); // (matrix.js: the Test matrix's size, time and chocolate)
       layerReadout();
       drawStack();
       render();

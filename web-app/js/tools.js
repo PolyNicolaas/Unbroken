@@ -464,7 +464,7 @@ function openAnyFile(f) {
   if (/\.json$/i.test(f.name) || f.type === "application/json")
     openDesign(f); // history.js
   else if (/\.stl$/i.test(f.name) || /stl|sla/.test(f.type))
-    loadModelFile(f); // model.js
+    ask("modelFile", f); // (model.js)
   else if (!f.type || f.type.startsWith("image/"))
     loadFile(f); // controls.js
   else

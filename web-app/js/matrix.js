@@ -273,3 +273,4 @@ addMapNode("tests", { cap: "Tests", step: "choc", cards: ["h-matrix"], quiet: ()
 // with a design: its levels and scores are saved, and shown again when a design is restored
 addSaved("mxS1", "mxS2", "mxS3", "mxF1", "mxF2", "mxF3", "mxH1", "mxH2", "mxH3", "mxSlow", "mxScores");
 on("designUI", mxUI);
+on("layersReady", mxSoon); // its size, time and chocolate follow the layers

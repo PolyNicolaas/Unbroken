@@ -445,10 +445,9 @@ function useSource(kind, canvas, label) {
   ask("sourceChanged"); // a text change or an Optimize run still going is for the old source
   if (st.tool) exitTool();
   if (kind === "model") {
-    document.body.dataset.src = "model";
     st.text = null;
     textSizeUI(false);
-    enterModel();
+    ask("modelEnter"); // (model.js)
     return;
   }
   if (kind === "text") {

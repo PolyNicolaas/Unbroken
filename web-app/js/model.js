@@ -710,3 +710,68 @@ addArtKind("model", {
     useSource("model");
   },
 });
+
+// ---------- with a design (history.js) ----------
+// A model is recognised by what it is, not by its id: the id is a counter that starts again every session, so a saved
+// design could put its turns and height on a different model loaded later. The fingerprint is the model's name, its
+// triangle count and its size as loaded (to 0.001), worked out once per mesh.
+const modelPrints = new WeakMap();
+function modelPrint(M) {
+  let p = modelPrints.get(M.tri);
+  if (!p) {
+    const t = M.tri,
+      lo = [Infinity, Infinity, Infinity],
+      hi = [-Infinity, -Infinity, -Infinity];
+    for (let i = 0; i < t.length; i++) {
+      const a = i % 3;
+      if (t[i] < lo[a]) lo[a] = t[i];
+      if (t[i] > hi[a]) hi[a] = t[i];
+    }
+    p = [M.name, M.n, ...hi.map((v, a) => (v - lo[a]).toFixed(3))].join("|");
+    modelPrints.set(M.tri, p);
+  }
+  return p;
+}
+on("save", () => ({
+  model: st.model
+    ? {
+        id: st.model.id,
+        print: modelPrint(st.model),
+        turns: { ...st.model.turns },
+        heightMM: st.model.heightMM,
+        cut: { ...modelCut() },
+        ...Object.assign({}, ...ask("modelSave")), // (a vase made here: made again from its settings)
+      }
+    : null,
+}));
+// A design restored: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
+// Designs saved before the fingerprint also match by id, but only when the model's name is the same too. Returns a
+// note when the model isn't the one loaded.
+on("modelRestore", (s) => {
+  const m = s.model;
+  ask("modelRestoring", m); // (vase.js: a vase made here is made again, or steps aside)
+  const same =
+    st.model &&
+    m &&
+    !m.vase &&
+    (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
+  if (same) {
+    st.model.turns = { ...m.turns };
+    st.model.om = UNB.orientMesh(st.model.tri, st.model.turns);
+    st.model.heightMM = m.heightMM;
+    st.model.cut = m.cut ? { ...m.cut } : { bottom: 0, top: 0 };
+  } else if (m && st.model && !m.vase)
+    return `made with ${s.srcLabel ? `“${s.srcLabel}”` : "another model"}: load that STL to get its turns and height back`;
+  return "";
+});
+// what the core asks of a model
+on("modelEnter", () => {
+  document.body.dataset.src = "model";
+  enterModel();
+});
+on("modelFile", loadModelFile); // an STL dropped or chosen
+on("modelDraw", drawModel); // the preview
+on("modelPlate", modelPlate); // its footprint on the plate
+on("modelLayers", buildModelLayers); // sliced into layers
+on("modelPrintedMM", printedMM); // the height it prints at
+on("modelHeight", setModelHeight); // scaled evenly to a height
