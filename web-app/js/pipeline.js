@@ -195,7 +195,7 @@ function traceWalk(W, s, engine = PIPE) {
 async function extract(g, P = Object.create(st), again = false) {
   if (st.art.kind === "model") return; // a model is sliced (model.js), not traced
   // workflow.js: Trace off, as drawn: nothing to trace (the page redrawn)
-  if (lineModeNow() === "drawn") return plotSoon(0);
+  if (lineModeNow() === "drawn") return void ask("lineReady", 0);
   if (lineModeNow() === "none") {
     // workflow.js: Trace off, a picture: the picture as Image prep and Grey levels make it, nothing traced
     const W = await working();
@@ -229,7 +229,7 @@ async function extract(g, P = Object.create(st), again = false) {
     render();
     drawPlate();
     drawMini();
-    drawPage();
+    ask("redraw");
     return;
   }
   const b = walk.bbox;
@@ -725,7 +725,7 @@ function placeSize() {
     first = !st.sizeUser;
   let target = first && m.fits && typeof pref === "string" ? m[pref] : st.outW;
   if (!Number.isFinite(target)) target = st.outW;
-  const page = pageFitW(); // plot.js: made for plotting, it fills the page
+  const page = ask("fitWidth").find(Boolean); // (plot.js: made for plotting, it fills the page)
   if (page) target = page;
   if (first && m.fits) st.sizeUser = true; // placed once: the size is yours now
   syncSizeUI();
@@ -738,11 +738,6 @@ function placeSize() {
   if (Math.abs(Math.max(target, m.fits ? m.smallest : 0) - st.outW) / st.outW > 0.003) setSize(target, false);
   else finalizeReadout();
 }
-$("fitPage").addEventListener("click", () => {
-  st.pageFit = true;
-  const W = pageFitW();
-  if (W) setSize(W, false);
-});
 $("sizeSlider").addEventListener("input", () => setSize(wFromSlider(+$("sizeSlider").value / 1000), true));
 $("sizeMarks").addEventListener("click", (e) => {
   const el = e.target.closest("span");

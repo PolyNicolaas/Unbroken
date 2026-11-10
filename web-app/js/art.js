@@ -146,7 +146,7 @@ function artApply() {
       A.kind !== "pattern" || patternDrawn().r
         ? ""
         : "Nothing left inside that shape: try more detail or another shape.";
-    plotSoon(0); // (the preview shows the page, the pattern as drawn: workflow.js)
+    ask("lineReady", 0); // (the preview shows the page, the pattern as drawn: workflow.js)
   } else if (A.kind === "model") {
     if (!st.model) useSampleModel(); // model.js
     useSource("model");

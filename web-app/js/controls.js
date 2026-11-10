@@ -289,7 +289,6 @@ $("penW").addEventListener("input", () => {
 document.querySelectorAll('input[name="artFor"]').forEach((r) =>
   r.addEventListener("change", () => {
     lineChanged();
-    fitPageSoon();
   })
 );
 $("simplify").addEventListener("input", () => {
@@ -297,5 +296,5 @@ $("simplify").addEventListener("input", () => {
   syncSpacingUI();
   recordSoon();
   layersSoon();
-  plotSoon();
+  ask("lineReady");
 }); // exports and the 3D / Plot steps simplify the line too

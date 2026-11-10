@@ -301,7 +301,7 @@ function paintMoves(g, s, P, lw, show) {
   g.setLineDash([]);
 }
 function drawPlate() {
-  if (plotWanted()) plotSoon(); // plot.js: the 2D page follows the design
+  if (plotWanted()) ask("lineReady"); // (plot.js: the 2D page follows the design)
   pieceMenuUI(); // pieces.js: the Plate card's Lines of text follows the text
   if (!layersWanted()) return;
   const res = paintPlate($("plate"), true);
@@ -504,8 +504,8 @@ function stageChanged() {
   document.body.dataset.stage = v;
   zoomUI(); // zoom.js: this view's own zoom
   if (v === "page") {
-    plotSoon(0);
-    drawPage();
+    ask("lineReady", 0);
+    ask("redraw");
   } else if (v === "plate") drawPlate();
   else if (v === "layers") {
     drawPlate();
@@ -520,7 +520,7 @@ document.querySelectorAll('input[name="stage"]').forEach((r) => r.addEventListen
 // what the animation redraws: the view that's showing (preview.js runs the clock)
 function redrawStage() {
   const v = stageNow();
-  if (v === "page") drawPage();
+  if (v === "page") ask("redraw");
   else if (v === "layers") drawStack();
   else if (v === "plate") drawPlate();
   else render();

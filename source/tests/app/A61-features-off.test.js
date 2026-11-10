@@ -8,7 +8,7 @@ const JS = path.join(__dirname, "../../../web-app/js");
 const FEATURES = {
   vase: { scripts: ["vase.js"], level: 2 },
   "3D model": { scripts: ["model.js", "vase.js", "sample-skull.js"], level: 2 },
-  "pen plotter": { scripts: ["plot.js"], level: 1 },
+  "pen plotter": { scripts: ["plot.js"], level: 2 },
   patterns: { scripts: ["patterns.js"], level: 1 },
   molecule: { scripts: ["molecule.js", "moleditor.js"], level: 1 },
   "text as pieces": { scripts: ["pieces.js"], level: 1 },

@@ -19,7 +19,7 @@ const rethemed = () => {
   drawPlate();
   drawMini();
   drawStack();
-  drawPage(); // the 3D layers and the 2D page (each draws only when showing)
+  ask("redraw"); // a feature's own view (the pen plotter's page; each draws only when showing)
 };
 try {
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rethemed);

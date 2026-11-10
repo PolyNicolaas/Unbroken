@@ -67,12 +67,7 @@ function workflowUI() {
         : mode === "strokes"
           ? `The ${kind} traced into strokes; the pen lifts between them.`
           : `The ${kind} traced into one continuous line: the pen never lifts.`;
-  // what the page plots follows the line (the 2D card's own switch is hidden)
-  const art = mode !== "one";
-  if ($("plotArt").checked !== art) {
-    $(art ? "plotArt" : "plotTraced").checked = true;
-    plotFromUI(); // plot.js
-  }
+  ask("lineMode", mode); // (plot.js: what the page plots follows the line)
   if (mode === "drawn") {
     setChip(
       `${st.art.kind === "text" ? "The text" : st.art.kind === "molecule" ? moleculeName() : patternName(st.art.pattern)} as drawn: exact lines, no trace`
@@ -220,7 +215,7 @@ async function traceStrokes(g) {
   $("fitinfo").textContent = n ? `${n} stroke${n === 1 ? "" : "s"}` : "";
   render();
   drawMini();
-  drawPage();
+  ask("redraw");
   labels();
 }
 workflowUI();

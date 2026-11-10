@@ -273,9 +273,9 @@ function needleTag() {
   return String(Math.round(w * 100)).padStart(3, "0");
 }
 async function buildFile(fmtName) {
-  if (fmtName === "svg") return plotFile();
+  // a format a feature makes (the pen plotter's SVG, the line drawing of a model's view): on("buildFile")
+  for (const file of ask("buildFile", fmtName)) if (file) return file;
   if (fmtName === "chocdxf") return chocDXF();
-  if (fmtName === "viewsvg") return modelViewSVG(); // model.js: the line drawing of a model's view, as vectors
   const g = gcodeSettings();
   // every copy prints all its layers (base and walls stacked into one 3D path), then the needle lifts above
   // everything printed and travels to the next copy
@@ -471,7 +471,7 @@ async function exportAs(fmtName, msg) {
     setStatus(msg, "bad", "Load a model first.");
     return;
   }
-  const asDrawn = fmtName === "svg" && plotFromArt(); // plot.js: the art's lines as drawn, no trace needed
+  const asDrawn = fmtName === "svg" && ask("drawnAsIs").some(Boolean); // (plot.js: the art's lines as drawn, no trace needed)
   if (isModel() && fmtName === "svg" && !asDrawn) {
     setStatus(
       msg,

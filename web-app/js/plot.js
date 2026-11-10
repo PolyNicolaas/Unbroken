@@ -1018,3 +1018,24 @@ on("designUI", () => {
   fillsSoon();
   plotFromUI(); // Traced line or Art as drawn
 });
+
+// what the core announces, and the plotter does about it
+on("redraw", drawPage); // the page, when it's showing
+on("lineReady", (delay) => plotSoon(delay)); // the line (or the art as drawn) changed: the page follows
+on("fitWidth", pageFitW); // made for plotting, a design fills the page
+on("drawnAsIs", plotFromArt); // the art's lines as drawn: an SVG needs no trace
+on("buildFile", (fmtName) => (fmtName === "svg" ? plotFile() : undefined));
+// what the page plots follows the line (the Plot card's own switch is hidden)
+on("lineMode", (mode) => {
+  const art = mode !== "one";
+  if ($("plotArt").checked !== art) {
+    $(art ? "plotArt" : "plotTraced").checked = true;
+    plotFromUI();
+  }
+});
+document.querySelectorAll('input[name="artFor"]').forEach((r) => r.addEventListener("change", fitPageSoon));
+$("fitPage").addEventListener("click", () => {
+  st.pageFit = true;
+  const W = pageFitW();
+  if (W) setSize(W, false);
+});

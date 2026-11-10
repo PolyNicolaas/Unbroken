@@ -171,7 +171,7 @@ $("turnReset").addEventListener("click", () => {
 function enterModel() {
   if (!st.model) useSampleModel();
   else modelChanged(false);
-  drawPage(); // plot.js: the 2D page no longer shows the last picture's drawing
+  ask("redraw"); // (the pen plotter's page no longer shows the last picture's drawing)
 }
 
 // ---------- a vase made here (the Vase switch in the 3D model card; vase.js edits it) ----------
@@ -699,3 +699,4 @@ on("ready", (L, add) => {
       "h-layers"
     );
 });
+on("buildFile", (fmtName) => (fmtName === "viewsvg" ? modelViewSVG() : undefined)); // the line drawing of a view
