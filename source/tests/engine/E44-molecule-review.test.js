@@ -1,7 +1,7 @@
 const { UNB } = require("../lib/trace.js"), { check } = require("../lib/check.js"), FONTS = require("../../engine/fonts.js"), fs = require("fs"), path = require("path"), vm = require("vm");
-// the app's own examples (web-app/js/molecule.js MOL_EXAMPLES), laid out as RDKit gives them
+// the app's own examples (web-app/features/molecule/molecule.js MOL_EXAMPLES), laid out as RDKit gives them
 function examples() {
-  const s = fs.readFileSync(path.resolve(__dirname, "../../../web-app/js/molecule.js"), "utf8"), box = {};
+  const s = fs.readFileSync(path.resolve(__dirname, "../../../web-app/features/molecule/molecule.js"), "utf8"), box = {};
   vm.runInNewContext(s.slice(s.indexOf("const MOL_EXAMPLES"), s.indexOf("const molOf")) + "\nbox.X = MOL_EXAMPLES;", { box });
   return box.X.map((e) => ({ key: e.key, atoms: e.atoms.map(([el, h, q, x, y]) => ({ el, h, q, x, y })), bonds: e.bonds.map(([a, b, order]) => ({ a, b, order })) }));
 }

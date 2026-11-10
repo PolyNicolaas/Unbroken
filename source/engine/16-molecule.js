@@ -343,7 +343,7 @@
     };
   };
 
-  // ---------- editing (the structure editor, web-app/js/moleditor.js) ----------
+  // ---------- editing (the structure editor, web-app/features/molecule/moleditor.js) ----------
   // Structures are { atoms: [{ el, x, y, h, q }], bonds: [{ a, b, order }] } in RDKit's units (a bond ≈ 1.5, y up).
   // Each edit returns a new structure (the editor keeps the old ones for Undo).
   const molCopy = (m) => ({ atoms: m.atoms.map((a) => ({ ...a })), bonds: m.bonds.map((b) => ({ ...b })) });

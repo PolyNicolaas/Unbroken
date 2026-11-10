@@ -21,7 +21,7 @@ async function working(res, engine = PIPE) {
     s.invert,
     s.blur,
     JSON.stringify(lv),
-    cutoutKey(), // cutout.js
+    ...ask("workingKey"), // (cutout.js: the cut-out in use)
   ].join("|");
   if (st.wk && st.wk.key === key) return st.wk;
   let sx = 0,
@@ -55,7 +55,7 @@ async function working(res, engine = PIPE) {
   g.fillStyle = "#fff";
   g.fillRect(0, 0, w, h);
   g.drawImage(src, sx, sy, sw, sh, 0, 0, w, h);
-  cutoutApply(g, sx, sy, sw, sh, w, h); // cutout.js: only the object, if it's cut out
+  ask("workingPicture", g, sx, sy, sw, sh, w, h); // (cutout.js: only the object, if it's cut out)
   const r = await engine.call("stagePrep", [
     g.getImageData(0, 0, w, h).data,
     w,
@@ -132,7 +132,7 @@ function lineSpec(W, sens, textMask, region) {
   return {
     blurred: W.blurred,
     // grey levels: their edges, and a filled block's run along the border (levels.js)
-    levels: W.levels ? { lab: W.levels.lab, edge: levelEdgeFlags(), border: levelBorderFlags() } : null,
+    levels: W.levels ? { lab: W.levels.lab, ...answer("levelFlags") } : null,
     mode: s.mode,
     sens,
     split: CFG.engine.packedStrokeSplit,
@@ -195,7 +195,7 @@ function traceWalk(W, s, engine = PIPE) {
 async function extract(g, P = Object.create(st), again = false) {
   if (st.art.kind === "model") return; // a model is sliced (model.js), not traced
   // workflow.js: Trace off, as drawn: nothing to trace (the page redrawn)
-  if (lineModeNow() === "drawn") return plotSoon(0);
+  if (lineModeNow() === "drawn") return void ask("lineReady", 0);
   if (lineModeNow() === "none") {
     // workflow.js: Trace off, a picture: the picture as Image prep and Grey levels make it, nothing traced
     const W = await working();
@@ -225,11 +225,11 @@ async function extract(g, P = Object.create(st), again = false) {
     Object.assign(P, { final: null, plot: null, pfill: null, finalVer: (st.finalVer || 0) + 1 });
     Object.assign(st, P);
     forgetLayers();
-    setChip(levelNoLinesAdvice(false) || "No lines found — lower the threshold or the speck filter");
+    setChip(answer("noLinesAdvice", false) || "No lines found — lower the threshold or the speck filter");
     render();
     drawPlate();
     drawMini();
-    drawPage();
+    ask("redraw");
     return;
   }
   const b = walk.bbox;
@@ -725,7 +725,7 @@ function placeSize() {
     first = !st.sizeUser;
   let target = first && m.fits && typeof pref === "string" ? m[pref] : st.outW;
   if (!Number.isFinite(target)) target = st.outW;
-  const page = pageFitW(); // plot.js: made for plotting, it fills the page
+  const page = ask("fitWidth").find(Boolean); // (plot.js: made for plotting, it fills the page)
   if (page) target = page;
   if (first && m.fits) st.sizeUser = true; // placed once: the size is yours now
   syncSizeUI();
@@ -738,11 +738,6 @@ function placeSize() {
   if (Math.abs(Math.max(target, m.fits ? m.smallest : 0) - st.outW) / st.outW > 0.003) setSize(target, false);
   else finalizeReadout();
 }
-$("fitPage").addEventListener("click", () => {
-  st.pageFit = true;
-  const W = pageFitW();
-  if (W) setSize(W, false);
-});
 $("sizeSlider").addEventListener("input", () => setSize(wFromSlider(+$("sizeSlider").value / 1000), true));
 $("sizeMarks").addEventListener("click", (e) => {
   const el = e.target.closest("span");
@@ -835,7 +830,7 @@ function finalizeReadout() {
   if (!dh.hidden)
     dh.textContent = `At this size ${fmt(100 * share, 0)}% of the line is pushed more than ${fmt(CFG.engine.sizeDetail.medium * st.outW, 1)} mm off the drawing to keep the spacing${$("showDrift").checked ? " (shaded orange)" : ""}.${m && m.fits && Number.isFinite(m.medium) && st.outW < m.medium ? ` Medium detail from ${fmt(m.medium, 1)} mm.` : " Make it bigger to bring it back."}`;
   syncSizeUI();
-  artSizeUI(); // art.js: the Pattern card's width and gap
+  ask("sized"); // (patterns.js: the Pattern card's width and gap)
 }
 
 // ---------- error sweep for the chart (its own background engine, so it doesn't hold up the trace) ----------

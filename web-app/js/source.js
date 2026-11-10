@@ -5,7 +5,8 @@
 // the order listed in index.html.
 "use strict";
 
-const isModel = () => $("srcModel").checked; // the source is a 3D model (model.js), not a picture or text
+// the source is a 3D model (model.js), not a picture or text (never, with that feature off)
+const isModel = () => !!$("srcModel") && $("srcModel").checked;
 
 // The still-life sample: a vase, fruit and a cloth on a table in five flat greys, for grey levels and fills (640 × 480)
 function stillLife(g) {
@@ -223,7 +224,7 @@ function settings() {
       flatten: $("flatten").checked,
       bgAt: st.bgAt || null, // (source-normalised; working() turns it into px)
     },
-    levels: levelSettings(), // levels.js: grey levels, or null
+    levels: answer("levelSettings"), // (levels.js: grey levels, or null)
   };
 }
 
@@ -234,7 +235,7 @@ function resetHandEdits(keepCut) {
   st.start = null;
   st.bgAt = null;
   if (!keepCut) st.cutout = null;
-  if (typeof cutoutUI === "function") cutoutUI(); // cutout.js (loaded after this file)
+  ask("handEditsReset"); // (cutout.js: its card follows)
   st.zones = { cross: [], lane: [] };
   st.zoneVer = (st.zoneVer || 0) + 1;
   st.zm = {};
@@ -242,7 +243,7 @@ function resetHandEdits(keepCut) {
 let srcCounter = 0;
 function setSource(canvas, label) {
   clearTimeout(textTimer);
-  stopOptimize(); // a new picture: pending text and a running Optimize are for the old one
+  ask("sourceChanged"); // a new picture: pending text and a running Optimize are for the old one
   if (document.body.dataset.src === "text") {
     document.body.dataset.src = "image";
     st.text = null;
@@ -255,7 +256,7 @@ function setSource(canvas, label) {
   st.rr = 0;
   st.sizeUser = false;
   st.sel = null; // a new image: proportions unknown, size back to the starting mark
-  resetHandEdits(typeof cutoutKeepFor === "function" && cutoutKeepFor(canvas)); // cutout.js
+  resetHandEdits(!!answer("keepCut", canvas)); // (cutout.js: the same picture again keeps its cut-out)
   if (st.penFill) st.penFill.areas = [];
   st.srcLabel = label;
   $("srcinfo").textContent = label;
@@ -441,13 +442,12 @@ function textChanged() {
 // sliced on the Print step)
 function useSource(kind, canvas, label) {
   clearTimeout(textTimer);
-  stopOptimize(); // a text change or an Optimize run still going is for the old source
+  ask("sourceChanged"); // a text change or an Optimize run still going is for the old source
   if (st.tool) exitTool();
   if (kind === "model") {
-    document.body.dataset.src = "model";
     st.text = null;
     textSizeUI(false);
-    enterModel();
+    ask("modelEnter"); // (model.js)
     return;
   }
   if (kind === "text") {

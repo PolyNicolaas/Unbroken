@@ -381,3 +381,53 @@ $("mfStl").addEventListener("change", () => {
 // the editor's canvas sizes with the card: redraw when it shows or the window changes
 new ResizeObserver(() => vaseDraw()).observe($("vaseProfile"));
 onPrintSettings(() => vaseHint()); // state.js: the needle changes what a bead holds
+
+addExample(120, "wavyvase", "Wavy vase", "a vase made here: profile, texture, movement", () => vaseExample(), true);
+
+// on the map: a vase's parts are chips under Art; each opens the 3D model card at its part
+addMapNode("vprofile", { cap: "Profile", step: "art", cards: ["h-model"], at: "vaseProfile", val: () => "" });
+addMapNode("vtexture", { cap: "Texture", step: "art", cards: ["h-model"], at: "vtNone", val: () => "" });
+addMapNode("vmove", { cap: "Movement", step: "art", cards: ["h-model"], at: "vmNone", val: () => "" });
+MAP_SHAPERS.push((S) => {
+  if (st.art.kind === "model" && st.model && st.model.vase) S.down.art = ["vprofile", "vtexture", "vmove"];
+});
+
+// the ready list (export.js): does each lap sit on the one below, and can the bead follow its turns?
+on("ready", (L, add) => {
+  if (!(L.vase && L.overhang)) return;
+  const step = overhangMM(),
+    zAt = (k) => fmt(firstZ() + k * L.S.h, 1),
+    fix = "a gentler profile there, a smaller movement or less shift";
+  if (L.overhang.worst > step + 0.02)
+    add(
+      "warn",
+      `The wall steps out ${fmt(L.overhang.worst, 2)} mm in a layer at ${zAt(L.overhang.at)} mm (a bead holds ${fmt(step, 2)}): ${fix}`,
+      "h-model"
+    );
+  if (L.overhang.inWorst > 0.02)
+    add(
+      "warn",
+      `The wall steps in ${fmt(L.overhang.inWorst + step, 2)} mm in a layer at ${zAt(L.overhang.inAt)} mm, over the empty inside (a bead holds ${fmt(step, 2)}): ${fix}`,
+      "h-model"
+    );
+  if (!(L.overhang.worst > step + 0.02) && !(L.overhang.inWorst > 0.02))
+    add("ok", `Every lap sits on the one below (within ${fmt(step, 2)} mm)`, "h-layers");
+  const T = L.tightest,
+    half = lineWidthMM() / 2;
+  if (T && T.r < half)
+    add(
+      "warn",
+      `Turns as tight as a ${fmt(T.r, 2)} mm radius at ${zAt(T.at)} mm, for a bead ${fmt(2 * half, 2)} mm wide: the chocolate rounds them off (fewer or smaller movements keep their shape)`,
+      "h-model"
+    );
+});
+
+// with a design (model.js keeps the model's part): a vase made here is kept as its settings and made again from them
+on("modelSave", () => ({ vase: st.model.vase ? structuredClone(st.model.vase) : undefined }));
+on("modelRestoring", (m) => {
+  if (m && m.vase) {
+    useVase(m.vase, false);
+    vaseUI();
+  } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
+});
+on("modelSized", vaseUI); // its Height box follows the model's height

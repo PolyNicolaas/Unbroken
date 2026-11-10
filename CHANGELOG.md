@@ -3,6 +3,46 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v145 · 2026-11-10
+
+Modules: every feature can be switched off, and worked on by itself (DESIGN.md, Modules; docs/FEATURES.md). Nothing
+changes on screen with everything on.
+
+- **Twelve features**, each a folder in `web-app/features/`: the pen plotter, 3D models, the vase, patterns (with
+  the path pad), the molecule, a text's pieces, the camera, the cut-out, Grey levels, Optimize and the starting
+  points, the test print, the test matrix. What's left is the core: a picture or a text, traced, sized and printed.
+- **The switch**: `features` in settings.js, one line each. Off, a feature's scripts aren't loaded and its cards
+  and buttons aren't on the page. `?off=vase,plotter` or `?on=vase` in the address tries it without editing the file.
+- **How a feature joins in** (`state.js`): it adds itself to the core's lists (examples, the map's steps and chips,
+  what the line is made for, the kinds of art, the controls a design keeps) and answers moments the core announces
+  (`on` / `ask` / `answer`). The Art step, the map, the ready list, save and undo, the plate and the layers no
+  longer call any feature by name.
+- **Tests**: A61 switches each feature off in turn and all of them at once (opens, traces, tours the map, exports:
+  36 of 36, from 13 of 39 this morning); E58 fails the moment a core script names a feature. The test library got
+  `source/tests/lib/scripts.js` (every script of the app, the features' too).
+- **docs/FEATURES.md**, written from the code by `source/tools/feature-map.js`: each feature's files, parts of the
+  page, what it joins and its tests.
+- **A vase's base is the shape of its wall.** With a wave or zigzag along the path the base was still a plain
+  circle (the wall without its movement), so a deep wave stood on a base that neither filled it nor matched it. The
+  base is now the first wall lap laid flat, movement and all. Loops, which cross themselves, keep the plain base
+  (test E57).
+- **A spiral base for 3D prints** (Layers → Base → Pattern: Spiral; a sliced model or a vase). The needle goes
+  round the rim and in, one row further in each time round, to the middle; steps up; and comes out again on the next
+  layer, ending on the rim where the wall's spiral starts. No joins and nothing crossed. It takes two layers at a
+  time, so an odd number of base layers goes up by one. A sliced model spirals each layer's own outline; a pair of
+  layers that is more than one piece (a model on feet), or pinches in two as it narrows, has no single way in and
+  gets rings, and the Layers note says so. (`UNB.spiralFill`; tests E23, E57, A59.)
+- **Brightness, contrast and background are with the picture.** The Image prep card (brightness, contrast, remove
+  plain background, even out lighting, cut out the object) is on the Art step, under the Picture card, where a photo
+  is taken or a file chosen. It was behind the faded Picture prep chip. Grey levels keeps a chip of its own, added
+  by its feature.
+- **Line width and gap are on the Line step** for a printer too (they were moved into Material). The needle picked
+  in Material still sets the width; Material shows "width + gap" with a link to Line.
+- A photo cleaned again (the Photo card) no longer takes the input back from a molecule, text or pattern in use.
+- Moved while untangling: the clean start (was examples.js) is in art.js; Tap the background is Image prep's
+  (controls.js, was levels.js); the plotter's Fit to page and SVG buttons, and the pattern's width, are wired in
+  their own scripts. A second `id="cutRow"` on the page (the cut-out's row had the model's id) is gone.
+
 ## v144 · 2026-11-09
 
 The step tabs are retired: the map of the steps is the only interface.

@@ -35,9 +35,9 @@ function layerSigNow() {
     lineWidthMM(),
     spacingMM(),
     M ? [M.id, M.turns, M.heightMM, M.cut] : null,
-    $("support").value,
+    valOf("support"),
     $("gOver").value,
-    $("wallCount").value,
+    valOf("wallCount"),
   ]);
 }
 // { key, base: [line], wall: line, stack, baseFinal, fillInfo, … } for one copy, mm, plate footprint coordinates
@@ -131,7 +131,7 @@ function showHeight() {
   box.min = String(model ? 0.05 : +(Math.max(1, S.N) * S.h).toFixed(3)); // at least the base, or one layer
   if (document.activeElement === $("printHeightMM")) return;
   if (model) {
-    if (st.model) $("printHeightMM").value = +printedMM().toFixed(2);
+    if (st.model) $("printHeightMM").value = +answer("modelPrintedMM").toFixed(2);
     return;
   }
   $("printHeightMM").value = +(n * S.h).toFixed(3); // (3 decimals: a whole number of layer steps for − and +)
@@ -148,7 +148,7 @@ $("printHeightMM").addEventListener("change", () => {
       showHeight();
       return;
     }
-    setModelHeight(H);
+    ask("modelHeight", H);
     return;
   }
   if (!(H > 0)) {
@@ -172,7 +172,7 @@ for (const id of ["infillMin", "fillMin"])
 // bw, spacing and final.
 async function layerLine(plan, D = st) {
   // the levels set to Fill (levels.js, a printer): their blocks print solid, in the layers with no infill of their own
-  const lvMask = D === st ? levelFillMask() : null;
+  const lvMask = D === st ? answer("fillMask") : null;
   if ((!plan || !plan.pattern) && lvMask)
     plan = { pattern: "lines", angle: 45, spacing: pxSpacing(D), minArea: 0, levels: true };
   if (!plan || !plan.pattern) return { final: D.final };
@@ -240,8 +240,9 @@ function lineToPlate(f, xf, D = st) {
   return { x: s.x, y: s.y };
 }
 async function buildLayers() {
-  if (isModel()) return buildModelLayers(); // model.js: a sliced model
-  if (piecesOn()) return buildPieceLayers(); // pieces.js: a piece for each line of a text
+  if (isModel()) return answer("modelLayers"); // (model.js: a sliced model)
+  const pieces = answer("pieceLayers"); // (pieces.js: a piece for each line of a text)
+  if (pieces) return pieces;
   const lay = plateNow();
   if (!lay || !st.final) return null;
   const ver = st.finalVer,
@@ -312,7 +313,7 @@ function layersSoon(delay = 250) {
       // left on a few layers doesn't hide the rest of the new print
       if (!st.layers || st.layers.stack !== L.stack) showEveryLayer();
       st.layers = L;
-      if (typeof mxSoon === "function") mxSoon(); // matrix.js: the Test matrix's size, time and chocolate
+      ask("layersReady"); // (matrix.js: the Test matrix's size, time and chocolate)
       layerReadout();
       drawStack();
       render();
@@ -467,15 +468,22 @@ function layerReadout() {
       hint = $("layerHint");
     hint.className = lf.short ? "hint warn" : "hint";
     hint.hidden = false;
+    // (a spiral base asked for, where the shape has no single way in)
+    const noSpiral =
+      S.spiral === false
+        ? " The base couldn't spiral everywhere (a layer in more than one piece, or one that pinches in two as it narrows): those layers are rings."
+        : "";
     if (L.vase) {
       hint.textContent =
         timing +
-        `The vase's path is written lap by lap from its profile, texture and movement (no slicing): the profile is the middle of the bead${S.N ? `; the first ${S.N} layer${S.N === 1 ? " is" : "s are"} filled at ${dens}% for the base` : "; no base, so the bottom is open"}. The layers spiral up with no seam; the top is open.`;
+        `The vase's path is written lap by lap from its profile, texture and movement (no slicing): the profile is the middle of the bead${S.N ? `; the first ${S.N} layer${S.N === 1 ? " is" : "s are"} filled at ${dens}% for the base` : "; no base, so the bottom is open"}. The layers spiral up with no seam; the top is open.` +
+        noSpiral;
       return;
     }
     hint.textContent =
       timing +
       `Sliced every ${fmt(S.h, 2)} mm through the model (the first at ${fmt(z0 / 2, 2)} mm); each layer's outside contour is moved in half a line width${L.walls > 1 ? ` with ${L.walls} walls` : ""} (inside surfaces and holes aren't traced; separate parts are joined by connector strands), ${S.N ? `filled at ${dens}% for the base, ` : ""}${S.F.infillDensity > 0 ? `filled at ${Math.round(S.F.infillDensity * 100)}% above it, ` : ""}and fitted with a Fourier series (${lo === hi ? lo : `${lo}–${hi}`} terms). The layers spiral up with no seam${S.F.infillDensity > 0 ? "" : "; the top is open"}.` +
+      noSpiral +
       (L.empty ? ` ${L.empty} layer${L.empty === 1 ? " had" : "s had"} nothing to cut and repeat the one below.` : "") +
       (L.support && L.support.layers
         ? ` Support: ${L.support.layers} layer${L.support.layers === 1 ? "" : "s"} widened from the plate up so no layer steps out more than ${fmt(overhangMM(), 2)} mm.`
@@ -544,7 +552,7 @@ function layerName(k) {
   if (j >= S.N + S.M) return "the last lap: level, the flow easing out";
   const plan = UNB.fillPlan(F, base, base ? j : j - S.N),
     fill = plan.pattern
-      ? `${plan.pattern === "lines" ? `lines at ${fmt(((plan.angle % 180) + 180) % 180, 0)}°` : "rings"} · ${Math.round((base ? S.F.baseDensity : S.F.infillDensity) * 100)}%`
+      ? `${plan.pattern === "lines" ? `lines at ${fmt(((plan.angle % 180) + 180) % 180, 0)}°` : plan.pattern === "spiral" ? (j % 2 ? "spiral, middle to rim" : "spiral, rim to middle") : "rings"} · ${Math.round((base ? S.F.baseDensity : S.F.infillDensity) * 100)}%`
       : base
         ? "open"
         : "no infill";

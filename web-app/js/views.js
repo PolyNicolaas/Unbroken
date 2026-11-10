@@ -84,8 +84,9 @@ function plateNow() {
   const n = Math.max(1, Math.min(200, Math.round(+$("copies").value || 1))),
     gap = Math.max(0, +$("copyGap").value || 0),
     straight = $("plateRot").value === "straight";
-  if (isModel()) return st.model ? modelPlate(n, gap, straight) : null; // model.js: the footprint
-  if (piecesOn()) return piecePlate(n, gap, straight); // pieces.js: a piece for each line of a text
+  if (isModel()) return st.model ? answer("modelPlate", n, gap, straight) : null; // (model.js: the footprint)
+  const pieces = answer("piecePlate", n, gap, straight); // (pieces.js: a piece for each line of a text)
+  if (pieces) return pieces;
   const d = designMM();
   if (!d) return null;
   const key = [st.finalVer, d.k, n, gap, straight, lineWidthMM(), BED.w, BED.h].join("|");
@@ -155,7 +156,7 @@ function paintPlate(cv, detail) {
       k = zoomOn(g, "plate", cv).z;
       if (lay && !copiesShown() && pl.length) {
         // (a text's pieces: the piece chosen in the Plate card)
-        const one = (lay.pieces && pl.find((p) => p.piece === pieceShown())) || pl[0],
+        const one = (lay.pieces && pl.find((p) => p.piece === answer("pieceShown"))) || pl[0],
           ft = footOf(lay, one);
         shown = [one];
         // (a molecule's pieces print together: one copy is the whole molecule, its bonds and every label)
@@ -300,13 +301,15 @@ function paintMoves(g, s, P, lw, show) {
   }
   g.setLineDash([]);
 }
+// a copy's footprint on a plate layout (a layout in pieces has one per piece: pieces.js)
+const footOf = (lay, p) => (lay.pieces && p.piece != null ? lay.pieces[p.piece] : lay);
 function drawPlate() {
-  if (plotWanted()) plotSoon(); // plot.js: the 2D page follows the design
-  pieceMenuUI(); // pieces.js: the Plate card's Lines of text follows the text
+  if (plotWanted()) ask("lineReady"); // (plot.js: the 2D page follows the design)
+  ask("plateUI"); // (pieces.js: the Plate card's Lines of text follows the text)
   if (!layersWanted()) return;
   const res = paintPlate($("plate"), true);
   if (!res) {
-    $("plateHint").textContent = piecesOn()
+    $("plateHint").textContent = answer("piecesOn")
       ? st.text
         ? "Tracing each line of the text as a piece of its own…"
         : "Tracing the bonds and each label as pieces of their own…"
@@ -314,7 +317,7 @@ function drawPlate() {
     return;
   }
   const { lay, pl, ok } = res;
-  if (lay.pieces) return piecePlateText(lay, pl, ok);
+  if (lay.pieces) return void ask("piecePlateText", lay, pl, ok); // (pieces.js: the card's size and hint for pieces)
   const single = lay.copies === 1;
   $("gOx").disabled = $("gOy").disabled = !single;
   $("plateCenter").disabled = !single;
@@ -334,35 +337,6 @@ function drawPlate() {
         ? `${lay.copies} copies fit, ${fmt(+$("copyGap").value || 0, 1)} mm apart (room for ${lay.capacity}).${rot}`
         : `Only ${lay.fits} of ${lay.copies} copies fit at ${fmt(+$("copyGap").value || 0, 1)} mm spacing.${rot} Lower the copies or spacing, or make the design smaller.`;
   layersSoon(); // layers.js: the stack follows the design and the plate
-}
-// the Plate card's size and hint for a text's pieces
-function piecePlateText(lay, pl, ok) {
-  const k = lay.pieces.length,
-    gap = fmt(+$("copyGap").value || 0, 1),
-    // a molecule: a bonds piece unless it has no bonds (water, a salt's ions), and a piece for each label
-    bonds = !st.text && !!st.pieces && st.pieces.list.some((D) => D.name === "bonds"),
-    lines = st.text
-      ? "lines"
-      : `piece${k === 1 ? "" : "s"}: ${bonds ? (k > 1 ? "the bonds and the labels" : "the bonds") : k === 1 ? "the label" : "the labels"}`,
-    what = `${lay.copies} piece${lay.copies === 1 ? "" : "s"} (${lay.sets > 1 ? `${lay.sets} × ` : ""}${k} ${lines})`,
-    how = st.text
-      ? piecesTogether()
-        ? "Each line prints as its own piece, one after another, in its place: the layout as typed."
-        : "Each line prints as its own piece, one after another, packed to save room."
-      : bonds
-        ? "The bonds print as one line, then each label as its own piece, in their places."
-        : k === 1
-          ? "The label prints as one line."
-          : "Each label prints as its own piece, in its place.",
-    rot = lay.angle ? ` Turned ${fmt(lay.angle, 0)}° to fit more.` : "";
-  $("gOx").disabled = $("gOy").disabled = $("plateCenter").disabled = true;
-  $("plateInfo").textContent =
-    `${k} piece${k === 1 ? "" : "s"} · ${fmt(lay.w, 1)} × ${fmt(lay.h, 1)} mm${lay.angle ? ` · rotated ${fmt(lay.angle, 0)}°` : ""}`;
-  $("plateHint").className = ok ? "hint" : "hint warn";
-  $("plateHint").textContent = ok
-    ? `${what} ${lay.copies === 1 ? "fits" : "fit"}, ${gap} mm apart. ${how}${rot}`
-    : `Only ${lay.fits} of ${what} fit at ${gap} mm spacing.${rot} Lower the copies or spacing, or make the letters smaller.`;
-  layersSoon();
 }
 function drawMini() {
   if (stageNow() !== "line") return; // the mini-map sits on the line view
@@ -504,8 +478,8 @@ function stageChanged() {
   document.body.dataset.stage = v;
   zoomUI(); // zoom.js: this view's own zoom
   if (v === "page") {
-    plotSoon(0);
-    drawPage();
+    ask("lineReady", 0);
+    ask("redraw");
   } else if (v === "plate") drawPlate();
   else if (v === "layers") {
     drawPlate();
@@ -520,7 +494,7 @@ document.querySelectorAll('input[name="stage"]').forEach((r) => r.addEventListen
 // what the animation redraws: the view that's showing (preview.js runs the clock)
 function redrawStage() {
   const v = stageNow();
-  if (v === "page") drawPage();
+  if (v === "page") ask("redraw");
   else if (v === "layers") drawStack();
   else if (v === "plate") drawPlate();
   else render();

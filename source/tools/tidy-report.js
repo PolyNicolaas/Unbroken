@@ -18,7 +18,10 @@ const ROOT = path.resolve(__dirname, "../.."),
       .sort()
       .map((f) => `${dir}/${f}`);
 const ENGINE = list("source/engine", /^\d\d-.*\.js$/),
-  APP = list("web-app/js", /\.js$/),
+  APP = [
+    ...list("web-app/js", /\.js$/),
+    ...fs.readdirSync(path.join(ROOT, "web-app/features")).flatMap((n) => list(`web-app/features/${n}`, /\.js$/)),
+  ],
   TESTS = [...list("source/tests/engine", /\.test\.js$/), ...list("source/tests/app", /\.test\.js$/)],
   noComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
 const R = { date: new Date().toISOString().slice(0, 10), sections: [] };
@@ -127,8 +130,8 @@ const section = (title, rows, ok) => R.sections.push({ title, rows, ok });
   const lastEngine = path.basename(ENGINE[ENGINE.length - 1]);
   if (!design.includes(lastEngine)) rows.push(`DESIGN.md's engine range doesn't reach ${lastEngine}`);
   for (const f of APP)
-    if (!webReadme.includes("`js/" + path.basename(f) + "`"))
-      rows.push(`web-app/README.md's file table misses js/${path.basename(f)}`);
+    if (!webReadme.includes("/" + path.basename(f) + "`"))
+      rows.push(`web-app/README.md's file table misses ${path.basename(f)}`);
   for (const f of ENGINE)
     if (!core.includes(path.basename(f) + " ")) rows.push(`core.js's header misses ${path.basename(f)}`);
   for (const t of TESTS) {

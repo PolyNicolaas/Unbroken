@@ -124,7 +124,7 @@ $("mxUse").addEventListener("click", () => {
 // each copy's own feed (mm/min), flow (its e, against the export's E per mm) and layer height (sliced at it). Returns
 // { paths, runs, w, h, seconds, ml } or throws with what's in the way.
 async function mxPlan() {
-  if (piecesOn()) throw new Error("this text prints a piece per line: set Lines of text to One piece first");
+  if (answer("piecesOn")) throw new Error("this text prints a piece per line: set Lines of text to One piece first");
   const L = mxLevels();
   if (!mxLevelsOK(L)) throw new Error("every level needs a value (speed 0.5–200 mm/s, flow 50–200%, layers 0.05–3 mm)");
   const lay = plateNow();
@@ -150,7 +150,7 @@ async function mxPlan() {
   const stacks = new Map();
   for (const h of new Set(L.h)) {
     // model.js, layers.js
-    const Ld = isModel() ? await buildModelLayers({ h, z0: mxZ0(h) }) : await designLayers(st, lay.xf, h);
+    const Ld = isModel() ? await answer("modelLayers", { h, z0: mxZ0(h) }) : await designLayers(st, lay.xf, h);
     if (!Ld) throw new Error("the layers aren't ready yet");
     stacks.set(h, Ld.stack);
   }
@@ -266,3 +266,11 @@ function mxUI() {
   mxSoon();
 }
 mxUI();
+
+// on the map: a card of the Tests chip, under Print
+addMapNode("tests", { cap: "Tests", step: "choc", cards: ["h-matrix"], quiet: () => true, val: () => "" });
+
+// with a design: its levels and scores are saved, and shown again when a design is restored
+addSaved("mxS1", "mxS2", "mxS3", "mxF1", "mxF2", "mxF3", "mxH1", "mxH2", "mxH3", "mxSlow", "mxScores");
+on("designUI", mxUI);
+on("layersReady", mxSoon); // its size, time and chocolate follow the layers

@@ -528,14 +528,15 @@ for (const q of CFG.printers) {
   const d = (CFG.raw && CFG.raw.defaults) || {},
     p = CFG.printer,
     notes = CFG.problems;
+  // (a control of a feature that's off isn't on the page: its default is skipped)
   const set = (id, v) => {
-    $(id).value = String(v);
+    if ($(id)) $(id).value = String(v);
   };
   const radio = (id) => {
-    $(id).checked = true;
+    if ($(id)) $(id).checked = true;
   };
   const tick = (id, v) => {
-    $(id).checked = !!v;
+    if ($(id)) $(id).checked = !!v;
   };
   const oneOf = (m) => (v) => Object.prototype.hasOwnProperty.call(m, v);
   const list =
@@ -546,7 +547,7 @@ for (const q of CFG.printers) {
   const bool = (v) => typeof v === "boolean";
   const RULES = [
     ["source", list("image", "text"), (v) => radio(v === "text" ? "srcText" : "srcImage")],
-    ["sample", list("none", "leaf", "shapes", "smiley", "face", "still"), () => {}], // (examples.js reads it at start)
+    ["sample", list("none", "leaf", "shapes", "smiley", "face", "still"), () => {}], // (art.js startInput reads it)
     ["traceStyle", oneOf(MAP.traceStyle), (v) => radio(v === "outline" ? "modeOutline" : "modeCenter")],
     ["path", list("closed", "open"), (v) => radio(v === "open" ? "loopOpen" : "loopClosed")],
     ["threshold", range(-60, 60), (v) => set("sens", Math.round(v))],
@@ -578,7 +579,7 @@ for (const q of CFG.printers) {
     ["crossings", oneOf(MAP.crossings), (v) => set("uncross", MAP.crossings[v])],
     ["allowOverlaps", bool, (v) => tick("overlaps", v)],
     ["baseDensity", range(0, 125), (v) => set("baseDensity", Math.round(v / 5) * 5)],
-    ["basePattern", list("rings", "lines"), (v) => set("basePattern", v)],
+    ["basePattern", list("rings", "lines", "spiral"), (v) => set("basePattern", v)],
     ["baseAngle", range(-90, 90), (v) => set("baseAngle", v)],
     ["baseTurn", range(1, 50), (v) => set("baseTurn", Math.round(v))],
     ["infillDensity", range(0, 100), (v) => set("fillDensity", Math.round(v / 5) * 5)],

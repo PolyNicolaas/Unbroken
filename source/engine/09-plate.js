@@ -481,7 +481,7 @@
         const k = rev ? n - 1 - i : i;
         out.push([line.x[k], line.y[k]]);
       }
-      if (!open && n > 1) out.push(out[0].slice());
+      if (!open && !line.open && n > 1) out.push(out[0].slice()); // (line.open: a spiral base, rim to middle)
       return out;
     };
     const addLap = (kind, P, zf, ef) => {

@@ -135,7 +135,6 @@ function levelsUI() {
   $("modeRow").hidden = $("sensRow").hidden = !!n;
   const sm = +$("levelSmooth").value;
   $("levelSmoothVal").textContent = sm ? mmAtSize(sm) : "off";
-  $("bgPickInfo").textContent = st.bgAt ? "from the point you tapped" : "";
   if (!n) return (levelListKey = null);
   const modes = levelModes(),
     plot = artForPlot(),
@@ -256,21 +255,24 @@ $("levelSmooth").addEventListener("input", () => {
   schedule(extract);
 });
 
-// ---------- Tap the background (a tool: tools.js handles the tap) ----------
-function bgTapped(p) {
-  st.bgAt = p; // source-normalised (u, v), like the start point
-  if (!+$("bgTol").value) $("bgTol").value = 20; // a tap means "remove it": start with some tolerance
-  labels();
-  levelsUI();
-  recordSoon();
-  schedule(extract);
-}
-$("bgBorder").addEventListener("click", () => {
-  st.bgAt = null;
-  labels();
-  levelsUI();
-  recordSoon();
-  schedule(extract);
-});
-$("bgDone").addEventListener("click", () => exitTool());
 levelsUI();
+
+// what the core asks about grey levels
+on("prepUI", levelsUI); // the picture's prep changed: the greys and their shares follow
+on("levelSettings", levelSettings); // for the trace: the levels, or null
+on("levelFlags", () => ({ edge: levelEdgeFlags(), border: levelBorderFlags() })); // which greys' edges are traced
+on("noLinesAdvice", levelNoLinesAdvice); // what to say when nothing was traced
+on("fillMask", levelFillMask); // the greys set to Fill, as a mask (a printer's layers)
+on("levelFills", levelFillList); // the greys set to Fill or Both (a plotter's strokes)
+on("levelWord", () => (levelColour() ? "colour" : "grey"));
+
+// ---------- the map: Grey levels, a chip under Art while a picture is the input ----------
+addMapNode("levels", {
+  cap: "Grey levels",
+  step: "art",
+  cards: ["h-levels"],
+  quiet: () => /off/.test(mapCardVal("h-levels") || "off"),
+});
+MAP_SHAPERS.push((S) => {
+  if (st.art.kind === "picture") S.down.art = [...(S.down.art || []), "levels"];
+});

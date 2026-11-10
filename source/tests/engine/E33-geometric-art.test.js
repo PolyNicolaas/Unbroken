@@ -53,7 +53,7 @@ function portraitTone() {
   return { w: 300, h: 400, d: out };
 }
 const TONE = portraitTone();
-// the picture the app traces (web-app/js/patterns.js drawArt), at the app's 1600 px
+// the picture the app traces (web-app/features/patterns/patterns.js drawArt), at the app's 1600 px
 function picture(r) {
   const L = UNB.patternLayout(r, 1600), c = createCanvas(L.w, L.h), g = c.getContext("2d");
   g.fillStyle = "#fff"; g.fillRect(0, 0, L.w, L.h); g.strokeStyle = "#000"; g.lineCap = g.lineJoin = "round"; g.lineWidth = L.lineWidth;

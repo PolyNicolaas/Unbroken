@@ -8,8 +8,8 @@ module.exports = {
   id: "E57", title: "Vases: a profile turned round, ribs and rings on the wall, a wave, zigzag or loops along the path, and the stacking check",
   guards: "a profile that misses its own points, a vase whose path doesn't follow its settings (radius, how many waves, twist), a jump between laps, loops that don't loop, and a shift that moves a lap off the one below without the check saying so",
   why: "Nicolaas (9 November 2026), after looking at clay printing apps: a vase from a profile curve you edit, with a surface texture and a movement pattern on the extrusion path. The path is written straight from the settings (no slicing), so the settings are the print: this test checks that the path is what was asked for, and that the check catches a lap that wouldn't sit on the one below.",
-  how: "Makes 12 mm vases with 0.3 mm layers: a 15 mm cylinder (plain, with a 0.5 mm wave of 16, with 8 ribs 2 mm deep twisted 20°, with loops of 1 mm, 30 round); the wave shifted half a wave a layer; a 3-layer filled base; a wide base (a 100 mm vase three times the bulb's width), how much of the band just inside its rim line it covers; and a bulb's profile. Measures each lap's radius round it, counts the waves and the loops (runs where the needle goes backwards), finds the top rib's crest, and stacks the laps into the printed 3D path.",
-  pass: "The wide base covers at least 85% of the band inside its rim line (60% before 9 November 2026, when the fill stopped a line spacing in); the profile passes through every point (to 0.001 mm); the plain cylinder is 15 mm all round on every lap (0.01) with 40 layers and nothing off the lap below; the wave spans 15 ± 0.5 mm with 16 waves a lap, and stacked straight is within 0.01 mm; shifted half a wave the check finds about 1 mm (2 × size) both ways; the ribs span 14–16 mm and the top rib's crest is at 20° (±2); loops: 30 backward runs a lap and a tight turn under half the bead; no step along the stacked path longer than 0.5 mm; the base: 3 filled layers inside the wall; the mesh is centred on its footprint.",
+  how: "Makes 12 mm vases with 0.3 mm layers: a 15 mm cylinder (plain, with a 0.5 mm wave of 16, with 8 ribs 2 mm deep twisted 20°, with loops of 1 mm, 30 round); the wave shifted half a wave a layer; a 3-layer filled base; a spiral base under a deep wave (3 layers asked) and a spiral fill of a 10 mm circle; a deep wave's base (3 mm, 10 round) and a loops base; a wide base (a 100 mm vase three times the bulb's width), how much of the band just inside its rim line it covers; and a bulb's profile. Measures each lap's radius round it, counts the waves and the loops (runs where the needle goes backwards), finds the top rib's crest, and stacks the laps into the printed 3D path.",
+  pass: "The wide base covers at least 85% of the band inside its rim line (60% before 9 November 2026, when the fill stopped a line spacing in); the profile passes through every point (to 0.001 mm); the plain cylinder is 15 mm all round on every lap (0.01) with 40 layers and nothing off the lap below; the wave spans 15 ± 0.5 mm with 16 waves a lap, and stacked straight is within 0.01 mm; shifted half a wave the check finds about 1 mm (2 × size) both ways; the ribs span 14–16 mm and the top rib's crest is at 20° (±2); loops: 30 backward runs a lap and a tight turn under half the bead; no step along the stacked path longer than 0.5 mm; the base: 3 filled layers inside the wall; the spiral base: 4 layers (an even number), open lines from the wall's start round and in to within 2.5 mm of the middle and back the same way, no step over 2 mm, nowhere inside more than 0.95 mm from the line (rows 0.84 apart), running into the wall without a jump; a 10 mm circle at 1 mm goes round 9 or 10 times; a deep wave's base follows the first wall lap (within 1.5 mm: the rim line opens a line spacing where the fill joins it; a circle would be 3 mm off) out to its crests, and a loops base stays the plain wall; the mesh is centred on its footprint.",
   run() {
     const checks = [];
     // the profile: a smooth curve through its points
@@ -58,6 +58,34 @@ module.exports = {
     const M = UNB.vaseMesh(vase({ kind: "ribs", count: 3 }, { kind: "none" }), { h: 0.3 });
     const xs = M.rows.flatMap((r) => Array.from(r.x)), ys = M.rows.flatMap((r) => Array.from(r.y));
     checks.push(check("mesh rows centred (mm)", +Math.max(Math.abs(Math.max(...xs) + Math.min(...xs)), Math.abs(Math.max(...ys) + Math.min(...ys))).toFixed(3), "<=", 0.01));
+    // the base is the shape of the wall that stands on it: a deep wave (3 mm, 10 round) has a star for a base, not a
+    // circle (10 November 2026); loops cross themselves, so their base is the plain wall
+    {
+      const far = (R) => { const B = R.base[R.base.length - 1], Wl = R.walls[0]; let worst = 0; for (let i = 0; i < Wl.x.length; i += 7) { let best = 1e9; for (let j = 0; j < B.x.length; j++) best = Math.min(best, Math.hypot(B.x[j] - Wl.x[i], B.y[j] - Wl.y[i])); worst = Math.max(worst, best); } return worst; };
+      const star = run(vase({}, { kind: "wave", size: 3, count: 10 }), { base: 2, baseDensity: 1, basePattern: "lines" });
+      const loopy = run(vase({}, { kind: "loops", size: 1, count: 30 }), { base: 1, baseDensity: 1, basePattern: "lines" });
+      checks.push(check("star base: the first wall lap's farthest point from the base line (mm)", +far(star).toFixed(2), "<=", 1.5), check("star base: reaches the crests (mm)", +Math.max(...radii(star.base[0])).toFixed(1), ">=", 17.8), check("loops: the base stays the plain wall (widest, mm)", +Math.max(...radii(loopy.base[0])).toFixed(1), "<=", 15.1));
+    }
+    // a spiral base: in from the rim on one layer, out on the next (11 November 2026)
+    {
+      const sp = run(vase({}, { kind: "wave", size: 3, count: 10 }), { base: 3, baseDensity: 1, basePattern: "spiral" });
+      const [b0, b1] = sp.base, n = b0.x.length, Wl = sp.walls[0];
+      const steps = []; for (let i = 1; i < n; i++) steps.push(Math.hypot(b0.x[i] - b0.x[i - 1], b0.y[i] - b0.y[i - 1]));
+      // every part of the inside within a row spacing of the line: sampled on a 0.5 mm grid inside the first wall lap
+      const P = Array.from(Wl.x, (x, i) => [x, Wl.y[i]]).filter((_, i) => i % 4 === 0);
+      const inside = (x, y) => { let c = 0; for (let i = 0; i < P.length; i++) { const p = P[i], q = P[(i + 1) % P.length]; if (p[1] > y !== q[1] > y && x < p[0] + ((y - p[1]) / (q[1] - p[1])) * (q[0] - p[0])) c = !c; } return c; };
+      let far = 0; for (let gx = -19; gx <= 19; gx += 0.5) for (let gy = -19; gy <= 19; gy += 0.5) { if (!inside(gx, gy)) continue; let best = 1e9; for (let i = 0; i < n; i += 2) best = Math.min(best, Math.hypot(b0.x[i] - gx, b0.y[i] - gy)); far = Math.max(far, best); }
+      const S = UNB.layerStack({ base: sp.base, baseLayers: sp.N, walls: sp.walls, wallLayers: sp.walls.length, h: OPT.h, open: false });
+      let jump = 0; for (let i = 1; i < S.x.length; i++) jump = Math.max(jump, Math.hypot(S.x[i] - S.x[i - 1], S.y[i] - S.y[i - 1]));
+      checks.push(check("spiral base: 3 asked, an even 4 made", sp.N, "==", 4), check("… open lines, and it says it spiralled", +(b0.open === true && b1.open === true && sp.spiralBase === true), "==", 1),
+        check("… starts on the rim, ends in the middle (mm from the middle)", +Math.hypot(b0.x[n - 1], b0.y[n - 1]).toFixed(1), "<=", 2.5), check("… the start's distance from the wall's start (mm)", +Math.hypot(b0.x[0] - Wl.x[0], b0.y[0] - Wl.y[0]).toFixed(2), "<=", 0.5),
+        check("… the next layer is the same line backwards (mm)", Math.hypot(b1.x[0] - b0.x[n - 1], b1.y[0] - b0.y[n - 1]) + Math.hypot(b1.x[n - 1] - b0.x[0], b1.y[n - 1] - b0.y[0]), "<=", 1e-9),
+        check("… no step along it longer than a slant in (mm)", +Math.max(...steps).toFixed(2), "<=", 2), check("… nowhere inside further from the line than a row (mm)", +far.toFixed(2), "<=", 0.95),
+        check("… stacked: base into wall without a jump (mm)", +jump.toFixed(2), "<=", 2));
+      // a shape with a waist can't spiral in one go: null
+      const circle = Array.from({ length: 300 }, (_, i) => [10 * Math.cos((2 * Math.PI * i) / 300), 10 * Math.sin((2 * Math.PI * i) / 300)]), sc = UNB.spiralFill(circle, 1);
+      checks.push(check("spiral fill of a 10 mm circle at 1 mm: times round", sc.rings, ">=", 9), check("… at most", sc.rings, "<=", 10));
+    }
     // a wide base (36 mm across the bottom, as a 100 mm vase three times the bulb's width): where the base meets its
     // rim line it's solid (the fill used to stop a line spacing in, a ring of nothing round the rim, worse the
     // bigger the base)

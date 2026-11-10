@@ -8,7 +8,7 @@ module.exports = {
   pass: "Every name used is defined in theme.css; both dark-mode blocks are identical; --corner, --text and --space are plain numbers.",
   async run() {
     const theme = fs.readFileSync(path.join(WEB, "css/theme.css"), "utf8").replace(/\/\*[\s\S]*?\*\//g, ""), app = fs.readFileSync(path.join(WEB, "css/app.css"), "utf8");
-    const js = fs.readdirSync(path.join(WEB, "js")).map((f) => fs.readFileSync(path.join(WEB, "js", f), "utf8")).join("\n");
+    const js = require("../lib/scripts.js").appScripts().map((x) => fs.readFileSync(x.file, "utf8")).join("\n");
     const defined = new Set([...theme.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]));
     const appOwn = new Set([...app.matchAll(/(--[\w-]+)\s*:/g)].map((m) => m[1]));            // names app.css defines for itself
     const used = new Set([...[...app.matchAll(/var\((--[\w-]+)/g)].map((m) => m[1]), ...[...js.matchAll(/"(--[a-z][\w-]*)"/g)].map((m) => m[1])]);

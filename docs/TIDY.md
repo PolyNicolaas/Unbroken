@@ -4,8 +4,7 @@ A recurring clean-up, so the code and the docs don't go stale or bloated between
 It runs every Monday morning as a scheduled task, and can be run by hand any time ("tidy up Unbroken"). It follows
 DESIGN.md's principles: build for the uses we have, one copy of each idea, delete rather than hide.
 
-Last tidied: 9 November 2026 (v144): the step tabs, the Next bar, More print settings, card folding and the Wheel taken
-out (the map is the only interface); the tests moved to the map; the styles without the map switch.
+Last tidied: 10 November 2026 (v145): the app split into a core and twelve features (DESIGN.md, Modules).
 
 ## 1 · Look
 

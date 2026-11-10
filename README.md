@@ -104,7 +104,7 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
 a **map** across the top of the page (`web-app/js/map.js`): one thick line through the steps this design takes
 (**Material → Art → Line → Size → Print** for a printer; a pen plotter ends in **Plot** and has no Material; a 3D
 model or a vase goes straight from Art to Print), with the less-used settings as small chips above and below their
-step (Examples, Picture prep, Tracing, Plate, Machine, Layers, Tests), faded until they matter. Each step shows its
+step (Examples, Grey levels, Tracing, Plate, Machine, Layers, Tests), faded until they matter. Each step shows its
 result, and a dot when the ready list has something for it. Tapping a step opens its settings beside the preview,
 one row per setting. The step tabs this replaced were taken out in v144 (`web-app/js/workflow.js` still holds the
 workflow's rules, [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)). Tests A60, A12.
@@ -112,7 +112,7 @@ workflow's rules, [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)). Tests A60, 
 The steps:
 
 - **Art**: what to start from (below). The app opens empty; the examples (pictures, patterns, lettering, the vase) are
-  a tray opened from the Examples chip on the map (`web-app/js/examples.js`; `?example=leaf` in the address, or
+  a tray opened from the Examples chip on the map (`web-app/js/state.js` `addExample`: each feature adds its own; `?example=leaf` in the address, or
   `defaults.sample` in settings.js, starts on one). Test A35.
 - **Trace** (the switch under the preview, on every step): on, the art becomes the line the Line step picks; off,
   the art stays as it is: a pattern or text plots as its exact lines (as drawn), a picture shows as the picture and
@@ -143,20 +143,20 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
 - **Text**: lettering in a single-stroke font (the Text card; see [Lettering](#lettering)).
 - **Pattern**: a geometric pattern, or a pattern that draws a picture's light and dark as one line (see
   [Geometric art](#geometric-art)).
-- **Molecule** (`web-app/js/molecule.js`, engine `16-molecule.js`; [`docs/CHEM-PLAN.md`](docs/CHEM-PLAN.md)): a
+- **Molecule** (`web-app/features/molecule/molecule.js`, engine `16-molecule.js`; [`docs/CHEM-PLAN.md`](docs/CHEM-PLAN.md)): a
   chemical structure as a skeletal formula, from a SMILES or a name (PubChem), laid out by RDKit (loaded from a CDN when
   first needed); the examples come laid out. **Draw or edit…** opens the structure editor on the preview
-  (`web-app/js/moleditor.js`): tap for atoms, drag for bonds, tap a bond for double or triple, rings, elements and
+  (`web-app/features/molecule/moleditor.js`): tap for atoms, drag for bonds, tap a bond for double or triple, rings, elements and
   charges, Erase, Undo, Clean up (RDKit). Exact lines, like a pattern: plotted as drawn or traced. Tests E39, E40, A40,
   A41.
 - **3D model**: an STL (or the sample skull cup), turned to the side it prints on, sliced on the 3D tab; **Draw this view**
-  makes its line drawing the picture to trace. Or **Make a vase** (`web-app/js/vase.js`, engine `17-vase.js`): a
+  makes its line drawing the picture to trace. Or **Make a vase** (`web-app/features/vase/vase.js`, engine `17-vase.js`): a
   profile curve you edit (the radius at each height, turned round the middle), a surface texture (ribs, twisting if
   you like, or rings) and a movement along the path (a wave, a zigzag or loops, shifted from layer to layer: columns,
   spirals or alternating). The Print step writes its path straight from those settings (`UNB.vaseStack`, no slicing)
   and checks that every lap sits on the one below and that the bead can follow its turns. Tests E57, A59.
 
-**Take a picture** (`web-app/js/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
+**Take a picture** (`web-app/features/camera/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
 phone) outlines the page it finds (`UNB.findPage`: the largest light, plain area on a small copy of the frame, its four
 corners from the widest four-sided shape round it, then made exact along each side's edge on the photo; if the shade
 makes the page's far end darker than the table, it looks again with the light divided out). The photo taken shows its
@@ -184,7 +184,7 @@ what it is tracing (Edit the art goes back). **Next** has **Trace it** (the prin
 continuous line) and **Plot as drawn**: a pattern or the text goes to the 2D tab exactly as made, without tracing
 (2D tab, **Art as drawn**, `UNB.exportLayersSVG`); a picture has no lines until it is traced.
 
-**Cut out the object** (Image prep, Select the object; `web-app/js/cutout.js`, engine `15-cutout.js`): drag a box
+**Cut out the object** (Image prep, Select the object; `web-app/features/cutout/cutout.js`, engine `15-cutout.js`): drag a box
 round the object on the preview; `UNB.cutout` (GrabCut) learns the colours inside and outside the box and cuts along
 the picture's edges where they change, so the floor at the box's sides tells it what the floor under the object looks
 like. **Keep** and **Remove** strokes fix what it gets wrong. Everything but the object is painted white before the
@@ -210,7 +210,7 @@ settings (the picture too). Designs from before the Art tab open on their own so
 ## Geometric art
 
 **Patterns** (Art tab → Input → Pattern) are abstract geometric patterns (`UNB.pattern`,
-`source/engine/13-patterns.js`; the Pattern card is `web-app/js/patterns.js`). A pattern is drawn as exact lines
+`source/engine/13-patterns.js`; the Pattern card is `web-app/features/patterns/patterns.js`). A pattern is drawn as exact lines
 (1600 px on its long side, `UNB.patternLayout`): the Art view and Plot as drawn use those lines, and the Trace tab traces
 them like any picture, so every rule of the line applies; a pattern that is one line is followed exactly instead
 (`UNB.stageVector`: its own points, crossings and all, unless a selection or erasing is set). Each style lists its own
@@ -346,7 +346,7 @@ Test E17 checks the per-axis form is exact (all terms rebuild the path; the writ
 
 The app has three tabs: **Trace** (trace and shape the line; called Design until October 2026), **2D** (a pen plotter and flat files) and **3D** (a printer, layers and G-code). Size and corner rounding are set in the Trace tab, which is the drawing alone; fills belong to the outputs: the 2D tab's fill pens (art) and the 3D tab's Base and Infill (structure).
 
-- **2D: the pen version.** A pen can lift and go over a line twice, so the 2D files hold the traced drawing itself: the walk fitted with no spacing, one continuous line that goes back over a stroke it travels out and back along, with no doubled strands and no stroke-end loops (`web-app/js/plot.js`, `UNB.stagePrint` with spacing 0). Corner rounding applies; infill doesn't. The preview shows it on the page.
+- **2D: the pen version.** A pen can lift and go over a line twice, so the 2D files hold the traced drawing itself: the walk fitted with no spacing, one continuous line that goes back over a stroke it travels out and back along, with no doubled strands and no stroke-end loops (`web-app/features/plotter/plot.js`, `UNB.stagePrint` with spacing 0). Corner rounding applies; infill doesn't. The preview shows it on the page.
 - **Paper.** A6 to A1; US Letter, Legal and Tabloid; drawing pads 6×8, 9×12, 11×14 and 18×24 in; **Printer plate** (the chosen printer's plate, from settings.js, to lay a drawing out at the size the chocolate printer would print it); or a custom size. Portrait or landscape; margins (default 20 mm); pen width (0.5 mm, the stroke width in the file). The drawing is centred; a warning shows when it doesn't fit inside the margins (change the size in the Trace tab, the paper or the margins). The page view always frames the whole drawing as well as the paper, so a drawing bigger than the paper shows hanging over its edge. `settings.js` defaults: paper, paperOrientation, paperSize (custom), paperMargin, penWidth, plotFormat.
 - **Fill pens.** Areas the pen line closes off can be filled with other pens, for colour. Pick a pen (Pen 2, 3 … up to 8; colour, width, spacing between strokes, style, angle, cross-hatch, follow tone), then click a shape on the page; the same pen clears it, another pen takes it over. Drag across shapes to do the same to each one you pass over (the first shape decides whether the drag fills or clears; one undo step per drag; a finger only taps, so it can still scroll). Strokes are ordered to keep pen-up travel short.
   - **Hatch**: straight strokes the pen lifts between, rows centred across the shape; cross-hatch adds a pass at 90°. **Contours**: rings following the shape's edge, stepping in by the spacing.
@@ -422,7 +422,7 @@ The Text card lays typed text out in a single-stroke font (`source/engine/fonts.
 
 ## 3D models
 
-**3D model** is the third source in the Trace tab, next to Image and Text (`web-app/js/model.js`, `UNB.parseSTL`, `UNB.orientMesh`, `UNB.sliceMesh`, `UNB.modelLayer`, `UNB.modelStack`).
+**3D model** is the third source in the Trace tab, next to Image and Text (`web-app/features/model/model.js`, `UNB.parseSTL`, `UNB.orientMesh`, `UNB.sliceMesh`, `UNB.modelLayer`, `UNB.modelStack`).
 
 - **Loading.** Load STL… reads binary or ASCII STL (units taken as mm). Picking 3D model with nothing loaded shows a sample vase. The model stands on the plate, centred; its starting height is its own, kept on the plate and under the printer's build height (at least 3 mm).
 - **Which way up.** Tip forward, Tip sideways and Turn give quarter turns; As loaded undoes them. Drag the preview to look round it (that only moves the view). Undo covers turns and height; design files keep the turns and height but not the mesh itself.
@@ -452,7 +452,7 @@ Tests E23 (slicing and fitting), E29 (cutting, outside only, overlapping shells)
 
 ## Credits
 
-- **The sample 3D model** (the Skull cup example, `web-app/js/sample-skull.js`): "Low Poly Skull Pencil Cup" from
+- **The sample 3D model** (the Skull cup example, `web-app/features/model/sample-skull.js`): "Low Poly Skull Pencil Cup" from
   [Printables](https://www.printables.com/model/555563-low-poly-skull-pencil-cup), licensed under
   [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Used unchanged;
   the app scales it to 25 mm tall. Not for commercial use: prints of it can't be sold.

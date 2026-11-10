@@ -38,8 +38,8 @@ In practice:
   helper is defined in two parts (checked 9 November).
 - **Background workers with cancellation** keep the page responsive. That is real complexity, but it's justified:
   tracing and slicing take seconds.
-- **The tests describe intent.** Each one says why it exists, how it checks and what counts as passing (56 engine
-  tests, 58 app tests on 9 November). App tests wait on the app's own "settled" signal, not the clock.
+- **The tests describe intent.** Each one says why it exists, how it checks and what counts as passing (57 engine
+  tests, 59 app tests on 10 November). App tests wait on the app's own "settled" signal, not the clock.
 - **Challenges** (`source/challenges/`): practical prints taken through the app with every version, their renders
   reviewed. `compare.js` checks two runs file by file, so a change that shouldn't change the output (a refactor, a
   rename) is proved byte for byte: the v91 clean-up left all 35 files of 30 jobs, and the screenshots, identical.
@@ -77,6 +77,67 @@ In practice:
   (`printSettingsChanged`, state.js) and what depends on them subscribes, instead of listening to those controls in
   four files and relying on listener order. (Step 6 removes the rest.)
 - **Shared state** is written by its owners only (test E27), but there is still one shared `st`.
+
+## Modules: features that can be switched off
+
+Decided 10 November 2026: the app is to be used for chocolate printers, pen plotters and clay printers, and each
+feature is to be worked on and made better on its own. So a feature is a module: the core doesn't name it, and it
+adds itself when its script loads. Switched off, it's as if it had never been built.
+
+**What a feature is.** Three things, and nothing else:
+
+1. a folder, `web-app/features/<name>/`, with its scripts;
+2. the parts of `web-app/index.html` marked `data-feature="<name>"` (its cards, buttons, panes);
+3. a line in `web-app/settings.js` (`features: { <name>: true }`) and its script tags in index.html, written
+   `feature("<name>", "features/<name>/<file>.js")`.
+
+Off (false in settings.js, or `?off=<name>` in the address to try it), its scripts aren't loaded and its parts are
+taken off the page before any other script runs (`state.js`). `docs/FEATURES.md` lists every feature with its
+files, its parts of the page, what it joins and its tests; `node source/tools/feature-map.js` writes it from the code.
+
+**How a feature joins in** (`web-app/js/state.js`):
+
+| It adds | With | Read by |
+|---|---|---|
+| an example | `addExample(order, key, name, what, use)` | the Examples tray (map.js) |
+| a step or chip of the map | `addMapNode(id, node)`; `MAP_SHAPERS.push(fn)` for chips that depend on the design | the map (map.js) |
+| something to make the line for | `addOutput(key, { name, radio, before, step, up, down })` | the map's line and the For chips |
+| a kind of art | `addArtKind(key, { radio, name, note, apply, drawnOK, vectors, sized, … })` | the Art step (art.js) |
+| controls saved with a design | `addSaved(...ids)` | history.js |
+| an answer to a moment | `on(moment, fn)` | whoever announces it: `ask(moment, …)` for every answer, `answer(moment, …)` for the first |
+
+The core announces a moment and doesn't know who answers: `ask("redraw")`, `answer("fitWidth")`. With no feature
+listening, `ask` gives an empty list and `answer` gives null, and the core carries on. FEATURES.md lists the
+moments each feature answers.
+
+**The rules, and the tests that hold them:**
+
+- *The core never names a feature* (test E58): no core script uses a name a feature's script defines. A feature
+  uses another's names only when it needs it (`FEATURE_NEEDS` in state.js: the vase needs the model).
+- *Every feature switches off clean* (test A61): with each one off in turn the app opens, traces the leaf, opens
+  every step of the map and exports, with no errors and none of the feature's parts left on the page; and with all
+  of them off at once the core alone does the same. 36 of 36 on 10 November (13 of 39 that morning).
+
+**Working on a feature.** Its folder, its marked parts of the page and its tests (FEATURES.md) are all of it.
+`?off=` the others to see it alone with the core. A feature in progress can ship switched off (`false` in
+settings.js) and be tried with `?on=<name>`.
+
+**Adding a feature.** Make its folder and script; mark its parts of the page; add its line to settings.js, its
+`feature(…)` tag to index.html (after the core scripts it calls), and its record to A61. In the script: add what it
+offers to the lists above, and answer the moments it cares about. If the core has to ask something new, add a
+moment (one `ask` in the core), never a call by name. Run `node source/tools/feature-map.js`.
+
+**What's still shared, on purpose or for now:**
+
+- *Styles.* A feature's styles are in `css/app.css` with everyone's. An off feature's rules match nothing, so
+  they do no harm; they move to the feature's folder when one needs restyling on its own.
+- *The page.* A feature's parts are marked in index.html rather than kept in its folder: the page stays one file
+  that opens straight from disk.
+- *Reads across a boundary.* A few core lines read the plotter's controls where the code only runs made for a
+  plotter (`#penW` in controls.js, `#penColor` in art.js); the Line step's Separate strokes and As drawn are the
+  plotter's line modes but live in workflow.js. They can't run with the plotter off; moving them is tidying.
+- *Clay.* A clay printer is expected to be a printer with its own machine and material profile and a few rules that
+  differ, not a new output. Not started: it needs a real printer's numbers.
 
 ## The plan
 

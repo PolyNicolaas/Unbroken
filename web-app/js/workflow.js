@@ -67,16 +67,9 @@ function workflowUI() {
         : mode === "strokes"
           ? `The ${kind} traced into strokes; the pen lifts between them.`
           : `The ${kind} traced into one continuous line: the pen never lifts.`;
-  // what the page plots follows the line (the 2D card's own switch is hidden)
-  const art = mode !== "one";
-  if ($("plotArt").checked !== art) {
-    $(art ? "plotArt" : "plotTraced").checked = true;
-    plotFromUI(); // plot.js
-  }
+  ask("lineMode", mode); // (plot.js: what the page plots follows the line)
   if (mode === "drawn") {
-    setChip(
-      `${st.art.kind === "text" ? "The text" : st.art.kind === "molecule" ? moleculeName() : patternName(st.art.pattern)} as drawn: exact lines, no trace`
-    );
+    setChip(`${st.art.kind === "text" ? "The text" : artKind().name()} as drawn: exact lines, no trace`);
     $("fitinfo").textContent = "as drawn";
   }
   if (mode === "none") {
@@ -146,9 +139,8 @@ function lineModeChanged() {
 // ---------- Separate strokes: traced into strokes (pipeline.js extract hands over to this) ----------
 // traced at the page's size: the base resolution per 100 mm of the page's long side (inside the margins)
 function strokesRes() {
-  const P = paperSize(),
-    mg = Math.max(0, +$("paperMargin").value || 0),
-    long = Math.max(P.w, P.h) - 2 * mg,
+  const P = answer("pageBox"), // (plot.js: the paper, its margin and pen 1)
+    long = Math.max(P.w, P.h) - 2 * P.margin,
     src = st.source,
     r = Math.min(CFG.engine.maxWorkingResolution, Math.round((long * baseRes()) / 100));
   return src ? Math.min(r, Math.max(baseRes(), src.width, src.height)) : r;
@@ -161,14 +153,13 @@ async function traceStrokes(g) {
   const r = await PIPE.call("stageStrokes", [lineSpec(W, s.sens), W.w, W.h, { minLen: s.minLen }]);
   guard(g);
   // the greys set to Fill or Both (levels.js), each filled with its own pen, at the page's scale (as artOnPage fits it)
-  const fills = W.levels ? levelFillList() : [];
+  const fills = (W.levels && answer("levelFills")) || [];
   let fillStrokes = [];
   if (fills.length) {
-    const P = paperSize(),
-      mg = Math.max(0, +$("paperMargin").value || 0),
-      k = Math.min((P.w - 2 * mg) / W.w, (P.h - 2 * mg) / W.h), // mm per px
-      pen = Math.max(0.05, +$("penW").value || 0.5),
-      pat = fills.some((f) => f.style === "pattern") && st.art.pattern ? patternDrawn().r : null;
+    const P = answer("pageBox"),
+      k = Math.min((P.w - 2 * P.margin) / W.w, (P.h - 2 * P.margin) / W.h), // mm per px
+      pen = P.pen,
+      pat = (fills.some((f) => f.style === "pattern") && ask("fillPattern")[0]) || null;
     const res = await PIPE.call("levelFills", [
       W.levels.lab,
       W.w,
@@ -215,12 +206,12 @@ async function traceStrokes(g) {
     n || nf
       ? `${n} stroke${n === 1 ? "" : "s"} · ${n ? n - 1 : 0} pen lift${n === 2 ? "" : "s"}` +
           (fillStrokes.length ? ` · ${fillStrokes.length} grey${fillStrokes.length === 1 ? "" : "s"} filled` : "")
-      : levelNoLinesAdvice(true) || "No lines found — lower the threshold or the speck filter"
+      : answer("noLinesAdvice", true) || "No lines found — lower the threshold or the speck filter"
   );
   $("fitinfo").textContent = n ? `${n} stroke${n === 1 ? "" : "s"}` : "";
   render();
   drawMini();
-  drawPage();
+  ask("redraw");
   labels();
 }
 workflowUI();

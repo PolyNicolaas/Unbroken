@@ -74,6 +74,9 @@ const fail = (msg) => {
   for (const dir of ["css", "js"])
     for (const f of fs.readdirSync(path.join(APP, dir)))
       copy(path.join(APP, dir, f), path.join(TMP, dir, f), dir === "js");
+  for (const name of fs.readdirSync(path.join(APP, "features")))
+    for (const f of fs.readdirSync(path.join(APP, "features", name)))
+      copy(path.join(APP, "features", name, f), path.join(TMP, "features", name, f), true);
   for (const f of fs.readdirSync(ENGINE).filter((f) => f.endsWith(".js")))
     copy(path.join(ENGINE, f), path.join(TMP, f)); // every engine part, core.js, fonts.js, worker.js
   // every file the page and the background engine load gets ?v=<version>: GitHub Pages lets browsers keep a file for
@@ -87,7 +90,9 @@ const fail = (msg) => {
     fs.writeFileSync(p, t);
   };
   tag("index.html", (s) =>
-    s.replace(/(<(?:script|link)[^>]+(?:src|href)=")(?!https?:)([^"?]+\.(?:js|css))"/g, `$1$2?v=${top}"`)
+    s
+      .replace(/(<(?:script|link)[^>]+(?:src|href)=")(?!https?:)([^"?]+\.(?:js|css))"/g, `$1$2?v=${top}"`)
+      .replace(/(feature\("\w+", ")([^"?]+\.js)"/g, `$1$2?v=${top}"`)
   );
   tag("js/engine-bridge.js", (s) =>
     s.replace('const WORKER_URL = "worker.js";', `const WORKER_URL = "worker.js?v=${top}";`)
@@ -98,8 +103,8 @@ const fail = (msg) => {
   // 3 ---------- every file the page asks for exists, and nothing still points outside dist/
   step(3, "Check the page's files");
   const html = fs.readFileSync(path.join(TMP, "index.html"), "utf8");
-  const refs = [...html.matchAll(/<(?:script|link)[^>]+(?:src|href)="([^"]+)"/g)]
-    .map((m) => m[1])
+  const refs = [...html.matchAll(/<(?:script|link)[^>]+(?:src|href)="([^"]+)"|feature\("\w+", "([^"]+)"/g)]
+    .map((m) => m[1] || m[2])
     .filter((u) => !/^https?:/.test(u));
   const missing = refs.filter((u) => !fs.existsSync(path.join(TMP, u.split("?")[0])));
   if (missing.length) fail(`index.html loads files that aren't in dist/: ${missing.join(", ")}`);

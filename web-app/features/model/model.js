@@ -70,7 +70,7 @@ function setModelHeight(H) {
   if (st.model.vase) {
     // a vase grows taller, its radii kept (the profile's heights are shares of the height)
     useVase(Object.assign({}, st.model.vase, { height: Math.min(500, Math.max(2, H)) }), true);
-    if (typeof vaseUI === "function") vaseUI(); // vase.js: its Height box
+    ask("modelSized"); // (vase.js: its Height box)
     return;
   }
   const c = modelCut();
@@ -171,7 +171,7 @@ $("turnReset").addEventListener("click", () => {
 function enterModel() {
   if (!st.model) useSampleModel();
   else modelChanged(false);
-  drawPage(); // plot.js: the 2D page no longer shows the last picture's drawing
+  ask("redraw"); // (the pen plotter's page no longer shows the last picture's drawing)
 }
 
 // ---------- a vase made here (the Vase switch in the 3D model card; vase.js edits it) ----------
@@ -311,13 +311,14 @@ async function buildModelLayers(o = {}) {
     modelStacks.set(key, R);
     if (modelStacks.size > 6) modelStacks.delete(modelStacks.keys().next().value);
   }
-  const place = (L) => UNB.plateLocal(L.x, L.y, lay.xf);
+  // (a spiral base's lines are open, rim to middle: UNB.layerStack doesn't close them)
+  const place = (L) => Object.assign(UNB.plateLocal(L.x, L.y, lay.xf), L.open ? { open: true } : null);
   const base = R.base.map(place),
     walls = R.walls.map(place),
     N = base.length,
     Mw = walls.length;
   const stack = UNB.layerStack({ base, baseLayers: N, walls, wallLayers: Mw, h: S0.h, open: false });
-  const S = { on: N > 0, pat: S0.pat, N, M: Mw, h: S0.h, F: S0.F };
+  const S = { on: N > 0, pat: S0.pat, N, M: Mw, h: S0.h, F: S0.F, spiral: R.spiralBase };
   return {
     key: key + "|" + JSON.stringify(lay.xf),
     S,
@@ -620,7 +621,7 @@ $("drawView").addEventListener("click", async () => {
       { yaw: M.yaw, pitch: M.pitch, size: 1400, crease: creaseDeg() },
     ]);
     const c = hlCanvas(r, 3);
-    applyPreset("drawing", true); // first, so the trace already uses it (one trace, not two)
+    ask("preset", "drawing", true); // first, so the trace already uses it (one trace, not two)
     artModelDrawing(c, `${M.name} · drawing`); // art.js: the drawing becomes the picture
     toast("Drawing made: tracing it as a line drawing");
   } catch (e) {
@@ -667,3 +668,137 @@ async function modelViewSVG() {
   };
 }
 $("drawSvg").addEventListener("click", () => exportAs("viewsvg", $("drawMsg")));
+
+addExample(110, "skull", "Skull cup", "a 3D model", () => artUse("model"), true);
+
+// the ready list (export.js): does any part of the model reach out past what a bead can hold?
+on("ready", (L, add) => {
+  if (!(L.model && L.overhang) || L.vase) return;
+  const step = overhangMM(),
+    S = L.support,
+    zAt = (k) => fmt(firstZ() + k * L.S.h, 1);
+  const kind = { thin: "thin wall", slope: "slope", skirt: "flared skirt" }[$("support").value] || "flared skirt";
+  // (a hollow single-wall print: a layer stepping in past its wall hangs over the empty inside; Support: Slope)
+  const inward = L.overhang.inWorst > 0.02 && !(S && S.layers && $("support").value === "slope");
+  if (S && S.layers)
+    add(
+      "ok",
+      `Support (${kind}): ${S.layers} layer${S.layers === 1 ? "" : "s"} ${$("support").value === "slope" ? "sloped" : "widened"}, from ${zAt(S.from)} mm`,
+      "h-layers"
+    );
+  else if (L.overhang.worst > step + 0.02)
+    add(
+      "warn",
+      `Overhang: a layer steps out ${fmt(L.overhang.worst, 2)} mm at ${zAt(L.overhang.at)} mm (a bead holds ${fmt(step, 2)}): turn on Support`,
+      "h-layers"
+    );
+  else if (!inward) add("ok", `No overhang past ${fmt(step, 2)} mm a layer`, "h-layers");
+  if (inward)
+    add(
+      "warn",
+      `A layer steps in ${fmt(L.overhang.inWorst, 2)} mm at ${zAt(L.overhang.inAt)} mm, over the empty inside (the wall holds ${fmt(step, 2)}): Support: Slope`,
+      "h-layers"
+    );
+});
+on("buildFile", (fmtName) => (fmtName === "viewsvg" ? modelViewSVG() : undefined)); // the line drawing of a view
+// a 3D model as the art in use (the Art step, art.js): sliced on the Print step, not traced
+addArtKind("model", {
+  radio: "srcModel",
+  name: () => (st.model && st.model.name) || "",
+  note: () => "A 3D model: it is sliced on the Print step.",
+  apply() {
+    if (!st.model) useSampleModel();
+    useSource("model");
+  },
+});
+
+// ---------- with a design (history.js) ----------
+// A model is recognised by what it is, not by its id: the id is a counter that starts again every session, so a saved
+// design could put its turns and height on a different model loaded later. The fingerprint is the model's name, its
+// triangle count and its size as loaded (to 0.001), worked out once per mesh.
+const modelPrints = new WeakMap();
+function modelPrint(M) {
+  let p = modelPrints.get(M.tri);
+  if (!p) {
+    const t = M.tri,
+      lo = [Infinity, Infinity, Infinity],
+      hi = [-Infinity, -Infinity, -Infinity];
+    for (let i = 0; i < t.length; i++) {
+      const a = i % 3;
+      if (t[i] < lo[a]) lo[a] = t[i];
+      if (t[i] > hi[a]) hi[a] = t[i];
+    }
+    p = [M.name, M.n, ...hi.map((v, a) => (v - lo[a]).toFixed(3))].join("|");
+    modelPrints.set(M.tri, p);
+  }
+  return p;
+}
+on("save", () => ({
+  model: st.model
+    ? {
+        id: st.model.id,
+        print: modelPrint(st.model),
+        turns: { ...st.model.turns },
+        heightMM: st.model.heightMM,
+        cut: { ...modelCut() },
+        ...Object.assign({}, ...ask("modelSave")), // (a vase made here: made again from its settings)
+      }
+    : null,
+}));
+// A design restored: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
+// Designs saved before the fingerprint also match by id, but only when the model's name is the same too. Returns a
+// note when the model isn't the one loaded.
+on("modelRestore", (s) => {
+  const m = s.model;
+  ask("modelRestoring", m); // (vase.js: a vase made here is made again, or steps aside)
+  const same =
+    st.model &&
+    m &&
+    !m.vase &&
+    (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
+  if (same) {
+    st.model.turns = { ...m.turns };
+    st.model.om = UNB.orientMesh(st.model.tri, st.model.turns);
+    st.model.heightMM = m.heightMM;
+    st.model.cut = m.cut ? { ...m.cut } : { bottom: 0, top: 0 };
+  } else if (m && st.model && !m.vase)
+    return `made with ${s.srcLabel ? `“${s.srcLabel}”` : "another model"}: load that STL to get its turns and height back`;
+  return "";
+});
+// what the core asks of a model
+on("modelEnter", () => {
+  document.body.dataset.src = "model";
+  enterModel();
+});
+on("modelFile", loadModelFile); // an STL dropped or chosen
+on("modelDraw", drawModel); // the preview
+on("modelPlate", modelPlate); // its footprint on the plate
+on("modelLayers", buildModelLayers); // sliced into layers
+on("modelPrintedMM", printedMM); // the height it prints at
+on("modelHeight", setModelHeight); // scaled evenly to a height
+
+// ---------- the spiral base ----------
+// A model's or a vase's base can spiral (the Base settings' Pattern): round the rim and in to the middle on one layer,
+// up, and out again on the next, ending where the wall starts. So it takes two layers at a time: an odd number goes
+// up by one. The choice is only there for a model (a drawing's base is the line's own fill).
+function spiralBaseUI() {
+  const sel = $("basePattern"),
+    opt = sel.querySelector('option[value="spiral"]'),
+    model = isModel();
+  opt.hidden = opt.disabled = !model;
+  if (!model && sel.value === "spiral") {
+    sel.value = "rings";
+    sel.dispatchEvent(new Event("input", { bubbles: true }));
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  const spiral = model && sel.value === "spiral",
+    n = $("baseLayers");
+  n.step = spiral ? 2 : 1;
+  if (spiral && +n.value % 2) {
+    n.value = +n.value + 1;
+    n.dispatchEvent(new Event("input", { bubbles: true }));
+    n.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+}
+for (const id of ["basePattern", "baseLayers"]) $(id).addEventListener("change", spiralBaseUI);
+on("artUI", spiralBaseUI);

@@ -512,9 +512,9 @@ body { --row-line: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
 .panel section.card:not([data-map]) { display: none !important; }
 .map-head { display: flex; flex-direction: column; gap: calc(10px * var(--space)); }
 .map-rows:not([hidden]) { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding-bottom: 6px; }
-.map-top { display: none; height: 34px; flex: none; margin-left: calc(24px * var(--space)); align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
+.map-top { display: flex; height: 34px; flex: none; margin-left: calc(24px * var(--space)); align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
 .map-top .name { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
-.map-top { display: flex; }
+.map-top[hidden] { display: none; }
 .map-for[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
 .map-lines { position: absolute; left: 0; top: 0; pointer-events: none; }
 .map-lines path { fill: none; stroke-linecap: round; }
@@ -600,10 +600,9 @@ label.field.changed > .map-reset { display: block; }
 .layerbar { top: 110px; }
 .pane-tip { display: none; }
 .pathbar { max-width: calc(100% - 96px); }
-/* the map: for a printer, line width and gap live in Material only (a pen plotter has no Material step: there they
-   stay on Line); the math sits with the Line step; the drop area is for loading a model (a picture has its own
-   buttons, and a file can be dropped anywhere) */
-body[data-out="print"] #card-h-line label.field:is(:has(#lineW), :has(#lineGapMM)) { display: none; }
+/* the map: line width and gap are on the Line step (the needle picked in Material sets the width); the math sits
+   with the Line step; the drop area is for loading a model (a picture has its own buttons, and a file can be dropped
+   anywhere) */
 .math { display: none; }
 .map-extra .math { display: block; }
 body:not([data-art="model"]) #dropZone, body[data-empty="1"] #dropZone { display: none; }

@@ -504,3 +504,4 @@ $("camFile").addEventListener("change", () => {
   };
   img.src = url;
 });
+on("artUI", photoUI); // the Photo card follows the picture

@@ -925,7 +925,7 @@ async function plotFile() {
     const w = +$("penW").value || 0.5;
     return {
       // (a pattern made for plotting isn't the traced source)
-      name: designSlug(20, st.art.kind === "pattern" ? patternName(st.art.pattern) : null) + "-art.svg",
+      name: designSlug(20, st.art.kind === "pattern" ? artKind().name() : null) + "-art.svg",
       data: UNB.exportLayersSVG(
         A.layers.map((l, i) => ({ label: `${i + 1} ${l.name}`, color: l.pen, width: w, strokes: l.strokes })),
         { paperW: A.P.w, paperH: A.P.h, what: lineModeNow() === "strokes" ? "traced into separate strokes" : null }
@@ -977,3 +977,85 @@ $("paperCustomRow").hidden = $("paper").value !== "custom";
 $("penColor").value = penColorAt(0);
 renderPens();
 shapesUI();
+
+// on the map: made for a pen plotter, the line ends in Plot (no Material step), with Export over it and Fills under
+addOutput("plot", { name: "A pen plotter", radio: "artForPlot", step: "plot", up: ["pexport"], down: ["fills"] });
+addMapNode("plot", {
+  cap: "Plot",
+  step: "plot",
+  cards: ["h-plot"],
+  val: () => (mapNothing() ? "nothing yet" : "the page"),
+});
+addMapNode("fills", { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" });
+addMapNode("pexport", { cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" });
+
+// with a design: its controls are saved, the fill pens kept, and the page follows a design that was restored
+addSaved(
+  "paper",
+  "paperOrient",
+  "paperMargin",
+  "paperW",
+  "paperH",
+  "penW",
+  "penColor",
+  "crease",
+  "gapClose",
+  "minShape",
+  "drawBridges",
+  "plotTraced",
+  "plotArt"
+);
+on("save", () => ({ penFill: structuredClone(st.penFill) }));
+on("restore", (s) => {
+  st.penFill = s.penFill ? structuredClone(s.penFill) : defaultPenFill();
+  st.pfill = null; // older design files: no fill pens
+});
+on("designUI", () => {
+  $("paperCustomRow").hidden = $("paper").value !== "custom";
+  renderPens();
+  shapesUI();
+  drawPage();
+  fillsSoon();
+  plotFromUI(); // Traced line or Art as drawn
+});
+
+// what the core announces, and the plotter does about it
+on("redraw", drawPage); // the page, when it's showing
+on("lineReady", (delay) => plotSoon(delay)); // the line (or the art as drawn) changed: the page follows
+on("fitWidth", pageFitW); // made for plotting, a design fills the page
+on("drawnAsIs", plotFromArt); // the art's lines as drawn: an SVG needs no trace
+on("buildFile", (fmtName) => (fmtName === "svg" ? plotFile() : undefined));
+// what the page plots follows the line (the Plot card's own switch is hidden)
+on("lineMode", (mode) => {
+  const art = mode !== "one";
+  if ($("plotArt").checked !== art) {
+    $(art ? "plotArt" : "plotTraced").checked = true;
+    plotFromUI();
+  }
+});
+document.querySelectorAll('input[name="artFor"]').forEach((r) => r.addEventListener("change", fitPageSoon));
+$("fitPage").addEventListener("click", () => {
+  st.pageFit = true;
+  const W = pageFitW();
+  if (W) setSize(W, false);
+});
+
+// the plotter's own controls, where the rest of the app follows them
+// (an art's width follows the page and the closest lines its pen: art.js)
+for (const id of ["paper", "paperW", "paperH", "paperMargin", "penW", "paperOrient"])
+  $(id).addEventListener(id === "paper" || id === "paperOrient" ? "change" : "input", () => ask("sized"));
+// (pen 1 is the line)
+$("penW").addEventListener("input", () => {
+  if (artForPlot()) lineChanged();
+});
+$("exportBtn").addEventListener("click", () => exportAs("svg", $("exportMsg")));
+// the paper inside its margin and pen 1's width, mm (Separate strokes are traced at the page's size: workflow.js)
+on("pageBox", () => {
+  const P = paperSize();
+  return {
+    w: P.w,
+    h: P.h,
+    margin: Math.max(0, +$("paperMargin").value || 0),
+    pen: Math.max(0.05, +$("penW").value || 0.5),
+  };
+});

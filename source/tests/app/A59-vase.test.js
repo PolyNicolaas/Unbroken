@@ -3,8 +3,8 @@ module.exports = {
   id: "A59", title: "Make a vase: the profile editor, texture and movement, the Print step's checks, the G-code, undo and design files",
   guards: "a profile point that can't be dragged or added, a change that doesn't reach the print, the STL's controls (turns, cuts, walls, support) showing for a vase, a shift past what a bead holds not flagged, G-code that isn't the vase's height, and a vase lost on undo or from a saved design",
   why: "Nicolaas (9 November 2026): a vase made from a profile curve he edits, with a surface texture and a movement pattern on the extrusion path, printed on the same Print step as a model. E57 checks the path; this checks the card, the checks on the Print step and the file.",
-  how: "Opens the Wavy vase example on the Art step. Drags the middle-right profile point outwards, taps beside the curve to add a point, undoes. Picks Zigzag, then Loops. On the Print step reads the ready list and exports the G-code; then shifts the movement half a wave a layer and reads the ready list again. Sets the Print step's Height to 30 mm. Saves the design, picks An STL file (the sample skull), opens the design again.",
-  pass: "The example is a vase (the Vase controls showing, the STL's turns and the Print step's cuts, walls and support hidden); dragging widens the vase and adds an undo step that takes it back; a tap adds a fifth point and Remove point takes it away; Loops says how far apart they are; the Print step's ready list says every lap sits on the one below, and with half a wave's shift that the wall steps out; the G-code's last printing move is within a layer of the vase's height above the first layer, every layer a wall after the base; Height 30 mm makes the vase 30 mm tall (same width); the design opens as the same vase after the skull; no page errors.",
+  how: "Last, on Layers picks the Spiral base with 3 layers, then opens the leaf. Before that: opens the Wavy vase example on the Art step. Drags the middle-right profile point outwards, taps beside the curve to add a point, undoes. Picks Zigzag, then Loops. On the Print step reads the ready list and exports the G-code; then shifts the movement half a wave a layer and reads the ready list again. Sets the Print step's Height to 30 mm. Saves the design, picks An STL file (the sample skull), opens the design again.",
+  pass: "Spiral base: offered for a vase, 3 layers become 4, each an open line; not offered for a picture. The example is a vase (the Vase controls showing, the STL's turns and the Print step's cuts, walls and support hidden); dragging widens the vase and adds an undo step that takes it back; a tap adds a fifth point and Remove point takes it away; Loops says how far apart they are; the Print step's ready list says every lap sits on the one below, and with half a wave's shift that the wall steps out; the G-code's last printing move is within a layer of the vase's height above the first layer, every layer a wall after the base; Height 30 mm makes the vase 30 mm tall (same width); the design opens as the same vase after the skull; no page errors.",
   slow: true,
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { example: "wavyvase", art: true }), checks = [];
@@ -72,6 +72,20 @@ module.exports = {
     await page.setInputFiles("#designFile", file); await A.idle(page); await A.idle(page);
     checks.push(check("the design opens as the same vase", +(await page.evaluate((v) => !!st.model.vase && JSON.stringify(st.model.vase) === v, V)), "==", 1));
     checks.push(check("page errors", errors.length, "==", 0));
+    // a spiral base (10 November 2026): the Base settings' Spiral is there for a vase, takes an even number of layers,
+    // and its layers are open lines (rim to middle, and back)
+    await page.evaluate(() => mapOpen("layers")); await A.idle(page, 3000);
+    const offered = await page.$eval('#basePattern option[value="spiral"]', (o) => +(!o.hidden && !o.disabled));
+    await page.selectOption("#basePattern", "spiral"); await A.setValue(page, "#baseLayers", 3, "change"); await page.dispatchEvent("#baseLayers", "input");
+    await page.waitForTimeout(1500); await A.idle(page, 20000); await page.waitForTimeout(1500);
+    const sp = await page.evaluate(() => ({ n: +$("baseLayers").value, N: st.layers && st.layers.S.N, open: st.layers ? st.layers.base.filter((b) => b.open).length : -1 }));
+    checks.push(check("spiral base: offered for a vase", offered, "==", 1), check("… 3 layers asked becomes 4", sp.n, "==", 4), check("… 4 base layers made, each an open line", +(sp.N === 4) + +(sp.open === 4), "==", 2));
+    await A.example(page, "skull"); await A.idle(page, 12000);
+    await page.evaluate(() => mapOpen("layers")); await A.idle(page, 20000); await page.waitForTimeout(1500);
+    const sk = await page.evaluate(() => ({ off: +!$("basePattern").querySelector('[value="spiral"]').disabled, pat: $("basePattern").value, n: +$("baseLayers").value, N: st.layers && st.layers.S.N, open: st.layers ? st.layers.base.filter((b) => b.open).length : -1 }));
+    checks.push(check("… offered for a sliced model too (the skull cup): still Spiral", +sk.off + +(sk.pat === "spiral"), "==", 2), check("… its base layers spiral (open lines of an even number)", +(sk.N > 0 && sk.N % 2 === 0 && sk.open === sk.N), "==", 1));
+    await A.example(page, "leaf"); await A.idle(page, 6000);
+    checks.push(check("… not offered for a picture, and the pattern back to rings", await page.evaluate(() => { const o = $("basePattern").querySelector('[value="spiral"]'); return +(o.hidden && o.disabled) + +($("basePattern").value !== "spiral"); }), "==", 2));
     await close();
     return { checks, notes: `ready: ${r1}  \nwidened ${(width1 - width0).toFixed(1)} mm; G-code ${printing.length} printing moves, top ${top.toFixed(2)} mm` + (errors.length ? "  \n" + errors.join("  \n") : "") };
   },
