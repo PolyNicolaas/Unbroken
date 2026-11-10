@@ -600,10 +600,9 @@ label.field.changed > .map-reset { display: block; }
 .layerbar { top: 110px; }
 .pane-tip { display: none; }
 .pathbar { max-width: calc(100% - 96px); }
-/* the map: for a printer, line width and gap live in Material only (a pen plotter has no Material step: there they
-   stay on Line); the math sits with the Line step; the drop area is for loading a model (a picture has its own
-   buttons, and a file can be dropped anywhere) */
-body[data-out="print"] #card-h-line label.field:is(:has(#lineW), :has(#lineGapMM)) { display: none; }
+/* the map: line width and gap are on the Line step (the needle picked in Material sets the width); the math sits
+   with the Line step; the drop area is for loading a model (a picture has its own buttons, and a file can be dropped
+   anywhere) */
 .math { display: none; }
 .map-extra .math { display: block; }
 body:not([data-art="model"]) #dropZone, body[data-empty="1"] #dropZone { display: none; }

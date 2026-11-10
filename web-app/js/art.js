@@ -110,7 +110,8 @@ function artUsePicture(canvas, label, sample) {
 }
 // A photo (camera.js) becomes the picture: the cleaned picture, with the photo it came from (photo: { raw, corners,
 // kind, light, ink, specks }) kept beside it so the Photo card can clean it again. The same photo cleaned again keeps
-// its turn and straightening.
+// its turn and straightening, and leaves another kind of input in use (a cleaning that finishes after the switch to
+// a molecule or a text doesn't bring the picture back).
 function artUsePhoto(canvas, label, photo) {
   const p = st.art.picture,
     again = p && p.photo && p.photo.raw === photo.raw,
@@ -125,6 +126,10 @@ function artUsePhoto(canvas, label, photo) {
     angle: again ? p.angle : 0,
   };
   if (!again) $("picAngle").value = 0;
+  if (again && st.art.kind !== "picture" && artKeepKind() === "picture") {
+    artUI(); // (kept for when the Picture is back)
+    return;
+  }
   if (again && (p.turn || p.angle)) {
     pictureTurn(p.turn, p.angle);
     return;

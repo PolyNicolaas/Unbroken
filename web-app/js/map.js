@@ -21,11 +21,11 @@ const MAP_CORE = {
     step: "choc",
     rows: [
       ["Machine and chocolate", ["printer", "#printerSummary", "chocolate", "needle", "#chocInfo"]],
-      ["Line", ["lineW", "lineGapMM", "#mapSpacing"]],
+      ["Line", ["#mapSpacing"]],
       ["Flow", ["layerH", "gFeed", "gFlow", "gE", "gOver"]],
     ],
     recipe: true,
-    holds: ["h-choc", "h-line"],
+    holds: ["h-choc"],
     val: () =>
       [
         selText("chocolate").replace(/ chocolate$/i, ""),
@@ -352,7 +352,8 @@ function mapPanelHead() {
       ? `${mapText("tuneVal")} for this print`
       : "as the recipe";
     $("mapRecipeReset").disabled = $("tuneReset").disabled;
-    $("mapSpacing").querySelector(".val").textContent = `${fmt(Math.max(lineWidthMM(), spacingMM() || 0), 2)} mm`;
+    $("mapSpacing").querySelector(".val").textContent =
+      `${fmt(lineWidthMM(), 2)} + ${fmt(Math.max(0, (spacingMM() || 0) - lineWidthMM()), 2)} mm`;
   }
 }
 // its step comes up (the preview follows it), only its settings show, at the top
@@ -463,6 +464,12 @@ for (const [key, O] of Object.entries(OUTPUTS)) {
 }
 document.querySelector(".map-top").hidden = Object.keys(OUTPUTS).length < 2;
 $("mapRecipeReset").addEventListener("click", () => $("tuneReset").click());
+// Material shows the line's width and gap; they're changed where the line is (the Line step)
+$("mapToLine").addEventListener("click", (e) => {
+  e.preventDefault();
+  mapOpen("line");
+  $("lineW").focus();
+});
 // the ready list (export.js) also lights the map's dots
 {
   const ready = readyUI;

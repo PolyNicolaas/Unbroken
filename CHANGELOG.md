@@ -22,6 +22,13 @@ changes on screen with everything on.
   `source/tests/lib/scripts.js` (every script of the app, the features' too).
 - **docs/FEATURES.md**, written from the code by `source/tools/feature-map.js`: each feature's files, parts of the
   page, what it joins and its tests.
+- **A vase's base is the shape of its wall.** With a wave or zigzag along the path the base was still a plain
+  circle (the wall without its movement), so a deep wave stood on a base that neither filled it nor matched it. The
+  base is now the first wall lap laid flat, movement and all. Loops, which cross themselves, keep the plain base
+  (test E57).
+- **Line width and gap are on the Line step** for a printer too (they were moved into Material). The needle picked
+  in Material still sets the width; Material shows "width + gap" with a link to Line.
+- A photo cleaned again (the Photo card) no longer takes the input back from a molecule, text or pattern in use.
 - Moved while untangling: the clean start (was examples.js) is in art.js; Tap the background is Image prep's
   (controls.js, was levels.js); the plotter's Fit to page and SVG buttons, and the pattern's width, are wired in
   their own scripts. A second `id="cutRow"` on the page (the cut-out's row had the model's id) is gone.
