@@ -15,7 +15,7 @@
 // step: the step (input name="view") its settings are on; cards: the headings of the cards it shows; rows: groups of
 // settings shown as rows ([title, [element ids or fields' control ids]]); cap: its label; val(): its result now
 // (default: the first card's header readout); quiet(): faded (a step you rarely need, with nothing to say)
-const MAP_NODES = {
+const MAP_CORE = {
   material: {
     cap: "Material",
     step: "choc",
@@ -54,10 +54,6 @@ const MAP_NODES = {
     cards: ["h-prep", "h-levels"],
     quiet: () => mapText("prepVal") === "off" && /off/.test(mapCardVal("h-levels") || "off"),
   },
-  // a vase made here: its parts are in the 3D model card, so each opens the card at its part
-  vprofile: { cap: "Profile", step: "art", cards: ["h-model"], at: "vaseProfile", val: () => "" },
-  vtexture: { cap: "Texture", step: "art", cards: ["h-model"], at: "vtNone", val: () => "" },
-  vmove: { cap: "Movement", step: "art", cards: ["h-model"], at: "vmNone", val: () => "" },
   tracing: { cap: "Tracing", step: "design", cards: ["h-trace"], quiet: () => true, val: () => "" },
   line: {
     cap: "Line",
@@ -111,16 +107,17 @@ const MAP_NODES = {
     quiet: () => !isModel() && /^1 layer\b/.test(mapText("layerInfo")) && !(+$("baseLayers").value > 0),
     val: () => "",
   },
-  tests: { cap: "Tests", step: "choc", cards: ["h-test", "h-matrix"], quiet: () => true, val: () => "" },
-  plot: {
-    cap: "Plot",
-    step: "plot",
-    cards: ["h-plot"],
-    val: () => (mapNothing() ? "nothing yet" : "the page"),
-  },
-  fills: { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" },
-  pexport: { cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" },
 };
+for (const [id, node] of Object.entries(MAP_CORE)) addMapNode(id, node);
+// a printer: Material before Art, Print at the end (a pen plotter adds itself: plot.js)
+addOutput("print", {
+  name: "A printer",
+  radio: "artForPrint",
+  before: ["material"],
+  step: "print",
+  up: ["plate", "machine"],
+  down: ["layers", "tests"],
+});
 const MAP_STEP_RADIO = { art: "viewArt", design: "viewDesign", choc: "viewChoc", plot: "view2D" };
 const mapText = (id) => ($(id) ? $(id).textContent.trim() : "");
 const selText = (id) => {
@@ -157,27 +154,21 @@ const mapVal = (N) => (N.val ? N.val() : mapCardVal(N.cards[0]));
 
 // ---------- the shape of the map for this design ----------
 // spine: the steps the design goes through, left to right; up / down: chips above and below a spine node
+const outputNow = () => Object.keys(OUTPUTS).find((k) => $(OUTPUTS[k].radio).checked) || "print";
 function mapShape() {
-  const plot = artForPlot(),
+  const O = OUTPUTS[outputNow()],
     model = st.art.kind === "model",
-    vase = model && st.model && st.model.vase,
     picture = st.art.kind === "picture";
-  const spine = plot ? ["art"] : ["material", "art"];
+  const spine = [...(O.before || []), "art"];
   if (!model) spine.push("line", "size");
-  spine.push(plot ? "plot" : "print");
-  const up = { art: ["examples"] },
-    down = {};
-  if (picture) down.art = ["prep"];
-  if (vase) down.art = ["vprofile", "vtexture", "vmove"];
-  if (!model && picture) up.line = ["tracing"];
-  if (plot) {
-    up.plot = ["pexport"];
-    down.plot = ["fills"];
-  } else {
-    up.print = ["plate", "machine"];
-    down.print = ["layers", "tests"];
-  }
-  return { spine, up, down };
+  spine.push(O.step);
+  const S = { spine, up: { art: ["examples"], [O.step]: [...(O.up || [])] }, down: { [O.step]: [...(O.down || [])] } };
+  if (picture) S.down.art = ["prep"];
+  if (!model && picture) S.up.line = ["tracing"];
+  for (const shaper of MAP_SHAPERS) shaper(S);
+  // a chip whose node no script added (its feature is off) isn't on the map
+  for (const side of [S.up, S.down]) for (const k in side) side[k] = side[k].filter((id) => MAP_NODES[id]);
+  return S;
 }
 
 // ---------- drawing it ----------
@@ -255,7 +246,7 @@ function mapRender() {
   svg.innerHTML = `<path class="map-thin" d="${thin}"/><path class="map-spine" d="${spine}"/>`;
   document
     .querySelectorAll(".map-for")
-    .forEach((b) => b.setAttribute("aria-pressed", String((b.dataset.for === "plot") === artForPlot())));
+    .forEach((b) => b.setAttribute("aria-pressed", String(b.dataset.for === outputNow())));
   mapDots();
   mapPanelHead();
 }
@@ -457,13 +448,20 @@ document
     });
   }).observe($("box"));
 }
-document.querySelectorAll(".map-for").forEach((b) =>
+// one For chip per thing it can be made for (none when there's only a printer)
+for (const [key, O] of Object.entries(OUTPUTS)) {
+  const b = document.createElement("button");
+  b.type = "button";
+  b.className = "chip-btn map-for";
+  b.dataset.for = key;
+  b.textContent = O.name;
   b.addEventListener("click", () => {
-    const r = $(b.dataset.for === "plot" ? "artForPlot" : "artForPrint");
-    if (!r.checked) mapPick(r);
+    if (!$(O.radio).checked) mapPick($(O.radio));
     setTimeout(mapFollowStep, 0);
-  })
-);
+  });
+  document.querySelector(".map-top").appendChild(b);
+}
+document.querySelector(".map-top").hidden = Object.keys(OUTPUTS).length < 2;
 $("mapRecipeReset").addEventListener("click", () => $("tuneReset").click());
 // the ready list (export.js) also lights the map's dots
 {

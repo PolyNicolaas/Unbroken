@@ -266,3 +266,6 @@ function mxUI() {
   mxSoon();
 }
 mxUI();
+
+// on the map: a card of the Tests chip, under Print
+addMapNode("tests", { cap: "Tests", step: "choc", cards: ["h-matrix"], quiet: () => true, val: () => "" });

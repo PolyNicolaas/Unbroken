@@ -43,6 +43,23 @@ function addExample(order, key, name, what, use, blank = false) {
   EXAMPLES.push({ order, key, name, what, use, blank });
   EXAMPLES.sort((a, b) => a.order - b.order);
 }
+// The map of the steps (map.js). A step or chip: id → { cap, step, cards, rows, holds, quiet, val } (map.js says what
+// each is); added again, a node's cards join the ones it has (the Tests chip holds the test print's card and the
+// test matrix's, each added by its own script).
+const MAP_NODES = {};
+function addMapNode(id, node) {
+  const had = MAP_NODES[id];
+  MAP_NODES[id] = had ? { ...had, ...node, cards: [...(had.cards || []), ...(node.cards || [])] } : node;
+}
+// What the line is made for: key → { name: its chip, radio: the input that holds the choice, before: the steps before
+// Art, step: its last step, up / down: the chips over and under that step }. The map draws the For chips from these.
+const OUTPUTS = {};
+function addOutput(key, output) {
+  OUTPUTS[key] = output;
+}
+// The map's shape for the design in hand can be changed by a feature: each of these gets the shape { spine, up, down }
+// and may add its chips (a vase's Profile, Texture and Movement under Art).
+const MAP_SHAPERS = [];
 const joined = {}; // moment → the functions given for it
 function on(moment, fn) {
   (joined[moment] ||= []).push(fn);

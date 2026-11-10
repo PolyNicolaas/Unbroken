@@ -383,3 +383,11 @@ new ResizeObserver(() => vaseDraw()).observe($("vaseProfile"));
 onPrintSettings(() => vaseHint()); // state.js: the needle changes what a bead holds
 
 addExample(120, "wavyvase", "Wavy vase", "a vase made here: profile, texture, movement", () => vaseExample(), true);
+
+// on the map: a vase's parts are chips under Art; each opens the 3D model card at its part
+addMapNode("vprofile", { cap: "Profile", step: "art", cards: ["h-model"], at: "vaseProfile", val: () => "" });
+addMapNode("vtexture", { cap: "Texture", step: "art", cards: ["h-model"], at: "vtNone", val: () => "" });
+addMapNode("vmove", { cap: "Movement", step: "art", cards: ["h-model"], at: "vmNone", val: () => "" });
+MAP_SHAPERS.push((S) => {
+  if (st.art.kind === "model" && st.model && st.model.vase) S.down.art = ["vprofile", "vtexture", "vmove"];
+});

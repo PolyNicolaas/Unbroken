@@ -512,9 +512,9 @@ body { --row-line: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
 .panel section.card:not([data-map]) { display: none !important; }
 .map-head { display: flex; flex-direction: column; gap: calc(10px * var(--space)); }
 .map-rows:not([hidden]) { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding-bottom: 6px; }
-.map-top { display: none; height: 34px; flex: none; margin-left: calc(24px * var(--space)); align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
+.map-top { display: flex; height: 34px; flex: none; margin-left: calc(24px * var(--space)); align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
 .map-top .name { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
-.map-top { display: flex; }
+.map-top[hidden] { display: none; }
 .map-for[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
 .map-lines { position: absolute; left: 0; top: 0; pointer-events: none; }
 .map-lines path { fill: none; stroke-linecap: round; }

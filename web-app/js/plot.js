@@ -977,3 +977,14 @@ $("paperCustomRow").hidden = $("paper").value !== "custom";
 $("penColor").value = penColorAt(0);
 renderPens();
 shapesUI();
+
+// on the map: made for a pen plotter, the line ends in Plot (no Material step), with Export over it and Fills under
+addOutput("plot", { name: "A pen plotter", radio: "artForPlot", step: "plot", up: ["pexport"], down: ["fills"] });
+addMapNode("plot", {
+  cap: "Plot",
+  step: "plot",
+  cards: ["h-plot"],
+  val: () => (mapNothing() ? "nothing yet" : "the page"),
+});
+addMapNode("fills", { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" });
+addMapNode("pexport", { cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" });

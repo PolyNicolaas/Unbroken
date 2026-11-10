@@ -163,3 +163,6 @@ $("testUse").addEventListener("click", () => {
   setStatus($("testMsg"), "ok", `Strip ${k}: ${fmt(v, K.digits)} ${K.unit} is now the setting.`);
 });
 testRange();
+
+// on the map: a card of the Tests chip, under Print
+addMapNode("tests", { cap: "Tests", step: "choc", cards: ["h-test"], quiet: () => true, val: () => "" });
