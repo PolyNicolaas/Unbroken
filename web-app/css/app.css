@@ -489,7 +489,12 @@ body[data-out="print"]:not([data-line="drawn"]):not([data-line="none"]) #card-h-
 
 /* Make a vase (vase.js): the vase's own controls, or the STL's */
 body:not([data-vase="1"]) .vase-only, body[data-vase="1"] .stl-only { display: none !important; }
-#vaseBox:not([data-tex="ribs"]) .vt-ribs, #vaseBox:not([data-tex="rings"]) .vt-rings, #vaseBox[data-tex="none"] .vt-on, #vaseBox[data-move="none"] .vm-on { display: none; }
+#vaseBox:is([data-tex="none"], [data-tex="rings"]) :is(.vt-ribs, .vt-twist), #vaseBox:is([data-tex="none"], [data-tex="ribs"], [data-tex="diamond"]) .vt-rings, #vaseBox[data-tex="none"] .vt-on, #vaseBox[data-move="none"] .vm-on { display: none; }
+#vaseBox:not([data-plan="polygon"], [data-plan="star"], [data-plan="flower"]) .vp-sides, #vaseBox:not([data-plan="star"], [data-plan="flower"]) .vp-depth, #vaseBox[data-plan="circle"] .vp-round, #vaseBox:not([data-plan="drawing"]) .vp-drawing { display: none; }
+#vaseBox:not([data-top="polygon"], [data-top="star"], [data-top="flower"]) .vr-sides, #vaseBox:not([data-top="star"], [data-top="flower"]) .vr-depth, #vaseBox:is([data-top="same"], [data-top="circle"]) .vr-round { display: none; }
+#vaseBox[data-lean="off"] .vl-on, #vaseBox:not([data-rim="flare"], [data-rim="scallop"]) .vrim-size, #vaseBox:not([data-rim="scallop"]) .vrim-scallop, #vaseBox[data-rim="none"] .vrim-on { display: none; }
+.vase-curve-cv { display: block; width: 100%; height: calc(72px * var(--space) + 20px); background: var(--paper); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); touch-action: none; cursor: crosshair; }
+.vase-curve-cv:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .vase-profile { display: block; width: 100%; height: calc(230px * var(--space)); background: var(--paper); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); touch-action: none; cursor: crosshair; }
 .vase-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 

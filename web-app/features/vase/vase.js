@@ -1,7 +1,9 @@
 // Unbroken · web app · vase.js
 // Make a vase (the 3D model card's second choice): the profile editor (drag the points of the radius-against-height
-// curve, tap beside it to add one), the height, the surface texture (ribs, rings) and the movement along the path
-// (wave, zigzag, loops, shifted from layer to layer). Every change goes to model.js (useVase), which makes the vase the
+// curve, tap beside it to add one), the height, the shape from above (a circle, polygon, star, flower or a traced
+// drawing's outline; another at the rim; turned and leaning as it rises), the surface texture (ribs, rings, a grid, a
+// weave, diamonds), the movement along the path (wave, zigzag, loops, shifted from layer to layer, or flipped into a
+// lattice), the strength of each up the wall (small curve editors), and the rim (flared or rolled). Every change goes to model.js (useVase), which makes the vase the
 // model in use; the Print step writes its path (UNB.vaseStack) and checks it.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
@@ -31,15 +33,31 @@ function vaseSend(record) {
       useVase(vaseCur, false);
     });
 }
+// the settings a vase from before a part was added doesn't have: as made then (a circle, no lean, …)
+function vaseFill(V) {
+  const D = UNB.vaseDefaults();
+  for (const k of ["plan", "lean", "rim"]) V[k] = Object.assign({}, D[k], V[k] || {});
+  if (V.planTop === undefined) V.planTop = null;
+  if (V.strength === undefined) V.strength = null;
+  if (!(+V.twist === V.twist)) V.twist = 0;
+  V.move = Object.assign({ flip: 0 }, V.move);
+  return V;
+}
 // the controls from the vase in use (a design opened, undo, the Print step's Height), or the one being edited
 function vaseUI() {
   if (st.model && st.model.vase) vaseCur = structuredClone(st.model.vase);
-  const V = vaseCur,
+  const V = vaseFill(vaseCur),
     T = V.texture,
-    M = V.move;
+    M = V.move,
+    P = V.plan,
+    Q = V.planTop;
   if (document.activeElement !== $("vaseH")) $("vaseH").value = +V.height.toFixed(1);
-  $({ none: "vtNone", ribs: "vtRibs", rings: "vtRings" }[T.kind] || "vtNone").checked = true;
-  $({ none: "vmNone", wave: "vmWave", zigzag: "vmZigzag", loops: "vmLoops" }[M.kind] || "vmNone").checked = true;
+  $(VASE_RADIO.tex[T.kind] || "vtNone").checked = true;
+  $(VASE_RADIO.move[M.kind] || "vmNone").checked = true;
+  $(VASE_RADIO.plan[P.kind] || "vpCircle").checked = true;
+  $(VASE_RADIO.top[Q ? Q.kind : "same"] || "vrSame").checked = true;
+  $(VASE_RADIO.lean[V.lean.curve] || "vlStraight").checked = true;
+  $(VASE_RADIO.rim[V.rim.kind] || "vrimNone").checked = true;
   $("vtCount").value = T.count;
   $("vtTwist").value = T.twist;
   $("vtSpacing").value = T.spacing;
@@ -47,35 +65,112 @@ function vaseUI() {
   $("vmSize").value = M.size;
   $("vmCount").value = M.count;
   $("vmShift").value = Math.round(M.shift * 100);
+  $("vmFlip").value = M.flip || 0;
+  $("vpSides").value = P.sides;
+  $("vpDepth").value = Math.round(P.depth * 100);
+  $("vpRound").value = Math.round(P.round * 100);
+  const Qs = Q || { sides: 6, depth: 0.3, round: 0.2 };
+  $("vrSides").value = Qs.sides;
+  $("vrDepth").value = Math.round(Qs.depth * 100);
+  $("vrRound").value = Math.round(Qs.round * 100);
+  $("vaseTwist").value = V.twist;
+  $("vlSize").value = V.lean.size;
+  $("vlDir").value = V.lean.dir;
+  $("vrimSize").value = V.rim.size;
+  $("vrimHeight").value = V.rim.height;
+  $("vrimCount").value = V.rim.count || 8;
   vasePick = Math.min(vasePick, V.profile.length - 1);
   vaseLabels();
   vaseHint();
   vaseDraw();
 }
+const VASE_RADIO = {
+  tex: { none: "vtNone", ribs: "vtRibs", rings: "vtRings", grid: "vtGrid", weave: "vtWeave", diamond: "vtDiamond" },
+  move: { none: "vmNone", wave: "vmWave", zigzag: "vmZigzag", loops: "vmLoops" },
+  plan: { circle: "vpCircle", polygon: "vpPolygon", star: "vpStar", flower: "vpFlower", drawing: "vpDrawing" },
+  top: { same: "vrSame", circle: "vrCircle", polygon: "vrPolygon", star: "vrStar", flower: "vrFlower" },
+  lean: { straight: "vlStraight", curve: "vlCurve", bow: "vlBow" },
+  rim: { none: "vrimNone", flare: "vrimFlare", rolled: "vrimRolled", scallop: "vrimScallop" },
+};
+// a shape's words: "6-sided, rounded 20%", "5 points, 30% deep"
+function vasePlanWords(P) {
+  if (!P || P.kind === "circle") return "circle";
+  if (P.kind === "drawing")
+    return P.loop
+      ? `a drawing's outline${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`
+      : "a drawing (none yet)";
+  const n = P.sides;
+  if (P.kind === "polygon") return `${n}-sided${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`;
+  return `${n} ${P.kind === "star" ? "points" : "petals"}, ${Math.round(P.depth * 100)}% deep`;
+}
 function vaseLabels() {
-  const V = vaseCur,
+  const V = vaseFill(vaseCur),
     T = V.texture,
     M = V.move,
-    box = $("vaseBox");
+    P = V.plan,
+    Q = V.planTop,
+    box = $("vaseBox"),
+    side = (k) => (k === "polygon" ? "Corners" : k === "star" ? "Points" : "Petals");
   box.dataset.tex = T.kind;
   box.dataset.move = M.kind;
+  box.dataset.plan = P.kind;
+  box.dataset.top = Q ? Q.kind : "same";
+  box.dataset.lean = V.lean.size > 0 ? "on" : "off";
+  box.dataset.rim = V.rim.kind;
   $("vtCountVal").textContent = `${T.count}`;
+  $("vtTwistLab").textContent = T.kind === "weave" ? "Twist each way" : "Twist, bottom to rim";
   $("vtTwistVal").textContent = `${T.twist}°`;
+  $("vtSpacingLab").textContent = T.kind === "weave" ? "Twists back every" : "Rings apart";
   $("vtSpacingVal").textContent = `${fmt(T.spacing, 1)} mm`;
   $("vtDepthVal").textContent = `${fmt(T.depth, 1)} mm`;
   $("vmSizeVal").textContent = `${fmt(M.size, 1)} mm`;
   $("vmCountVal").textContent = `${M.count}`;
   $("vmShiftVal").textContent = M.shift ? `${Math.round(M.shift * 100)}% of one a layer` : "none: straight columns";
+  $("vmFlipVal").textContent = M.flip ? `${M.flip} layer${M.flip === 1 ? "" : "s"}` : "off";
+  $("vpSidesLab").textContent = side(P.kind);
+  $("vpSidesVal").textContent = `${P.sides}`;
+  $("vpDepthVal").textContent = `${Math.round(P.depth * 100)}%`;
+  $("vpRoundVal").textContent = `${Math.round(P.round * 100)}%`;
+  const Qs = Q || {};
+  $("vrSidesLab").textContent = side(Qs.kind);
+  $("vrSidesVal").textContent = `${Qs.sides || ""}`;
+  $("vrDepthVal").textContent = Q ? `${Math.round(Qs.depth * 100)}%` : "";
+  $("vrRoundVal").textContent = Q ? `${Math.round(Qs.round * 100)}%` : "";
+  $("vaseTwistVal").textContent = V.twist ? `${V.twist}°` : "none";
+  $("vlSizeVal").textContent = V.lean.size ? `${fmt(V.lean.size, 1)} mm` : "upright";
+  $("vlDirVal").textContent = `${V.lean.dir}°`;
+  $("vrimSizeLab").textContent = V.rim.kind === "scallop" ? "Crests rise" : "Flares out";
+  $("vrimSizeVal").textContent = `${fmt(V.rim.size, 1)} mm`;
+  $("vrimCountVal").textContent = `${V.rim.count || 8}`;
+  $("vrimHeightVal").textContent = `the top ${fmt(V.rim.height, 1)} mm`;
+  $("vasePlanVal").textContent = vasePlanWords(P) + (V.twist ? `, turning ${V.twist}°` : "");
+  $("vaseTopVal").textContent = Q ? `blends to ${vasePlanWords(Q)}` : "the same shape";
+  $("vaseLeanVal").textContent = V.lean.size ? `${fmt(V.lean.size, 1)} mm, ${V.lean.curve}` : "upright";
+  $("vaseRimVal").textContent =
+    V.rim.kind === "flare"
+      ? `flares ${fmt(V.rim.size, 1)} mm over the top ${fmt(V.rim.height, 1)} mm`
+      : V.rim.kind === "rolled"
+        ? `doubled over the top ${fmt(V.rim.height, 1)} mm`
+        : V.rim.kind === "scallop"
+          ? `${V.rim.count || 8} scallops rising ${fmt(V.rim.size, 1)} mm`
+          : "plain";
   $("vaseTexVal").textContent =
-    T.kind === "ribs"
-      ? `${T.count} ribs${T.twist ? `, ${T.twist}° twist` : ""}`
-      : T.kind === "rings"
-        ? `rings ${fmt(T.spacing, 1)} mm apart`
-        : "smooth";
+    {
+      ribs: `${T.count} ribs${T.twist ? `, ${T.twist}° twist` : ""}`,
+      rings: `rings ${fmt(T.spacing, 1)} mm apart`,
+      grid: `a grid: ${T.count} ribs, rings ${fmt(T.spacing, 1)} mm apart`,
+      weave: `${T.count} ribs weaving ${T.twist}° every ${fmt(T.spacing, 1)} mm`,
+      diamond: `diamonds: ${T.count} round, ${T.twist}° twist`,
+    }[T.kind] || "smooth";
   $("vaseMoveVal").textContent =
     M.kind === "none"
       ? "straight along the wall"
-      : `${M.count} ${M.kind === "loops" ? "loops" : M.kind === "zigzag" ? "zigzags" : "waves"} round`;
+      : `${M.count} ${M.kind === "loops" ? "loops" : M.kind === "zigzag" ? "zigzags" : "waves"} round${M.flip ? `, a lattice` : ""}`;
+  for (const [id, key] of [
+    ["vtCurve", "texture"],
+    ["vmCurve", "move"],
+  ])
+    $(id + "Val").textContent = vaseCurveWords(V.strength && V.strength[key]);
   $("vasePtDel").disabled = !(vasePick > 0 && vasePick < V.profile.length - 1);
 }
 // What the settings will do, worked out on the spot (the Print step's ready list checks the path itself): the widths,
@@ -130,6 +225,12 @@ function vaseHint() {
       if (off > step) warn = true;
     }
   }
+  if (M.kind !== "none" && M.flip > 0) {
+    const span = (2 * Math.PI * rmax) / M.count / 2;
+    parts.push(
+      `a lattice: every ${M.flip} layer${M.flip === 1 ? "" : "s"} the movement flips, and that layer bridges up to ${fmt(span, 1)} mm between crossings (more round makes the gaps shorter)`
+    );
+  }
   el.textContent = parts.join(" · ") + ".";
   el.className = warn ? "hint warn" : "hint";
 }
@@ -148,6 +249,8 @@ function vaseView(cv) {
   return { s, x0: cv.width / 2, y0: cv.height - pad, H: V.height };
 }
 function vaseDraw() {
+  vaseCurveDraw("vtCurve");
+  vaseCurveDraw("vmCurve");
   const cv = $("vaseProfile");
   if (!cv || !cv.isConnected || cv.getBoundingClientRect().width === 0) return;
   const fit = fitCanvas(cv, true);
@@ -326,12 +429,79 @@ $("vaseH").addEventListener("change", () => {
   $("vaseH").value = vaseCur.height;
   vaseSend(true);
 });
-for (const id of ["vtNone", "vtRibs", "vtRings"])
+for (const id of Object.values(VASE_RADIO.tex))
   $(id).addEventListener("change", () => {
     vaseCur.texture.kind = $(id).value;
+    // a weave or diamonds need a twist to be one
+    if ((vaseCur.texture.kind === "weave" || vaseCur.texture.kind === "diamond") && !vaseCur.texture.twist) {
+      vaseCur.texture.twist = 45;
+      $("vtTwist").value = 45;
+    }
     vaseLabels();
     vaseSend(true);
   });
+// the shape from above, and at the rim
+for (const id of Object.values(VASE_RADIO.plan))
+  $(id).addEventListener("change", () => {
+    vaseCur.plan.kind = $(id).value;
+    if (vaseCur.plan.kind === "drawing" && !vaseCur.plan.loop) vaseUseLine();
+    if (vaseCur.plan.kind === "flower" && vaseCur.plan.sides > 12) vaseCur.plan.sides = 8;
+    vaseLabels();
+    vaseSend(true);
+  });
+for (const id of Object.values(VASE_RADIO.top))
+  $(id).addEventListener("change", () => {
+    const k = $(id).value,
+      Q = vaseCur.planTop;
+    vaseCur.planTop = k === "same" ? null : Object.assign({ sides: 6, depth: 0.3, round: 0.2 }, Q, { kind: k });
+    vaseSend(true);
+    vaseUI(); // (its sliders from the rim's shape)
+  });
+for (const id of Object.values(VASE_RADIO.lean))
+  $(id).addEventListener("change", () => {
+    vaseCur.lean.curve = $(id).value;
+    vaseLabels();
+    vaseSend(true);
+  });
+for (const id of Object.values(VASE_RADIO.rim))
+  $(id).addEventListener("change", () => {
+    vaseCur.rim.kind = $(id).value;
+    vaseLabels();
+    vaseSend(true);
+  });
+// the outside edge of the line last traced (a picture's or a text's), as the shape from above
+function vaseUseLine() {
+  const F = st.final,
+    msg = $("vpDrawMsg");
+  if (!F || !F.re || F.re.length < 8) {
+    msg.textContent = "Nothing traced yet: trace a picture or a text (Art), then come back here and use it.";
+    msg.className = "hint warn";
+    return false;
+  }
+  const O = UNB.vaseOutline(
+    Array.from(F.re),
+    Array.from(F.im, (v) => -v)
+  );
+  if (!O) {
+    msg.textContent = "The traced line has no inside to make a shape from.";
+    msg.className = "hint warn";
+    return false;
+  }
+  vaseCur.plan = Object.assign(vaseCur.plan, { kind: "drawing", loop: O.loop });
+  msg.textContent =
+    O.pieces > 1
+      ? `The outline of the largest of the ${O.pieces} shapes in the line (the others are left out).`
+      : "The outline of the line last traced. Trace another and use it again to change it.";
+  msg.className = "hint";
+  return true;
+}
+$("vpUseLine").addEventListener("click", () => {
+  if (vaseUseLine()) {
+    $("vpDrawing").checked = true;
+    vaseLabels();
+    vaseSend(true);
+  }
+});
 for (const id of ["vmNone", "vmWave", "vmZigzag", "vmLoops"])
   $(id).addEventListener("change", () => {
     vaseCur.move.kind = $(id).value;
@@ -342,6 +512,19 @@ for (const id of ["vmNone", "vmWave", "vmZigzag", "vmLoops"])
     vaseSend(true);
   });
 for (const [id, part, key, k] of [
+  ["vmFlip", "move", "flip", 1],
+  ["vpSides", "plan", "sides", 1],
+  ["vpDepth", "plan", "depth", 0.01],
+  ["vpRound", "plan", "round", 0.01],
+  ["vrSides", "planTop", "sides", 1],
+  ["vrDepth", "planTop", "depth", 0.01],
+  ["vrRound", "planTop", "round", 0.01],
+  ["vaseTwist", "", "twist", 1],
+  ["vlSize", "lean", "size", 1],
+  ["vlDir", "lean", "dir", 1],
+  ["vrimSize", "rim", "size", 1],
+  ["vrimHeight", "rim", "height", 1],
+  ["vrimCount", "rim", "count", 1],
   ["vtCount", "texture", "count", 1],
   ["vtTwist", "texture", "twist", 1],
   ["vtSpacing", "texture", "spacing", 1],
@@ -351,12 +534,203 @@ for (const [id, part, key, k] of [
   ["vmShift", "move", "shift", 0.01],
 ]) {
   $(id).addEventListener("input", () => {
-    vaseCur[part][key] = +$(id).value * k;
+    const into = part ? vaseCur[part] : vaseCur;
+    if (!into) return; // (the rim's shape while it's the same as the bottom's)
+    into[key] = +$(id).value * k;
     vaseLabels();
     vaseSend(false);
   });
   $(id).addEventListener("change", () => vaseSend(true));
 }
+// ---------- the strength curves ----------
+// How much of the texture (or the movement) there is at each height: k 0–1 across (left: none, right: all of it), the
+// height up, as the profile. null: all of it all the way up (drawn flat at the right).
+const VASE_CURVES = {
+  even: null,
+  in: [
+    [0, 0],
+    [1, 1],
+  ],
+  out: [
+    [0, 1],
+    [1, 0],
+  ],
+  middle: [
+    [0, 0],
+    [0.5, 1],
+    [1, 0],
+  ],
+  ends: [
+    [0, 1],
+    [0.5, 0],
+    [1, 1],
+  ],
+};
+function vaseCurveWords(C) {
+  if (!C) return "all the way up";
+  const lo = Math.min(...C.map((p) => p[1])),
+    hi = Math.max(...C.map((p) => p[1]));
+  for (const [k, P] of Object.entries(VASE_CURVES))
+    if (P && P.length === C.length && P.every((p, i) => p[0] === C[i][0] && p[1] === C[i][1]))
+      return { in: "fading in", out: "fading out", middle: "strongest in the middle", ends: "at the ends" }[k];
+  return `${Math.round(lo * 100)}–${Math.round(hi * 100)}%, ${C.length} points`;
+}
+const vaseCurveKey = (id) => (id === "vtCurve" ? "texture" : "move");
+let vaseCurveDrag = null; // { id, i, moved }
+function vaseCurveGet(id) {
+  const S = vaseCur.strength;
+  return (S && S[vaseCurveKey(id)]) || null;
+}
+function vaseCurveSet(id, C) {
+  vaseCur.strength = Object.assign({ texture: null, move: null }, vaseCur.strength, {
+    [vaseCurveKey(id)]: C ? UNB.vaseProfile(C, 0, 1) : null,
+  });
+  if (!vaseCur.strength.texture && !vaseCur.strength.move) vaseCur.strength = null;
+}
+function vaseCurveView(cv) {
+  const pad = 10 * (window.devicePixelRatio || 1);
+  return { pad, w: cv.width - 2 * pad, h: cv.height - 2 * pad };
+}
+function vaseCurveDraw(id) {
+  const cv = $(id);
+  if (!cv || !cv.isConnected || cv.getBoundingClientRect().width === 0) return;
+  const fit = fitCanvas(cv, true);
+  if (!fit) return;
+  const g = cv.getContext("2d"),
+    W = vaseCurveView(cv),
+    C = vaseCurveGet(id) || [
+      [0, 1],
+      [1, 1],
+    ],
+    dpr = fit.dpr,
+    X = (k) => W.pad + k * W.w,
+    Y = (t) => W.pad + (1 - t) * W.h,
+    c = cssRGBA("--choc");
+  g.clearRect(0, 0, cv.width, cv.height);
+  g.strokeStyle = css("--rule");
+  g.lineWidth = 1 * dpr;
+  g.strokeRect(X(0), Y(1), W.w, W.h);
+  g.fillStyle = `rgba(${c[0]}, ${c[1]}, ${c[2]}, 0.14)`;
+  g.beginPath();
+  g.moveTo(X(0), Y(0));
+  for (let i = 0; i <= 60; i++) g.lineTo(X(UNB.vaseStrength(C, i / 60)), Y(i / 60));
+  g.lineTo(X(0), Y(1));
+  g.closePath();
+  g.fill();
+  g.strokeStyle = `rgb(${c[0]}, ${c[1]}, ${c[2]})`;
+  g.lineWidth = 2 * dpr;
+  g.beginPath();
+  for (let i = 0; i <= 60; i++) {
+    const x = X(UNB.vaseStrength(C, i / 60)),
+      y = Y(i / 60);
+    i ? g.lineTo(x, y) : g.moveTo(x, y);
+  }
+  g.stroke();
+  if (vaseCurveGet(id))
+    C.forEach(([t, k]) => {
+      g.beginPath();
+      g.arc(X(k), Y(t), 4.5 * dpr, 0, 2 * Math.PI);
+      g.fillStyle = css("--surface");
+      g.fill();
+      g.stroke();
+    });
+  g.fillStyle = css("--muted");
+  g.font = `${10 * dpr}px ${css("--font-mono") || "monospace"}`;
+  g.fillText("rim", X(0) + 4 * dpr, Y(1) + 11 * dpr);
+  g.fillText("base", X(0) + 4 * dpr, Y(0) - 4 * dpr);
+}
+for (const id of ["vtCurve", "vmCurve"]) {
+  const cv = $(id),
+    at = (e) => {
+      const b = cv.getBoundingClientRect(),
+        q = cv.width / Math.max(1, b.width),
+        W = vaseCurveView(cv);
+      return {
+        px: (e.clientX - b.left) * q,
+        py: (e.clientY - b.top) * q,
+        k: Math.min(1, Math.max(0, ((e.clientX - b.left) * q - W.pad) / W.w)),
+        t: Math.min(1, Math.max(0, 1 - ((e.clientY - b.top) * q - W.pad) / W.h)),
+        W,
+      };
+    };
+  cv.addEventListener("pointerdown", (e) => {
+    const p = at(e),
+      C = (
+        vaseCurveGet(id) || [
+          [0, 1],
+          [1, 1],
+        ]
+      ).map((q) => q.slice()),
+      dpr = window.devicePixelRatio || 1;
+    let best = -1,
+      bd = (14 * dpr) ** 2;
+    C.forEach(([t, k], i) => {
+      const d = (p.W.pad + k * p.W.w - p.px) ** 2 + (p.W.pad + (1 - t) * p.W.h - p.py) ** 2;
+      if (d < bd) {
+        bd = d;
+        best = i;
+      }
+    });
+    if (best < 0) {
+      if (!(p.t > 0.01 && p.t < 0.99)) {
+        // the bottom or the top: move its point
+        best = p.t <= 0.01 ? 0 : C.length - 1;
+        C[best][1] = p.k;
+      } else {
+        const i = C.findIndex((q) => q[0] > p.t);
+        C.splice(i, 0, [p.t, p.k]);
+        best = i;
+      }
+    }
+    vaseCurveSet(id, C);
+    vaseCurveDrag = { id, i: best, moved: false, fresh: bd === (14 * dpr) ** 2 };
+    cv.setPointerCapture(e.pointerId);
+    vaseLabels();
+    vaseCurveDraw(id);
+    vaseSend(false);
+  });
+  cv.addEventListener("pointermove", (e) => {
+    if (!vaseCurveDrag || vaseCurveDrag.id !== id) return;
+    const p = at(e),
+      C = vaseCurveGet(id).map((q) => q.slice()),
+      i = vaseCurveDrag.i,
+      last = C.length - 1;
+    C[i][1] = Math.round(p.k * 100) / 100;
+    if (i > 0 && i < last) C[i][0] = Math.min(C[i + 1][0] - 0.02, Math.max(C[i - 1][0] + 0.02, p.t));
+    vaseCurveSet(id, C);
+    vaseCurveDrag.moved = true;
+    vaseLabels();
+    vaseCurveDraw(id);
+    vaseSend(false);
+  });
+  for (const ev of ["pointerup", "pointercancel"])
+    cv.addEventListener(ev, () => {
+      if (!vaseCurveDrag || vaseCurveDrag.id !== id) return;
+      const D = vaseCurveDrag;
+      vaseCurveDrag = null;
+      // a tap on a point (not dragged, not just added) between the ends removes it
+      const C = vaseCurveGet(id);
+      if (!D.moved && !D.fresh && C && D.i > 0 && D.i < C.length - 1) {
+        C.splice(D.i, 1);
+        vaseCurveSet(id, C);
+      }
+      vaseLabels();
+      vaseCurveDraw(id);
+      vaseSend(true);
+    });
+  new ResizeObserver(() => vaseCurveDraw(id)).observe(cv);
+}
+document.querySelectorAll("#vaseBox [data-curve] button").forEach((b) =>
+  b.addEventListener("click", () => {
+    const id = b.parentElement.dataset.curve,
+      C = VASE_CURVES[b.dataset.k];
+    vaseCurveSet(id, C && C.map((p) => p.slice()));
+    vaseLabels();
+    vaseCurveDraw(id);
+    vaseSend(true);
+  })
+);
+
 // the Wavy vase example: a bulb with waves round it, from scratch
 function vaseExample() {
   artUse("model"); // art.js: the 3D model input (the sample, until the vase takes over)
@@ -386,10 +760,13 @@ addExample(120, "wavyvase", "Wavy vase", "a vase made here: profile, texture, mo
 
 // on the map: a vase's parts are chips under Art; each opens the 3D model card at its part
 addMapNode("vprofile", { cap: "Profile", step: "art", cards: ["h-model"], at: "vaseProfile", val: () => "" });
+addMapNode("vshape", { cap: "Shape", step: "art", cards: ["h-model"], at: "vaseShapeLab", val: () => "" });
 addMapNode("vtexture", { cap: "Texture", step: "art", cards: ["h-model"], at: "vtNone", val: () => "" });
 addMapNode("vmove", { cap: "Movement", step: "art", cards: ["h-model"], at: "vmNone", val: () => "" });
+addMapNode("vrim", { cap: "Rim", step: "art", cards: ["h-model"], at: "vrimNone", val: () => "" });
 MAP_SHAPERS.push((S) => {
-  if (st.art.kind === "model" && st.model && st.model.vase) S.down.art = ["vprofile", "vtexture", "vmove"];
+  if (st.art.kind === "model" && st.model && st.model.vase)
+    S.down.art = ["vprofile", "vshape", "vtexture", "vmove", "vrim"];
 });
 
 // the ready list (export.js): does each lap sit on the one below, and can the bead follow its turns?
@@ -412,6 +789,12 @@ on("ready", (L, add) => {
     );
   if (!(L.overhang.worst > step + 0.02) && !(L.overhang.inWorst > 0.02))
     add("ok", `Every lap sits on the one below (within ${fmt(step, 2)} mm)`, "h-layers");
+  if (L.lattice && L.lattice.bridges)
+    add(
+      L.lattice.span > 6 * lineWidthMM() ? "warn" : "ok",
+      `Lattice: ${L.lattice.bridges} layer${L.lattice.bridges === 1 ? "" : "s"} bridge gaps up to ${fmt(L.lattice.span, 1)} mm between crossings${L.lattice.span > 6 * lineWidthMM() ? ": long for chocolate (more movements round shorten them)" : ""}`,
+      "h-model"
+    );
   const T = L.tightest,
     half = lineWidthMM() / 2;
   if (T && T.r < half)

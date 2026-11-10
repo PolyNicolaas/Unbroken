@@ -3,6 +3,35 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v146 · 2026-11-10
+
+More shapes for a vase (Art → Vase: the map's Shape, Texture, Movement and Rim chips). Every new setting is optional:
+a vase made before them opens as it was.
+
+- **Shape from above**: a circle, a polygon (3–24 corners), a star or a flower (points or petals, how deep), each
+  with its corners rounded off; or **a drawing**: the outside edge of the line last traced from a picture or a
+  text (Use the last traced line), its largest shape if there are several. The profile is the reach of its furthest
+  point.
+- **At the rim**: another shape, the wall blending into it as it rises (a round base to a star at the top, say).
+- **Turn the shape**: the whole shape twists from the base to the rim, ribs and movement with it.
+- **Lean**: the rim moves sideways, straight, curving more towards the top, or bowing out and back.
+- **Textures**: Grid (ribs and rings), Weave (ribs twisting one way and back every few mm), Diamond (two sets of
+  ribs twisting opposite ways).
+- **Strength up the wall**: a small curve each for the texture and the movement (drag its points, tap to add or
+  remove, or start from Even, Fade in, Fade out, Middle, Ends): how much of it there is at each height.
+- **Lattice**: every few layers the movement flips to the other side, so a layer touches the one below only where
+  they cross: a lattice with holes. The flip layers bridge on purpose; the ready list gives the longest gap and
+  warns when it's long for chocolate. Each layer is otherwise checked as before.
+- **Rim**: Flare bends the top few mm out; Rolled doubles the wall there (a second bead inside the first, stepping
+  in a bead's hold a layer at first so it has the one below under it) for a stronger edge; Scalloped makes the top
+  edge wave up and down: over the rim each lap rises and falls round the wall a little more than the one below
+  (never more than half a layer more, with up to 1.5 times the chocolate at the crests), so every lap still lands
+  on the one below.
+- **Footed**, a new starting shape for the profile: a solid foot, the cup widening over it no faster than each
+  layer holds. (A hollow foot ring isn't offered: the base would have to bridge its empty middle.)
+- Tests: E59 (the engine: each option makes the shape it says, and the checks stay honest), A62 (the controls, a
+  traced drawing as the shape, undo, a vase from before them).
+
 ## v145 · 2026-11-10
 
 Modules: every feature can be switched off, and worked on by itself (DESIGN.md, Modules; docs/FEATURES.md). Nothing
