@@ -3,8 +3,6 @@
 // asks its background engines whether a job is running, so a test can wait until the app has finished its work
 // instead of sleeping for a guessed time. window.__settled() is true when nothing is pending.
 const SETTLE = () => {
-  // the tests written before the map of the steps (v140) use the step tabs: the map starts off unless a test saved it on
-  try { if (localStorage.getItem("unbroken-mapUI") === null) localStorage.setItem("unbroken-mapUI", "0"); } catch (e) {}
   const live = new Set(),
     st0 = window.setTimeout,
     ct0 = window.clearTimeout;
@@ -59,24 +57,9 @@ async function open(ctx, opts = {}) {
   // since v109 the app opens empty: the tests start on the leaf example, as the app used to (opts.clean: empty)
   await page.goto(withExample(opts.url || ctx.url, opts.clean ? null : opts.example || "leaf"));
   await idle(page, 300);
-  // the Wheel (v108) folds every card but the one scrolled to: the tests written before it expect cards to stay as they
-  // set them, so it's off unless opts.wheel
-  if (!opts.wheel) await page.evaluate(() => { const w = document.getElementById("wheel"); if (w && w.checked) { w.checked = false; w.dispatchEvent(new Event("change")); } });
-  // cards folded for a first visit since v105.1 (Fit, Base, Infill) open, as the tests written
-  // before expect; opts.folded keeps them folded
-  if (!opts.folded)
-    await page.evaluate(() =>
-      ["h-fit", "h-base", "h-infill"].forEach((h) => {
-        const b = document.querySelector(`#card-${h}.collapsed .card-toggle`);
-        if (b) b.click();
-      })
-    );
-  // More print settings (v119) folded away: shown, as the tests written before expect
-  if (!opts.folded) await page.evaluate(() => { if (typeof morePrintSet === "function") morePrintSet(true, false); });
-  // the map of the steps (v140) replaces the step tabs: the tests written before it use the tabs (opts.map: keep the map)
-  if (typeof opts.map === "boolean" || !opts.map) await page.evaluate((on) => { if (typeof mapSet === "function") mapSet(on, false); }, !!opts.map);
-  // the app opens on the Art tab; most tests work on the Trace tab, so they start there (opts.art: stay on Art)
-  if (!opts.art && (await page.$("label[for=viewDesign]"))) {
+  mapNav(page);
+  // the app opens on the Art step; most tests work on the Line step, so they start there (opts.art: stay on Art)
+  if (!opts.art) {
     await page.click("label[for=viewDesign]");
     await idle(page, 100);
   }
@@ -108,6 +91,55 @@ async function idle(page, first = 300) {
   }
 }
 const chip = (page) => page.textContent("#chip");
+// The settings show one step of the map at a time (map.js): a test names a control and, like someone using the app,
+// first opens the place it's in. Before an action on a selector, mapNav opens the node of the step now showing that
+// holds the control's card (never another step: a control on another step isn't reachable until the test goes there).
+// The steps themselves and what it's made for keep the names the tests have always used: "label[for=viewDesign]" is
+// the Line step (its node on the map), "label[for=artForPlot]" the pen plotter's chip.
+async function reveal(page, sel, method) {
+  if (typeof sel !== "string") return null;
+  return page.evaluate(
+    ([sel, method]) => {
+      if (typeof mapOpen !== "function" || !mapOn()) return null;
+      const S = mapShape(),
+        shown = S.spine.concat(...Object.values(S.up), ...Object.values(S.down));
+      const step = sel.match(/^(?:label\[for="?|#)(viewArt|viewDesign|viewChoc|view2D)"?\]?$/);
+      if (step) {
+        if (method !== "click" && method !== "check") return null;
+        const v = document.getElementById(step[1]).value,
+          id = S.spine.find((k) => MAP_NODES[k].step === v);
+        if (id) mapOpen(id);
+        return { done: true, opened: id || null };
+      }
+      const out = sel.match(/^(?:label\[for="?|#)artFor(Plot|Print)"?\]?$/);
+      if (out && method === "click") return { sel: `.map-for[data-for="${out[1].toLowerCase()}"]` };
+      let el = null;
+      try {
+        el = document.querySelector(sel);
+      } catch (e) {}
+      if (!el || el.getClientRects().length) return null;
+      const card = el.closest("section.card"),
+        h = card && card.querySelector("h2"),
+        v = document.body.dataset.view;
+      if (!h) return null;
+      const id = shown.find((k) => MAP_NODES[k].step === v && (MAP_NODES[k].holds || MAP_NODES[k].cards || []).includes(h.id));
+      if (id && id !== mapOpenId) mapOpen(id);
+      return id ? { opened: id } : null;
+    },
+    [sel, method]
+  );
+}
+function mapNav(page) {
+  for (const m of ["click", "dblclick", "tap", "fill", "check", "uncheck", "selectOption", "press", "type", "hover", "focus", "setInputFiles", "isVisible", "isHidden"]) {
+    const f = page[m].bind(page);
+    page[m] = async (sel, ...a) => {
+      const r = await reveal(page, sel, m);
+      if (r && r.done) return;
+      if (r && r.opened) await page.waitForTimeout(30);
+      return f((r && r.sel) || sel, ...a);
+    };
+  }
+}
 const terms = async (page) => +((await chip(page)).match(/(\d+) terms/) || [0, 0])[1];
 const errorMM = async (page) => +((await chip(page)).match(/error ([\d.]+) mm/) || [0, NaN])[1];
 async function setValue(page, sel, value, ev = "input") {

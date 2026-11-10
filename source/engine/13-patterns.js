@@ -1588,7 +1588,6 @@
       evenGap: true,
     },
   };
-  UNB.PATTERN_SHAPES = SHAPE.options.map(([v]) => v);
   // a style's settings filled in: each one given (and in range) or its starting value; seed a whole number ≥ 1. o.plot:
   // made for plotting (ranges go up to their plotMax)
   UNB.patternDefaults = function (style, o) {
