@@ -29,9 +29,9 @@ module.exports = {
   how: "Reads every file in web-app/js and finds each place that sets a field of st (st.x = …, st.x++, st.x.push(…), and nested fields like st.model.yaw). Compares the file with the field's owners.",
   pass: "Every field set anywhere is in the table, and only its owners (or config.js / history.js) set it.",
   async run() {
-    const dir = path.resolve(__dirname, "../../../web-app/js"), bad = [], seen = new Set();
-    for (const f of fs.readdirSync(dir).filter((x) => x.endsWith(".js"))) {
-      const code = fs.readFileSync(path.join(dir, f), "utf8").replace(/\/\/.*$/gm, "");
+    const bad = [], seen = new Set();
+    for (const { name: f, file } of require("../lib/scripts.js").appScripts()) {
+      const code = fs.readFileSync(file, "utf8").replace(/\/\/.*$/gm, "");
       for (const m of code.matchAll(/\bst\.([A-Za-z]+)(?:\.[A-Za-z]+)*\s*(?:=(?!=)|\+\+|--|\+=|-=)|\bst\.([A-Za-z]+)(?:\.[A-Za-z]+)*\.(?:push|pop|splice|shift|unshift)\(/g)) {
         const field = m[1] || m[2]; seen.add(field);
         if (ALSO.includes(f)) continue;

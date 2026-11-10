@@ -275,32 +275,32 @@ function artSizeUI() {
   $("artWidthLab").textContent = artForPlot() ? "Size" : "Width (mm)";
   if (artForPlot()) {
     // made for plotting: as wide as the Plot step's page allows (Art as drawn), measured against pen 1
-    const P = paperSize(), // plot.js
-      mg = Math.max(0, +$("paperMargin").value || 0),
+    const P = answer("pageBox"), // (plot.js: the paper, its margin and pen 1)
+      mg = P.margin,
       W = r.box[0] * L.s * Math.min((P.w - 2 * mg) / L.w, (P.h - 2 * mg) / L.h), // (as artOnPage places it)
-      gapMM = (W * r.gap) / r.box[0],
-      pen = Math.max(0.05, +$("penW").value || 0.5),
+      gapNow = (W * r.gap) / r.box[0],
+      pen = P.pen,
       h = $("artGapHint");
-    $("artGapInfo").textContent = `${fmt(W, 0)} mm wide · lines ${fmt(gapMM, 2)} mm apart`;
-    h.className = gapMM < pen ? "hint warn" : "hint";
+    $("artGapInfo").textContent = `${fmt(W, 0)} mm wide · lines ${fmt(gapNow, 2)} mm apart`;
+    h.className = gapNow < pen ? "hint warn" : "hint";
     h.textContent =
-      gapMM < pen
+      gapNow < pen
         ? `Closer than pen 1 (${fmt(pen, 2)} mm): neighbouring lines run into each other. Pick less detail, a finer pen, or a bigger page (Plot step).`
         : `Pen 1 is ${fmt(pen, 2)} mm: every line stays clear of its neighbours. The page size and margin (Plot step) set the width.`;
     return;
   }
   if (!st.outW) return;
   if (document.activeElement !== $("artWidth")) $("artWidth").value = +st.outW.toFixed(1);
-  const gapMM = (st.outW * r.gap) / r.box[0],
+  const gapNow = (st.outW * r.gap) / r.box[0],
     sp = st.spacing,
     P = UNB.PATTERNS[st.art.pattern.style],
     h = $("artGapHint");
-  $("artGapInfo").textContent = `closest lines ${fmt(gapMM, 2)} mm apart`;
+  $("artGapInfo").textContent = `closest lines ${fmt(gapNow, 2)} mm apart`;
   $("artFit").hidden = !(P && P.evenGap && sp > 0);
   if (!(sp > 0) || !P || !P.evenGap) {
     h.className = "hint";
     h.textContent = "";
-  } else if (gapMM < sp * 0.995) {
+  } else if (gapNow < sp * 0.995) {
     h.className = "hint warn";
     h.textContent = `Closer than the needle's line spacing (${fmt(sp, 2)} mm): those lines get pushed apart, and the pattern loses its shape there. Make it wider, pick less detail, or Fit the needle.`;
   } else {

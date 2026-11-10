@@ -1,7 +1,7 @@
 const { UNB } = require("../lib/trace.js"), { check } = require("../lib/check.js"), fs = require("fs"), path = require("path");
-// the app's sample, the Printables skull cup (web-app/js/sample-skull.js), 30 mm tall with its bottom 2% cut, as the app prints it
+// the app's sample, the Printables skull cup (web-app/features/model/sample-skull.js), 30 mm tall with its bottom 2% cut, as the app prints it
 function skull() {
-  const src = fs.readFileSync(path.join(__dirname, "../../../web-app/js/sample-skull.js"), "utf8"),
+  const src = fs.readFileSync(path.join(__dirname, "../../../web-app/features/model/sample-skull.js"), "utf8"),
     b64 = src.match(/stl: "([^"]+)"/)[1], M = UNB.parseSTL(new Uint8Array(Buffer.from(b64, "base64"))), om = UNB.orientMesh(M.tri, { x: 0, y: 0, z: 0 });
   return { tri: om.tri, sc: 30 / 0.98 / om.size[2], H: 30 / 0.98 };
 }

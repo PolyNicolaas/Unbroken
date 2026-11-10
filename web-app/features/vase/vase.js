@@ -430,3 +430,4 @@ on("modelRestoring", (m) => {
     vaseUI();
   } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
 });
+on("modelSized", vaseUI); // its Height box follows the model's height

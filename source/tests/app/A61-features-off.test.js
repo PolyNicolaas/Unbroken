@@ -1,6 +1,6 @@
 const fs = require("fs"), path = require("path");
 const A = require("../lib/app.js"), { check } = require("../lib/check.js");
-const APP = path.join(__dirname, "../../../web-app"), JS = path.join(APP, "js");
+const APP = path.join(__dirname, "../../../web-app"), ALL = require("../lib/scripts.js").appScripts();
 // The features (settings.js features, index.html feature(name, file)) and how well the app does without each today.
 //   0 the app breaks (no trace) · 1 it runs, with errors · 2 it runs clean (opens, traces, exports) · 3 clean, and
 //   nothing of the feature is left on the page
@@ -11,12 +11,12 @@ const RECORD = { plotter: 3, model: 3, vase: 3, patterns: 3, molecule: 3, pieces
 const CORE_PARTS = ["loopClosed", "copiesLab", "modeRow", "sensRow", "modeOutline"];
 // a feature's scripts, from the page
 const SCRIPTS = {};
-for (const m of fs.readFileSync(path.join(APP, "index.html"), "utf8").matchAll(/feature\("(\w+)", "js\/([\w-]+\.js)"\)/g)) (SCRIPTS[m[1]] ||= []).push(m[2]);
+for (const m of fs.readFileSync(path.join(APP, "index.html"), "utf8").matchAll(/feature\("(\w+)", "features\/\w+\/([\w-]+\.js)"\)/g)) (SCRIPTS[m[1]] ||= []).push(m[2]);
 // the parts of the page only this feature's scripts read: what's left behind if they aren't marked as the feature's
 function ownIds(scripts) {
-  const ids = (f) => new Set([...fs.readFileSync(path.join(JS, f), "utf8").matchAll(/\$\("([\w-]+)"\)/g)].map((m) => m[1]));
-  const mine = new Set(scripts.flatMap((f) => [...ids(f)]));
-  for (const f of fs.readdirSync(JS)) if (f.endsWith(".js") && !scripts.includes(f)) for (const id of ids(f)) mine.delete(id);
+  const ids = (file) => new Set([...fs.readFileSync(file, "utf8").matchAll(/\$\("([\w-]+)"\)/g)].map((m) => m[1]));
+  const mine = new Set(ALL.filter((x) => scripts.includes(x.name)).flatMap((x) => [...ids(x.file)]));
+  for (const x of ALL) if (!scripts.includes(x.name)) for (const id of ids(x.file)) mine.delete(id);
   return [...mine].filter((id) => !CORE_PARTS.includes(id));
 }
 module.exports = {

@@ -5,19 +5,26 @@ the page's title (it shows "dev" when the page runs from the source folder). Add
 
 ## v145 · 2026-11-10
 
-The start of modules: features that add themselves, so one can be left out (DESIGN.md, Modules). Nothing changes on
-screen.
+Modules: every feature can be switched off, and worked on by itself (DESIGN.md, Modules; docs/FEATURES.md). Nothing
+changes on screen with everything on.
 
-- **Where features join in** (`state.js`): lists a feature adds to (examples, the map's steps and chips, what the
-  line is made for, the controls saved with a design) and moments the core announces and a feature answers
-  (`on` / `ask`: the ready list, a design saved and restored, redraw, the line changed, exports).
-- **Turned around**: the examples list (each feature adds its own; `examples.js` is gone, the clean start is in
-  art.js), the map (the vase's chips, the plotter's steps and its For chip, the Tests chip's cards come from their
-  own scripts), the ready list (the vase's and the model's checks), what a design keeps (the plotter's pens, the
-  test matrix's levels).
-- **The pen plotter** is the first output added as a module: the core no longer calls plot.js by name, and the app
-  opens, traces and exports without it (its Separate strokes and As drawn modes are still in the core: next).
-- **A61, the scoreboard**: each feature's scripts left out, scored 0 to 3. 15 of 36 today; the record only goes up.
+- **Twelve features**, each a folder in `web-app/features/`: the pen plotter, 3D models, the vase, patterns (with
+  the path pad), the molecule, a text's pieces, the camera, the cut-out, Grey levels, Optimize and the starting
+  points, the test print, the test matrix. What's left is the core: a picture or a text, traced, sized and printed.
+- **The switch**: `features` in settings.js, one line each. Off, a feature's scripts aren't loaded and its cards
+  and buttons aren't on the page. `?off=vase,plotter` or `?on=vase` in the address tries it without editing the file.
+- **How a feature joins in** (`state.js`): it adds itself to the core's lists (examples, the map's steps and chips,
+  what the line is made for, the kinds of art, the controls a design keeps) and answers moments the core announces
+  (`on` / `ask` / `answer`). The Art step, the map, the ready list, save and undo, the plate and the layers no
+  longer call any feature by name.
+- **Tests**: A61 switches each feature off in turn and all of them at once (opens, traces, tours the map, exports:
+  36 of 36, from 13 of 39 this morning); E58 fails the moment a core script names a feature. The test library got
+  `source/tests/lib/scripts.js` (every script of the app, the features' too).
+- **docs/FEATURES.md**, written from the code by `source/tools/feature-map.js`: each feature's files, parts of the
+  page, what it joins and its tests.
+- Moved while untangling: the clean start (was examples.js) is in art.js; Tap the background is Image prep's
+  (controls.js, was levels.js); the plotter's Fit to page and SVG buttons, and the pattern's width, are wired in
+  their own scripts. A second `id="cutRow"` on the page (the cut-out's row had the model's id) is gone.
 
 ## v144 · 2026-11-09
 

@@ -150,7 +150,7 @@ async function mxPlan() {
   const stacks = new Map();
   for (const h of new Set(L.h)) {
     // model.js, layers.js
-    const Ld = isModel() ? await buildModelLayers({ h, z0: mxZ0(h) }) : await designLayers(st, lay.xf, h);
+    const Ld = isModel() ? await answer("modelLayers", { h, z0: mxZ0(h) }) : await designLayers(st, lay.xf, h);
     if (!Ld) throw new Error("the layers aren't ready yet");
     stacks.set(h, Ld.stack);
   }

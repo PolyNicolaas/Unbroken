@@ -18,7 +18,10 @@ const ROOT = path.resolve(__dirname, "../.."),
       .sort()
       .map((f) => `${dir}/${f}`);
 const ENGINE = list("source/engine", /^\d\d-.*\.js$/),
-  APP = list("web-app/js", /\.js$/),
+  APP = [
+    ...list("web-app/js", /\.js$/),
+    ...fs.readdirSync(path.join(ROOT, "web-app/features")).flatMap((n) => list(`web-app/features/${n}`, /\.js$/)),
+  ],
   TESTS = [...list("source/tests/engine", /\.test\.js$/), ...list("source/tests/app", /\.test\.js$/)],
   noComments = (s) => s.replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "");
 const R = { date: new Date().toISOString().slice(0, 10), sections: [] };

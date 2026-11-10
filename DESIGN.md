@@ -80,9 +80,20 @@ In practice:
 
 ## Modules: features that can be switched off
 
-Decided 10 November 2026: the app is to be used for chocolate printers, pen plotters and clay printers, and new
-features are to be built and tried without touching the rest. So a feature is a module: the core doesn't name it,
-and it adds itself when its script loads. Leaving its script out leaves it out of the app.
+Decided 10 November 2026: the app is to be used for chocolate printers, pen plotters and clay printers, and each
+feature is to be worked on and made better on its own. So a feature is a module: the core doesn't name it, and it
+adds itself when its script loads. Switched off, it's as if it had never been built.
+
+**What a feature is.** Three things, and nothing else:
+
+1. a folder, `web-app/features/<name>/`, with its scripts;
+2. the parts of `web-app/index.html` marked `data-feature="<name>"` (its cards, buttons, panes);
+3. a line in `web-app/settings.js` (`features: { <name>: true }`) and its script tags in index.html, written
+   `feature("<name>", "features/<name>/<file>.js")`.
+
+Off (false in settings.js, or `?off=<name>` in the address to try it), its scripts aren't loaded and its parts are
+taken off the page before any other script runs (`state.js`). `docs/FEATURES.md` lists every feature with its
+files, its parts of the page, what it joins and its tests; `node source/tools/feature-map.js` writes it from the code.
 
 **How a feature joins in** (`web-app/js/state.js`):
 
@@ -91,29 +102,42 @@ and it adds itself when its script loads. Leaving its script out leaves it out o
 | an example | `addExample(order, key, name, what, use)` | the Examples tray (map.js) |
 | a step or chip of the map | `addMapNode(id, node)`; `MAP_SHAPERS.push(fn)` for chips that depend on the design | the map (map.js) |
 | something to make the line for | `addOutput(key, { name, radio, before, step, up, down })` | the map's line and the For chips |
+| a kind of art | `addArtKind(key, { radio, name, note, apply, drawnOK, vectors, sized, … })` | the Art step (art.js) |
 | controls saved with a design | `addSaved(...ids)` | history.js |
-| an answer to a moment | `on(moment, fn)`; the core calls `ask(moment, …)` | whoever announces it |
+| an answer to a moment | `on(moment, fn)` | whoever announces it: `ask(moment, …)` for every answer, `answer(moment, …)` for the first |
 
-The moments so far: `ready` (the ready list: add your own checks), `save` / `restore` / `designUI` (a design saved,
-restored, shown again), `redraw` (draw your own view), `lineReady` (the line changed), `lineMode` (how it's traced
-changed), `fitWidth` (a width the design should take), `drawnAsIs` and `buildFile` (exports).
+The core announces a moment and doesn't know who answers: `ask("redraw")`, `answer("fitWidth")`. With no feature
+listening, `ask` gives an empty list and `answer` gives null, and the core carries on. FEATURES.md lists the
+moments each feature answers.
 
-**The measure** is test A61: each feature's scripts are left out, and the app is asked to open, trace and export.
-0 the app breaks · 1 it runs with errors · 2 it runs clean · 3 clean, and nothing of the feature left on the page.
-The record per feature only goes up. On 10 November: 15 of 36 (was 13 of 39 with Examples counted as a feature; the
-examples are now a list each feature adds to).
+**The rules, and the tests that hold them:**
 
-**What's still tied** (the next steps, in order):
+- *The core never names a feature* (test E58): no core script uses a name a feature's script defines. A feature
+  uses another's names only when it needs it (`FEATURE_NEEDS` in state.js: the vase needs the model).
+- *Every feature switches off clean* (test A61): with each one off in turn the app opens, traces the leaf, opens
+  every step of the map and exports, with no errors and none of the feature's parts left on the page; and with all
+  of them off at once the core alone does the same. 36 of 36 on 10 November (13 of 39 that morning).
 
-1. *The pen plotter's own line modes.* Separate strokes and As drawn are the plotter's, but live in workflow.js and
-   art.js, which read the plotter's controls (`paperSize()`, `#penW`, `#paperMargin`). They run only when made for a
-   plotter, so the app is clean without plot.js, but they belong in the module.
-2. *Features the core calls by name*: the cut-out, grey levels, optimize (the app breaks without them), patterns,
-   the molecule, a text's pieces (errors without them). Each needs its calls turned into moments.
-3. *Each feature's cards and styles* are in index.html and app.css: a feature left out leaves its buttons behind
-   (no feature is at 3). A feature's markup moves next to its script.
-4. *One list of what's on* (settings.js), read by the page and the build, once 1 to 3 make it true.
-5. *Clay* as a machine profile of the printer, plus the rules that differ.
+**Working on a feature.** Its folder, its marked parts of the page and its tests (FEATURES.md) are all of it.
+`?off=` the others to see it alone with the core. A feature in progress can ship switched off (`false` in
+settings.js) and be tried with `?on=<name>`.
+
+**Adding a feature.** Make its folder and script; mark its parts of the page; add its line to settings.js, its
+`feature(…)` tag to index.html (after the core scripts it calls), and its record to A61. In the script: add what it
+offers to the lists above, and answer the moments it cares about. If the core has to ask something new, add a
+moment (one `ask` in the core), never a call by name. Run `node source/tools/feature-map.js`.
+
+**What's still shared, on purpose or for now:**
+
+- *Styles.* A feature's styles are in `css/app.css` with everyone's. An off feature's rules match nothing, so
+  they do no harm; they move to the feature's folder when one needs restyling on its own.
+- *The page.* A feature's parts are marked in index.html rather than kept in its folder: the page stays one file
+  that opens straight from disk.
+- *Reads across a boundary.* A few core lines read the plotter's controls where the code only runs made for a
+  plotter (`#penW` in controls.js, `#penColor` in art.js); the Line step's Separate strokes and As drawn are the
+  plotter's line modes but live in workflow.js. They can't run with the plotter off; moving them is tidying.
+- *Clay.* A clay printer is expected to be a printer with its own machine and material profile and a few rules that
+  differ, not a new output. Not started: it needs a real printer's numbers.
 
 ## The plan
 

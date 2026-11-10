@@ -89,9 +89,14 @@ Tests:
   first; Art → Line → Print or Plot; one switch for the line (One continuous line, Separate strokes, As drawn); the
   preview follows the step. v107.
 
-- **Modules** (decided 10 November: for chocolate printers, pen plotters and clay printers, and to build and try new
-  features): a feature adds itself and can be left out. Started in v145; the measure is test A61 (15 of 36), the
-  next steps are in DESIGN.md, Modules. The look and feel comes after this.
+- **Modules** (decided 10 November: for chocolate printers, pen plotters and clay printers, and so each feature can
+  be worked on and made better on its own). Done in v145: twelve features that switch off clean (tests A61, E58;
+  DESIGN.md, Modules; docs/FEATURES.md). Next:
+  - *Clay*: a printer profile with its own material and the rules that differ. Needs a real clay printer's numbers
+    (nozzle sizes, layer heights, speeds, what its firmware wants at the start and end).
+  - *The look and feel*, now that the structure is in place.
+  - Tidying: the plotter's line modes (Separate strokes, As drawn) into its folder; a feature's styles into its
+    folder when one needs restyling.
 
 - **The map of the steps** (v140–v141, 9 November: the interface; a band of steps on top, the preview biggest,
   settings as rows beside it). Next, each for finding and keeping settings now that there are many:

@@ -70,7 +70,7 @@ function setModelHeight(H) {
   if (st.model.vase) {
     // a vase grows taller, its radii kept (the profile's heights are shares of the height)
     useVase(Object.assign({}, st.model.vase, { height: Math.min(500, Math.max(2, H)) }), true);
-    if (typeof vaseUI === "function") vaseUI(); // vase.js: its Height box
+    ask("modelSized"); // (vase.js: its Height box)
     return;
   }
   const c = modelCut();

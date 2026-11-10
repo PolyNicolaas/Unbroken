@@ -74,6 +74,9 @@ const fail = (msg) => {
   for (const dir of ["css", "js"])
     for (const f of fs.readdirSync(path.join(APP, dir)))
       copy(path.join(APP, dir, f), path.join(TMP, dir, f), dir === "js");
+  for (const name of fs.readdirSync(path.join(APP, "features")))
+    for (const f of fs.readdirSync(path.join(APP, "features", name)))
+      copy(path.join(APP, "features", name, f), path.join(TMP, "features", name, f), true);
   for (const f of fs.readdirSync(ENGINE).filter((f) => f.endsWith(".js")))
     copy(path.join(ENGINE, f), path.join(TMP, f)); // every engine part, core.js, fonts.js, worker.js
   // every file the page and the background engine load gets ?v=<version>: GitHub Pages lets browsers keep a file for
