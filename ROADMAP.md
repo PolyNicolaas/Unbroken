@@ -5,7 +5,7 @@ the past audits and reviews in docs/history/ are kept as written, and whatever t
 ideas and bugs come in as comments in the chat and go straight into this file. Every item says who it's for and what
 it's used for: an idea without a use stays in "Maybe later".
 
-Last sorted: 9 November 2026 (v143: the map of the steps and its next steps added; what's done since October moved to
+Last sorted: 10 November 2026 (v143: the map of the steps and its next steps added; what's done since October moved to
 "Done since the last sort"). Decisions made together are in PLAN.md.
 
 ## Now

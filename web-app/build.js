@@ -90,7 +90,8 @@ const fail = (msg) => {
     fs.writeFileSync(p, t);
   };
   tag("index.html", (s) =>
-    s.replace(/(<(?:script|link)[^>]+(?:src|href)=")(?!https?:)([^"?]+\.(?:js|css))"/g, `$1$2?v=${top}"`)
+    s
+      .replace(/(<(?:script|link)[^>]+(?:src|href)=")(?!https?:)([^"?]+\.(?:js|css))"/g, `$1$2?v=${top}"`)
       .replace(/(feature\("\w+", ")([^"?]+\.js)"/g, `$1$2?v=${top}"`)
   );
   tag("js/engine-bridge.js", (s) =>

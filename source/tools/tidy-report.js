@@ -130,8 +130,8 @@ const section = (title, rows, ok) => R.sections.push({ title, rows, ok });
   const lastEngine = path.basename(ENGINE[ENGINE.length - 1]);
   if (!design.includes(lastEngine)) rows.push(`DESIGN.md's engine range doesn't reach ${lastEngine}`);
   for (const f of APP)
-    if (!webReadme.includes("`js/" + path.basename(f) + "`"))
-      rows.push(`web-app/README.md's file table misses js/${path.basename(f)}`);
+    if (!webReadme.includes("/" + path.basename(f) + "`"))
+      rows.push(`web-app/README.md's file table misses ${path.basename(f)}`);
   for (const f of ENGINE)
     if (!core.includes(path.basename(f) + " ")) rows.push(`core.js's header misses ${path.basename(f)}`);
   for (const t of TESTS) {
