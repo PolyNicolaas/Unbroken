@@ -281,3 +281,30 @@ $("cutStart").addEventListener("click", () => {
 });
 document.querySelectorAll('input[name="cutMode"]').forEach((r) => r.addEventListener("change", cutoutUI));
 cutoutUI();
+
+// what the core announces or asks
+on("pictureCut", cutoutOn); // (Image prep's readout says "cut out")
+on("workingKey", cutoutKey); // the working picture depends on the cut-out
+on("workingPicture", cutoutApply); // only the object, if it's cut out
+on("toolRender", (tool) => tool === "cut" && (renderCutout(), true)); // its tool draws the preview itself
+on("toolDown:cut", cutoutDown);
+on("toolMove:cut", cutoutMove);
+on("toolUp:cut", cutoutUp);
+on("handEditsReset", cutoutUI);
+on("keepCut", cutoutKeepFor); // the same picture again keeps its cut-out
+on("save", () => ({ cutout: st.cutout && st.cutout.box ? { box: st.cutout.box, strokes: st.cutout.strokes } : null }));
+// a design restored: its box and strokes come back with the picture, and its mask is worked out again
+on("restoredSource", (s) => {
+  const cut = s.cutout && !textMode() ? structuredClone(s.cutout) : null,
+    same =
+      cut &&
+      st.cutout &&
+      st.cutout.src === (st.source && st.source.__id) &&
+      JSON.stringify([st.cutout.box, st.cutout.strokes]) === JSON.stringify([cut.box, cut.strokes]);
+  if (!cut) st.cutout = null;
+  else if (!same) {
+    st.cutout = { ...cut, src: st.source && st.source.__id, mask: null, ver: (st.cutout && st.cutout.ver) || 0 };
+    cutoutRun();
+  }
+  cutoutUI();
+});

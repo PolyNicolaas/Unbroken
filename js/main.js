@@ -19,7 +19,7 @@ const rethemed = () => {
   drawPlate();
   drawMini();
   drawStack();
-  drawPage(); // the 3D layers and the 2D page (each draws only when showing)
+  ask("redraw"); // a feature's own view (the pen plotter's page; each draws only when showing)
 };
 try {
   matchMedia("(prefers-color-scheme: dark)").addEventListener("change", rethemed);
@@ -51,11 +51,11 @@ lineUI(); // the spacing from line width + gap, and the needle shown
 // the Art step starts on the sample picture, or the text (art.js)
 const start = CFG.defaults.startFrom;
 if (start === "lettering")
-  applyPreset("lettering"); // starts on the text
+  ask("preset", "lettering"); // (optimize.js: the starting points) starts on the text
 else if (CFG.defaults.source === "text") artUse("text");
 else {
-  if (start) applyPreset(start, true);
-  startInput(); // examples.js: empty, or the sample settings.js or the address names
+  if (start) ask("preset", start, true);
+  startInput(); // art.js: empty, or the sample settings.js or the address names
 }
 viewChanged(); // the tab that opens (Art) brings its view
 showE();

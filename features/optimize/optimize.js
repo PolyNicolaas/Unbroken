@@ -259,3 +259,7 @@ $("optUndo").addEventListener("click", () => {
   $("optbar").hidden = true;
   optBefore = null;
 });
+
+// what the core announces
+on("sourceChanged", stopOptimize); // a run still going is for the old source
+on("preset", applyPreset); // a starting point asked for by name (settings.js startFrom, a model's drawing)

@@ -7,7 +7,8 @@
 // ---------- undo / redo and design files ----------
 // A design = the source (image, or typed text), every setting that shapes the line or the plate, and the
 // hand edits (selection, erasing, start point, painted areas). View options (line view, box, …) are not part of it.
-const DESIGN_IDS = [
+// (a feature adds the controls it owns to this list itself: state.js addSaved)
+addSaved(
   "designName",
   "srcImage",
   "srcText",
@@ -75,24 +76,12 @@ const DESIGN_IDS = [
   "copyGap",
   "plateRot",
   "textPieces",
-  "molPieces",
   "gOx",
   "gOy",
   "gZ",
   "gLift",
   "gFlow",
   "gOver",
-  "mxS1",
-  "mxS2",
-  "mxS3",
-  "mxF1",
-  "mxF2",
-  "mxF3",
-  "mxH1",
-  "mxH2",
-  "mxH3",
-  "mxSlow",
-  "mxScores",
   "support",
   "gFeed",
   "layerTime",
@@ -101,42 +90,8 @@ const DESIGN_IDS = [
   "wallLayers",
   "layerH",
   "printer",
-  "paper",
-  "paperOrient",
-  "paperMargin",
-  "paperW",
-  "paperH",
-  "penW",
-  "penColor",
-  "wallCount",
-  "crease",
-  "gapClose",
-  "minShape",
-  "drawBridges",
-  "plotTraced",
-  "plotArt",
-];
-const DESIGN_SET = new Set(DESIGN_IDS);
-// A model is recognised by what it is, not by its id: the id is a counter that starts again every session, so a saved
-// design could put its turns and height on a different model loaded later. The fingerprint is the model's name, its
-// triangle count and its size as loaded (to 0.001), worked out once per mesh.
-const modelPrints = new WeakMap();
-function modelPrint(M) {
-  let p = modelPrints.get(M.tri);
-  if (!p) {
-    const t = M.tri,
-      lo = [Infinity, Infinity, Infinity],
-      hi = [-Infinity, -Infinity, -Infinity];
-    for (let i = 0; i < t.length; i++) {
-      const a = i % 3;
-      if (t[i] < lo[a]) lo[a] = t[i];
-      if (t[i] > hi[a]) hi[a] = t[i];
-    }
-    p = [M.name, M.n, ...hi.map((v, a) => (v - lo[a]).toFixed(3))].join("|");
-    modelPrints.set(M.tri, p);
-  }
-  return p;
-}
+  "wallCount"
+);
 function designState() {
   const v = {};
   for (const id of DESIGN_IDS) {
@@ -155,25 +110,13 @@ function designState() {
       erase: st.erase || [],
       start: st.start || null,
       bgAt: st.bgAt || null,
-      cutout: st.cutout && st.cutout.box ? { box: st.cutout.box, strokes: st.cutout.strokes } : null,
       lineChosen: !!st.lineChosen,
       zones: st.zones,
-      penFill: structuredClone(st.penFill),
-      model: st.model
-        ? {
-            id: st.model.id,
-            print: modelPrint(st.model),
-            turns: { ...st.model.turns },
-            heightMM: st.model.heightMM,
-            cut: { ...modelCut() },
-            // (a vase made here: made again from this)
-            vase: st.model.vase ? structuredClone(st.model.vase) : undefined,
-          }
-        : null,
       srcLabel: st.srcLabel,
       art: artSaved(), // art.js: the layers (their pictures are kept apart)
       feedUnit: "mm/s",
       posManual,
+      ...Object.assign({}, ...ask("save")), // what a feature keeps with the design (the pen plotter's fill pens)
     },
   };
 }
@@ -225,7 +168,7 @@ function syncDesignUI() {
   st.needleCustom = false; // (lineUI shows Custom… again if the width matches no needle)
   if (typeof letteringShown === "function") letteringShown(); // source.js: the Text card's printer-only switches
   if (typeof fontMenu === "function") fontMenu(); // config.js: fonts that can't write the text set apart
-  document.body.dataset.src = $("srcModel").checked ? "model" : t ? "text" : "image";
+  document.body.dataset.src = isModel() ? "model" : t ? "text" : "image";
   document.body.dataset.art = st.art.kind;
   textSizeUI(t);
   if (!t) syncSizeUI();
@@ -233,20 +176,14 @@ function syncDesignUI() {
   $("outW").value = +st.outW.toFixed(1);
   infillUI();
   baseUI();
-  if (typeof mxUI === "function") mxUI(); // matrix.js: the Test matrix's levels and scores
   applyPrinter(false);
   forgetHeightGoal();
   showHeight();
   tuneUI();
-  $("paperCustomRow").hidden = $("paper").value !== "custom";
-  renderPens();
-  shapesUI();
-  drawPage();
-  fillsSoon();
   syncSpacingUI();
   labels();
   updateToolLabels();
-  plotFromUI(); // plot.js: Traced line or Art as drawn
+  ask("designUI"); // a feature's own controls follow the design (the pen plotter's page and pens, the test matrix)
   artUI(); // art.js: the layer list and the chosen layer's cards
 }
 // Returns a note when part of the design couldn't come back (a 3D model that isn't the one loaded), else "".
@@ -257,7 +194,7 @@ function applyDesign(d, src, imageSource, pics, picMore) {
   try {
     clearTimeout(textTimer);
     clearTimeout(recTimer);
-    stopOptimize();
+    ask("sourceChanged"); // (a running Optimize is for the design that's going)
     if (st.tool) exitTool();
     const s = d.s || {};
     // As drawn (the Line card's third choice until v112) is Trace off now
@@ -303,38 +240,17 @@ function applyDesign(d, src, imageSource, pics, picMore) {
     st.zm = {};
     st.wk = null;
     posManual = !!s.posManual;
-    st.penFill = s.penFill ? structuredClone(s.penFill) : defaultPenFill();
-    st.pfill = null; // older design files: no fill pens
+    ask("restore", s); // what a feature kept with the design
     // the Art step's input (art.js); a design from before the Art step comes back as its source was
     if (s.art) artRestore(s.art, pics || null, picMore || null);
-    else artFromOld($("srcModel").checked ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
-    if ($("srcModel").checked) {
-      // a 3D model: its turns and height come back when the same model is loaded; the mesh itself isn't saved.
-      // Designs saved before the fingerprint also match by id, but only when the model's name is the same too.
-      const m = s.model;
-      if (m && m.vase) {
-        // a vase made here: made again from its settings
-        useVase(m.vase, false); // model.js
-        vaseUI(); // vase.js
-      } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
-      const same =
-        st.model &&
-        m &&
-        !m.vase &&
-        (m.print ? m.print === modelPrint(st.model) : m.id === st.model.id && s.srcLabel === st.model.name);
-      if (same) {
-        st.model.turns = { ...m.turns };
-        st.model.om = UNB.orientMesh(st.model.tri, st.model.turns);
-        st.model.heightMM = m.heightMM;
-        st.model.cut = m.cut ? { ...m.cut } : { bottom: 0, top: 0 };
-      } else if (m && st.model && !m.vase)
-        note = `made with ${s.srcLabel ? `“${s.srcLabel}”` : "another model"}: load that STL to get its turns and height back`;
-      // the image to go back to from the model
+    else artFromOld(isModel() ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
+    if (isModel()) {
+      // a 3D model (model.js): what it kept comes back; the image to go back to from the model
+      note = answer("modelRestore", s) || "";
       st.imageSource = imageSource || (src ? { canvas: src, label: s.srcLabel } : st.imageSource);
       st.text = null;
       syncDesignUI();
-      document.body.dataset.src = "model";
-      enterModel();
+      ask("modelEnter");
       return note;
     }
     if (textMode()) {
@@ -351,19 +267,7 @@ function applyDesign(d, src, imageSource, pics, picMore) {
       if (src) st.source = src;
       st.srcLabel = s.srcLabel || st.srcLabel;
     }
-    // the cut-out (cutout.js): its box and strokes come back with the picture, and its mask is worked out again
-    const cut = s.cutout && !textMode() ? structuredClone(s.cutout) : null,
-      same =
-        cut &&
-        st.cutout &&
-        st.cutout.src === (st.source && st.source.__id) &&
-        JSON.stringify([st.cutout.box, st.cutout.strokes]) === JSON.stringify([cut.box, cut.strokes]);
-    if (!cut) st.cutout = null;
-    else if (!same) {
-      st.cutout = { ...cut, src: st.source && st.source.__id, mask: null, ver: (st.cutout && st.cutout.ver) || 0 };
-      cutoutRun();
-    }
-    cutoutUI();
+    ask("restoredSource", s); // what a feature kept that belongs to the source now in place (the cut-out)
     $("srcinfo").textContent = st.srcLabel || "";
     if (![...$("chocolate").options].some((o) => o.value === $("chocolate").value))
       $("chocolate").value = CFG.defaults.chocolate;
@@ -412,7 +316,7 @@ for (const ev of ["input", "change"])
   document.addEventListener(
     ev,
     (e) => {
-      if (e.target && DESIGN_SET.has(e.target.id)) recordSoon();
+      if (e.target && DESIGN_IDS.includes(e.target.id)) recordSoon();
     },
     true
   );
@@ -476,7 +380,7 @@ async function openDesign(f) {
     // checked before anything changes, so a file that can't open leaves the design as it was
     const ds = file.design.s;
     // (a v101 file keeps its art as layers, with no kind: artRestore takes those)
-    if (ds && ds.art && !ds.art.layers && ds.art.kind !== undefined && !Object.hasOwn(KIND_RADIO, ds.art.kind))
+    if (ds && ds.art && !ds.art.layers && ds.art.kind !== undefined && !kindRadio(ds.art.kind))
       throw new Error("its art is of a kind this app doesn't know");
     if (ds && ["outW", "spacing", "simplify", "N"].some((k) => ds[k] !== undefined && !Number.isFinite(ds[k])))
       throw new Error("its size or line settings aren't numbers");

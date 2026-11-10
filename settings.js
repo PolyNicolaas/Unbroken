@@ -129,6 +129,25 @@ window.UNB_SETTINGS = {
     // },
   ],
 
+  // ---------- Features ----------
+  // (used) What the app includes. Set one to false and it's as if it was never built: its scripts aren't loaded and
+  // its buttons and cards aren't on the page. To try one without editing this file, add ?off=vase,plotter (or
+  // ?on=vase) to the page's address.
+  features: {
+    plotter: true,                    // made for a pen plotter: the Plot step, pens, fills, SVG
+    model: true,                      // a 3D model (STL) sliced into layers
+    vase: true,                       // Make a vase (needs model)
+    patterns: true,                   // the pattern styles (labyrinth, spirograph, wave portrait …)
+    molecule: true,                   // a molecule drawn from its name
+    pieces: true,                     // a text printed as a piece per line
+    camera: true,                     // a photo of a drawing, straightened
+    cutout: true,                     // cut the subject out of a picture
+    levels: true,                     // Grey levels
+    optimize: true,                   // Optimize and the starting points
+    testprint: true,                  // the test print
+    matrix: true,                     // the test matrix
+  },
+
   // ---------- Starting defaults ----------
   // (used) Everything the app shows when it opens, panel by panel. Undo, saved designs and presets work on top of these.
   defaults: {

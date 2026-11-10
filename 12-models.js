@@ -5,7 +5,17 @@
   "use strict";
   const UNB = root.UNB,
     // shared helpers (00-util.js)
-    { f3, svgPolylines, cumLength, resampleLoop, isoContours, labelComponents, segDist2, startNearest } = UNB._u;
+    {
+      f3,
+      svgPolylines,
+      cumLength,
+      resampleLoop,
+      isoContours,
+      labelComponents,
+      segDist2,
+      startNearest,
+      rasterPolyline,
+    } = UNB._u;
 
   // a mesh corner as a text key, matched to 0.0001 units so float noise between neighbouring triangles doesn't split it
   const cornerKey = (tri, i) =>
@@ -375,7 +385,9 @@
       // solid)
       dens = Math.min(base ? 1.25 : 1, Math.max(0, +opt[p + "Density"] || 0));
     if (!(dens > 0.001)) return { pattern: null, spacing: 0, angle: 0, minArea: 0 };
-    const pattern = opt[p + "Pattern"] === "rings" ? "rings" : "lines",
+    // (spiral: a base only, of a vase or a sliced model: UNB.vaseStack, UNB.modelStack; elsewhere it's rings)
+    const want = opt[p + "Pattern"],
+      pattern = want === "rings" || (want === "spiral" && !base) ? "rings" : want === "spiral" ? "spiral" : "lines",
       turn = Math.max(1, opt[p + "Turn"] | 0 || 1);
     // each its own smallest area filled (fillMinArea: both)
     const minArea = opt[p + "MinArea"] != null ? +opt[p + "MinArea"] || 0 : +opt.fillMinArea || 0;
@@ -385,6 +397,85 @@
       angle: (+opt[p + "Angle"] || 0) + (pattern === "lines" && Math.floor(j / turn) % 2 ? 90 : 0),
       minArea,
     };
+  };
+
+  // A spiral fill: from a closed rim (the loop P of [x, y], mm, the bead's centre line) the line goes round just
+  // inside itself, one row spacing (rs) further in each time round, to the middle: rings following the rim's shape,
+  // each left a row spacing before it closes for a short slant in to the next. One open line, no joins, nothing
+  // crossed. Starts on the rim nearest (gx, gy). Returns { x, y, open: true, rings } (rim → middle), or null when
+  // there's no single way in: the shape splits in two as it narrows (a waist), or it's too big for the grid.
+  UNB.spiralFill = function (P0, rs, gx, gy) {
+    if (!P0 || P0.length < 8 || !(rs > 0)) return null;
+    const step = Math.min(0.25, rs / 4),
+      g = Math.max(0.05, rs / 6),
+      xs = P0.map((p) => p[0]),
+      ys = P0.map((p) => p[1]),
+      pad = 3,
+      ox = Math.min(...xs) - pad * g,
+      oy = Math.min(...ys) - pad * g,
+      w = Math.ceil((Math.max(...xs) - ox) / g) + pad + 1,
+      h = Math.ceil((Math.max(...ys) - oy) / g) + pad + 1;
+    if (w * h > 12e6) return null;
+    const line = new Uint8Array(w * h);
+    rasterPolyline(line, w, xs, ys, true, ox, oy, g, 0.5);
+    const dist = UNB.edt(line, w, h).dist,
+      lab = new Int32Array(w * h).fill(-1);
+    // the cells inside the rim (even-odd, at cell centres)
+    for (let r = 0; r < h; r++) {
+      const Y = oy + r * g,
+        cut = [];
+      for (let i = 0; i < P0.length; i++) {
+        const p = P0[i],
+          q = P0[(i + 1) % P0.length];
+        if (p[1] > Y !== q[1] > Y) cut.push(p[0] + ((Y - p[1]) / (q[1] - p[1])) * (q[0] - p[0]));
+      }
+      cut.sort((a, b) => a - b);
+      for (let k = 0; k + 1 < cut.length; k += 2)
+        for (
+          let c = Math.max(0, Math.ceil((cut[k] - ox) / g));
+          c <= Math.min(w - 1, Math.floor((cut[k + 1] - ox) / g));
+          c++
+        )
+          lab[r * w + c] = 0;
+    }
+    const box = { x0: [0], y0: [0], x1: [w - 1], y1: [h - 1] },
+      len = (R) =>
+        R.reduce((a, p, i) => a + Math.hypot(p[0] - R[(i + 1) % R.length][0], p[1] - R[(i + 1) % R.length][1]), 0),
+      acw = (R) => (loopArea(R) < 0 ? R.slice().reverse() : R),
+      rings = [acw(resampleLoop(P0, step))];
+    for (let k = 1; k < 4000; k++) {
+      const C = isoContours(dist, lab, 0, (k * rs) / g, w, h, box, ox, oy, g).filter(
+        (R) => R.length > 3 && len(R) > rs
+      );
+      if (!C.length) break;
+      if (C.length > 1) return null;
+      rings.push(acw(resampleLoop(C[0], step)));
+    }
+    const x = [],
+      y = [];
+    let sx = gx == null ? rings[0][0][0] : gx,
+      sy = gy == null ? rings[0][0][1] : gy;
+    for (const R of rings) {
+      const n = R.length;
+      let i0 = 0,
+        best = Infinity;
+      for (let i = 0; i < n; i++) {
+        const d2 = (R[i][0] - sx) ** 2 + (R[i][1] - sy) ** 2;
+        if (d2 < best) {
+          best = d2;
+          i0 = i;
+        }
+      }
+      // (all but the last row spacing of it: the slant in to the next ring takes that)
+      const m = Math.max(2, n - Math.max(1, Math.round((Math.min(rs, len(R) / 4) / len(R)) * n)));
+      for (let i = 0; i < m; i++) {
+        x.push(R[(i0 + i) % n][0]);
+        y.push(R[(i0 + i) % n][1]);
+      }
+      sx = R[i0][0];
+      sy = R[i0][1];
+    }
+    return { x: Float64Array.from(x), y: Float64Array.from(y), open: true, rings: rings.length };
   };
 
   // ---------- a grid for regions ----------
@@ -837,7 +928,10 @@
       Hfull = top * sc,
       Hmm = Math.max(h, Hfull - cb - ct);
     const T = Math.max(1, Math.floor((Hmm - z0) / h + 1e-9) + 1),
-      NB = Math.min(T, Math.max(0, o.base | 0));
+      // (a spiral base goes in on one layer and out on the next: an even number of layers, one more if need be)
+      wantSpiral = UNB.fillPlan(o, true, 0).pattern === "spiral",
+      NB0 = Math.min(T, Math.max(0, o.base | 0)),
+      NB = wantSpiral && NB0 % 2 ? (NB0 + 1 <= T ? NB0 + 1 : NB0 - 1) : NB0;
     // slice every layer first (support is worked out from the top down), then fit them from the bottom up
     const outl = [];
     for (let k = 0; k < T; k++) {
@@ -886,10 +980,60 @@
     let prev = null,
       empty = 0,
       last = null;
+    // A spiral base, two layers at a time: in from the rim to the middle on one, out again on the next, each layer
+    // its own outline's spiral (the rim is the outline moved in half a line width, as a wall is). A pair spirals when
+    // both layers are one piece with a single way in; otherwise that pair is rings.
+    const w0 = o.w || 0.8,
+      spirals = [];
+    let spiralBase = wantSpiral && NB > 0 ? true : null;
+    if (wantSpiral) {
+      const rimOf = (k) => {
+        const O = outsideLoops(outl[k]);
+        if (O.length !== 1) return null;
+        const P0 = resampleLoop(O[0], Math.min(0.2, w0 / 4)),
+          P = loopArea(P0) < 0 ? P0.reverse() : P0,
+          m = P.length,
+          R = P.map((p, i) => {
+            const a = P[(i - 2 + m) % m],
+              b = P[(i + 2) % m],
+              tx = b[0] - a[0],
+              ty = b[1] - a[1],
+              l = Math.hypot(tx, ty) || 1;
+            return [p[0] - (ty / l) * (w0 / 2), p[1] + (tx / l) * (w0 / 2)];
+          });
+        return loopArea(R) > w0 * w0 ? R : null;
+      };
+      let at = null;
+      for (let k = 0; k + 1 < NB; k += 2) {
+        const F = UNB.fillPlan(o, true, k),
+          Ra = rimOf(k),
+          Rb = Ra && rimOf(k + 1),
+          A = Rb && UNB.spiralFill(Ra, F.spacing, at && at[0], at && at[1]),
+          B = A && UNB.spiralFill(Rb, F.spacing, A.x[0], A.y[0]);
+        if (!B) {
+          spiralBase = false;
+          continue;
+        }
+        spirals[k] = { x: A.x, y: A.y, open: true };
+        spirals[k + 1] = { x: B.x.slice().reverse(), y: B.y.slice().reverse(), open: true };
+        at = [B.x[0], B.y[0]];
+      }
+    }
     for (let k = 0; k < T; k++) {
       const baseL = k < NB,
         j = baseL ? k : k - NB,
-        F = UNB.fillPlan(o, baseL, j);
+        F = Object.assign({}, UNB.fillPlan(o, baseL, j));
+      if (F.pattern === "spiral") F.pattern = "rings"; // (a pair that couldn't spiral)
+      if (spirals[k]) {
+        const Sk = spirals[k],
+          e = Sk.x.length - 1;
+        base.push(Sk);
+        terms.push(0);
+        joins.push(0);
+        prev = [Sk.x[e], Sk.y[e]]; // (where the needle is: the middle, or back on the rim)
+        yield { done: k + 1, of: T };
+        continue;
+      }
       let L = outl[k].length
         ? UNB.modelLayer(outl[k], {
             w: o.w,
@@ -923,6 +1067,7 @@
       walls,
       T: base.length + walls.length,
       N: base.length,
+      spiralBase,
       terms,
       joins,
       empty,

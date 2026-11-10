@@ -79,7 +79,7 @@
     17-vase.js    16. Vases — a profile curve turned round the middle, a surface texture (ribs, rings) and a movement
                       pattern along the path (wave, zigzag, loops), written straight to one lap per layer; the checks.
                       UNB.VASE_SHAPES, UNB.vaseDefaults, VASE_MIN_R, UNB.vaseRadius, UNB.vaseProfile, vaseWiggle,
-                      vaseRing, vaseLap, vaseLapPoints, vaseStacking, vaseTightest, UNB.vaseStack, UNB.vaseMesh
+                      vaseRing, vaseLap, vaseCrosses, vaseLapPoints, vaseStacking, vaseTightest, UNB.vaseStack, UNB.vaseMesh
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
@@ -116,7 +116,7 @@
     module.exports = root.UNB;
   } else if (typeof importScripts === "function") {
     // a Web Worker (worker.js): the parts sit next to this file
-    importScripts(...PARTS.map((p) => p + "?v=v144"));
+    importScripts(...PARTS.map((p) => p + "?v=v145"));
     root.UNB.PARTS = PARTS;
   } else if (root.UNB) root.UNB.PARTS = PARTS; // the page: index.html loads the parts itself, before this file
 })(typeof window !== "undefined" ? window : globalThis);

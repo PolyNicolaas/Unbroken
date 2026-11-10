@@ -14,7 +14,7 @@ function readouts() {
   $("rMiss").textContent = fmt(e.missing * mm);
   // jumps between separate parts: always drawn, the flow can't stop; but between the lines of a text printed as a
   // piece per line the needle lifts instead (pieces.js)
-  const lifted = (typeof lineLifts === "function" && lineLifts()) || null,
+  const lifted = answer("lineLifts"),
     up = lifted ? lifted.n : 0,
     j = Math.max(0, (st.connRuns || 0) - up);
   setChip(
@@ -100,6 +100,6 @@ function renderMath() {
 
 function setChip(t, model) {
   if (!model && isModel()) return;
-  if (!model && document.body.dataset.empty === "1") t = "Nothing yet: start on the Art step"; // (examples.js)
+  if (!model && document.body.dataset.empty === "1") t = "Nothing yet: start on the Art step"; // (art.js emptyUI)
   $("chip").textContent = t;
 } // a model's readout is model.js's

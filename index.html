@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v144">
-<link rel="stylesheet" href="css/app.css?v=v144">
+<link rel="stylesheet" href="css/theme.css?v=v145">
+<link rel="stylesheet" href="css/app.css?v=v145">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v144</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v145</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -22,8 +22,6 @@
   <section class="map" id="map" aria-label="The steps, as a map: tap a step to open its settings">
     <div class="map-top">
       <span class="name">For</span>
-      <button class="chip-btn map-for" type="button" data-for="print">A printer</button>
-      <button class="chip-btn map-for" type="button" data-for="plot">A pen plotter</button>
     </div>
     <svg class="map-lines" id="mapLines" aria-hidden="true"></svg>
     <div class="map-nodes" id="mapNodes"></div>
@@ -32,24 +30,24 @@
     <div class="stage">
       <div class="seg small stage-tabs" role="radiogroup" aria-label="What the big view shows">
         <input type="radio" name="stage" id="stLine" value="line" checked><label for="stLine">Line</label>
-        <input type="radio" name="stage" id="stPage" value="page"><label for="stPage">2D page</label>
+        <input data-feature="plotter" type="radio" name="stage" id="stPage" value="page"><label data-feature="plotter" for="stPage">2D page</label>
         <input type="radio" name="stage" id="stPlate" value="plate"><label for="stPlate">Plate</label>
         <input type="radio" name="stage" id="stLayers" value="layers"><label for="stLayers">3D layers</label>
       </div>
       <div class="canvas-box" id="box">
         <canvas id="view" aria-label="Traced line preview"></canvas>
-        <div class="stage-pane" id="panePage"><canvas class="page" id="pageView" aria-label="The drawing on the paper. Click a shape to fill it with the chosen pen."></canvas></div>
+        <div data-feature="plotter" class="stage-pane" id="panePage"><canvas class="page" id="pageView" aria-label="The drawing on the paper. Click a shape to fill it with the chosen pen."></canvas></div>
         <div class="stage-pane" id="panePlate"><canvas class="plate" id="plate" aria-label="The drawing placed on the 340 by 232 mm print plate"></canvas></div>
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
         <div class="chip" id="chip">loading…</div>
-        <div class="moled" id="pathEd" hidden role="dialog" aria-modal="true" aria-label="Draw the centre's path">
+        <div data-feature="patterns" class="moled" id="pathEd" hidden role="dialog" aria-modal="true" aria-label="Draw the centre's path">
           <div class="me-top"><p class="hint" id="peHint">Drag the path the ring's centre should follow, from its start to its end. The faint figure is the ring at rest; the dashed box is the frame. Start outside it if you like.</p></div>
           <div class="me-stage"><canvas id="peView" aria-label="The centre's path being drawn"></canvas></div>
           <p class="me-msg" id="peMsg" role="status"></p>
           <div class="me-bar"><button class="btn" type="button" id="peClear">Clear</button><span class="me-gap"></span><button class="btn" type="button" id="peCancel">Cancel</button><button class="btn primary" type="button" id="peDone">Use it</button></div>
         </div>
-        <div class="moled" id="molEd" hidden role="dialog" aria-modal="true" aria-label="Draw a structure">
+        <div data-feature="molecule" class="moled" id="molEd" hidden role="dialog" aria-modal="true" aria-label="Draw a structure">
           <div class="me-top">
             <div class="seg small me-tools" role="radiogroup" aria-label="Tool">
               <input type="radio" name="meTool" id="meTbond" value="bond" checked><label for="meTbond" title="Tap to place an atom, drag from an atom to draw a bond, tap a bond to make it double or triple">Bond</label>
@@ -83,7 +81,7 @@
             <button class="btn primary" type="button" id="meDone">Use it</button>
           </div>
         </div>
-        <div class="camera" id="camera" data-mode="live" hidden role="dialog" aria-modal="true" aria-label="Take a picture">
+        <div data-feature="camera" class="camera" id="camera" data-mode="live" hidden role="dialog" aria-modal="true" aria-label="Take a picture">
           <video id="camVideo" playsinline muted autoplay></video>
           <canvas id="camStill" aria-label="The photo taken: drag its corners onto the page's corners"></canvas>
           <svg id="camQuad" aria-hidden="true"><polygon id="camPoly"></polygon><g id="camHandles"></g></svg>
@@ -108,7 +106,7 @@
         </div>
         <div class="empty-state" id="emptyState" hidden>
           <p class="es-title">Start with a picture, text, a pattern or a 3D model</p>
-          <p class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
+          <p data-feature="camera" class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
           <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>. Not sure where to start? Tap Examples on the map.</p>
         </div>
         <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
@@ -197,7 +195,7 @@
         <button class="btn" type="button" id="eraseClear">Restore all</button>
         <button class="btn primary" type="button" id="eraseDone">Done</button>
       </div>
-      <div class="selbar" id="cutbar" hidden>
+      <div data-feature="cutout" class="selbar" id="cutbar" hidden>
         <div class="seg small" role="radiogroup" aria-label="What dragging does">
           <input type="radio" name="cutMode" id="cutMbox" value="box" checked><label for="cutMbox">Box</label>
           <input type="radio" name="cutMode" id="cutMkeep" value="keep"><label for="cutMkeep">Keep</label>
@@ -219,7 +217,7 @@
         <button class="btn" type="button" id="startAuto">Automatic</button>
         <button class="btn primary" type="button" id="startDone">Done</button>
       </div>
-      <div class="selbar" id="optbar" hidden>
+      <div data-feature="optimize" class="selbar" id="optbar" hidden>
         <span class="hint" id="optMsg"></span>
         <button class="btn" type="button" id="optCancel" hidden>Cancel</button>
         <button class="btn" type="button" id="optUndo" hidden>Undo</button>
@@ -265,7 +263,7 @@
     </div>
     <section class="map-rows" id="mapRows" aria-label="Settings" hidden>
       <div id="mapRowsBody"></div>
-      <div hidden><div class="map-calc" id="mapSpacing"><span>Line spacing <small class="from">width + gap</small></span><span class="val"></span></div></div>
+      <div hidden><div class="map-calc" id="mapSpacing"><span>Line width + gap <small class="from">the needle sets the width · <a href="#" id="mapToLine">change them on Line</a></small></span><span class="val"></span></div></div>
     </section>
     <!-- what it's made for and the step now showing: the app's state, set from the map (map.js) -->
     <div hidden>
@@ -301,9 +299,9 @@
         <label class="field"><span>Spacing between copies (mm)</span><input type="number" id="copyGap" min="0" step="0.5" value="5"></label>
         <label class="field"><span>Rotation</span><select id="plateRot"><option value="auto" selected>Auto (to fit)</option><option value="straight">Straight only</option></select></label>
       </div>
-      <div class="two" id="piecesRow" hidden>
+      <div data-feature="pieces" class="two" id="piecesRow" hidden>
         <label class="field" title="A piece for each line: every line of the text is traced on its own and printed as a separate piece, one continuous line each, with no strand joining one line to the next. In place: the lines keep the layout you typed, one under the other (a card or a message); packed: they're moved wherever they fit, to save room (a set of name labels). One piece: the lines print joined, as the Line step draws them."><span>Lines of text</span><select id="textPieces"><option value="place" selected>A piece for each line, in place</option><option value="each">A piece for each line, packed</option><option value="one">One piece, lines joined</option></select></label>
-        <label class="field" id="molPiecesField" title="One piece: all of it as one continuous line, as the Line step draws it, connectors and all. Bonds and labels apart: the bonds print as one continuous line and each atom's letters as a small piece of their own, in their places, so no strand joins a label to the bonds."><span>Molecule</span><select id="molPieces"><option value="one" selected>One piece</option><option value="apart">Bonds and labels apart</option></select></label>
+        <label data-feature="molecule" class="field" id="molPiecesField" title="One piece: all of it as one continuous line, as the Line step draws it, connectors and all. Bonds and labels apart: the bonds print as one continuous line and each atom's letters as a small piece of their own, in their places, so no strand joins a label to the bonds."><span>Molecule</span><select id="molPieces"><option value="one" selected>One piece</option><option value="apart">Bonds and labels apart</option></select></label>
         <label class="field" id="pieceShownField" title="The piece One copy shows, in the Plate and 3D layers views"><span>One copy shows</span><select id="pieceShown"><option value="0">line 1</option></select></label>
       </div>
       <div class="inline"><button class="btn" type="button" id="plateCenter">Center on plate</button></div>
@@ -316,7 +314,7 @@
         <label class="field" title="Chocolate needs time to set before the next layer lands on it. Layers that would print faster are slowed down (not below the printer's slowest speed)."><span>Seconds per layer (at least)</span><input type="number" id="layerTime" min="0" max="300" step="1" value="20"></label>
       </div>
       <input type="hidden" id="wallLayers" value="1">
-      <div class="row model-only stl-only" id="cutRow">
+      <div data-feature="model" class="row model-only stl-only" id="cutRow">
         <div class="lab"><span class="name">Cut off</span><span class="val" id="cutInfo"></span></div>
         <div class="two">
           <label class="field"><span>Bottom (mm)</span><input type="number" id="cutBottom" min="0" step="0.5" value="0"></label>
@@ -324,10 +322,10 @@
         </div>
         <p class="hint help">Only the part of the model between the two cuts is printed. Cut the top where it stops being flat (a dome or a point ends in a few tiny, wobbly last layers that don't hold their shape in chocolate), or the bottom of a round model so it stands on a flat first layer. The model's preview on the Line step fades the parts cut off and outlines the cuts; the Height above is the part that's left. Turning the model clears the cuts.</p>
       </div>
-      <label class="field model-only stl-only" title="How many walls, one line spacing inside each other"><span>Walls</span><input type="number" id="wallCount" min="1" max="5" step="1" value="1"></label>
-      <p class="hint help model-only stl-only" data-anchor="wallCount">A model prints its outside contour only: the inside surface of a hollow model (a cup's inner wall) and any hole are not traced. Walls adds lines inside the outside contour, one spacing apart; how much of the inside gets chocolate is up to Base and Infill.</p>
-      <label class="field model-only stl-only" title="Holds up parts that reach out further than a bead can step: the support is part of the same line, from the plate up"><span>Support</span><select id="support"><option value="off" selected>Off</option><option value="skirt">Flared skirt</option><option value="thin">Thin wall</option><option value="slope">Slope</option></select></label>
-      <p class="hint help model-only stl-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, in Fine-tuning) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Slope: the model's own ledges turned into short slopes, so no layer steps out more than a bead holds, nor in further than its wall (on a hollow print a layer that steps in hangs over the empty inside, like the bottom of a skull's nose): only the layers round a ledge change. Each layer stays one loop. The ready list says how far the model steps out, or in, with Support off.</p>
+      <label data-feature="model" class="field model-only stl-only" title="How many walls, one line spacing inside each other"><span>Walls</span><input type="number" id="wallCount" min="1" max="5" step="1" value="1"></label>
+      <p data-feature="model" class="hint help model-only stl-only" data-anchor="wallCount">A model prints its outside contour only: the inside surface of a hollow model (a cup's inner wall) and any hole are not traced. Walls adds lines inside the outside contour, one spacing apart; how much of the inside gets chocolate is up to Base and Infill.</p>
+      <label data-feature="model" class="field model-only stl-only" title="Holds up parts that reach out further than a bead can step: the support is part of the same line, from the plate up"><span>Support</span><select id="support"><option value="off" selected>Off</option><option value="skirt">Flared skirt</option><option value="thin">Thin wall</option><option value="slope">Slope</option></select></label>
+      <p data-feature="model" class="hint help model-only stl-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, in Fine-tuning) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Slope: the model's own ledges turned into short slopes, so no layer steps out more than a bead holds, nor in further than its wall (on a hollow print a layer that steps in hangs over the empty inside, like the bottom of a skull's nose): only the layers round a ledge change. Each layer stays one loop. The ready list says how far the model steps out, or in, with Support off.</p>
       <p class="hint" id="layerCount"></p>
       <p class="hint" id="layerHint"></p>
       <p class="hint" id="cartHint" hidden></p>
@@ -348,7 +346,7 @@
       <h2 id="h-base">Base <span id="infillVal">none</span></h2>
       <div class="two">
         <label class="field" title="Filled layers at the bottom (0: no base)"><span>Base layers</span><input type="number" id="baseLayers" min="0" max="50" step="1" value="0"></label>
-        <label class="field" title="Rows straight across, or rings following the edge"><span>Pattern</span><select id="basePattern"><option value="lines" selected>Lines</option><option value="rings">Rings</option></select></label>
+        <label class="field" title="Rows straight across, or rings following the edge. A 3D model or a vase can also spiral: round and in to the middle on one layer, up, and out again on the next"><span>Pattern</span><select id="basePattern"><option value="lines" selected>Lines</option><option value="rings">Rings</option><option value="spiral" data-feature="model" hidden disabled>Spiral (in, then out)</option></select></label>
       </div>
       <div class="row">
         <div class="lab"><label for="baseDensity">Density</label><span class="val" id="baseDensityVal">100%</span></div>
@@ -396,7 +394,7 @@
       </div>
       <div class="inline"><button class="btn mini" type="button" id="tuneReset" disabled>Back to the profile values</button></div>
     </section>
-    <section class="card choc-only" aria-labelledby="h-test">
+    <section data-feature="testprint" class="card choc-only" aria-labelledby="h-test">
       <h2 id="h-test">Test print <span class="hval" id="testVal"></span></h2>
       <div class="two">
         <label class="field" title="The setting that changes from strip to strip; everything else is as set above"><span>Vary</span><select id="testVary">
@@ -414,7 +412,7 @@
       <p class="status" id="testMsg" role="status"></p>
       <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it: it becomes the setting (a Flow strip sets the Flow in Fine-tuning). First layer Z strips each start at their own height above the plate, to find the one that sticks; 1 or 2 layers are enough for those.</p>
     </section>
-    <section class="card choc-only" aria-labelledby="h-matrix">
+    <section data-feature="matrix" class="card choc-only" aria-labelledby="h-matrix">
       <h2 id="h-matrix">Test matrix <span class="hval" id="mxVal"></span></h2>
       <p class="hint">Nine copies of this design on one plate, each printed with its own speed, flow and layer height: a Taguchi L9, three levels of each setting in nine prints. Score the copies and the best level of each setting is worked out.</p>
       <table class="mx-levels">
@@ -446,9 +444,9 @@
       <div class="seg five" role="radiogroup" aria-label="What to start from">
         <input type="radio" name="srcType" id="srcImage" value="picture" checked><label for="srcImage">Picture<small>trace an image</small></label>
         <input type="radio" name="srcType" id="srcText" value="text"><label for="srcText">Text<small>type words</small></label>
-        <input type="radio" name="srcType" id="srcPattern" value="pattern"><label for="srcPattern">Pattern<small>geometric art</small></label>
-        <input type="radio" name="srcType" id="srcMolecule" value="molecule"><label for="srcMolecule">Molecule<small>a structure</small></label>
-        <input type="radio" name="srcType" id="srcModel" value="model"><label for="srcModel">3D model<small>an STL</small></label>
+        <input data-feature="patterns" type="radio" name="srcType" id="srcPattern" value="pattern"><label data-feature="patterns" for="srcPattern">Pattern<small>geometric art</small></label>
+        <input data-feature="molecule" type="radio" name="srcType" id="srcMolecule" value="molecule"><label data-feature="molecule" for="srcMolecule">Molecule<small>a structure</small></label>
+        <input data-feature="model" type="radio" name="srcType" id="srcModel" value="model"><label data-feature="model" for="srcModel">3D model<small>an STL</small></label>
       </div>
       <div class="dropzone" id="dropZone" role="button" tabindex="0" aria-label="Choose or drop a file: an image, an STL model or a saved design">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -461,10 +459,10 @@
 
     <section class="card art-only art-picture" aria-labelledby="h-pic">
       <h2 id="h-pic">Picture <span id="picVal"></span></h2>
-      <div class="inline"><button class="btn primary" type="button" id="picCamera" title="A drawing, a print or anything else, with the camera: the page is found and straightened">Take a picture</button><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
+      <div class="inline"><button data-feature="camera" class="btn primary" type="button" id="picCamera" title="A drawing, a print or anything else, with the camera: the page is found and straightened">Take a picture</button><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
       <input type="file" id="picFile" accept="image/*" hidden>
-      <input type="file" id="camFile" accept="image/*" capture="environment" hidden>
-      <div class="photo-box" id="photoBox">
+      <input data-feature="camera" type="file" id="camFile" accept="image/*" capture="environment" hidden>
+      <div data-feature="camera" class="photo-box" id="photoBox">
         <div class="lab"><span class="name">Photo</span><span class="val" id="photoVal"></span></div>
   <div class="row" id="photoRows">
           <div class="seg four small" role="radiogroup" aria-label="What the photo is of">
@@ -536,7 +534,7 @@
       </div>
     </section>
 
-    <section class="card art-only art-pattern" aria-labelledby="h-art">
+    <section data-feature="patterns" class="card art-only art-pattern" aria-labelledby="h-art">
       <h2 id="h-art">Pattern <span id="artVal"></span></h2>
       <label class="field"><span>Style</span><select id="artStyle" aria-describedby="artTip"></select></label>
       <p class="hint" id="artTip"></p>
@@ -558,7 +556,7 @@
       <p class="hint help">Geometric art drawn as exact lines, then traced. The first group are patterns of their own; the second draw a picture's light and dark (the Picture row picks it), still as one line, so they print in chocolate. Labyrinth, Moore loop and Double spiral are one closed line already, and Hilbert, Gosper, Whirl and Waves one open line, with an even gap between neighbouring lines: they print without doubled strokes (the Line card's Closed loop or Open is set to suit). Width sets the print's size in mm, and says how far apart its closest lines come against the needle's line spacing; Fit the needle picks the width where they are exactly that. Spirograph, Lissajous and Rose are one line that crosses itself: the trace follows their exact line, and with Allow overlaps (the Line step's Line card) the needle prints over each crossing; without it every crossing is undone. Truchet tiles are many pieces: those suit the pen plotter. Every style has its own settings below the style; Shuffle gives the random ones another version.</p>
     </section>
 
-    <section class="card art-only art-molecule" aria-labelledby="h-mol">
+    <section data-feature="molecule" class="card art-only art-molecule" aria-labelledby="h-mol">
       <h2 id="h-mol">Molecule <span id="molVal"></span></h2>
       <form class="mol-form" id="molForm" autocomplete="off">
         <input type="text" id="molIn" spellcheck="false" autocapitalize="off" placeholder="a name (caffeine) or a SMILES" aria-label="A molecule's name or SMILES" aria-describedby="molMsg">
@@ -571,7 +569,7 @@
       <div class="examples"><span class="name">Examples</span><div class="chips" id="molChips"></div></div>
       <p class="hint help">A chemical structure drawn as a skeletal formula: bonds as lines (double and triple bonds as parallel lines, a ring's double bonds inside the ring), carbons implied, every other atom as its letters with its hydrogens, in the single-stroke font. Type a SMILES (CCO, c1ccccc1) or a name (caffeine, theobromine), or Draw or edit… to draw one by hand or change the one shown (tap to place an atom, drag from an atom for a bond, tap a bond for double or triple; rings; elements and charges; Clean up tidies the layout). Names are looked up on PubChem, and RDKit, the chemistry toolkit, lays it out (loaded the first time, about 7 MB; both need the internet; the examples don't). Like text and patterns it is exact lines: plotted as drawn with Trace off, or traced into one line for chocolate. Its bonds start long enough that a double bond's two lines are the line spacing apart.</p>
     </section>
-    <section class="card art-only art-model" aria-labelledby="h-model">
+    <section data-feature="model" class="card art-only art-model" aria-labelledby="h-model">
       <h2 id="h-model">3D model</h2>
       <div class="row" id="modelBox">
         <div class="seg small" role="radiogroup" aria-label="Where the model comes from">
@@ -582,7 +580,7 @@
           <span class="val" id="modelInfo"></span>
         </div>
         <p class="hint" id="modelCredit" hidden></p>
-        <div class="row vase-only" id="vaseBox">
+        <div data-feature="vase" class="row vase-only" id="vaseBox">
           <div class="lab"><span class="name">Profile</span><span class="val" id="vaseProfileVal"></span></div>
           <canvas id="vaseProfile" class="vase-profile" tabindex="0" aria-label="The vase's profile: the radius at each height. Drag a point to shape it; tap beside the curve to add one; arrow keys move the picked point"></canvas>
           <div class="inline"><button class="btn mini" type="button" id="vasePtDel" disabled title="Remove the picked point (the bottom and the rim stay)">Remove point</button></div>
@@ -633,7 +631,7 @@
     </section>
     <section class="card art-only art-picture" aria-labelledby="h-prep">
       <h2 id="h-prep">Image prep <span id="prepVal">off</span></h2>
-          <div class="row" id="cutRow">
+          <div data-feature="cutout" class="row">
             <div class="lab"><span class="name">Cut out the object</span><span class="val" id="cutVal">off</span></div>
             <div class="inline"><button class="btn mini" type="button" id="cutBtn" data-tool="cut" aria-pressed="false" title="Drag a box round the thing to keep on the preview: the floor it stands on and the wall behind are removed">Select the object</button><button class="btn mini" type="button" id="cutClear" hidden>Remove the cut-out</button></div>
             <p class="hint help">Drag a box round the object on the preview. What's in the box that looks like what's around it (the floor the object stands on, the wall behind) is removed, and the rest is the object: everything else becomes white paper before Grey levels and the trace. Then paint Keep over parts that went missing, or Remove over what isn't the object (a shadow, a bit of floor). Works best when the object's colours differ from its surroundings.</p>
@@ -649,7 +647,7 @@
           </div>
 
     </section>
-    <section class="card art-only art-picture" aria-labelledby="h-levels">
+    <section data-feature="levels" class="card art-only art-picture" aria-labelledby="h-levels">
       <h2 id="h-levels">Levels <span id="levelsCardVal">off</span></h2>
       <div class="row" id="levelsRow">
         <div class="lab"><label for="levels">Blocks</label><span class="val" id="levelsVal">off</span></div>
@@ -685,7 +683,7 @@
 
     <section class="card design-only img-only" aria-labelledby="h-trace">
       <h2 id="h-trace">Tracing</h2>
-      <p class="hint" id="levelsOnHint" hidden>Grey levels are on (the card below): the line follows the edges between the greys, so the trace style and the ink threshold aren't used.</p>
+      <p data-feature="levels" class="hint" id="levelsOnHint" hidden>Grey levels are on (the card below): the line follows the edges between the greys, so the trace style and the ink threshold aren't used.</p>
       <div class="row" id="modeRow">
         <div class="lab"><span class="name" title="Centerline suits drawings and lettering; Outline suits photos.">Trace style</span></div>
         <div class="seg" role="radiogroup" aria-label="Trace style">
@@ -817,14 +815,14 @@
         <div><b id="rStray">–</b><small>stray (mm)</small></div>
         <div><b id="rMiss">–</b><small>missing (mm)</small></div>
       </div>
-      <div class="inline">
+      <div data-feature="optimize" class="inline">
         <button class="btn" type="button" id="optBtn" title="Try tracing settings and keep the printable result closest to the image">Optimize tracing</button>
         <span class="hint" id="optInfo">Tries tracing settings; your size, needle and painted areas stay as they are. <span class="slow">Can take a minute.</span></span>
       </div>
     </section>
 
 
-    <section class="card plot-only" aria-labelledby="h-plot">
+    <section data-feature="plotter" class="card plot-only" aria-labelledby="h-plot">
       <h2 id="h-plot">The page <span id="plotInfo"></span></h2>
       <div class="seg" role="radiogroup" aria-label="What is plotted" hidden>
         <input type="radio" name="plotFrom" id="plotTraced" value="traced" checked><label for="plotTraced">Traced line<small>from the Line step</small></label>
@@ -847,7 +845,7 @@
       <p class="hint" id="pageHint"></p>
     </section>
 
-    <section class="card plot-only" aria-labelledby="h-fills">
+    <section data-feature="plotter" class="card plot-only" aria-labelledby="h-fills">
       <h2 id="h-fills">Fills <span id="penFillInfo"></span></h2>
       <div class="pens" id="pens">
         <p class="hint help" id="penHelp">Pick a pen, then click a shape on the page to fill it; click again to clear. Each pen is its own layer in the SVG, for changing pens in Saxi. Spacing = pen width fills solid.</p>
@@ -871,7 +869,7 @@
 
     </section>
 
-    <section class="card plot-only" aria-labelledby="h-pexport">
+    <section data-feature="plotter" class="card plot-only" aria-labelledby="h-pexport">
       <h2 id="h-pexport">Export</h2>
       <label class="check"><input type="checkbox" id="smooth"> Smooth curves</label>
       <div class="inline"><span class="spacer" style="flex:1"></span><button class="btn primary" type="button" id="exportBtn">Export SVG for Saxi</button></div>
@@ -903,64 +901,63 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v144"></script>
-<script src="01-image.js?v=v144"></script>
-<script src="02-lines.js?v=v144"></script>
-<script src="03-text.js?v=v144"></script>
-<script src="04-walk.js?v=v144"></script>
-<script src="05-fill.js?v=v144"></script>
-<script src="06-fourier.js?v=v144"></script>
-<script src="07-measure.js?v=v144"></script>
-<script src="08-shape.js?v=v144"></script>
-<script src="09-plate.js?v=v144"></script>
-<script src="10-export.js?v=v144"></script>
-<script src="11-stages.js?v=v144"></script>
-<script src="12-models.js?v=v144"></script>
-<script src="13-patterns.js?v=v144"></script>
-<script src="14-photo.js?v=v144"></script>
-<script src="15-cutout.js?v=v144"></script>
-<script src="16-molecule.js?v=v144"></script>
-<script src="17-vase.js?v=v144"></script>
-<script src="core.js?v=v144"></script>
-<script src="fonts.js?v=v144"></script>
-<script src="settings.js?v=v144"></script>
-<script src="js/state.js?v=v144"></script>
-<script src="js/ui.js?v=v144"></script>
-<script src="js/config.js?v=v144"></script>
-<script src="js/engine-bridge.js?v=v144"></script>
-<script src="js/source.js?v=v144"></script>
-<script src="js/pipeline.js?v=v144"></script>
-<script src="js/preview.js?v=v144"></script>
-<script src="js/tools.js?v=v144"></script>
-<script src="js/patterns.js?v=v144"></script>
-<script src="js/art.js?v=v144"></script>
-<script src="js/readouts.js?v=v144"></script>
-<script src="js/controls.js?v=v144"></script>
-<script src="js/levels.js?v=v144"></script>
-<script src="js/cutout.js?v=v144"></script>
-<script src="js/export.js?v=v144"></script>
-<script src="js/optimize.js?v=v144"></script>
-<script src="js/pieces.js?v=v144"></script>
-<script src="js/views.js?v=v144"></script>
-<script src="js/zoom.js?v=v144"></script>
-<script src="js/layers.js?v=v144"></script>
-<script src="js/testprint.js?v=v144"></script>
-<script src="js/matrix.js?v=v144"></script>
-<script src="js/plot.js?v=v144"></script>
-<script src="js/workflow.js?v=v144"></script>
-<script src="js/molecule.js?v=v144"></script>
-<script src="js/moleditor.js?v=v144"></script>
-<script src="js/pathpad.js?v=v144"></script>
-<script src="js/examples.js?v=v144"></script>
-<script src="js/camera.js?v=v144"></script>
-<script src="js/steppers.js?v=v144"></script>
-<script src="js/scroll.js?v=v144"></script>
-<script src="js/sample-skull.js?v=v144"></script>
-<script src="js/model.js?v=v144"></script>
-<script src="js/vase.js?v=v144"></script>
-<script src="js/history.js?v=v144"></script>
-<script src="js/map.js?v=v144"></script>
-<script src="js/main.js?v=v144"></script>
+<script src="00-util.js?v=v145"></script>
+<script src="01-image.js?v=v145"></script>
+<script src="02-lines.js?v=v145"></script>
+<script src="03-text.js?v=v145"></script>
+<script src="04-walk.js?v=v145"></script>
+<script src="05-fill.js?v=v145"></script>
+<script src="06-fourier.js?v=v145"></script>
+<script src="07-measure.js?v=v145"></script>
+<script src="08-shape.js?v=v145"></script>
+<script src="09-plate.js?v=v145"></script>
+<script src="10-export.js?v=v145"></script>
+<script src="11-stages.js?v=v145"></script>
+<script src="12-models.js?v=v145"></script>
+<script src="13-patterns.js?v=v145"></script>
+<script src="14-photo.js?v=v145"></script>
+<script src="15-cutout.js?v=v145"></script>
+<script src="16-molecule.js?v=v145"></script>
+<script src="17-vase.js?v=v145"></script>
+<script src="core.js?v=v145"></script>
+<script src="fonts.js?v=v145"></script>
+<script src="settings.js?v=v145"></script>
+<script src="js/state.js?v=v145"></script>
+<script src="js/ui.js?v=v145"></script>
+<script src="js/config.js?v=v145"></script>
+<script src="js/engine-bridge.js?v=v145"></script>
+<script src="js/source.js?v=v145"></script>
+<script src="js/pipeline.js?v=v145"></script>
+<script src="js/preview.js?v=v145"></script>
+<script src="js/tools.js?v=v145"></script>
+<script src="js/art.js?v=v145"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v145");</script>
+<script src="js/readouts.js?v=v145"></script>
+<script src="js/controls.js?v=v145"></script>
+<script>feature("levels", "features/levels/levels.js?v=v145");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v145");</script>
+<script src="js/export.js?v=v145"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v145");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v145");</script>
+<script src="js/views.js?v=v145"></script>
+<script src="js/zoom.js?v=v145"></script>
+<script src="js/layers.js?v=v145"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v145");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v145");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v145");</script>
+<script src="js/workflow.js?v=v145"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v145");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v145");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v145");</script>
+<script>feature("camera", "features/camera/camera.js?v=v145");</script>
+<script src="js/steppers.js?v=v145"></script>
+<script src="js/scroll.js?v=v145"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v145");</script>
+<script>feature("model", "features/model/model.js?v=v145");</script>
+<script>feature("vase", "features/vase/vase.js?v=v145");</script>
+<script src="js/history.js?v=v145"></script>
+<script src="js/map.js?v=v145"></script>
+<script src="js/main.js?v=v145"></script>
 
 </body>
 </html>

@@ -254,7 +254,6 @@ function piecePlate(n, gap, straight) {
   return lay;
 }
 // a placement's footprint: its piece's (w, h, local line), or the one design's
-const footOf = (lay, p) => (lay.pieces && p.piece != null ? lay.pieces[p.piece] : lay);
 
 // The layers of every piece (layers.js designLayers, each turned and moved into its own footprint). Returns the
 // layers of the piece One copy shows, with every piece's in .pieces, so the readouts, the slider and the One copy
@@ -288,7 +287,7 @@ function pieceMenuUI() {
     on = piecesOn();
   $("piecesRow").hidden = !many && !molLabels;
   $("textPieces").closest(".field").hidden = !many;
-  $("molPiecesField").hidden = !molLabels;
+  if ($("molPiecesField")) $("molPiecesField").hidden = !molLabels; // (molecule.js's, when it's on)
   $("pieceShownField").hidden = !on || piecesTogether(); // (pieces kept together: One copy is every piece)
   $("copiesLab").textContent = on && many && !piecesTogether() ? "Copies of each line" : "Copies";
   const P = piecesNow(),
@@ -317,3 +316,41 @@ $("pieceShown").addEventListener("change", () => {
   drawPlate();
   layersSoon(0);
 });
+
+// what the core asks about pieces
+on("piecesOn", piecesOn);
+on("piecePlate", (n, gap, straight) => (piecesOn() ? piecePlate(n, gap, straight) : null)); // the plate's layout
+on("pieceLayers", () => (piecesOn() ? buildPieceLayers() : null)); // the layers
+on("lineLifts", lineLifts); // where the needle lifts between the lines of a text
+on("plateUI", pieceMenuUI);
+// the Plate card's size and hint for a text's pieces
+function piecePlateText(lay, pl, ok) {
+  const k = lay.pieces.length,
+    gap = fmt(+$("copyGap").value || 0, 1),
+    // a molecule: a bonds piece unless it has no bonds (water, a salt's ions), and a piece for each label
+    bonds = !st.text && !!st.pieces && st.pieces.list.some((D) => D.name === "bonds"),
+    lines = st.text
+      ? "lines"
+      : `piece${k === 1 ? "" : "s"}: ${bonds ? (k > 1 ? "the bonds and the labels" : "the bonds") : k === 1 ? "the label" : "the labels"}`,
+    what = `${lay.copies} piece${lay.copies === 1 ? "" : "s"} (${lay.sets > 1 ? `${lay.sets} × ` : ""}${k} ${lines})`,
+    how = st.text
+      ? piecesTogether()
+        ? "Each line prints as its own piece, one after another, in its place: the layout as typed."
+        : "Each line prints as its own piece, one after another, packed to save room."
+      : bonds
+        ? "The bonds print as one line, then each label as its own piece, in their places."
+        : k === 1
+          ? "The label prints as one line."
+          : "Each label prints as its own piece, in its place.",
+    rot = lay.angle ? ` Turned ${fmt(lay.angle, 0)}° to fit more.` : "";
+  $("gOx").disabled = $("gOy").disabled = $("plateCenter").disabled = true;
+  $("plateInfo").textContent =
+    `${k} piece${k === 1 ? "" : "s"} · ${fmt(lay.w, 1)} × ${fmt(lay.h, 1)} mm${lay.angle ? ` · rotated ${fmt(lay.angle, 0)}°` : ""}`;
+  $("plateHint").className = ok ? "hint" : "hint warn";
+  $("plateHint").textContent = ok
+    ? `${what} ${lay.copies === 1 ? "fits" : "fit"}, ${gap} mm apart. ${how}${rot}`
+    : `Only ${lay.fits} of ${what} fit at ${gap} mm spacing.${rot} Lower the copies or spacing, or make the letters smaller.`;
+  layersSoon();
+}
+on("piecePlateText", piecePlateText);
+on("pieceShown", pieceShown); // the piece One copy shows

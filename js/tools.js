@@ -312,8 +312,8 @@ view$.addEventListener("pointerdown", (e) => {
   } else if (st.tool === "erase") {
     st.draft = { pts: [workXY(e)], r: +$("brush").value, down: [e.clientX, e.clientY], moved: false };
     render();
-  } else if (st.tool === "cut")
-    cutoutDown(e); // cutout.js
+  } else if (heard("toolDown:" + st.tool))
+    ask("toolDown:" + st.tool, e); // a feature's own tool (cutout.js)
   else if (st.tool === "start" || st.tool === "bg") st.draft = { p: workXY(e) };
   else if (st.tool === "cross" || st.tool === "lane") {
     st.draft = { pts: [workXY(e)], r: +$("zoneBrush").value, erase: $("zoneErase").checked };
@@ -336,7 +336,7 @@ view$.addEventListener("pointermove", (e) => {
       d.last = [e.clientX, e.clientY];
       renderDraw();
     }
-  } else if (st.tool === "cut") cutoutMove(e);
+  } else if (heard("toolMove:" + st.tool)) ask("toolMove:" + st.tool, e);
   else if (st.tool === "cross" || st.tool === "lane") {
     d.pts.push(workXY(e));
     render();
@@ -370,9 +370,9 @@ const endPointer = () => {
     if (brushMode()) st.erase.push({ type: "brush", r: d.r / st.crop.kx, pts: d.pts.map(([x, y]) => fromWork(x, y)) });
     else st.erase.push({ type: "part", p: fromWork(...d.pts[0]) });
     eraseChanged();
-  } else if (st.tool === "cut") cutoutUp(d);
+  } else if (heard("toolUp:" + st.tool)) ask("toolUp:" + st.tool, d);
   else if (st.tool === "bg")
-    bgTapped(fromWork(...d.p)); // levels.js
+    bgTapped(fromWork(...d.p)); // controls.js
   else if (st.tool === "start") {
     st.start = fromWork(...d.p);
     updateToolLabels();
@@ -464,7 +464,7 @@ function openAnyFile(f) {
   if (/\.json$/i.test(f.name) || f.type === "application/json")
     openDesign(f); // history.js
   else if (/\.stl$/i.test(f.name) || /stl|sla/.test(f.type))
-    loadModelFile(f); // model.js
+    ask("modelFile", f); // (model.js)
   else if (!f.type || f.type.startsWith("image/"))
     loadFile(f); // controls.js
   else
