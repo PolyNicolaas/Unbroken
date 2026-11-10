@@ -3,6 +3,29 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v147 · 2026-11-10
+
+A sweep for bugs and crowded screens: every example, every step of the map, at phone, iPad and desktop sizes (test
+A63 keeps it that way).
+
+- **The map on a phone**: the steps show their names only (Material, Art, Line, Size, Print) and the open step's
+  chips sit in a row under them, wrapping if need be. It had squeezed five steps and all their chips into 390 px:
+  captions cut off, chips overlapping, small chips shrunk to empty circles.
+- **The map on an iPad**: each chip is as wide as its name, and a step's chips spread into the room beside it when
+  they need it (the vase's five no longer crowd each other); a step's value that doesn't fit wraps onto a second
+  line instead of being cut off ("Dark · 18G · 0…").
+- **A vase's chips show their own part**: Shape shows the shape from above, the rim's shape, the turn and the lean;
+  Texture, Movement, Rim and Profile likewise, with what each is set to beside the panel's title. (They had all
+  shown the whole card.)
+- Cards: the vase card no longer widens the page on an iPad (choices of five or more wrap); the Photo box, the
+  molecule's name box and Look up, its Examples, and a pattern's own sliders had no margin; the Picture card's
+  second ⓘ is now next to Photo; a row's readout wraps rather than pushing past the card; the pen colour shows its
+  colour; the pattern's width box shows the whole number; Fit inside a box's W and H no longer cut off.
+- Size: the card's readout says "line …" (the line as it prints), so it isn't mistaken for the drawing's box the
+  step shows.
+- Made for a pen plotter with separate strokes, the map said "nothing yet" for Line, Size and Plot with the
+  strokes on the page; they now show "separate strokes", the size and the page.
+
 ## v146 · 2026-11-10
 
 More shapes for a vase (Art → Vase: the map's Shape, Texture, Movement and Rim chips). Every new setting is optional:

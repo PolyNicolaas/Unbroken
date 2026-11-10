@@ -39,7 +39,7 @@ In practice:
 - **Background workers with cancellation** keep the page responsive. That is real complexity, but it's justified:
   tracing and slicing take seconds.
 - **The tests describe intent.** Each one says why it exists, how it checks and what counts as passing (58 engine
-  tests, 60 app tests on 10 November). App tests wait on the app's own "settled" signal, not the clock.
+  tests, 61 app tests on 10 November). App tests wait on the app's own "settled" signal, not the clock.
 - **Challenges** (`source/challenges/`): practical prints taken through the app with every version, their renders
   reviewed. `compare.js` checks two runs file by file, so a change that shouldn't change the output (a refactor, a
   rename) is proved byte for byte: the v91 clean-up left all 35 files of 30 jobs, and the screenshots, identical.
