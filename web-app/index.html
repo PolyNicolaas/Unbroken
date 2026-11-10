@@ -106,7 +106,7 @@
         </div>
         <div class="empty-state" id="emptyState" hidden>
           <p class="es-title">Start with a picture, text, a pattern or a 3D model</p>
-          <p class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
+          <p data-feature="camera" class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
           <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>. Not sure where to start? Tap Examples on the map.</p>
         </div>
         <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
@@ -459,10 +459,10 @@
 
     <section class="card art-only art-picture" aria-labelledby="h-pic">
       <h2 id="h-pic">Picture <span id="picVal"></span></h2>
-      <div class="inline"><button class="btn primary" type="button" id="picCamera" title="A drawing, a print or anything else, with the camera: the page is found and straightened">Take a picture</button><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
+      <div class="inline"><button data-feature="camera" class="btn primary" type="button" id="picCamera" title="A drawing, a print or anything else, with the camera: the page is found and straightened">Take a picture</button><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
       <input type="file" id="picFile" accept="image/*" hidden>
-      <input type="file" id="camFile" accept="image/*" capture="environment" hidden>
-      <div class="photo-box" id="photoBox">
+      <input data-feature="camera" type="file" id="camFile" accept="image/*" capture="environment" hidden>
+      <div data-feature="camera" class="photo-box" id="photoBox">
         <div class="lab"><span class="name">Photo</span><span class="val" id="photoVal"></span></div>
   <div class="row" id="photoRows">
           <div class="seg four small" role="radiogroup" aria-label="What the photo is of">

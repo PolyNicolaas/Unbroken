@@ -5,7 +5,10 @@ const APP = path.join(__dirname, "../../../web-app"), JS = path.join(APP, "js");
 //   0 the app breaks (no trace) · 1 it runs, with errors · 2 it runs clean (opens, traces, exports) · 3 clean, and
 //   nothing of the feature is left on the page
 // The record only goes up: when a feature does better than its record the test says so, and the record is raised here.
-const RECORD = { plotter: 2, model: 2, vase: 2, patterns: 1, molecule: 1, pieces: 1, camera: 2, cutout: 0, levels: 0, optimize: 0, testprint: 2, matrix: 2 };
+const RECORD = { plotter: 3, model: 3, vase: 3, patterns: 3, molecule: 3, pieces: 3, camera: 3, cutout: 3, levels: 3, optimize: 3, testprint: 3, matrix: 3 };
+// parts of the core's own cards that only one feature's scripts happen to read (it hides a row, renames a label):
+// they stay when the feature is off, and aren't the feature's
+const CORE_PARTS = ["loopClosed", "copiesLab", "modeRow", "sensRow", "modeOutline"];
 // a feature's scripts, from the page
 const SCRIPTS = {};
 for (const m of fs.readFileSync(path.join(APP, "index.html"), "utf8").matchAll(/feature\("(\w+)", "js\/([\w-]+\.js)"\)/g)) (SCRIPTS[m[1]] ||= []).push(m[2]);
@@ -14,7 +17,7 @@ function ownIds(scripts) {
   const ids = (f) => new Set([...fs.readFileSync(path.join(JS, f), "utf8").matchAll(/\$\("([\w-]+)"\)/g)].map((m) => m[1]));
   const mine = new Set(scripts.flatMap((f) => [...ids(f)]));
   for (const f of fs.readdirSync(JS)) if (f.endsWith(".js") && !scripts.includes(f)) for (const id of ids(f)) mine.delete(id);
-  return [...mine];
+  return [...mine].filter((id) => !CORE_PARTS.includes(id));
 }
 module.exports = {
   id: "A61", title: "Features switched off: how well the app does without each one (the modules' scoreboard)",
