@@ -12,7 +12,7 @@ module.exports = {
     const idle = async (page) => { for (let i = 0; i < 6; i++) { await A.idle(page, 300); if (!/finding/.test(await page.textContent("#sizeInfo"))) break; } };
     for (const vp of [{ width: 1300, height: 1000 }, { width: 390, height: 844 }]) {
       const { page, errors, close } = await A.open(ctx, { viewport: vp }), tag = `${vp.width} px`;
-      await idle(page);
+      await page.click('[data-node="size"]'); await idle(page);
       const m = await marks(page), lab = m.map((x) => x.label).join(",");
       checks.push(check(`${tag}: marks are smallest, medium, high, plate`, +(lab === "smallest,medium,high,plate"), "==", 1));
       checks.push(check(`${tag}: marks grow left to right (in width and position)`, +m.every((x, i) => !i || (x.w > m[i - 1].w && x.mid > m[i - 1].mid)), "==", 1));

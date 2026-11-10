@@ -23,7 +23,7 @@ function pathPadOpen(key) {
   pad.ringW = ringW;
   $("pathEd").hidden = false;
   document.body.dataset.moled = "1"; // (the same full-screen overlay as the structure editor, on a phone)
-  if (innerWidth < 900 && document.body.dataset.pv !== "big") $("pvSize").click();
+  if (innerWidth < 640 && document.body.dataset.pv !== "big") $("pvSize").click();
   requestAnimationFrame(() => {
     pathPadFit();
     pathPadDraw();

@@ -35,7 +35,7 @@ const stepCards = () => [...document.querySelectorAll(".panel section.card")].fi
 // where a card lands: just under the pinned preview on a phone, near the top of the window otherwise
 function landingY() {
   const left = document.querySelector(".left"),
-    pinned = getComputedStyle(left).position === "sticky" && innerWidth < 900;
+    pinned = getComputedStyle(left).position === "sticky" && innerWidth < 640;
   return pinned ? left.getBoundingClientRect().bottom + 8 : 16;
 }
 function wheelSnapTop() {

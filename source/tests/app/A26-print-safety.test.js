@@ -28,7 +28,7 @@ module.exports = {
     await close();
     // a quoted number in settings.js: named, ignored, and the chocolate menu still switches
     const body2 = fs.readFileSync(path.resolve(__dirname, "../../../web-app/settings.js"), "utf8").replace("costPer100g: 2.50,", 'costPer100g: "2.50",');
-    const c2 = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), p2 = await c2.newPage(), e2 = [];
+    const c2 = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), p2 = await c2.newPage(), e2 = []; A.mapNav(p2);
     p2.on("pageerror", (e) => e2.push(e.message));
     try {
       await p2.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body: body2 }));

@@ -20,7 +20,7 @@ const MAP_NODES = {
     cap: "Material",
     step: "choc",
     rows: [
-      ["Machine and chocolate", ["printer", "chocolate", "needle", "#chocInfo"]],
+      ["Machine and chocolate", ["printer", "#printerSummary", "chocolate", "needle", "#chocInfo"]],
       ["Line", ["lineW", "lineGapMM", "#mapSpacing"]],
       ["Flow", ["layerH", "gFeed", "gFlow", "gE", "gOver"]],
     ],

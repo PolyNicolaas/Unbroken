@@ -231,7 +231,7 @@ function cutoutUp(d) {
 function cutoutEnter() {
   if (!cutoutOn()) $("cutMbox").checked = true;
   // a phone's pinned preview is small to draw on: the big one (scroll.js, Bigger)
-  if (innerWidth < 900 && document.body.dataset.pv !== "big") $("pvSize").click();
+  if (innerWidth < 640 && document.body.dataset.pv !== "big") $("pvSize").click();
   enterTool("cut"); // tools.js
   cutoutUI();
 }

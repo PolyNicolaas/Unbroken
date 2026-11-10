@@ -19,8 +19,8 @@ module.exports = {
     await page.click(`label[for=level${teal}f]`); await A.idle(page, 3000);
     const pen = await page.evaluate((j) => levelFillSpecs()[j].color, teal), hex = "#" + L.colours[teal].map((v) => v.toString(16).padStart(2, "0")).join("");
     checks.push(check("the vase's block filled: its pen starts with its colour", pen, "==", hex));
-    await page.click("#goTrace"); await A.idle(page, 1500); await page.click("#goOut"); await A.idle(page, 2000);
-    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#nbSvg")]);
+    await page.click("label[for=viewDesign]"); await A.idle(page, 1500); await A.out(page); await A.idle(page, 2000);
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#exportBtn")]);
     const svg = fs.readFileSync(await dl.path(), "utf8");
     checks.push(check("… the SVG draws a layer in it", +svg.toLowerCase().includes(`stroke="${hex}"`), "==", 1));
     const [df] = await Promise.all([page.waitForEvent("download"), page.click("#fileMenu summary").then(() => page.click("#saveDesign"))]);

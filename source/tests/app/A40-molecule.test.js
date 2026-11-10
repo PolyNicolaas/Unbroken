@@ -17,16 +17,16 @@ module.exports = {
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { clean: true, art: true }), checks = [];
     await offline(page);
-    await page.click("[data-examples] [data-example=theobromine]:visible"); await A.idle(page, 4000);
+    await A.example(page, "theobromine"); await A.idle(page, 4000);
     const t = await page.evaluate(() => ({ kind: st.art.kind, n: st.art.molecule.mol.atoms.length, chip: $("chip").textContent }));
     checks.push(check("Theobromine: the Molecule in use, 13 atoms, traced", +(t.kind === "molecule" && t.n === 13 && /terms/.test(t.chip)), "==", 1));
     // printed in pieces: the bonds, then each label, in their places (pieces.js, Plate card: Molecule)
-    await page.click("#goTrace"); await A.idle(page, 600); await page.click("#goOut"); await A.idle(page, 2000);
+    await page.click("label[for=viewDesign]"); await A.idle(page, 600); await A.out(page); await A.idle(page, 2000);
     await page.evaluate(() => { const s = $("molPieces"); s.value = "apart"; s.dispatchEvent(new Event("change", { bubbles: true })); }); await A.idle(page, 1000); // (One piece is the start since v126)
     await page.click("label[for=stPlate]"); await page.waitForFunction(() => st.pieces && st.pieces.list.length, null, { timeout: 60000 }).catch(() => {}); await A.idle(page, 2000);
     const pc = await page.evaluate(() => { const lay = plateNow(); return { n: st.pieces ? st.pieces.list.length : 0, first: st.pieces && st.pieces.list[0].name, hint: $("plateHint").textContent, same: lay && lay.placed.length >= 2 && lay.placed.every((p) => p.x === lay.placed[0].x && p.y === lay.placed[0].y) }; });
     checks.push(check("printer: Theobromine in 7 pieces (the bonds, then 6 labels), all in one place on the plate", +(pc.n === 7 && pc.first === "bonds" && pc.same && /bonds print as one line/.test(pc.hint)), "==", 1));
-    const [gz] = await Promise.all([page.waitForEvent("download", { timeout: 30000 }), page.click("#nbGcode")]);
+    const [gz] = await Promise.all([page.waitForEvent("download", { timeout: 30000 }), page.click("#gcodeBtn")]);
     checks.push(check("… its G-code exports", +/gcode/.test(gz.suggestedFilename()), "==", 1));
     await page.selectOption("#molPieces", "one"); await A.idle(page, 1500);
     checks.push(check("… Molecule: One piece turns the pieces off", +!(await page.evaluate(() => piecesOn())), "==", 1));
@@ -46,14 +46,14 @@ module.exports = {
     // a pen plotter: as drawn, every stroke in the SVG
     await page.click("label[for=artForPlot]"); await A.idle(page, 2500);
     const mode = await page.evaluate(() => lineModeNow()), strokes = await page.evaluate(() => moleculeDrawn().r.paths.length);
-    await page.click("#goTrace"); await A.idle(page, 400); await page.click("#goOut"); await A.idle(page, 1500);
-    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#nbSvg")]);
+    await page.click("label[for=viewDesign]"); await A.idle(page, 400); await A.out(page); await A.idle(page, 1500);
+    const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#exportBtn")]);
     const svg = fs.readFileSync(await dl.path(), "utf8"), moves = (svg.match(/[" ]M-?[\d.]/g) || []).length;
     checks.push(check("pen plotter: Trace off, as drawn", +(mode === "drawn"), "==", 1), check("… the SVG's strokes ÷ the drawing's", moves / strokes, "==", 1));
     // a design file
     const [df] = await Promise.all([page.waitForEvent("download"), page.click("#fileMenu summary").then(() => page.click("#saveDesign"))]);
     const file = await df.path();
-    await page.click("label[for=viewArt]"); await page.click("[data-examples] [data-example=leaf]:visible"); await A.idle(page, 1500);
+    await page.click("label[for=viewArt]"); await A.example(page, "leaf"); await A.idle(page, 1500);
     await page.setInputFiles("#designFile", file); await A.idle(page, 3000);
     checks.push(check("design file: the molecule back", +(await page.evaluate(() => st.art.kind === "molecule" && st.art.molecule.name === "caffeine" && st.art.molecule.mol.atoms.length === 14)), "==", 1));
     checks.push(check("page errors", errors.filter((e) => !/404/.test(e)).length, "==", 0));

@@ -50,7 +50,7 @@ module.exports = {
     await page.click("#card-h-machine .card-toggle"); await A.setValue(page, "#layerH", 0.4); await idle(); await idle();
     checks.push(check("layer height 0.4: the height stays 2.4 mm, 6 layers (2 base + 4)", await page.textContent("#layerCount"), "==", "6 layers: 2 base + 4 above · 0.40 mm each"),
       check("… first layer Z follows (mm)", +(await page.inputValue("#gZ")), "==", 0.4), check("… Fine-tuning says one changed", await page.textContent("#tuneVal"), "==", "1 changed"));
-    await page.click("#tuneReset"); await idle(); await idle();
+    await page.click('[data-node="material"]'); await page.click("#mapRecipeReset"); await idle(); await idle();
     checks.push(check("Back to the profile values: 0.3 mm, 8 layers, nothing changed", +(/^8 layers/.test(await page.textContent("#layerCount")) && (await page.textContent("#tuneVal")) === "as the profiles" && +(await page.inputValue("#gZ")) === 0.3), "==", 1));
     // density: the base's line gets shorter as the rows spread; 0% leaves the base open (no fill)
     const baseLen = () => page.evaluate(() => { const S = st.layers.stack, l = S.laps[0]; return l.length; });

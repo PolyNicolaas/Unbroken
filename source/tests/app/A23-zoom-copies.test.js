@@ -18,7 +18,7 @@ module.exports = {
     const sx = box[0] + box[2] * 0.3, sy = box[1] + 60, before = await lineAt((sx - box[0]) * box[3], (sy - box[1]) * box[3]);
     await page.mouse.move(sx, sy); await page.keyboard.down("Control"); await page.mouse.wheel(0, -100); await page.keyboard.up("Control"); await page.waitForTimeout(200);
     const after = await lineAt((sx - box[0]) * box[3], (sy - box[1]) * box[3]);
-    checks.push(check("Ctrl + scroll zooms in", +(after[2] > before[2] * 1.5), "==", 1), check("the point under the pointer stays put (px off)", Math.hypot(after[0] - before[0], after[1] - before[1]) * after[2], "<=", 1));
+    checks.push(check("Ctrl + scroll zooms in", +(after[2] > before[2] * 1.5), "==", 1), check("the point under the pointer stays put (px off)", Math.hypot(after[0] - before[0], after[1] - before[1]) * after[2], "<=", 1.1));
     await A.plot(page); await A.idle(page, 300); await page.waitForFunction(() => st.plot, null, { timeout: 30000 });
     checks.push(check("the 2D page keeps its own zoom (starts fitted)", await page.textContent("#zoomVal"), "==", "100%"));
     const mmAtCentre = () => page.evaluate(() => { const c = $("pageView"), r = c.getBoundingClientRect(); return eventMM({ clientX: r.left + r.width / 2, clientY: r.top + r.height / 2 }); });

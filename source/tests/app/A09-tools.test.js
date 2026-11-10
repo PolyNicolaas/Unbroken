@@ -8,8 +8,9 @@ module.exports = {
   pass: "Selecting changes the traced parts and clearing restores the original; the erase stroke cuts the leaf into more parts and its Undo restores the original; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [], p0 = await parts(page), c0 = await A.chip(page);
-    const box = await (await page.$("#view")).boundingBox(), at = (fx, fy) => [box.x + box.width * fx, box.y + box.height * fy];
-    const drag = async (a, b) => { await page.mouse.move(...a); await page.mouse.down(); await page.mouse.move((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, { steps: 6 }); await page.mouse.move(...b, { steps: 6 }); await page.mouse.up(); };
+    // (fractions of the preview, measured when the drag starts: opening a tool can scroll the page)
+    const at = (fx, fy) => [fx, fy];
+    const drag = async (fa, fb) => { const box = await (await page.$("#view")).boundingBox(), px = ([fx, fy]) => [box.x + box.width * fx, box.y + box.height * fy], a = px(fa), b = px(fb); await page.mouse.move(...a); await page.mouse.down(); await page.mouse.move((a[0] + b[0]) / 2, (a[1] + b[1]) / 2, { steps: 6 }); await page.mouse.move(...b, { steps: 6 }); await page.mouse.up(); };
     await page.click("#selectBtn"); await drag(at(0.45, 0.05), at(0.95, 0.6)); await page.click("#selDone"); await A.idle(page, 800);
     checks.push(check("selection changes the trace (parts)", await parts(page), "!=", p0));
     await page.click("#selectBtn"); await page.click("#selClear"); if (await page.isVisible("#selDone")) await page.click("#selDone"); await A.idle(page, 800);

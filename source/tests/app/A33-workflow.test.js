@@ -8,7 +8,7 @@ module.exports = {
   pass: "For a printer: steps Art, Line, Print (no Plot), no line choices (the Line card hidden: a printer makes one continuous line), no preview tabs on Art or Line, Plate and 3D layers on Print. For a pen plotter: Plot replaces Print; the leaf is separate strokes (more than 5, the readout counts the pen lifts) shown on the line view and plotted on the page, its SVG a path per stroke; a picture starts traced (Trace on); a pattern starts with Trace off, as drawn with the page as its preview and isn't traced; One continuous line traces it (1 part); Next goes Art → Line → Plot; back to a printer, One continuous line and the Print step; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { art: true }), checks = [];
-    checks.push(check("printer: steps Art, Line, Print", +((await vis(page, "label[for=viewArt]")) && (await vis(page, "label[for=viewDesign]")) && (await vis(page, "label[for=viewChoc]")) && !(await vis(page, "label[for=view2D]"))), "==", 1));
+    checks.push(check("printer: steps Art, Line, Print", await A.spine(page), "==", "material,art,line,size,print"));
     checks.push(check("… no preview tabs on Art", +!(await vis(page, ".stage-tabs")), "==", 1));
     await page.click("label[for=viewDesign]"); await A.idle(page, 500);
     checks.push(check("… Line: no line choices for a printer (the Line card hidden), no preview tabs", +(!(await vis(page, "#card-h-src")) && !(await vis(page, ".stage-tabs"))), "==", 1));
@@ -16,12 +16,12 @@ module.exports = {
     checks.push(check("… Print: Plate and 3D layers to pick", +((await vis(page, "label[for=stPlate]")) && (await vis(page, "label[for=stLayers]")) && !(await vis(page, "label[for=stLine]"))), "==", 1));
     // a pen plotter
     await page.click("label[for=viewArt]"); await page.click("label[for=artForPlot]"); await A.idle(page, 2500);
-    checks.push(check("plotter: Plot replaces Print", +((await vis(page, "label[for=view2D]")) && !(await vis(page, "label[for=viewChoc]"))), "==", 1));
+    checks.push(check("plotter: Plot replaces Print", await A.spine(page), "==", "art,line,size,plot"));
     const leaf = await page.evaluate(() => ({ mode: lineModeNow(), n: st.sepStrokes && st.sepStrokes.strokes.length, chip: $("chip").textContent, traced: $("traceOn").checked }));
     checks.push(check("… the leaf (a picture) as separate strokes (strokes)", leaf.mode === "strokes" && /pen lifts?/.test(leaf.chip) ? leaf.n : 0, ">", 5), check("… a picture starts traced (Trace on)", +leaf.traced, "==", 1));
-    await page.click("#goTrace"); await A.idle(page, 500);
+    await page.click("label[for=viewDesign]"); await A.idle(page, 500);
     checks.push(check("Next: on the Line step, the line view showing the strokes", +((await page.isChecked("#viewDesign")) && (await page.evaluate(() => document.body.dataset.stage)) === "line" && (await vis(page, "#view"))), "==", 1));
-    await page.click("#goOut"); await A.idle(page, 1500);
+    await A.out(page); await A.idle(page, 1500);
     checks.push(check("Next: on the Plot step, the page showing the strokes", +((await page.isChecked("#view2D")) && /separate strokes/.test(await page.textContent("#pageHint"))), "==", 1));
     const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#exportBtn")]);
     const svg = fs.readFileSync(await dl.path(), "utf8"), n = await page.evaluate(() => st.sepStrokes.strokes.length);
@@ -35,7 +35,7 @@ module.exports = {
     checks.push(check("… One continuous line: traced (parts), the line view showing", +((await page.evaluate(() => document.body.dataset.stage)) === "line") * +((await page.textContent("#fitinfo")).match(/(\d+) part/) || [0, 0])[1], "==", 1));
     // back to a printer
     await page.click("label[for=artForPrint]"); await A.idle(page, 3000);
-    checks.push(check("printer again: One continuous line, the Print step back", +((await page.evaluate(() => lineModeNow())) === "one" && (await vis(page, "label[for=viewChoc]")) && !(await vis(page, "label[for=view2D]"))), "==", 1));
+    checks.push(check("printer again: One continuous line, the Print step back", +((await page.evaluate(() => lineModeNow())) === "one" && /print$/.test(await A.spine(page))), "==", 1));
     checks.push(check("page errors", errors.length, "==", 0));
     await close();
     return { checks, notes: errors.join("  \n") };

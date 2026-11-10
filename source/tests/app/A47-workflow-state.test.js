@@ -7,20 +7,20 @@ module.exports = {
   guards: "a printer exporting the last trace's G-code with Trace off, an undo that switches printer/plotter leaving the other step's cards, a Next bar export that seems to do nothing, a page error when a model goes to the plotter, a model start that can't be saved or undone, a design opened as drawn saying Nothing yet, a pattern saved as nothing-yet, a broken design file half-applied, and the phone's preview bar and 3D layers controls running off or over each other",
   why: "Area D of the v123 bug hunt (scratchpad/hunt/d/REPORT.md, items 1–5 and 8–10).",
   how: "Lettering, printer, Trace off, text changed, Print: the ready list and the Next bar's Export G-code. Leaf for the plotter, Plot step, Undo. Vase, then A pen plotter. ?example=vase: history and Save design. Lettering as drawn saved and reopened in a fresh page. Labyrinth as drawn from the empty app: saved file name. Leaf for the plotter, Trace off, Export SVG. A design with an unknown art kind and one with outW null. A phone (390 × 844): the preview bar, the 3D layers view",
-  pass: "No G-code with Trace off (a red Trace is off line, a toast says so); after Undo the Print step shows (view choc); no page errors; a model start has a history entry and saves; the reopened design's readout isn't Nothing yet; the pattern's file is labyrinth….json; the SVG message says to turn Trace on; a bad file leaves the art and size as they were; the phone's View button inside the screen, One copy / Whole plate clear of the Layer slider, Bigger clear of the What's shown row",
+  pass: "No G-code with Trace off (a red Trace is off line, and the Export card says so); after Undo the Print step shows (view choc); no page errors; a model start has a history entry and saves; the reopened design's readout isn't Nothing yet; the pattern's file is labyrinth….json; the SVG message says to turn Trace on; a bad file leaves the art and size as they were; the phone's View button inside the screen, One copy / Whole plate clear of the Layer slider, Bigger clear of the What's shown row",
   async run(ctx) {
     const checks = [], notes = [], allErrors = [];
     // 1 + 3: a printer with Trace off exports nothing, and the Next bar says why
     { const { page, errors, close } = await A.open(ctx, { example: "lettering", art: true, viewport: { width: 820, height: 1180 } });
       await traceOff(page); await A.idle(page, 1200);
       await page.fill("#textIn", "Hi"); await page.dispatchEvent("#textIn", "input"); await A.idle(page, 2000);
-      await page.click("#goTrace"); await A.idle(page, 400); await page.click("#goOut"); await A.idle(page, 2000);
+      await page.click("label[for=viewDesign]"); await A.idle(page, 400); await A.out(page); await A.idle(page, 2000);
       const ready = await page.evaluate(() => [...document.querySelectorAll("#readyList li.bad")].map((l) => l.textContent).join(" | "));
       checks.push(check("printer, Trace off: a red Trace is off line in the ready list", +/Trace is off/.test(ready), "==", 1));
       let dl = false; page.once("download", () => (dl = true));
-      await page.click("#nbGcode"); await page.waitForTimeout(400); await page.click("#nbGcode"); await page.waitForTimeout(800);
+      await page.click("#gcodeBtn"); await page.waitForTimeout(400); await page.click("#gcodeBtn"); await page.waitForTimeout(800);
       const t = await page.evaluate(() => ({ toast: !$("toast").hidden && $("toast").textContent, msg: $("gcodeMsg").textContent }));
-      checks.push(check("printer, Trace off: no G-code even on a second tap", +dl, "==", 0), check("the Next bar's tap shows the reason as a toast", +/Trace is off/.test(t.toast || ""), "==", 1));
+      checks.push(check("printer, Trace off: no G-code even on a second tap", +dl, "==", 0), check("the Export card says why", +/Trace is off/i.test(t.msg || ""), "==", 1));
       // 10: the output names the art (a pattern as drawn from the empty start, below), and a bad design file changes nothing
       const good = await saveAs(page), g = JSON.parse(fs.readFileSync(good.f, "utf8"));
       const bad = (k, fn) => { const x = structuredClone(g); fn(x); const p = path.join(os.tmpdir(), `unbroken-a47-${k}.unbroken.json`); fs.writeFileSync(p, JSON.stringify(x)); return p; };
@@ -34,7 +34,7 @@ module.exports = {
     // 2: an undo that switches the plotter back to the printer brings the Print step
     { const { page, errors, close } = await A.open(ctx, { example: "leaf", art: true });
       await page.click("label[for=artForPlot]"); await A.idle(page, 1500);
-      await page.click("#goTrace"); await A.idle(page, 400); await page.click("#goOut"); await A.idle(page, 1500);
+      await page.click("label[for=viewDesign]"); await A.idle(page, 400); await A.out(page); await A.idle(page, 1500);
       await page.click("#undoBtn"); await A.idle(page, 2000);
       const s = await page.evaluate(() => ({ view: document.body.dataset.view, out: document.body.dataset.out, radio: document.querySelector("input[name=view]:checked").id }));
       checks.push(check("Undo back to a printer: the Print step shows (view)", s.out === "print" ? s.view : "out " + s.out, "==", "choc"));
@@ -64,7 +64,7 @@ module.exports = {
     // 10: a pattern started as drawn from the empty app is saved under its name
     { const { page, errors, close } = await A.open(ctx, { clean: true, art: true });
       await page.click("label[for=artForPlot]"); await A.idle(page, 600);
-      await page.click("[data-examples] [data-example=labyrinth]:visible"); await A.idle(page, 2000);
+      await A.example(page, "labyrinth"); await A.idle(page, 2000);
       const { name } = await saveAs(page); notes.push(name);
       checks.push(check("a pattern as drawn from the empty start: saved under its name", +/^labyrinth/.test(name), "==", 1));
       allErrors.push(...errors); await close(); }

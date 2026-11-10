@@ -26,7 +26,7 @@ module.exports = {
     checks.push(check("E per mm, 0.84 mm needle at 0.3 mm layers: off choc OS's 0.000457 by", Math.abs(e18 - 0.000457), "<=", 0.000003), check("a 1.54 mm needle: E ratio off 1.54 ÷ 0.84 by", Math.abs(e14 / e18 - 1.54 / 0.84), "<=", 0.02));
     checks.push(check("page errors", errors.length, "==", 0)); await close();
     // a settings.js with a syntax error
-    const ctxB = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), pb = await ctxB.newPage(), errsB = [];
+    const ctxB = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), pb = await ctxB.newPage(), errsB = []; A.mapNav(pb);
     pb.on("pageerror", (e) => errsB.push(e.message));
     await pb.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body: "window.UNB_SETTINGS = { chocolates: [ { id: 'x' name: 'oops' } ] };" }));
     await pb.goto(A.withExample(ctx.url, "leaf")); await A.idle(pb, 2500);
@@ -35,7 +35,7 @@ module.exports = {
       check("broken file: only the settings.js syntax error", errsB.filter((m) => !/Unexpected|SyntaxError|missing/.test(m)).length, "==", 0));
     await ctxB.close();
     // a settings.js with one bad chocolate entry
-    const ctxC = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), pc = await ctxC.newPage(), errsC = [];
+    const ctxC = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), pc = await ctxC.newPage(), errsC = []; A.mapNav(pc);
     pc.on("pageerror", (e) => errsC.push(e.message));
     const body = fs.readFileSync(path.resolve(__dirname, "../../../web-app/settings.js"), "utf8").replace('color: "#7b4a2d"', 'color: "brown"');
     await pc.route("**/settings.js", (r) => r.fulfill({ contentType: "text/javascript", body }));
@@ -44,7 +44,7 @@ module.exports = {
       check("bad entry: named in the 3D tab", +/chocolate 2 skipped/.test(await pc.textContent("#settingsNote")), "==", 1), check("bad entry: page errors", errsC.length, "==", 0));
     await ctxC.close();
     // a settings.js with many starting defaults changed: each must reach its control
-    const ctxD = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), pd = await ctxD.newPage(), errsD = [];
+    const ctxD = await ctx.browser.newContext({ viewport: { width: 1300, height: 1000 } }), pd = await ctxD.newPage(), errsD = []; A.mapNav(pd);
     pd.on("pageerror", (e) => errsD.push(e.message));
     let bodyD = fs.readFileSync(path.resolve(__dirname, "../../../web-app/settings.js"), "utf8");
     const swap = (re, to) => { const before = bodyD; bodyD = bodyD.replace(re, to); if (before === bodyD) throw new Error("test setup: couldn't change " + re); };

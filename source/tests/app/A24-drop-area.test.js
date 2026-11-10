@@ -3,12 +3,12 @@ module.exports = {
   id: "A24", title: "One drop area for every input file",
   guards: "an STL or a design file dropped on the page being refused as 'not an image', a drop area that doesn't open the file chooser, and a wrong file changing anything",
   why: "The Art tab's Layers card starts with one drop area: click it to choose a file, or drop one there or anywhere on the page. An image is traced, an STL model is sliced and a saved design is opened, whichever source was showing.",
-  how: "Opens the app. Clicks the drop area and waits for the file chooser. Drops an STL (two posts) on the page, then a PNG drawn in the page, then a text file, reading the source each time.",
-  pass: "Clicking opens the file chooser; the STL switches to the 3D model source; the PNG switches back to an image; the text file shows a message and leaves the image as it was; no page errors.",
+  how: "Opens the app empty. Clicks choose a file in the empty preview and waits for the file chooser. Drops an STL (two posts) on the page, then a PNG drawn in the page, then a text file, reading the source each time.",
+  pass: "Choose a file opens the file chooser; the STL switches to the 3D model source; the PNG switches back to an image; the text file shows a message and leaves the image as it was; no page errors.",
   async run(ctx) {
-    const { page, errors, close } = await A.open(ctx, { art: true }), checks = [];
-    const [chooser] = await Promise.all([page.waitForEvent("filechooser", { timeout: 5000 }).catch(() => null), page.click("#dropZone")]);
-    checks.push(check("clicking the drop area opens the file chooser", +!!chooser, "==", 1));
+    const { page, errors, close } = await A.open(ctx, { art: true, clean: true }), checks = [];
+    const [chooser] = await Promise.all([page.waitForEvent("filechooser", { timeout: 5000 }).catch(() => null), page.click("#esChoose")]);
+    checks.push(check("the empty start's choose a file opens the file chooser", +!!chooser, "==", 1));
     const drop = (name, type, bytes) => page.evaluate(([name, type, bytes]) => {
       const dt = new DataTransfer(); dt.items.add(new File([new Uint8Array(bytes)], name, { type }));
       document.body.dispatchEvent(new DragEvent("drop", { dataTransfer: dt, bubbles: true, cancelable: true }));

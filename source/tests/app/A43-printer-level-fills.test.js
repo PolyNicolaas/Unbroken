@@ -15,8 +15,8 @@ module.exports = {
     checks.push(check("printer: Trace, Fill, Skip per level, no pen settings", +(labels === 3 && st1.pens === 0), "==", 1), check("… Fill: outline and inside (mode b), the note says solid", +(st1.modes[0] === "b" && /prints solid/.test(st1.note)), "==", 1));
     const r = await page.evaluate(async () => { const a = await layerLine(null), all = await layerLine({ pattern: "lines", angle: 45, spacing: pxSpacing(st), minArea: 0 }); return { filled: a.filled, n: a.final.re.length, base: st.final.re.length, all: all.filled }; });
     checks.push(check("the wall layer: areas filled", r.filled, ">=", 1), check("… only the level's (fewer than every area)", +(r.filled < r.all || r.all === 1), "==", 1), check("… its line longer than the traced line (÷)", r.n / r.base, ">", 1.05));
-    await page.click("#goTrace"); await A.idle(page, 600); await page.click("#goOut"); await A.idle(page, 4000);
-    const [dl] = await Promise.all([page.waitForEvent("download", { timeout: 40000 }), page.click("#nbGcode")]);
+    await page.click("label[for=viewDesign]"); await A.idle(page, 600); await A.out(page); await A.idle(page, 4000);
+    const [dl] = await Promise.all([page.waitForEvent("download", { timeout: 40000 }), page.click("#gcodeBtn")]);
     checks.push(check("the G-code exports", +/gcode/.test(dl.suggestedFilename()), "==", 1));
     await page.click("label[for=artForPlot]"); await A.idle(page, 1500); await page.click("label[for=viewArt]"); await A.idle(page, 500);
     checks.push(check("pen plotter: the filled level has its pen settings", await page.evaluate(() => document.querySelectorAll("#levelList .level-fill").length), ">=", 1));

@@ -146,9 +146,10 @@ $("zoomFit").addEventListener("click", zoomFit);
   box.addEventListener(
     "pointerdown",
     (e) => {
-      // (with the map, a plain drag on the line view pans too, when no tool is in use)
+      // (a plain drag on the line view pans too, when no tool is in use: on the drawing itself, not on the buttons
+      // laid over it, whose clicks it would swallow)
       const drag =
-        e.button === 0 && typeof mapOn === "function" && mapOn() && stageNow() === "line" && !st.tool && !isModel();
+        e.button === 0 && e.target.tagName === "CANVAS" && mapOn() && stageNow() === "line" && !st.tool && !isModel();
       if (!(space || e.button === 1 || drag) || zoomOf(stageNow()).z <= 1) return;
       e.preventDefault();
       e.stopPropagation();

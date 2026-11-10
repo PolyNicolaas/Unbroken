@@ -11,7 +11,7 @@ module.exports = {
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { clean: true, art: true, viewport: { width: 1180, height: 820 } }), checks = [];
     await page.route("https://unpkg.com/@rdkit/**", (r) => { const f = r.request().url().split("/").pop(); r.fulfill({ body: fs.readFileSync(RD + f), contentType: f.endsWith(".wasm") ? "application/wasm" : "text/javascript" }); });
-    await page.click("[data-examples] [data-example=theobromine]:visible"); await A.idle(page, 3000);
+    await A.example(page, "theobromine"); await A.idle(page, 3000);
     // the Plate card's Molecule: a design setting, undone and redone
     await page.evaluate(() => { const s = $("molPieces"); s.value = "apart"; s.dispatchEvent(new Event("change", { bubbles: true })); }); await A.idle(page, 1200);
     await page.evaluate(() => undo()); await A.idle(page, 1500);
@@ -53,7 +53,7 @@ module.exports = {
     await close();
     // a phone turned with the editor open: the structure fitted again
     const P = await A.open(ctx, { clean: true, art: true, viewport: { width: 844, height: 390 } });
-    await P.page.click("[data-examples] [data-example=theobromine]:visible"); await A.idle(P.page, 3000);
+    await A.example(P.page, "theobromine"); await A.idle(P.page, 3000);
     await P.page.click("#molEdit"); await P.page.waitForTimeout(500);
     await P.page.setViewportSize({ width: 390, height: 844 }); await P.page.waitForTimeout(600);
     checks.push(check("phone turned to portrait: atoms on screen (of 13)", await onScreen(P.page), "==", 13), check("page errors (phone)", P.errors.length, "==", 0));

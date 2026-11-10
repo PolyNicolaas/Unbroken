@@ -111,6 +111,13 @@ async function reveal(page, sel, method) {
         if (id) mapOpen(id);
         return { done: true, opened: id || null };
       }
+      // a card's heading (the tests used to unfold a card by it): the node that holds the card, on any step shown
+      const fold = sel.match(/^(?:#card-|\[aria-labelledby=")(h-[\w-]+)(?:"\])? \.card-toggle$/);
+      if (fold && method === "click") {
+        const id = shown.find((k) => (MAP_NODES[k].holds || MAP_NODES[k].cards || []).includes(fold[1]));
+        if (id && id !== mapOpenId) mapOpen(id);
+        return { done: true, opened: id || null };
+      }
       const out = sel.match(/^(?:label\[for="?|#)artFor(Plot|Print)"?\]?$/);
       if (out && method === "click") return { sel: `.map-for[data-for="${out[1].toLowerCase()}"]` };
       let el = null;
@@ -122,7 +129,11 @@ async function reveal(page, sel, method) {
         h = card && card.querySelector("h2"),
         v = document.body.dataset.view;
       if (!h) return null;
-      const id = shown.find((k) => MAP_NODES[k].step === v && (MAP_NODES[k].holds || MAP_NODES[k].cards || []).includes(h.id));
+      // (a setting shown as a row belongs to the node that lists it, whichever card it came from)
+      const inRows = (k) => (MAP_NODES[k].rows || []).some(([, ids]) => ids.some((r) => { const f = mapFieldOf(r); return f && (f === el || f.contains(el)); }));
+      const id =
+        shown.find((k) => MAP_NODES[k].step === v && inRows(k)) ||
+        shown.find((k) => MAP_NODES[k].step === v && (MAP_NODES[k].holds || MAP_NODES[k].cards || []).includes(h.id));
       if (id && id !== mapOpenId) mapOpen(id);
       return id ? { opened: id } : null;
     },
@@ -186,4 +197,15 @@ async function print(page) {
   if (!(await page.isChecked("#artForPrint"))) { await page.click("label[for=artForPrint]"); await idle(page, 300); }
   await page.click("label[for=viewChoc]");
 }
-module.exports = { SETTLE, withExample, open, idle, source, chip, terms, errorMM, setValue, longestFreeze, plot, print };
+// start from an example: the Examples chip on the map opens the tray, a tile there starts from it
+async function example(page, key) {
+  if (!(await page.$("#mapTray:not([hidden])"))) await page.click('[data-node="examples"]');
+  await page.click(`#mapTray .map-ex[data-example="${key}"]`);
+}
+// the last step: Print (made for a printer) or Plot (for a pen plotter)
+async function out(page) {
+  await page.click((await page.isChecked("#artForPlot")) ? "label[for=view2D]" : "label[for=viewChoc]");
+}
+// the steps on the map's line, left to right ("material,art,line,size,print")
+const spine = (page) => page.$$eval("#mapNodes .map-node.big", (els) => els.sort((a, b) => a.offsetLeft - b.offsetLeft).map((e) => e.dataset.node).join(","));
+module.exports = { spine, example, out, mapNav, SETTLE, withExample, open, idle, source, chip, terms, errorMM, setValue, longestFreeze, plot, print };

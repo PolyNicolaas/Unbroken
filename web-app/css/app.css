@@ -353,10 +353,10 @@ body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; 
    top of the window and the settings scroll beside it. Phones: a compact preview sticks to the top (a third of the
    screen, its tools tucked away); Bigger shows it full size, with its tools, in the page as before. */
 .pv-size { display: none; }
-@media (min-width: 900px) {
+@media (min-width: 640px) {
   .left { position: sticky; top: calc(10px * var(--space)); max-height: calc(100vh - 20px * var(--space)); overflow-y: auto; overscroll-behavior: contain; scrollbar-width: thin; }
 }
-@media (max-width: 899px) {
+@media (max-width: 639px) {
   .pv-size { display: block; position: absolute; right: 8px; bottom: 8px; z-index: 4; }
   body:not([data-pv="big"]) .left { position: sticky; top: 0; z-index: 30; background: var(--paper); padding-block: 4px; margin-inline: calc(-4px * var(--space)); padding-inline: calc(4px * var(--space)); box-shadow: 0 6px 10px -8px rgb(0 0 0 / 0.35); }
   body:not([data-pv="big"]) .canvas-box { aspect-ratio: auto; height: 28vh; height: 28svh; }
@@ -406,7 +406,7 @@ body[data-empty="1"] .pv-size { display: none; }
 /* ---------- the camera (camera.js): a live view with the page outlined, then the photo with its corners ---------- */
 .camera { position: absolute; inset: 0; z-index: 6; background: #111; color: #fff; display: grid; grid-template-rows: auto 1fr auto; overflow: hidden; touch-action: none; }
 .camera[hidden] { display: none; }
-@media (max-width: 899px) { .camera { position: fixed; z-index: 60; } }
+@media (max-width: 639px) { .camera { position: fixed; z-index: 60; } }
 .camera :is(video, #camStill, #camQuad) { grid-area: 1 / 1 / 4 / 2; width: 100%; height: 100%; min-height: 0; display: block; object-fit: contain; }
 .camera[data-mode="live"] #camStill, .camera[data-mode="edit"] video { visibility: hidden; }
 #camQuad { pointer-events: none; }
@@ -507,7 +507,7 @@ body[data-view="art"] .toolbar.tools { display: none; }
 /* ---------- v117: the structure editor (moleditor.js) ---------- */
 .moled { position: absolute; inset: 0; z-index: 6; display: grid; grid-template-rows: auto minmax(0, 1fr) auto auto; overflow: hidden; background: var(--surface); }
 .moled[hidden] { display: none; }
-@media (max-width: 899px) { .moled { position: fixed; z-index: 60; } }
+@media (max-width: 639px) { .moled { position: fixed; z-index: 60; } }
 .me-top { display: grid; gap: calc(6px * var(--space)); padding: calc(8px * var(--space)) calc(10px * var(--space)); border-bottom: 1px solid var(--rule); }
 .me-tools label { white-space: nowrap; }
 .me-els { display: flex; flex-wrap: wrap; gap: calc(4px * var(--space)); }
@@ -551,9 +551,11 @@ body[data-ui="map"] .map { display: block; position: relative; height: 124px; ba
   body[data-ui="map"] .left { grid-area: left; }
   body[data-ui="map"] .panel { grid-area: panel; align-self: start; }
   body[data-ui="map"] .math { grid-area: math; }
+  /* (the preview as tall as the window allows; a phone keeps its pinned preview's own height) */
+  body[data-ui="map"] .canvas-box { aspect-ratio: auto; height: calc(100vh - 290px); height: calc(100svh - 290px); min-height: 420px; max-height: none; }
 }
 /* (its gestures stay its own: dragging, pinching and scrolling over it never move the page) */
-body[data-ui="map"] .canvas-box { aspect-ratio: auto; height: calc(100vh - 290px); height: calc(100svh - 290px); min-height: 420px; max-height: none; touch-action: none; overscroll-behavior: contain; }
+body[data-ui="map"] .canvas-box { touch-action: none; overscroll-behavior: contain; }
 body[data-ui="map"] :is(.output-row, .view-tabs.steps, .nextbar, .more-print, [data-examples], #examplesRow) { display: none !important; }
 body[data-ui="map"] .panel section.card:not([data-map]) { display: none !important; }
 body[data-ui="map"] .map-head { display: flex; flex-direction: column; gap: calc(10px * var(--space)); }
@@ -651,9 +653,10 @@ body[data-ui="map"] .copies-seg label { white-space: nowrap; }
 body[data-ui="map"] .layerbar { top: 110px; }
 body[data-ui="map"] .pane-tip { display: none; }
 body[data-ui="map"] .pathbar { max-width: calc(100% - 96px); }
-/* the map: line width and gap live in Material only; the math sits with the Line step; the drop area is for loading
-   a model (a picture has its own buttons, and a file can be dropped anywhere) */
-body[data-ui="map"] #card-h-line label.field:is(:has(#lineW), :has(#lineGapMM)) { display: none; }
+/* the map: for a printer, line width and gap live in Material only (a pen plotter has no Material step: there they
+   stay on Line); the math sits with the Line step; the drop area is for loading a model (a picture has its own
+   buttons, and a file can be dropped anywhere) */
+body[data-ui="map"][data-out="print"] #card-h-line label.field:is(:has(#lineW), :has(#lineGapMM)) { display: none; }
 body[data-ui="map"] .math { display: none; }
 body[data-ui="map"] .map-extra .math { display: block; }
 body[data-ui="map"]:not([data-art="model"]) #dropZone { display: none; }
