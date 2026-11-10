@@ -137,7 +137,7 @@ function vaseLabels() {
   $("vrDepthVal").textContent = Q ? `${Math.round(Qs.depth * 100)}%` : "";
   $("vrRoundVal").textContent = Q ? `${Math.round(Qs.round * 100)}%` : "";
   $("vaseTwistVal").textContent = V.twist ? `${V.twist}°` : "none";
-  $("vlSizeVal").textContent = V.lean.size ? `${fmt(V.lean.size, 1)} mm` : "upright";
+  $("vlSizeVal").textContent = `${fmt(V.lean.size, 1)} mm`;
   $("vlDirVal").textContent = `${V.lean.dir}°`;
   $("vrimSizeLab").textContent = V.rim.kind === "scallop" ? "Crests rise" : "Flares out";
   $("vrimSizeVal").textContent = `${fmt(V.rim.size, 1)} mm`;
@@ -759,11 +759,41 @@ onPrintSettings(() => vaseHint()); // state.js: the needle changes what a bead h
 addExample(120, "wavyvase", "Wavy vase", "a vase made here: profile, texture, movement", () => vaseExample(), true);
 
 // on the map: a vase's parts are chips under Art; each opens the 3D model card at its part
-addMapNode("vprofile", { cap: "Profile", step: "art", cards: ["h-model"], at: "vaseProfile", val: () => "" });
-addMapNode("vshape", { cap: "Shape", step: "art", cards: ["h-model"], at: "vaseShapeLab", val: () => "" });
-addMapNode("vtexture", { cap: "Texture", step: "art", cards: ["h-model"], at: "vtNone", val: () => "" });
-addMapNode("vmove", { cap: "Movement", step: "art", cards: ["h-model"], at: "vmNone", val: () => "" });
-addMapNode("vrim", { cap: "Rim", step: "art", cards: ["h-model"], at: "vrimNone", val: () => "" });
+addMapNode("vprofile", {
+  cap: "Profile",
+  step: "art",
+  cards: ["h-model"],
+  part: "vprofile",
+  val: () => `${vaseCur.profile.length} points · ${fmt(vaseCur.height, 0)} mm tall`,
+});
+addMapNode("vshape", {
+  cap: "Shape",
+  step: "art",
+  cards: ["h-model"],
+  part: "vshape",
+  val: () => vasePlanWords(vaseFill(vaseCur).plan),
+});
+addMapNode("vtexture", {
+  cap: "Texture",
+  step: "art",
+  cards: ["h-model"],
+  part: "vtexture",
+  val: () => $("vaseTexVal").textContent,
+});
+addMapNode("vmove", {
+  cap: "Movement",
+  step: "art",
+  cards: ["h-model"],
+  part: "vmove",
+  val: () => $("vaseMoveVal").textContent,
+});
+addMapNode("vrim", {
+  cap: "Rim",
+  step: "art",
+  cards: ["h-model"],
+  part: "vrim",
+  val: () => $("vaseRimVal").textContent,
+});
 MAP_SHAPERS.push((S) => {
   if (st.art.kind === "model" && st.model && st.model.vase)
     S.down.art = ["vprofile", "vshape", "vtexture", "vmove", "vrim"];

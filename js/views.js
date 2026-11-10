@@ -533,9 +533,11 @@ for (const card of document.querySelectorAll("section.card")) {
     // data-anchor="id": next to that control's own label; else the row's label; else the card's title
     const own = p.dataset.anchor && $(p.dataset.anchor),
       row = p.closest(".row");
+    // (a box of its own with a heading, the Photo's: next to that heading)
     const lab = own
       ? own.closest("label").querySelector("span")
-      : row && row.querySelector(":scope > .lab label, :scope > .lab .name");
+      : (row && row.querySelector(":scope > .lab label, :scope > .lab .name")) ||
+        p.parentElement.querySelector(":scope > .lab .name");
     const card = p.closest("section.card"),
       at = lab || (card && card.querySelector("h2"));
     if (!at) continue;
