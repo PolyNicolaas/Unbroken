@@ -23,7 +23,12 @@ a vase made before them opens as it was.
   they cross: a lattice with holes. The flip layers bridge on purpose; the ready list gives the longest gap and
   warns when it's long for chocolate. Each layer is otherwise checked as before.
 - **Rim**: Flare bends the top few mm out; Rolled doubles the wall there (a second bead inside the first, stepping
-  in a bead's hold a layer at first so it has the one below under it) for a stronger edge.
+  in a bead's hold a layer at first so it has the one below under it) for a stronger edge; Scalloped makes the top
+  edge wave up and down: over the rim each lap rises and falls round the wall a little more than the one below
+  (never more than half a layer more, with up to 1.5 times the chocolate at the crests), so every lap still lands
+  on the one below.
+- **Footed**, a new starting shape for the profile: a solid foot, the cup widening over it no faster than each
+  layer holds. (A hollow foot ring isn't offered: the base would have to bridge its empty middle.)
 - Tests: E59 (the engine: each option makes the shape it says, and the checks stay honest), A62 (the controls, a
   traced drawing as the shape, undo, a vase from before them).
 

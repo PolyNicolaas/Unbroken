@@ -4,8 +4,8 @@ module.exports = {
   title: "Vase shapes in the app: the shape from above (a traced drawing's too), the rim's shape, twist, strength, lattice and rim, undo, and a vase from before them",
   guards: "features/vase/vase.js: the Shape, Texture, Movement and Rim controls and their map chips, the strength curve editors, Use the last traced line; model.js passing the lattice to the ready list",
   why: "Added 10 November 2026 with the vase shapes (E59 checks the engine): the controls have to reach the vase in use, show only what applies, undo, and open a vase saved before they existed.",
-  how: "Opens the leaf (traced), then the Wavy vase. Taps the map's Shape chip, picks Drawing (the leaf's outline is used), then Star with 5 points, a circle at the rim and a 45° turn. Picks Diamond, the Middle strength, a lattice of 2 layers and a rolled rim; reads the Print step's ready list; undoes the rim. Last, puts in a vase with only the old settings (no shape, lean, strength or rim) and reads the controls.",
-  pass: "The map shows Profile, Shape, Texture, Movement and Rim; Drawing takes the leaf's outline (512 points) and says so; the star's Points row shows and the Use the last traced line row doesn't; the vase in use has each setting; the ready list has a Lattice line; undo takes the rim back to plain; the old vase opens as a circle with no lean and a plain rim; no page errors.",
+  how: "Opens the leaf (traced), then the Wavy vase. Taps the map's Shape chip, picks Drawing (the leaf's outline is used), then Star with 5 points, a circle at the rim and a 45° turn. Picks Diamond, the Middle strength, a lattice of 2 layers and a rolled rim; reads the Print step's ready list; undoes the rim; picks a scalloped rim. Last, puts in a vase with only the old settings (no shape, lean, strength or rim) and reads the controls.",
+  pass: "The map shows Profile, Shape, Texture, Movement and Rim; Drawing takes the leaf's outline (512 points) and says so; the star's Points row shows and the Use the last traced line row doesn't; the vase in use has each setting; the ready list has a Lattice line; undo takes the rim back to plain; scallops show their own rows and lift the preview's top; the old vase opens as a circle with no lean and a plain rim; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { example: "leaf", viewport: { width: 1280, height: 1000 } });
     const checks = [];
@@ -52,6 +52,13 @@ module.exports = {
     await page.click("#undoBtn");
     await A.idle(page, 4000);
     checks.push(check("undo: the rim back to plain", await page.evaluate(() => st.model.vase.rim.kind), "==", "none"));
+    // scallops: their own rows, and the crests in the vase in use
+    await page.click('[data-node="vrim"]');
+    await A.idle(page, 1500);
+    await page.click('label[for="vrimScallop"]');
+    await A.idle(page, 4000);
+    const sc = await page.evaluate(() => ({ kind: st.model.vase.rim.kind, count: !!$("vrimCount").getClientRects().length, lab: $("vrimSizeLab").textContent, lifted: st.model.rows.some((r) => r.dz && Math.max(...r.dz) > 0.5) }));
+    checks.push(check("scalloped rim: in use, its Scallops round row, Crests rise, the preview's top lifted", +(sc.kind === "scallop") + +sc.count + +(sc.lab === "Crests rise") + +sc.lifted, "==", 4));
     // a vase saved before the shapes: only its old settings
     await page.evaluate(() => {
       useVase({ height: 30, profile: [[0, 12], [1, 14]], texture: { kind: "ribs", count: 10, depth: 1, twist: 0, spacing: 4 }, move: { kind: "wave", size: 0.5, count: 16, shift: 0 } }, true);

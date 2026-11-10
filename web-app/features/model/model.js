@@ -502,7 +502,7 @@ function drawVaseRows(g, M, P, s, cx, cy, choc, dpr) {
     rows.forEach((r) => {
       const n = r.x.length,
         Q = [];
-      for (let i = 0; i < n; i++) Q.push(P(r.x[i], r.y[i], r.z));
+      for (let i = 0; i < n; i++) Q.push(P(r.x[i], r.y[i], r.z + (r.dz ? r.dz[i] : 0)));
       // a run of points on one side (near: the outward normal turned towards you), drawn as one path per shade band
       for (let band = 0; band < (near ? 4 : 1); band++) {
         g.beginPath();

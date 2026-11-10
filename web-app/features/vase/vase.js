@@ -78,6 +78,7 @@ function vaseUI() {
   $("vlDir").value = V.lean.dir;
   $("vrimSize").value = V.rim.size;
   $("vrimHeight").value = V.rim.height;
+  $("vrimCount").value = V.rim.count || 8;
   vasePick = Math.min(vasePick, V.profile.length - 1);
   vaseLabels();
   vaseHint();
@@ -89,7 +90,7 @@ const VASE_RADIO = {
   plan: { circle: "vpCircle", polygon: "vpPolygon", star: "vpStar", flower: "vpFlower", drawing: "vpDrawing" },
   top: { same: "vrSame", circle: "vrCircle", polygon: "vrPolygon", star: "vrStar", flower: "vrFlower" },
   lean: { straight: "vlStraight", curve: "vlCurve", bow: "vlBow" },
-  rim: { none: "vrimNone", flare: "vrimFlare", rolled: "vrimRolled" },
+  rim: { none: "vrimNone", flare: "vrimFlare", rolled: "vrimRolled", scallop: "vrimScallop" },
 };
 // a shape's words: "6-sided, rounded 20%", "5 points, 30% deep"
 function vasePlanWords(P) {
@@ -138,7 +139,9 @@ function vaseLabels() {
   $("vaseTwistVal").textContent = V.twist ? `${V.twist}°` : "none";
   $("vlSizeVal").textContent = V.lean.size ? `${fmt(V.lean.size, 1)} mm` : "upright";
   $("vlDirVal").textContent = `${V.lean.dir}°`;
+  $("vrimSizeLab").textContent = V.rim.kind === "scallop" ? "Crests rise" : "Flares out";
   $("vrimSizeVal").textContent = `${fmt(V.rim.size, 1)} mm`;
+  $("vrimCountVal").textContent = `${V.rim.count || 8}`;
   $("vrimHeightVal").textContent = `the top ${fmt(V.rim.height, 1)} mm`;
   $("vasePlanVal").textContent = vasePlanWords(P) + (V.twist ? `, turning ${V.twist}°` : "");
   $("vaseTopVal").textContent = Q ? `blends to ${vasePlanWords(Q)}` : "the same shape";
@@ -148,7 +151,9 @@ function vaseLabels() {
       ? `flares ${fmt(V.rim.size, 1)} mm over the top ${fmt(V.rim.height, 1)} mm`
       : V.rim.kind === "rolled"
         ? `doubled over the top ${fmt(V.rim.height, 1)} mm`
-        : "plain";
+        : V.rim.kind === "scallop"
+          ? `${V.rim.count || 8} scallops rising ${fmt(V.rim.size, 1)} mm`
+          : "plain";
   $("vaseTexVal").textContent =
     {
       ribs: `${T.count} ribs${T.twist ? `, ${T.twist}° twist` : ""}`,
@@ -519,6 +524,7 @@ for (const [id, part, key, k] of [
   ["vlDir", "lean", "dir", 1],
   ["vrimSize", "rim", "size", 1],
   ["vrimHeight", "rim", "height", 1],
+  ["vrimCount", "rim", "count", 1],
   ["vtCount", "texture", "count", 1],
   ["vtTwist", "texture", "twist", 1],
   ["vtSpacing", "texture", "spacing", 1],

@@ -27,8 +27,11 @@
   //     towards the rim) | "bow" (out and back: the rim over the base again) }
   //   strength: { texture, move }: each [[t, k], …] (as the profile: t share of the height; k 0–1, how much of the
   //     texture's depth or the movement's size there); null: all of it all the way up
-  //   rim: { kind: "none" | "flare" | "rolled", size (flare: mm out at the rim), height (mm: how far down the rim
-  //     goes) }: a flare bends the top out; a rolled rim doubles the wall there (a second bead inside the first) }
+  //   rim: { kind: "none" | "flare" | "rolled" | "scallop", size (flare: mm out at the rim; scallop: mm the crests
+  //     rise), height (mm: how far down the rim goes), count (scallop: how many round) }: a flare bends the top out; a
+  //     rolled rim doubles the wall there (a second bead inside the first); scallops make the top edge wave up and
+  //     down: over the rim's height each lap rises and falls round the wall a little more than the one below (never
+  //     more than half a layer more), the needle lifting at the crests, so every lap still lands on the one below }
   UNB.VASE_SHAPES = {
     cylinder: {
       name: "Cylinder",
@@ -56,6 +59,17 @@
         [1, 18],
       ],
     },
+    footed: {
+      name: "Footed",
+      // a solid foot, then the cup widening out over it no faster than each layer holds
+      profile: [
+        [0, 9],
+        [0.1, 9],
+        [0.25, 13],
+        [0.6, 18],
+        [1, 20],
+      ],
+    },
     bowl: {
       name: "Bowl",
       profile: [
@@ -76,7 +90,7 @@
       twist: 0,
       lean: { size: 0, dir: 0, curve: "straight" },
       strength: null,
-      rim: { kind: "none", size: 3, height: 5 },
+      rim: { kind: "none", size: 3, height: 5, count: 8 },
     };
   };
   UNB.VASE_PLANS = {
@@ -86,9 +100,6 @@
     flower: { name: "Flower", sides: [2, 24] },
     drawing: { name: "A drawing" },
   };
-  // the texture's kinds: ribs run up the wall, rings round it, a grid is both, a weave is ribs twisting one way and
-  // back every `spacing` mm, a diamond is two sets of ribs twisting opposite ways
-  UNB.VASE_TEXTURES = ["none", "ribs", "rings", "grid", "weave", "diamond"];
   // the smallest radius anything is made at (mm): a vase narrower than this has no inside to print round
   const VASE_MIN_R = 1;
 
@@ -391,6 +402,16 @@
     if (!R || R.kind !== "flare" || !(R.size > 0) || !(R.height > 0)) return 0;
     const u = (z - (H - R.height)) / R.height;
     return u > 0 ? R.size * Math.min(1, u) * Math.min(1, u) : 0;
+  };
+  // a scalloped rim: how far a point at share s round lifts at height z (mm; 0 below the rim). Its rise over the rim
+  // is at least twice the crests' height, so a lap rises at most half a layer more than the one below anywhere.
+  const scallopAt = (V, z, H, s) => {
+    const R = V.rim;
+    if (!R || R.kind !== "scallop" || !(R.size > 0)) return 0;
+    const over = Math.max(R.height || 0, 2 * R.size),
+      f = (z - (H - over)) / over;
+    if (!(f > 0)) return 0;
+    return R.size * Math.min(1, f) * 0.5 * (1 - Math.cos(2 * Math.PI * Math.max(1, Math.round(R.count || 8)) * s));
   };
   // how far the middle moves sideways at share t of the height (the lean)
   const leanAt = (V, t) => {
@@ -736,6 +757,22 @@
         }
         L = { x: Float64Array.from([...A.x, ...B.x]), y: Float64Array.from([...A.y, ...B.y]), parts: [A, B] };
       } else L = shiftTo(vaseLap(V, k, z, h, n));
+      // scallops: each point lifted (dz, mm) and its flow raised by how much more it rises than the lap below (ef)
+      if (V.rim && V.rim.kind === "scallop") {
+        const m = L.x.length,
+          prev = walls.length ? walls[walls.length - 1].dz : null;
+        let any = false;
+        const dz = new Float64Array(m);
+        for (let i = 0; i < m; i++) any = (dz[i] = scallopAt(V, z + (h * i) / m, H, i / m)) > 0 || any;
+        if (any || prev) {
+          L.dz = dz;
+          L.ef = Float64Array.from(dz, (d, i) => {
+            // (the same point of the lap below: laps have the same number of points, evenly along them)
+            const b = prev ? (prev.length === m ? prev[i] : prev[Math.round((i / m) * prev.length) % prev.length]) : 0;
+            return 1 + Math.max(-0.5, (d - b) / h);
+          });
+        }
+      }
       if (Mv.flip > 0 && k > NB && flipAt(Mv, k) !== flipAt(Mv, k - 1)) L.bridge = true;
       // (the lap after one sits on its easing over the first repeat: checked from there on)
       if (walls.length && walls[walls.length - 1].bridge) L.settled = 1.5 / Math.max(1, Math.round(Mv.count || 1));
@@ -870,12 +907,14 @@
         L = vaseLap(V, k, z, 0, n),
         x = new Float64Array(cols),
         y = new Float64Array(cols);
+      const dz = V.rim && V.rim.kind === "scallop" ? new Float64Array(cols) : null;
       for (let c = 0; c < cols; c++) {
         const i = Math.floor((c / cols) * n);
         x[c] = L.x[i];
         y[c] = L.y[i];
+        if (dz) dz[c] = scallopAt(V, z, H, i / n);
       }
-      rows.push({ x, y, z });
+      rows.push(dz ? { x, y, z, dz } : { x, y, z });
       if (z >= H) break;
     }
     const band = Math.max(1, Math.ceil((rows.length - 1) / (o.meshRows || 60))),
@@ -892,12 +931,14 @@
         const A = R[r],
           B = R[r + 1],
           d = (c + 1) % cols;
-        put(A.x[c], A.y[c], A.z);
-        put(A.x[d], A.y[d], A.z);
-        put(B.x[d], B.y[d], B.z);
-        put(A.x[c], A.y[c], A.z);
-        put(B.x[d], B.y[d], B.z);
-        put(B.x[c], B.y[c], B.z);
+        const za = (i) => A.z + (A.dz ? A.dz[i] : 0),
+          zb = (i) => B.z + (B.dz ? B.dz[i] : 0);
+        put(A.x[c], A.y[c], za(c));
+        put(A.x[d], A.y[d], za(d));
+        put(B.x[d], B.y[d], zb(d));
+        put(A.x[c], A.y[c], za(c));
+        put(B.x[d], B.y[d], zb(d));
+        put(B.x[c], B.y[c], zb(c));
       }
     // the bottom: a fan from the middle, facing down
     for (let c = 0; c < cols; c++) {
