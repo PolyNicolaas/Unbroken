@@ -546,7 +546,7 @@ for (const q of CFG.printers) {
   const bool = (v) => typeof v === "boolean";
   const RULES = [
     ["source", list("image", "text"), (v) => radio(v === "text" ? "srcText" : "srcImage")],
-    ["sample", list("none", "leaf", "shapes", "smiley", "face", "still"), () => {}], // (examples.js reads it at start)
+    ["sample", list("none", "leaf", "shapes", "smiley", "face", "still"), () => {}], // (art.js startInput reads it)
     ["traceStyle", oneOf(MAP.traceStyle), (v) => radio(v === "outline" ? "modeOutline" : "modeCenter")],
     ["path", list("closed", "open"), (v) => radio(v === "open" ? "loopOpen" : "loopClosed")],
     ["threshold", range(-60, 60), (v) => set("sens", Math.round(v))],

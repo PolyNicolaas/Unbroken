@@ -1,6 +1,6 @@
 // Unbroken · web app · state.js
 // Shared state and two tiny helpers used everywhere: $ (element by id), PX_MM, and st (the current design and its
-// trace).
+// trace); and where features join in (the lists and moments the core offers).
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
 "use strict";
@@ -32,4 +32,24 @@ function onPrintSettings(fn) {
 function printSettingsChanged() {
   for (const fn of printSettingsSubs) fn();
 }
+
+// ---------- where features join in ----------
+// The core never names a feature. A feature adds itself when its script loads: an entry in a list the core reads
+// (an example, a step of the map, something it's made for), or a function for a moment the core announces
+// (on("save", fn): asked with ask("save")). A feature whose script isn't loaded simply isn't in the lists: test A61
+// leaves each one out and checks the app still opens, traces and exports.
+const EXAMPLES = []; // { order, key, name, what, use, blank }: the Examples tray (map.js), in order
+function addExample(order, key, name, what, use, blank = false) {
+  EXAMPLES.push({ order, key, name, what, use, blank });
+  EXAMPLES.sort((a, b) => a.order - b.order);
+}
+const joined = {}; // moment → the functions given for it
+function on(moment, fn) {
+  (joined[moment] ||= []).push(fn);
+}
+// every answer to a moment (a list, empty when no feature joined it)
+const ask = (moment, ...args) => (joined[moment] || []).map((fn) => fn(...args));
+// what the line is made for (the For chips, map.js): a printer or a pen plotter
+const artForPlot = () => $("artForPlot").checked;
+
 const st = { finalVer: 0, outW: 100, spacing: 0, simplify: 0.05, N: 300, autoPending: true, playing: false, t: 0 };

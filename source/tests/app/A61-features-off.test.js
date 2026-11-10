@@ -7,9 +7,9 @@ const JS = path.join(__dirname, "../../../web-app/js");
 // The record only goes up: when a feature does better than its record the test says so, and the record is raised here.
 const FEATURES = {
   vase: { scripts: ["vase.js"], level: 2 },
-  "3D model": { scripts: ["model.js", "vase.js"], level: 2 },
+  "3D model": { scripts: ["model.js", "vase.js", "sample-skull.js"], level: 2 },
   "pen plotter": { scripts: ["plot.js"], level: 1 },
-  patterns: { scripts: ["patterns.js"], level: 0 },
+  patterns: { scripts: ["patterns.js"], level: 1 },
   molecule: { scripts: ["molecule.js", "moleditor.js"], level: 1 },
   "text as pieces": { scripts: ["pieces.js"], level: 1 },
   camera: { scripts: ["camera.js"], level: 2 },
@@ -18,7 +18,6 @@ const FEATURES = {
   optimize: { scripts: ["optimize.js"], level: 0 },
   "test print": { scripts: ["testprint.js"], level: 2 },
   "test matrix": { scripts: ["matrix.js"], level: 2 },
-  examples: { scripts: ["examples.js", "sample-skull.js"], level: 0 },
 };
 // the parts of the page only this feature's scripts read: what's left behind when the scripts go
 function ownIds(scripts) {

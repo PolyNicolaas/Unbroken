@@ -381,3 +381,5 @@ $("mfStl").addEventListener("change", () => {
 // the editor's canvas sizes with the card: redraw when it shows or the window changes
 new ResizeObserver(() => vaseDraw()).observe($("vaseProfile"));
 onPrintSettings(() => vaseHint()); // state.js: the needle changes what a bead holds
+
+addExample(120, "wavyvase", "Wavy vase", "a vase made here: profile, texture, movement", () => vaseExample(), true);

@@ -551,3 +551,5 @@ $("molPieces").addEventListener("change", () => {
   layersSoon(0);
   readyUI();
 });
+
+addExample(100, "theobromine", "Theobromine", "a molecule: chocolate's own", () => moleculeExample("theobromine"));

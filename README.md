@@ -112,7 +112,7 @@ workflow's rules, [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)). Tests A60, 
 The steps:
 
 - **Art**: what to start from (below). The app opens empty; the examples (pictures, patterns, lettering, the vase) are
-  a tray opened from the Examples chip on the map (`web-app/js/examples.js`; `?example=leaf` in the address, or
+  a tray opened from the Examples chip on the map (`web-app/js/state.js` `addExample`: each feature adds its own; `?example=leaf` in the address, or
   `defaults.sample` in settings.js, starts on one). Test A35.
 - **Trace** (the switch under the preview, on every step): on, the art becomes the line the Line step picks; off,
   the art stays as it is: a pattern or text plots as its exact lines (as drawn), a picture shows as the picture and

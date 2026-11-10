@@ -192,7 +192,7 @@ function artApply() {
       $("artMsg").textContent = note;
     } else $("artMsg").textContent = "Nothing left inside that shape: try more detail or another shape.";
   } else {
-    // no picture yet: a blank page to trace (examples.js shows how to start)
+    // no picture yet: a blank page to trace (the preview shows how to start)
     useSource("picture", A.picture ? A.picture.canvas : blankPicture(), A.picture ? A.picture.label : "nothing yet");
   }
   artUI();
@@ -242,7 +242,7 @@ function artUsePhoto(canvas, label, photo) {
   const P = UNB.PATTERNS[st.art.pattern.style];
   artUse(st.art.kind === "pattern" && P && P.tone ? "pattern" : "picture");
 }
-// an example (examples.js): a picture example is the Picture in use even after a pattern drawn from a picture (which
+// an example: a picture example is the Picture in use even after a pattern drawn from a picture (which
 // artUsePicture keeps); a pattern example starts from that style's own settings
 function artExamplePicture(key) {
   st.art.picture = { canvas: tagged(makeSample(key)), label: "sample", sample: key };
@@ -510,7 +510,7 @@ function artUI() {
   }[A.kind];
   workflowUI(); // workflow.js: what the Line step can do with this input
   if (typeof photoUI === "function") photoUI(); // camera.js: the Photo card
-  emptyUI(); // examples.js: the empty preview, until there's something to start from
+  emptyUI(); // the empty preview, until there's something to start from
 }
 // ---------- the picture turned: quarter turns and a few degrees to straighten, from the picture as loaded ----------
 function turnedCanvas(src, deg) {
@@ -578,3 +578,55 @@ document.querySelectorAll('input[name="artFor"]').forEach((r) =>
     recordSoon();
   })
 );
+
+// ---------- a clean start, and the examples ----------
+// The app opens empty (the Art step's preview says how to start) unless settings.js names a sample (defaults.sample)
+// or the page's address does (?example=leaf: the tests start that way). The examples are a tray on the map (map.js);
+// each becomes the input in use just as choosing it by hand would. The pictures and the lettering are added here;
+// a pattern, a molecule, a model and the vase by their own scripts (state.js addExample).
+addExample(10, "leaf", "Leaf", "a line drawing", () => artExamplePicture("leaf"));
+addExample(20, "still", "Still life", "flat greys: try Grey levels", () => artExamplePicture("still"));
+addExample(30, "face", "Face", "soft greys: try a picture pattern", () => artExamplePicture("face"));
+addExample(40, "shapes", "Shapes & text", "outlines and letters", () => artExamplePicture("shapes"));
+addExample(50, "smiley", "Smiley", "a simple drawing", () => artExamplePicture("smiley"));
+addExample(90, "lettering", "Lettering", "text in a single-stroke font", () => artUse("text"));
+function useExample(key) {
+  const e = EXAMPLES.find((x) => x.key === key);
+  if (!e) return false;
+  e.use();
+  return true;
+}
+$("esChoose").addEventListener("click", () => $("anyFile").click());
+
+// Empty: the Art step's Picture with no picture yet. The preview says how to start; the trace has nothing to do.
+const isEmpty = () => st.art.kind === "picture" && !st.art.picture;
+function emptyUI() {
+  const e = isEmpty(),
+    was = document.body.dataset.empty === "1";
+  document.body.dataset.empty = e ? "1" : "";
+  $("emptyState").hidden = !e;
+  // the readout and the Trace note were set while it was empty (an opened design, the art as drawn): again, now
+  if (was && !e && typeof workflowUI === "function") workflowUI(); // workflow.js (not loaded yet at the start)
+}
+// a blank page to trace while empty (so the steps after Art show nothing, not the last input)
+function blankPicture() {
+  const c = document.createElement("canvas");
+  c.width = 400;
+  c.height = 300;
+  const g = c.getContext("2d");
+  g.fillStyle = "#ffffff";
+  g.fillRect(0, 0, 400, 300);
+  return c;
+}
+// the start: a sample named in settings.js, or one in the page's address, or empty
+function startInput() {
+  const named = CFG.defaults.sample && CFG.defaults.sample !== "none" ? CFG.defaults.sample : null,
+    asked = new URLSearchParams(location.search).get("example");
+  let key = named || asked || "";
+  if (key === "vase") key = "skull"; // (the sample was a plain vase until v124)
+  // an example that isn't a picture to trace (a model, a vase) starts as from empty: the blank picture first (the
+  // design's saved image, and undo, need a source)
+  if ((EXAMPLES.find((x) => x.key === key) || {}).blank) artUse("picture");
+  if (useExample(key)) return;
+  artUse("picture"); // empty: no picture yet
+}

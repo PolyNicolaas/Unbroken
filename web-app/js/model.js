@@ -667,3 +667,5 @@ async function modelViewSVG() {
   };
 }
 $("drawSvg").addEventListener("click", () => exportAs("viewsvg", $("drawMsg")));
+
+addExample(110, "skull", "Skull cup", "a 3D model", () => artUse("model"), true);

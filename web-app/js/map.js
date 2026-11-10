@@ -397,7 +397,7 @@ function mapFollowStep() {
 }
 
 // ---------- the examples tray ----------
-// the examples (examples.js) as tiles over the preview; picking one starts from it. It opens only when asked.
+// the examples (state.js EXAMPLES) as tiles over the preview; picking one starts from it. It opens only when asked.
 function mapTray(on) {
   mapTrayOpen = !!on;
   let t = $("mapTray");
@@ -414,7 +414,7 @@ function mapTray(on) {
     head.querySelector("button").addEventListener("click", () => mapTray(false));
     const grid = document.createElement("div");
     grid.className = "map-tray-grid";
-    for (const [key, name, what] of EXAMPLES) {
+    for (const { key, name, what } of EXAMPLES) {
       const b = document.createElement("button");
       b.type = "button";
       b.className = "map-ex";

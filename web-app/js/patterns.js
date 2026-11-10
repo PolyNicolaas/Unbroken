@@ -8,9 +8,6 @@
 // the order listed in index.html.
 "use strict";
 
-// made for plotting (the Art step's Input card, Made for): the ranges go up to their plotMax, and nothing is traced
-// until asked (art.js)
-const artForPlot = () => $("artForPlot").checked;
 const artStyle = () => UNB.PATTERNS[$("artStyle").value] || UNB.PATTERNS.labyrinth;
 const patternMemory = {}; // this session: each style's last settings, so going back to a style finds them again
 
@@ -205,3 +202,7 @@ $("overlaps").addEventListener("change", () => {
   if (st.art.kind === "pattern") patternUI();
 });
 patternControls(UNB.patternDefaults("labyrinth")); // (art.js shows the pattern in use once it loads)
+
+addExample(60, "labyrinth", "Labyrinth", "a pattern, one closed line", () => artExamplePattern("labyrinth"));
+addExample(70, "spirograph", "Spirograph", "a pattern that crosses itself", () => artExamplePattern("spirograph"));
+addExample(80, "portrait", "Wave portrait", "the face in wave rows", () => artExamplePattern("wavesTone"));

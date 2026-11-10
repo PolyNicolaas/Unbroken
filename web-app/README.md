@@ -26,7 +26,6 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/cutout.js` | Cut out the object (Image prep): the Select the object tool on the preview (a box, Keep and Remove strokes), the mask from `UNB.cutout` in its own worker (`CUT`), applied to the picture before tracing. |
 | `js/molecule.js` | The Molecule input: a SMILES or a name (PubChem) laid out by RDKit (loaded from a CDN when first needed), the laid-out examples, and the drawing (`UNB.molecule`) handed to art.js like a pattern's. |
 | `js/moleditor.js` | The structure editor (Draw or edit…): tap, drag and ring tools on the preview, elements and charges, Erase, Undo, Clean up with RDKit; the edits are the engine's (`UNB.molGrow`, `UNB.molRing` …). |
-| `js/examples.js` | The clean start (the empty preview) and the examples as chips: pictures, patterns, lettering, the vase. |
 | `js/steppers.js` | − and + beside every number box (touch-friendly; holding repeats), boxes made later included. |
 | `js/scroll.js` | The phone's pinned preview: Bigger / Smaller. |
 | `js/workflow.js` | The workflow: made for a printer or a pen plotter, the steps Art → Line → Print or Plot, the Line step's switch (one continuous line, separate strokes, as drawn), and tracing separate strokes. |
