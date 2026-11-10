@@ -65,7 +65,7 @@ module.exports = {
       vaseUI();
     });
     await A.idle(page, 4000);
-    const old = await page.evaluate(() => ({ plan: document.querySelector('input[name="vasePlan"]:checked').id, rim: document.querySelector('input[name="vaseRim"]:checked').id, lean: $("vlSizeVal").textContent }));
+    const old = await page.evaluate(() => ({ plan: document.querySelector('input[name="vasePlan"]:checked').id, rim: document.querySelector('input[name="vaseRim"]:checked').id, lean: $("vaseLeanVal").textContent }));
     checks.push(check("an old vase: a circle, upright, a plain rim", +(old.plan === "vpCircle") + +(old.rim === "vrimNone") + +(old.lean === "upright"), "==", 3), check("no page errors", errors.length, "==", 0));
     await close();
     return { checks, notes: errors.join(" | ").slice(0, 300) };

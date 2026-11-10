@@ -119,8 +119,17 @@ const selText = (id) => {
   const s = $(id);
   return s && s.selectedIndex >= 0 ? s.options[s.selectedIndex].textContent.trim() : "";
 };
-// nothing to work on yet: the empty start, or a picture still being traced
-const mapNothing = () => isEmpty() || (!isModel() && !st.final);
+// nothing to work on yet: the empty start, or a picture still being traced (a line made some other way counts: the
+// Line step's separate strokes, or the art as drawn)
+const mapNothing = () => {
+  if (isEmpty()) return true;
+  if (isModel() || st.final) return false;
+  const m = lineModeNow();
+  return !(
+    (m === "strokes" && st.sepStrokes && st.sepStrokes.strokes && st.sepStrokes.strokes.length) ||
+    m === "drawn"
+  );
+};
 // the size the design is drawn at: on a pen plotter's page (the page card's readout), else the Size card's own
 const sizeText = () => {
   if (mapNothing()) return "";
@@ -168,35 +177,108 @@ function mapShape() {
 // ---------- drawing it ----------
 let mapOpenId = null,
   mapTrayOpen = false;
-// the band fits its width (no sideways scrolling): the steps share it, and each step's chips share the room under
-// (or over) it and the gap to the next step, so nothing overlaps; chips 28 px tall (the map is dense: many settings)
+// The band fits its width (no sideways scrolling). The steps share it; each chip is as wide as its name. A step's
+// chips sit centred over (or under) it, spreading into the room beside it when they need it, and groups that would
+// meet are pushed apart. Values that don't fit a step wrap onto a second line. Too narrow for that (a phone), the
+// steps show their names only and the open step's chips sit in a row under them, wrapping if need be. Chips 28 px
+// tall (the map is dense: many settings).
 const MAP_CHIP_H = 28;
+let mapMeasure = null;
+// a chip's width for its name (the chip's font, its padding and its dot)
+function mapChipW(text) {
+  if (!mapMeasure) mapMeasure = document.createElement("canvas").getContext("2d");
+  mapMeasure.font = `500 ${12.5 * (parseFloat(css("--text")) || 1)}px ${css("--font-body") || "sans-serif"}`;
+  return Math.ceil(mapMeasure.measureText(text).width) + 30;
+}
+// the step whose chips a phone shows: the open one, or the one holding the open chip
+function mapChipStep(S) {
+  if (S.spine.includes(mapOpenId)) return mapOpenId;
+  for (const side of [S.up, S.down]) for (const k in side) if (side[k].includes(mapOpenId)) return k;
+  return S.spine.includes("art") ? "art" : S.spine[0];
+}
 function mapRender() {
   const box = $("map"),
     W = box.clientWidth,
-    H = box.clientHeight,
     S = mapShape(),
     nodes = $("mapNodes"),
     pos = {};
-  if (!(H > 0 && W > 0)) return;
+  if (!(box.clientHeight > 0 && W > 0)) return;
   nodes.style.width = `${W}px`;
   const n = S.spine.length,
     side = 16,
     sw = Math.min(250, (W - 2 * side - (n - 1) * 28) / n),
     gap = n > 1 ? (W - 2 * side - n * sw) / (n - 1) : 0,
-    midY = Math.round(H / 2),
-    nh = 46;
-  S.spine.forEach((id, i) => (pos[id] = { x: side + i * (sw + gap), y: midY - nh / 2, w: sw, h: nh, big: true, i }));
-  const chips = (list, parent, y) => {
-    const room = sw + gap - 12,
-      w = Math.min(132, (room - 8 * (list.length - 1)) / list.length),
-      tw = list.length * (w + 8) - 8;
-    // (centred on their step; at the band's ends they lean in just enough to stay inside it)
-    const x0 = Math.max(side, Math.min(W - side - tw, pos[parent].x + pos[parent].w / 2 - tw / 2));
-    list.forEach((id, k) => (pos[id] = { x: x0 + k * (w + 8), y, w, h: MAP_CHIP_H }));
+    cw = {};
+  for (const L of [...Object.values(S.up), ...Object.values(S.down)])
+    for (const id of L) cw[id] = mapChipW(MAP_NODES[id].cap);
+  // a row of chips groups ([{ parent, ids }]) placed side by side within the band: false if they don't fit
+  const place = (groups, y) => {
+    const want = groups.map((g) => g.ids.reduce((a, id) => a + cw[id], 0) + 8 * (g.ids.length - 1)),
+      room = W - 2 * side - 16 * (groups.length - 1),
+      total = want.reduce((a, b) => a + b, 0);
+    if (total > room) return false;
+    const at = groups.map((g, k) => {
+      const c = g.parent ? pos[g.parent].x + pos[g.parent].w / 2 : W / 2;
+      return c - want[k] / 2;
+    });
+    for (let k = 0; k < at.length; k++) at[k] = Math.max(at[k], k ? at[k - 1] + want[k - 1] + 16 : side);
+    for (let k = at.length - 1; k >= 0; k--)
+      at[k] = Math.min(at[k], k < at.length - 1 ? at[k + 1] - 16 - want[k] : W - side - want[k]);
+    groups.forEach((g, k) => {
+      let x = at[k];
+      for (const id of g.ids) {
+        pos[id] = { x, y, w: cw[id], h: MAP_CHIP_H, parent: g.parent };
+        x += cw[id] + 8;
+      }
+    });
+    return true;
   };
-  for (const [p, list] of Object.entries(S.up)) chips(list, p, 6);
-  for (const [p, list] of Object.entries(S.down)) chips(list, p, H - 6 - MAP_CHIP_H);
+  const order = (side) =>
+      S.spine.filter((id) => side[id] && side[id].length).map((id) => ({ parent: id, ids: side[id] })),
+    wide = sw >= 104;
+  let narrow = !wide,
+    H = 124,
+    nh = 46;
+  if (wide) {
+    // values that don't fit wrap: a taller step
+    const two = S.spine.some((id) => {
+      const v = mapVal(MAP_NODES[id]) || "";
+      return mapChipW(v) * 1.03 > sw;
+    });
+    nh = two ? 58 : 46;
+    H = two ? 136 : 124;
+    const midY = Math.round(H / 2);
+    S.spine.forEach((id, i) => (pos[id] = { x: side + i * (sw + gap), y: midY - nh / 2, w: sw, h: nh, big: true, i }));
+    narrow = !(place(order(S.up), 6) && place(order(S.down), H - 6 - MAP_CHIP_H));
+  }
+  if (narrow) {
+    // a phone: names only, the open step's chips in rows under the steps
+    nh = 36;
+    for (const k in pos) delete pos[k];
+    // (closer together than on a wider screen, so each step's name fits)
+    const nsw = (W - 2 * side - (n - 1) * 10) / n,
+      ngap = n > 1 ? (W - 2 * side - n * nsw) / (n - 1) : 0;
+    S.spine.forEach((id, i) => (pos[id] = { x: side + i * (nsw + ngap), y: 8, w: nsw, h: nh, big: true, i }));
+    const step = mapChipStep(S),
+      ids = [...(S.up[step] || []), ...(S.down[step] || [])],
+      rows = [[]];
+    let used = 0;
+    for (const id of ids) {
+      cw[id] = Math.min(cw[id], W - 2 * side);
+      if (used && used + 8 + cw[id] > W - 2 * side) {
+        rows.push([]);
+        used = 0;
+      }
+      rows[rows.length - 1].push(id);
+      used += (used ? 8 : 0) + cw[id];
+    }
+    rows.forEach((r, k) => r.length && place([{ parent: step, ids: r }], 8 + nh + 10 + k * (MAP_CHIP_H + 6)));
+    H = 8 + nh + (ids.length ? 10 + rows.length * (MAP_CHIP_H + 6) : 8);
+  }
+  box.classList.toggle("narrow", narrow);
+  box.classList.toggle("tall", !narrow && nh > 46);
+  box.style.height = `${H}px`;
+  const midY = narrow ? 8 + nh / 2 : Math.round(H / 2);
   // the nodes: made once each, moved and refreshed
   const want = new Set(Object.keys(pos));
   for (const el of [...nodes.children]) if (!want.has(el.dataset.node)) el.remove();
@@ -219,8 +301,9 @@ function mapRender() {
     el.classList.toggle("chip", !p.big);
     el.classList.toggle("open", open);
     el.setAttribute("aria-pressed", String(open));
-    el.querySelector(".map-cap").textContent = p.big ? `${p.i + 1} · ${N.cap}` : N.cap;
+    el.querySelector(".map-cap").textContent = p.big && !narrow ? `${p.i + 1} · ${N.cap}` : N.cap;
     el.querySelector(".map-val").textContent = mapVal(N);
+    el.title = p.big ? `${N.cap}${mapVal(N) ? ": " + mapVal(N) : ""}` : N.cap;
   }
   // the lines: the design's own line thick through the spine, a short thin stem to each chip
   let spine = "",
@@ -228,13 +311,19 @@ function mapRender() {
   S.spine.forEach((id, i) => {
     if (i) spine += `M${pos[S.spine[i - 1]].x + pos[S.spine[i - 1]].w} ${midY} L${pos[id].x} ${midY} `;
   });
-  const mid = (id) => pos[id].x + pos[id].w / 2;
-  for (const [p, list] of Object.entries(S.up))
-    for (const id of list) thin += `M${mid(id)} ${pos[id].y + MAP_CHIP_H} L${mid(id)} ${pos[p].y} `;
-  for (const [p, list] of Object.entries(S.down))
-    for (const id of list) thin += `M${mid(id)} ${pos[p].y + nh} L${mid(id)} ${pos[id].y} `;
+  // (a chip's stem goes to the nearest point of its step's edge: straight down or up, or slanting in from the side)
+  const mid = (id) => pos[id].x + pos[id].w / 2,
+    foot = (id, p) => Math.min(pos[p].x + pos[p].w - 10, Math.max(pos[p].x + 10, mid(id)));
+  for (const [id, P] of Object.entries(pos)) {
+    if (P.big || !P.parent) continue;
+    const p = P.parent,
+      above = P.y < pos[p].y;
+    thin += above
+      ? `M${mid(id)} ${P.y + MAP_CHIP_H} L${foot(id, p)} ${pos[p].y} `
+      : `M${mid(id)} ${P.y} L${foot(id, p)} ${pos[p].y + nh} `;
+  }
   const svg = $("mapLines");
-  svg.setAttribute("viewBox", `0 0 ${W} ${H}`);
+  svg.setAttribute("viewBox", `0 0 ${W} ${H}`); // (H: the band's height as laid out)
   svg.setAttribute("width", W);
   svg.setAttribute("height", H);
   svg.innerHTML = `<path class="map-thin" d="${thin}"/><path class="map-spine" d="${spine}"/>`;
@@ -366,6 +455,10 @@ function mapOpen(id) {
     if (!c) continue;
     c.dataset.map = "1";
   }
+  // a node that's one part of a card (a vase's Shape, say) shows only that part of it: [data-part] marks the parts
+  document
+    .querySelectorAll(".panel [data-part]")
+    .forEach((el) => el.classList.toggle("part-off", !!N.part && el.dataset.part !== N.part));
   // a node's extra parts (the math, for the Line step) move into the panel after its cards
   for (const ref of N.extra || []) if (mapFieldOf(ref)) mapMove(mapFieldOf(ref), $("mapExtra"));
   mapRender();

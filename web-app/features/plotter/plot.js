@@ -984,7 +984,7 @@ addMapNode("plot", {
   cap: "Plot",
   step: "plot",
   cards: ["h-plot"],
-  val: () => (mapNothing() ? "nothing yet" : "the page"),
+  val: () => (mapNothing() ? "nothing yet" : mapCardVal("h-plot") || "the page"),
 });
 addMapNode("fills", { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" });
 addMapNode("pexport", { cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" });

@@ -18,8 +18,12 @@ module.exports = {
     // every step of the map opened in turn: which of the controls never showed, and the widest overflow of the panel
     const tour = async (page, sels) => {
       const seen = new Set(); let over = 0;
-      for (const id of await page.$$eval("#mapNodes .map-node:not([data-node=examples])", (els) => els.map((e) => e.dataset.node))) {
-        await page.click(`[data-node="${id}"]`); await A.idle(page, 600);
+      // (every node of the map now: a phone shows only the open step's chips, so one not on the band is opened directly)
+      const ids = await page.evaluate(() => { const S = mapShape(); return [...S.spine, ...Object.values(S.up).flat(), ...Object.values(S.down).flat()].filter((id) => id !== "examples"); });
+      for (const id of ids) {
+        if (await page.$(`#mapNodes [data-node="${id}"]`)) await page.click(`#mapNodes [data-node="${id}"]`);
+        else await page.evaluate((n) => mapOpen(n), id);
+        await A.idle(page, 600);
         for (const s of sels) if (await visible(page, s)) seen.add(s);
         over = Math.max(over, await page.evaluate(() => { const p = document.querySelector(".panel"); return [...p.querySelectorAll("section.card, .map-rows")].filter((c) => c.getClientRects().length).reduce((m, c) => Math.max(m, c.scrollWidth - c.clientWidth), 0); }));
       }
