@@ -88,6 +88,7 @@ const fail = (msg) => {
   };
   tag("index.html", (s) =>
     s.replace(/(<(?:script|link)[^>]+(?:src|href)=")(?!https?:)([^"?]+\.(?:js|css))"/g, `$1$2?v=${top}"`)
+      .replace(/(feature\("\w+", ")([^"?]+\.js)"/g, `$1$2?v=${top}"`)
   );
   tag("js/engine-bridge.js", (s) =>
     s.replace('const WORKER_URL = "worker.js";', `const WORKER_URL = "worker.js?v=${top}";`)
@@ -98,8 +99,8 @@ const fail = (msg) => {
   // 3 ---------- every file the page asks for exists, and nothing still points outside dist/
   step(3, "Check the page's files");
   const html = fs.readFileSync(path.join(TMP, "index.html"), "utf8");
-  const refs = [...html.matchAll(/<(?:script|link)[^>]+(?:src|href)="([^"]+)"/g)]
-    .map((m) => m[1])
+  const refs = [...html.matchAll(/<(?:script|link)[^>]+(?:src|href)="([^"]+)"|feature\("\w+", "([^"]+)"/g)]
+    .map((m) => m[1] || m[2])
     .filter((u) => !/^https?:/.test(u));
   const missing = refs.filter((u) => !fs.existsSync(path.join(TMP, u.split("?")[0])));
   if (missing.length) fail(`index.html loads files that aren't in dist/: ${missing.join(", ")}`);

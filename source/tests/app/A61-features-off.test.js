@@ -1,25 +1,15 @@
 const fs = require("fs"), path = require("path");
 const A = require("../lib/app.js"), { check } = require("../lib/check.js");
-const JS = path.join(__dirname, "../../../web-app/js");
-// The features that should be able to go: the scripts that make each one, and how well the app does without it today.
+const APP = path.join(__dirname, "../../../web-app"), JS = path.join(APP, "js");
+// The features (settings.js features, index.html feature(name, file)) and how well the app does without each today.
 //   0 the app breaks (no trace) · 1 it runs, with errors · 2 it runs clean (opens, traces, exports) · 3 clean, and
 //   nothing of the feature is left on the page
 // The record only goes up: when a feature does better than its record the test says so, and the record is raised here.
-const FEATURES = {
-  vase: { scripts: ["vase.js"], level: 2 },
-  "3D model": { scripts: ["model.js", "vase.js", "sample-skull.js"], level: 2 },
-  "pen plotter": { scripts: ["plot.js"], level: 2 },
-  patterns: { scripts: ["patterns.js"], level: 1 },
-  molecule: { scripts: ["molecule.js", "moleditor.js"], level: 1 },
-  "text as pieces": { scripts: ["pieces.js"], level: 1 },
-  camera: { scripts: ["camera.js"], level: 2 },
-  "cut-out": { scripts: ["cutout.js"], level: 0 },
-  "grey levels": { scripts: ["levels.js"], level: 0 },
-  optimize: { scripts: ["optimize.js"], level: 0 },
-  "test print": { scripts: ["testprint.js"], level: 2 },
-  "test matrix": { scripts: ["matrix.js"], level: 2 },
-};
-// the parts of the page only this feature's scripts read: what's left behind when the scripts go
+const RECORD = { plotter: 2, model: 2, vase: 2, patterns: 1, molecule: 1, pieces: 1, camera: 2, cutout: 0, levels: 0, optimize: 0, testprint: 2, matrix: 2 };
+// a feature's scripts, from the page
+const SCRIPTS = {};
+for (const m of fs.readFileSync(path.join(APP, "index.html"), "utf8").matchAll(/feature\("(\w+)", "js\/([\w-]+\.js)"\)/g)) (SCRIPTS[m[1]] ||= []).push(m[2]);
+// the parts of the page only this feature's scripts read: what's left behind if they aren't marked as the feature's
 function ownIds(scripts) {
   const ids = (f) => new Set([...fs.readFileSync(path.join(JS, f), "utf8").matchAll(/\$\("([\w-]+)"\)/g)].map((m) => m[1]));
   const mine = new Set(scripts.flatMap((f) => [...ids(f)]));
@@ -30,13 +20,15 @@ module.exports = {
   id: "A61", title: "Features switched off: how well the app does without each one (the modules' scoreboard)",
   guards: "a feature growing new ties to the rest of the app (the app breaking, or throwing errors, without a feature it used to do without), and the record of how modular the app is going stale",
   why: "Nicolaas (10 November 2026) wants the app modular: a feature added or taken out by switching its module on or off, for printers, pen plotters and clay printers. This is the measure of that, taken before the work: each feature's scripts are left out and the app is asked to open, trace and export. The record per feature only goes up.",
-  how: "For each feature, opens the leaf with the feature's scripts loading as empty files; notes the page errors, whether the leaf traced, whether the Print step exports G-code, and how many parts of the page only that feature's scripts read are still there. Scores it 0 to 3 and compares with the record in this file.",
+  how: "For each feature, opens the leaf with the feature switched off (?off=name in the address, as settings.js would); notes the page errors, whether the leaf traced, whether the Print step exports G-code, and how many parts of the page only that feature's scripts read are still there. Scores it 0 to 3 and compares with the record in this file.",
   pass: "Every feature scores at least its record (0 breaks · 1 runs with errors · 2 runs clean · 3 clean and nothing left on the page), and none scores above it without the record being raised; the scoreboard is in the notes.",
   slow: true, needs: ["browser"],
   async run(ctx) {
     const checks = [], board = [];
-    for (const [name, F] of Object.entries(FEATURES)) {
-      const { page, errors, close } = await A.open(ctx, { art: true, without: F.scripts }).catch(() => ({}));
+    checks.push(check("the features in settings.js, the page and this record are the same", Object.keys(SCRIPTS).sort().join(","), "==", Object.keys(RECORD).sort().join(",")));
+    for (const [name, record] of Object.entries(RECORD)) {
+      const F = { scripts: SCRIPTS[name] || [], level: record };
+      const { page, errors, close } = await A.open(ctx, { art: true, url: ctx.url + "?off=" + name }).catch(() => ({}));
       let traced = false, exported = false, left = 0;
       if (page) {
         await page.waitForTimeout(2500);

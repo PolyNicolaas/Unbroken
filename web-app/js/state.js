@@ -33,6 +33,31 @@ function printSettingsChanged() {
   for (const fn of printSettingsSubs) fn();
 }
 
+// ---------- features on and off ----------
+// A feature is a module: its scripts (index.html loads them with feature(name, file)) and the parts of the page marked
+// data-feature="name". Switched off, its scripts aren't loaded and its parts are taken off the page, so the app is as
+// if it had never been built. What's off: settings.js (features: { vase: false }), and the page's address for trying
+// things (?off=vase,plotter turns some off, ?on=vase turns one on that settings.js has off). A feature that needs
+// another goes with it.
+const FEATURE_NEEDS = { vase: ["model"] };
+const FEATURES_OFF = (() => {
+  const off = new Set(),
+    set = (window.UNB_SETTINGS && window.UNB_SETTINGS.features) || {},
+    q = new URLSearchParams(location.search),
+    list = (k) => (q.get(k) || "").split(",").filter(Boolean);
+  for (const k in set) if (set[k] === false) off.add(k);
+  for (const k of list("off")) off.add(k);
+  for (const k of list("on")) off.delete(k);
+  for (const k in FEATURE_NEEDS) if (FEATURE_NEEDS[k].some((n) => off.has(n))) off.add(k);
+  return off;
+})();
+const featureOn = (name) => !FEATURES_OFF.has(name);
+function feature(name, src) {
+  if (featureOn(name)) document.write(`<script src="${src}"><\/script>`);
+}
+// (state.js loads after the page's markup: an off feature's parts go before any other script looks for them)
+for (const el of document.querySelectorAll("[data-feature]")) if (!featureOn(el.dataset.feature)) el.remove();
+
 // ---------- where features join in ----------
 // The core never names a feature. A feature adds itself when its script loads: an entry in a list the core reads
 // (an example, a step of the map, something it's made for), or a function for a moment the core announces
