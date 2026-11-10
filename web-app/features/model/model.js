@@ -337,6 +337,7 @@ async function buildModelLayers(o = {}) {
     support: R.support,
     vase: !!M.vase,
     tightest: R.tightest || null,
+    lattice: R.lattice || null,
   };
 }
 
