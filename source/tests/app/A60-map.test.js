@@ -69,7 +69,7 @@ module.exports = {
     await page.click('.map-for[data-for="print"]'); await A.idle(page, 800);
     await page.click('[data-node="material"]'); await A.idle(page, 800);
     // a control moved into a node's rows goes back to its card when another node opens
-    await page.click('[data-node="size"]'); await A.idle(page, 400);
+    await page.click('[data-node="print"]'); await A.idle(page, 400);
     const home = await page.evaluate(() => ({ flow: !!$("gFlow").closest("#card-h-machine"), printer: !!$("printer").closest("#card-h-choc"), gap: !!$("lineGapMM").closest("#card-h-line"), height: !!$("printHeightMM").closest("#card-h-layers"), math: !$("math").closest("#mapExtra") }));
     checks.push(check("another step opened: every control and the math back in its place", +home.flow + +home.printer + +home.gap + +home.height + +home.math, "==", 5));
     checks.push(check("page errors", errors.length, "==", 0));

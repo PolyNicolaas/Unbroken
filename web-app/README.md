@@ -28,7 +28,7 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/moleditor.js` | The structure editor (Draw or edit…): tap, drag and ring tools on the preview, elements and charges, Erase, Undo, Clean up with RDKit; the edits are the engine's (`UNB.molGrow`, `UNB.molRing` …). |
 | `js/examples.js` | The clean start (the empty preview) and the examples as chips: pictures, patterns, lettering, the vase. |
 | `js/steppers.js` | − and + beside every number box (touch-friendly; holding repeats), boxes made later included. |
-| `js/scroll.js` | The preview kept in view (the phone's pinned preview: Bigger / Smaller) and the settings Wheel. |
+| `js/scroll.js` | The phone's pinned preview: Bigger / Smaller. |
 | `js/workflow.js` | The workflow: made for a printer or a pen plotter, the steps Art → Line → Print or Plot, the Line step's switch (one continuous line, separate strokes, as drawn), and tracing separate strokes. |
 | `js/levels.js` | The Image prep card's grey levels (a row per grey: Trace or Skip) and the Tap the background tool. |
 | `js/controls.js` | The run scheduler (start, debounce and cancel traces) and the control wiring: sliders, size, line spacing and needles. |
@@ -45,7 +45,7 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/pathpad.js` | The path pad (Pattern card, a path setting such as the Spirograph's Centre path): a path drawn by hand that the pattern's centre follows. |
 | `js/sample-skull.js` | The sample 3D model: "Low Poly Skull Pencil Cup" from Printables (CC BY-NC 4.0), as a binary STL in base64, with its credit. |
 | `js/vase.js` | Make a vase (the 3D model card's second choice): the profile editor (drag points, tap to add one, Remove point, arrow keys), the starting shapes, Height, the surface texture and the movement along the path, and the hint that works out what they'll do. Every change goes to `useVase` in model.js; the Print step writes the path (`UNB.vaseStack`). |
-| `js/map.js` | The map of the steps (View ▸ Map of the steps; v140, an experiment): the band of steps the design takes with chips for the less-used ones (faded until they matter), each node's result and a dot from the ready list (`readyUI`); a node's settings as rows (Material, Machine, Layers: the controls moved in while it's open, `mapRows`, and put back, `mapPutBack`) or its cards (`data-map`); the Examples tray (`mapTray`, from `EXAMPLES`). |
+| `js/map.js` | The map of the steps (the interface since v141): the band of steps the design takes with chips for the less-used ones (faded until they matter), each node's result and a dot from the ready list (`readyUI`); a node's settings as rows (Material, Machine, Layers: the controls moved in while it's open, `mapRows`, and put back, `mapPutBack`) or its cards (`data-map`); the Examples tray (`mapTray`, from `EXAMPLES`). |
 | `js/history.js` | Undo / redo and design files. |
 | `js/main.js` | Start-up. |
 
@@ -97,7 +97,7 @@ height, linked to the size) · **Fit** (terms, the error chart, Optimize tracing
 Each tab shows all its controls (the Simple / Advanced switch was removed in October 2026). The less-used ones are
 folded into groups that open with a click and remember whether they were open: **More tracing settings**, **Image
 prep**, **More text settings**, **More line settings** on the Trace tab, **Fine-tuning** and
-**Printer profile** on the 3D tab. **Collapse all / Expand all** fold whole cards. The explanations sit on the page under
+**Printer profile** on the 3D tab. (Since v144 nothing folds: the map shows one step's settings at a time.) The explanations sit on the page under
 the controls they explain; warnings use the warning colour. Save and Open sit in the **File ▾** menu next to **View ▾**.
 
 The app opens set for chocolate: the 18G needle (3D tab) gives a 0.84 mm line width, with a 0.5 mm gap, so lines start at least 1.34 mm apart. Out-and-back strokes are then two strands that far apart with a round loop at each end (see "Stroke ends: the loop" in the main README), which the error readout counts as distance from the traced line. Change `needle` (or `lineWidth`) and `gapBetweenLines` in `settings.js` to open differently.

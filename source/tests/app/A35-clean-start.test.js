@@ -7,8 +7,8 @@ module.exports = {
   pass: "Empty at the start: the empty preview showing with all twelve examples, the readout saying nothing yet, nothing traced on Line and Print; each example becomes its input (five pictures, three patterns, the text, the theobromine molecule, the skull cup, the wavy vase made in the app) and the preview is no longer empty; after the Wave portrait the Leaf is the Picture in use; no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { clean: true, art: true }), checks = [];
-    const empty = await page.evaluate(() => ({ e: document.body.dataset.empty, shown: !$("emptyState").hidden && $("emptyState").offsetParent !== null, chips: document.querySelectorAll("#emptyState [data-example]").length, chip: $("chip").textContent, pic: st.art.picture }));
-    checks.push(check("opens empty, the empty preview showing, its examples (chips)", +(empty.e === "1" && empty.shown && !empty.pic) * empty.chips, "==", 12), check("… the readout says nothing yet", +/Nothing yet/.test(empty.chip), "==", 1));
+    const empty = await page.evaluate(() => ({ e: document.body.dataset.empty, shown: !$("emptyState").hidden && $("emptyState").offsetParent !== null, chips: EXAMPLES.length, tray: !!document.querySelector("#mapTray:not([hidden])"), chip: $("chip").textContent, pic: st.art.picture }));
+    checks.push(check("opens empty, the empty preview showing, the examples tray closed (examples to offer)", +(empty.e === "1" && empty.shown && !empty.pic && !empty.tray) * empty.chips, "==", 12), check("… the readout says nothing yet", +/Nothing yet/.test(empty.chip), "==", 1));
     await page.click("label[for=viewDesign]"); await A.idle(page, 800);
     const line = await page.evaluate(() => ({ final: !!st.final, walk: !!st.walk, chip: $("chip").textContent }));
     await A.print(page); await A.idle(page, 800);

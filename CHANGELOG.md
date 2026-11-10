@@ -3,6 +3,27 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v144 · 2026-11-09
+
+The step tabs are retired: the map of the steps is the only interface.
+
+- **Taken out**: the step tabs and View ▸ Map of the steps (the switch back to them), the Next bar, More print
+  settings, card folding with Collapse all / Expand all, the settings Wheel, the example chips in the Input card and
+  the empty preview (the Examples tray has them), and the unused `UNB.PATTERN_SHAPES`. About 400 lines of code and
+  50 style rules.
+- **The tests moved to the map first** (they ran on the tabs): a test names a control and the test library opens the
+  step that holds it, as someone using the app would. That turned up things the map was missing or had broken:
+  - once zoomed in, **+, − and Fit stopped working** (the drag-to-pan took their clicks);
+  - **a pen plotter had no line width or gap** (they're Material's, and a plotter has no Material step: there they
+    show on Line);
+  - the **printer's summary** (cartridge, plate, retraction) and the **G-code notice** weren't on any step (now on
+    Material and on Print's Export);
+  - a **ready-list line** now opens the step that holds the setting, not just its part of the workflow;
+  - **on a phone the preview took most of the screen**: the pinned preview is back, and phones and wide screens now
+    switch at one width (640 px) instead of two.
+- A12 (every control on some step, for a printer and a plotter) and A38 (the layout) rewritten for the map; the
+  Wheel's and folding's checks removed with them.
+
 ## v143 · 2026-11-09
 
 A tidy-up after the map of the steps, and two bugs it turned up.

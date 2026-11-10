@@ -96,9 +96,6 @@ Tests:
     the chocolate database (DATA-PLAN.md stage 3) or the browser's storage until then.
   - *Keep or drop on a chocolate switch*: after changing Flow by hand, switching chocolate asks whether to keep the
     change or take the new recipe's value.
-  - *Retire the step tabs*: View ▸ Map of the steps still turns the map off, and almost every app test runs on the
-    tabs. Decide whether to keep both; if the tabs go, the tests move to the map first, then workflow.js's Next bar,
-    the tabs and their styles can go.
   - Small: the last chips' names are tight at about 900 px wide; sliders' names are bold where other rows' aren't.
 
 - **Image prep and grey levels** (decided 27 October, [`docs/PREP-PLAN.md`](docs/PREP-PLAN.md)): a still-life sample;
@@ -159,7 +156,8 @@ design, never G-code: the owner makes the G-code with his own printer and chocol
   update is built and published by hand.
 
 Done since the last sort (9 November): Make a vase (v139); the map of the steps (v140–v141); the Suggestion box taken
-out (v141, see Removed); a solid base however big (v142); the weekly tidy-up (docs/TIDY.md).
+out (v141, see Removed); a solid base however big (v142); the weekly tidy-up (docs/TIDY.md); the step tabs retired
+(v144, see Removed).
 
 Done before that: Edit line (push, smooth, straighten the traced line by hand) and the Geometric art card
 (v100, 26 October); the desktop app taken out for now (19 October, see Removed); the 4000-term limit lifted to
@@ -196,6 +194,7 @@ wall), connectors through the middle of 3D models, the challenge runner, and the
 
 | When | What | Why |
 |---|---|---|
+| 2026-11-09 | The step tabs, the Next bar, More print settings, card folding (Collapse all / Expand all) and the settings Wheel (v107–v119) | The map of the steps does their job: one interface. A fold or a wheel could come back if a step's settings grow too long to scan |
 | 2026-11-09 | The Suggestion box (notes.js, File ▸ Suggestion box…, v113) | Comments come in the chat instead; on GitHub Pages the notes stayed in the browser that typed them. Could come back with the shared database (DATA-PLAN.md stage 2) |
 | 2026-10-27 | Edit line (push, smooth, straighten the traced line by hand, v100) | Not very useful in practice: hand edits are better made in a drawing app (export the SVG, edit, drop it back in) |
 | 2026-10-27 | Shading in the Tracing card (hatch, cross-hatch, squiggle) | Didn't work well and was hard to use; patterns that draw a picture's tones replace it (v103) |

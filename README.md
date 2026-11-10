@@ -100,12 +100,19 @@ and the slow spots. Anything still open from them is in [`ROADMAP.md`](ROADMAP.m
 
 ## The workflow
 
-What it's made for comes first, at the top: **a printer** (chocolate, clay) or **a pen plotter**. Then three steps,
-**1 Art → 2 Line → 3 Print** (a printer) or **3 Plot** (a pen plotter) (`web-app/js/workflow.js`,
-[`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)):
+What it's made for comes first, at the top: **a printer** (chocolate, clay) or **a pen plotter**. Then the steps, as
+a **map** across the top of the page (`web-app/js/map.js`): one thick line through the steps this design takes
+(**Material → Art → Line → Size → Print** for a printer; a pen plotter ends in **Plot** and has no Material; a 3D
+model or a vase goes straight from Art to Print), with the less-used settings as small chips above and below their
+step (Examples, Picture prep, Tracing, Plate, Machine, Layers, Tests), faded until they matter. Each step shows its
+result, and a dot when the ready list has something for it. Tapping a step opens its settings beside the preview,
+one row per setting. The step tabs this replaced were taken out in v144 (`web-app/js/workflow.js` still holds the
+workflow's rules, [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)). Tests A60, A12.
+
+The steps:
 
 - **Art**: what to start from (below). The app opens empty; the examples (pictures, patterns, lettering, the vase) are
-  chips on the empty preview and in the Input card (`web-app/js/examples.js`; `?example=leaf` in the address, or
+  a tray opened from the Examples chip on the map (`web-app/js/examples.js`; `?example=leaf` in the address, or
   `defaults.sample` in settings.js, starts on one). Test A35.
 - **Trace** (the switch under the preview, on every step): on, the art becomes the line the Line step picks; off,
   the art stays as it is: a pattern or text plots as its exact lines (as drawn), a picture shows as the picture and
@@ -118,17 +125,12 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
   Trace off and a picture as separate strokes, until you pick. The cards a line doesn't use are hidden.
 - **Print** (plate, layers, G-code) or **Plot** (the page, pens, SVG for Saxi).
 
-**The Next bar** at the foot of the settings goes on (and back) a step.
-Test A38.
-
 The preview follows the step: the art or the line on Art and Line (the page for as drawn), the page on Plot, the plate or
 the layers on Print. Test A33.
 
 **Touch and scrolling** (`steppers.js`, `scroll.js`): every number box has − and + (finger-sized on touch screens;
 holding repeats). The preview stays in view while the settings scroll: a sticky column on wide screens, a compact
-pinned preview on phones (**Bigger** / **Smaller**). With the **Wheel** on (next to Collapse all), when scrolling stops
-the card that reached the top opens and the others fold to their headers, and cards further away tip back a little.
-Test A34.
+pinned preview on phones (**Bigger** / **Smaller**). Test A34.
 
 ## The Art tab
 
