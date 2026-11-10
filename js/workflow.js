@@ -55,9 +55,6 @@ function workflowUI() {
       ? `the ${{ text: "text's", molecule: "molecule's" }[st.art.kind] || "pattern's"} own lines, exactly as drawn.` +
         (plot ? "" : " A printer needs it traced: turn Trace on to print.")
       : "the picture as it is. Turn Trace on to make it into lines.";
-  $("stepLineSub").textContent = LINE_SUB[mode];
-  $("goOut").textContent = plot ? "Next: plot it →" : "Next: print it →";
-  nextBarUI();
   const kind = { picture: "picture", text: "text", pattern: "pattern", molecule: "molecule", model: "model" }[
     st.art.kind
   ];
@@ -91,22 +88,6 @@ function workflowUI() {
   // on Art and Line the preview shows what the line will be: the page for as drawn, else the line
   const v = document.body.dataset.view;
   if ((v === "art" || v === "design") && stageFor(v) !== stageNow()) setStage(stageFor(v));
-}
-// the Next bar (at the foot of the settings): its note says what the next step does
-function nextBarUI() {
-  const mode = lineModeNow(),
-    plot = artForPlot(),
-    v = document.body.dataset.view;
-  $("nextHint").textContent =
-    v === "art"
-      ? mode === "drawn" || mode === "none"
-        ? "Trace is off"
-        : LINE_SUB[mode]
-      : v === "design"
-        ? plot
-          ? "the page, pens, SVG"
-          : "plate, layers, G-code"
-        : "";
 }
 // Print, or plot a picture, with Trace off: the step needs the line, so the preview says so (with the switch)
 function traceNeededUI() {
@@ -161,13 +142,6 @@ function lineModeChanged() {
   followStep();
   recordSoon();
 }
-$("goOut").addEventListener("click", () => {
-  $(artForPlot() ? "view2D" : "viewChoc").checked = true;
-  viewChanged();
-});
-// a new step starts at the top of the page (its first card and the preview)
-for (const id of ["goTrace", "goOut", "toArt", "backLine", "backLine2"])
-  $(id).addEventListener("click", () => window.scrollTo({ top: 0 }));
 
 // ---------- Separate strokes: traced into strokes (pipeline.js extract hands over to this) ----------
 // traced at the page's size: the base resolution per 100 mm of the page's long side (inside the margins)
@@ -252,20 +226,3 @@ async function traceStrokes(g) {
 workflowUI();
 
 // the last step's Next bar: the export, one tap away (the Export cards keep their options)
-// The export's message shows under its button, far down the Export card (off screen on an iPad), so a refusal or a
-// failure tapped from the Next bar also shows as a toast.
-function nextBarExport(btn, msg) {
-  let obs = null;
-  const say = () => {
-    if (!msg.classList.contains("busy") && obs) obs.disconnect();
-    if (msg.classList.contains("bad")) toast(msg.textContent, true); // ui.js
-  };
-  setStatus(msg, "", "");
-  $(btn).click();
-  if (msg.classList.contains("busy")) {
-    obs = new MutationObserver(say);
-    obs.observe(msg, { attributes: true, childList: true, characterData: true, subtree: true });
-  } else say();
-}
-$("nbGcode").addEventListener("click", () => nextBarExport("gcodeBtn", $("gcodeMsg")));
-$("nbSvg").addEventListener("click", () => nextBarExport("exportBtn", $("exportMsg")));

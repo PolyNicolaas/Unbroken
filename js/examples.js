@@ -29,22 +29,6 @@ function useExample(key) {
   e[3]();
   return true;
 }
-// the chips (the Input card and the empty preview get the same row)
-document.querySelectorAll("[data-examples]").forEach((box) => {
-  for (const [key, name, what] of EXAMPLES) {
-    const b = document.createElement("button");
-    b.type = "button";
-    b.className = "chip-btn";
-    b.dataset.example = key;
-    b.textContent = name;
-    b.title = what;
-    b.addEventListener("click", () => {
-      useExample(key);
-      recordSoon();
-    });
-    box.appendChild(b);
-  }
-});
 $("esChoose").addEventListener("click", () => $("anyFile").click());
 
 // Empty: the Art step's Picture with no picture yet. The preview says how to start; the trace has nothing to do.

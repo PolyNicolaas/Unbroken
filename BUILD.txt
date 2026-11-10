@@ -1,6 +1,6 @@
-Unbroken · web app build v143
-Built:  2026-11-09T23:42:35.090Z
-Tests:  114 of 114 tests passed
+Unbroken · web app build v144
+Built:  2026-11-10T02:13:34.135Z
+Tests:  114 of 114 tests passed (the app tests run in batches)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -17,35 +17,35 @@ Files (sha1, first 12):
   a6db241501bf  10-export.js
   ac3de470b974  11-stages.js
   4f33518be515  12-models.js
-  f384302a9e33  13-patterns.js
+  3e3d05c682f5  13-patterns.js
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   c58b27214155  16-molecule.js
   2ca0391bde0f  17-vase.js
-  7caff25bff5a  core.js
-  6ca793b2392f  css/app.css
-  f2a0abd81100  css/theme.css
+  a20a08c3fb93  core.js
+  8a9b1506d9f1  css/app.css
+  2e7b02cdb930  css/theme.css
   84cc740df42b  fonts.js
-  d1bd6f45643c  index.html
-  04742756d25f  js/art.js
+  8bd3251c814e  index.html
+  601db93202eb  js/art.js
   01da455a1225  js/camera.js
   a5b3fec619dd  js/config.js
   65b40fc186b1  js/controls.js
-  419f0a9223bc  js/cutout.js
-  c8739f3923bb  js/engine-bridge.js
-  9cba404a6796  js/examples.js
-  44f7c877cb4b  js/export.js
+  bb2ce755a10d  js/cutout.js
+  83ff93694a71  js/engine-bridge.js
+  bd4b61770ee1  js/examples.js
+  dd91d3d2997d  js/export.js
   7a408170558e  js/history.js
   255ad8424b9b  js/layers.js
   430a29c664e0  js/levels.js
   7510c8db4a05  js/main.js
-  e24173635730  js/map.js
-  e04ad77f8f92  js/matrix.js
+  9e453b075dbe  js/map.js
+  70acf6ced04b  js/matrix.js
   7561c5a36bad  js/model.js
   4af0a8cd6be9  js/molecule.js
-  7a0d068854d0  js/moleditor.js
+  add9b908520a  js/moleditor.js
   0d0910778259  js/optimize.js
-  8344d7117344  js/pathpad.js
+  035f0cc17156  js/pathpad.js
   e5316bce512f  js/patterns.js
   568f4e1474f2  js/pieces.js
   61f2764d42fd  js/pipeline.js
@@ -53,7 +53,7 @@ Files (sha1, first 12):
   b3ebdd62a275  js/preview.js
   13a1993d3c1e  js/readouts.js
   ce0678154019  js/sample-skull.js
-  6a60c3f00fce  js/scroll.js
+  01f3cf4a980c  js/scroll.js
   13c042d46d81  js/source.js
   88c609c4d0f6  js/state.js
   49125f92bd01  js/steppers.js
@@ -61,8 +61,8 @@ Files (sha1, first 12):
   ffb18c999901  js/tools.js
   e651a30c34d9  js/ui.js
   7cca0253f8e3  js/vase.js
-  e658b885006d  js/views.js
-  7c48c854ce75  js/workflow.js
-  a6fb2284499f  js/zoom.js
+  2f68508e82bf  js/views.js
+  85bb82dd712d  js/workflow.js
+  cb0c999d9f14  js/zoom.js
   38d35f195d41  settings.js
-  0125c79aef85  worker.js
+  c359c37ab752  worker.js

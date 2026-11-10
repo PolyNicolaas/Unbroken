@@ -197,7 +197,7 @@ async function mxInfoUI() {
   $("mxVal").textContent = mxLevelsOK(L) ? "9 copies" : "";
   // (only while the card is open on the Print step: slicing three layer heights isn't free)
   const card = $("h-matrix").closest("section");
-  if (!layersWanted() || card.classList.contains("collapsed") || !card.offsetParent) return;
+  if (!layersWanted() || !card.offsetParent) return;
   try {
     const p = await mxPlan();
     if (my !== mxTok) return;
@@ -255,11 +255,8 @@ for (const k of ["S", "F", "H"])
       mxSoon();
     });
 $("mxSlow").addEventListener("change", mxSoon);
-$("h-matrix")
-  .closest("section")
-  .addEventListener("click", (e) => {
-    if (e.target.closest(".card-toggle")) mxSoon(); // (opened: its size, time and chocolate)
-  });
+// (its size, time and chocolate are worked out when the card comes into view: its step opened on the map)
+new ResizeObserver(() => mxSoon()).observe($("h-matrix").closest("section"));
 onPrintSettings(mxSoon); // the printer, chocolate, needle, layer height
 for (const id of ["gFeed", "gFlow", "gZ", "copyGap"]) $(id).addEventListener("input", mxSoon);
 // (a design opened or undone: its levels and scores, or round the settings when it has none)

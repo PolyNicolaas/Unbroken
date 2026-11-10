@@ -570,10 +570,6 @@ $("picDraw").addEventListener("click", () => {
   setStage("line");
   enterTool("draw");
 });
-$("goTrace").addEventListener("click", () => {
-  $("viewDesign").checked = true;
-  viewChanged();
-});
 document.querySelectorAll('input[name="artFor"]').forEach((r) =>
   r.addEventListener("change", () => {
     patternControls(st.art.pattern); // patterns.js: the ranges for this use
@@ -582,12 +578,3 @@ document.querySelectorAll('input[name="artFor"]').forEach((r) =>
     recordSoon();
   })
 );
-for (const id of ["backLine", "backLine2"])
-  $(id).addEventListener("click", () => {
-    $("viewDesign").checked = true;
-    viewChanged();
-  });
-$("toArt").addEventListener("click", () => {
-  $("viewArt").checked = true;
-  viewChanged();
-});

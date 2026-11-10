@@ -35,7 +35,7 @@ function molEditOpen() {
   $("viewArt").checked = true;
   viewChanged();
   // a phone's pinned preview is small to draw on: the big one (scroll.js)
-  if (innerWidth < 900 && document.body.dataset.pv !== "big") $("pvSize").click();
+  if (innerWidth < 640 && document.body.dataset.pv !== "big") $("pvSize").click();
   requestAnimationFrame(() => {
     meFit();
     meDraw();

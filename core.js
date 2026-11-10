@@ -61,7 +61,7 @@
                       truchet, gammaOf, easeOut, toneIn, toneGrid, hilbertTone, wavesTone, spiralTone, labyrinthTone,
                       closeGaps, outlineLoop, rangeParam, choiceParam, checkParam, pct, ord, off0, SHAPE, SIDES,
                       CORNERS, CONTRAST, INVERT,
-                      UNB.PATTERNS, UNB.PATTERN_SHAPES, UNB.patternDefaults, UNB.patternLayout, UNB.pattern
+                      UNB.PATTERNS, UNB.patternDefaults, UNB.patternLayout, UNB.pattern
     14-photo.js   13. Photos — a camera photo → a clean picture: the page found and flattened, the light evened out,
                       the paper white and the ink kept, or an object's colours balanced.
                       photoCells, convexHull, quadArea, widestQuad, orderCorners, UNB.findPage, sharpenCorners,
@@ -116,7 +116,7 @@
     module.exports = root.UNB;
   } else if (typeof importScripts === "function") {
     // a Web Worker (worker.js): the parts sit next to this file
-    importScripts(...PARTS.map((p) => p + "?v=v143"));
+    importScripts(...PARTS.map((p) => p + "?v=v144"));
     root.UNB.PARTS = PARTS;
   } else if (root.UNB) root.UNB.PARTS = PARTS; // the page: index.html loads the parts itself, before this file
 })(typeof window !== "undefined" ? window : globalThis);
