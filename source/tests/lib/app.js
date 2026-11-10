@@ -41,6 +41,8 @@ async function open(ctx, opts = {}) {
   const page = await context.newPage(),
     errors = [];
   page.on("pageerror", (e) => errors.push(e.message + (process.env.STACK ? " " + e.stack : "")));
+  // opts.without: scripts of the app left out (a feature switched off, test A61): they load as empty files
+  for (const f of opts.without || []) await page.route("**/js/" + f, (r) => r.fulfill({ status: 200, contentType: "text/javascript", body: "" }));
   page.on("console", (m) => {
     if (m.type() === "error") errors.push("console: " + m.text());
   });
