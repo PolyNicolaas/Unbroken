@@ -117,7 +117,6 @@ const MAP_NODES = {
     step: "plot",
     cards: ["h-plot"],
     val: () => (mapNothing() ? "nothing yet" : "the page"),
-    extra: [],
   },
   fills: { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" },
   pexport: { cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" },
@@ -129,7 +128,7 @@ const selText = (id) => {
   return s && s.selectedIndex >= 0 ? s.options[s.selectedIndex].textContent.trim() : "";
 };
 // nothing to work on yet: the empty start, or a picture still being traced
-const mapNothing = () => (typeof isEmpty === "function" && isEmpty()) || (!isModel() && !st.final);
+const mapNothing = () => isEmpty() || (!isModel() && !st.final);
 // the size the design is drawn at: on a pen plotter's page (the page card's readout), else the Size card's own
 const sizeText = () => {
   if (mapNothing()) return "";
@@ -153,6 +152,8 @@ function mapCardVal(hid) {
     .replace(/ⓘ/g, "")
     .trim();
 }
+
+const mapVal = (N) => (N.val ? N.val() : mapCardVal(N.cards[0]));
 
 // ---------- the shape of the map for this design ----------
 // spine: the steps the design goes through, left to right; up / down: chips above and below a spine node
@@ -203,14 +204,11 @@ function mapRender() {
     nh = 46;
   S.spine.forEach((id, i) => (pos[id] = { x: side + i * (sw + gap), y: midY - nh / 2, w: sw, h: nh, big: true, i }));
   const chips = (list, parent, y) => {
-    // (the last step's chips may lean left into the gap before it, so they aren't cut short)
-    const room = Math.min(sw + gap - 12, W - 2 * side),
-      w = Math.min(132, (room - 8 * (list.length - 1)) / list.length);
-    // (centred on their step, within its room)
-    const x0 = Math.max(
-      side,
-      Math.min(W - side - room, pos[parent].x + pos[parent].w / 2 - (list.length * (w + 8) - 8) / 2)
-    );
+    const room = sw + gap - 12,
+      w = Math.min(132, (room - 8 * (list.length - 1)) / list.length),
+      tw = list.length * (w + 8) - 8;
+    // (centred on their step; at the band's ends they lean in just enough to stay inside it)
+    const x0 = Math.max(side, Math.min(W - side - tw, pos[parent].x + pos[parent].w / 2 - tw / 2));
     list.forEach((id, k) => (pos[id] = { x: x0 + k * (w + 8), y, w, h: MAP_CHIP_H }));
   };
   for (const [p, list] of Object.entries(S.up)) chips(list, p, 6);
@@ -238,7 +236,7 @@ function mapRender() {
     el.classList.toggle("open", open);
     el.setAttribute("aria-pressed", String(open));
     el.querySelector(".map-cap").textContent = p.big ? `${p.i + 1} · ${N.cap}` : N.cap;
-    el.querySelector(".map-val").textContent = N.val ? N.val() : mapCardVal(N.cards[0]);
+    el.querySelector(".map-val").textContent = mapVal(N);
   }
   // the lines: the design's own line thick through the spine, a short thin stem to each chip
   let spine = "",
@@ -299,7 +297,13 @@ function mapFieldOf(ref) {
   if (el.matches("div.row, div.two, label.field")) return el;
   return el.closest("label.field, div.row, label.check") || el;
 }
-let mapMoved = []; // the settings moved into the rows, each with a marker where it came from
+let mapMoved = []; // the parts moved into the panel, each with a marker where it came from
+function mapMove(el, into) {
+  if (!el.__mapHome) el.__mapHome = document.createComment("map: its place");
+  if (el.parentNode) el.parentNode.insertBefore(el.__mapHome, el);
+  into.appendChild(el);
+  mapMoved.push(el);
+}
 function mapPutBack() {
   for (const el of mapMoved)
     if (el.__mapHome && el.__mapHome.parentNode) el.__mapHome.parentNode.insertBefore(el, el.__mapHome);
@@ -320,10 +324,7 @@ function mapRows(N) {
     h.textContent = title;
     g.appendChild(h);
     for (const el of els) {
-      if (!el.__mapHome) el.__mapHome = document.createComment("map: its place");
-      if (el.parentNode) el.parentNode.insertBefore(el.__mapHome, el);
-      g.appendChild(el);
-      mapMoved.push(el);
+      mapMove(el, g);
       // a Fine-tuning setting changed from the recipe: ↺ puts it back
       const inp = el.matches("label.field") && el.querySelector("input, select");
       if (inp && inp.id in TUNE_FROM && !el.querySelector(".map-reset")) {
@@ -352,7 +353,7 @@ function mapPanelHead() {
   const N = mapOpenId && MAP_NODES[mapOpenId];
   if (!N) return;
   $("mapHeadTitle").textContent = N.cap;
-  $("mapHeadSub").textContent = N.val ? N.val() : mapCardVal(N.cards[0]);
+  $("mapHeadSub").textContent = mapVal(N);
   $("mapRecipe").hidden = !N.recipe;
   if (N.recipe) {
     $("mapRecipeSwatch").style.background = $("chocSwatch").style.background;
@@ -380,19 +381,10 @@ function mapOpen(id) {
     const c = mapCard(h);
     if (!c) continue;
     c.dataset.map = "1";
-    if (c.classList.contains("collapsed") && typeof cardSetOpen === "function") cardSetOpen(c, true, false);
+    if (c.classList.contains("collapsed") && cardSetOpen) cardSetOpen(c, true, false);
   }
-  $("mapRows").dataset.map = N.rows ? "1" : "";
   // a node's extra parts (the math, for the Line step) move into the panel after its cards
-  for (const ref of N.extra || []) {
-    const el = mapFieldOf(ref);
-    if (!el) continue;
-    if (!el.__mapHome) el.__mapHome = document.createComment("map: its place");
-    if (el.parentNode) el.parentNode.insertBefore(el.__mapHome, el);
-    $("mapExtra").appendChild(el);
-    mapMoved.push(el);
-  }
-  document.body.dataset.mapnode = id;
+  for (const ref of N.extra || []) if (mapFieldOf(ref)) mapMove(mapFieldOf(ref), $("mapExtra"));
   mapRender();
   const part = N.at && $(N.at) && ($(N.at).closest(".seg") || $(N.at));
   if (part) part.scrollIntoView({ block: "center" });
@@ -470,7 +462,6 @@ function mapSet(on, store = true) {
     mapPutBack();
     mapTray(false);
     document.querySelectorAll(".panel section.card").forEach((c) => c.removeAttribute("data-map"));
-    delete document.body.dataset.mapnode;
   }
   window.dispatchEvent(new Event("resize")); // (the preview's canvas sizes itself to its new box)
 }

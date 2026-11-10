@@ -12,7 +12,7 @@
 // still wanted then go to the fresh worker). cancel(pred) drops only the calls pred(call) picks, e.g. the layers of an
 // older setting but not the 2D page's pen line on the same engine. Where workers aren't allowed (opened straight from
 // disk, or a page that blocks them) the same calls run on the page in small slices instead.
-const WORKER_URL = "worker.js?v=v142";
+const WORKER_URL = "worker.js?v=v143";
 const CANCELLED = Object.freeze({ cancelled: true });
 let workersOK = null; // null: not known yet · true · false: run on the page
 function makeEngine(name) {

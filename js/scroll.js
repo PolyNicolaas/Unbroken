@@ -31,8 +31,7 @@ const WHEEL_KEY = storeKey("wheel");
 const wheelOn = () => $("wheel").checked;
 const calm = matchMedia("(prefers-reduced-motion: reduce)");
 // the cards of the step in use, top to bottom
-const stepCards = () =>
-  [...document.querySelectorAll(".panel section.card")].filter((c) => c.offsetParent && !c.classList.contains("notes"));
+const stepCards = () => [...document.querySelectorAll(".panel section.card")].filter((c) => c.offsetParent);
 // where a card lands: just under the pinned preview on a phone, near the top of the window otherwise
 function landingY() {
   const left = document.querySelector(".left"),

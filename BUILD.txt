@@ -1,6 +1,6 @@
-Unbroken · web app build v142
-Built:  2026-11-09T20:00:02.946Z
-Tests:  113 of 114 in the build; A31 (timed out under load) passed on its own
+Unbroken · web app build v143
+Built:  2026-11-09T23:42:35.090Z
+Tests:  114 of 114 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -22,24 +22,24 @@ Files (sha1, first 12):
   db42a3da56bd  15-cutout.js
   c58b27214155  16-molecule.js
   2ca0391bde0f  17-vase.js
-  dd53d6ca4ee7  core.js
-  bad5ef1ddb7f  css/app.css
+  7caff25bff5a  core.js
+  6ca793b2392f  css/app.css
   f2a0abd81100  css/theme.css
   84cc740df42b  fonts.js
-  6077e0eab677  index.html
+  d1bd6f45643c  index.html
   04742756d25f  js/art.js
   01da455a1225  js/camera.js
   a5b3fec619dd  js/config.js
   65b40fc186b1  js/controls.js
   419f0a9223bc  js/cutout.js
-  8916def6ce00  js/engine-bridge.js
+  c8739f3923bb  js/engine-bridge.js
   9cba404a6796  js/examples.js
   44f7c877cb4b  js/export.js
   7a408170558e  js/history.js
   255ad8424b9b  js/layers.js
   430a29c664e0  js/levels.js
   7510c8db4a05  js/main.js
-  27eacfab9190  js/map.js
+  e24173635730  js/map.js
   e04ad77f8f92  js/matrix.js
   7561c5a36bad  js/model.js
   4af0a8cd6be9  js/molecule.js
@@ -53,9 +53,9 @@ Files (sha1, first 12):
   b3ebdd62a275  js/preview.js
   13a1993d3c1e  js/readouts.js
   ce0678154019  js/sample-skull.js
-  90c1c8639014  js/scroll.js
+  6a60c3f00fce  js/scroll.js
   13c042d46d81  js/source.js
-  78f5450a22d9  js/state.js
+  88c609c4d0f6  js/state.js
   49125f92bd01  js/steppers.js
   3c01d085cc08  js/testprint.js
   ffb18c999901  js/tools.js
@@ -65,4 +65,4 @@ Files (sha1, first 12):
   7c48c854ce75  js/workflow.js
   a6fb2284499f  js/zoom.js
   38d35f195d41  settings.js
-  e00ce6b4cfe7  worker.js
+  0125c79aef85  worker.js
