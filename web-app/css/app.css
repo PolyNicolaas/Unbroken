@@ -60,15 +60,9 @@ input[readonly] { background: transparent; }
 section.card { background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding: calc(14px * var(--space)); display: grid; gap: calc(12px * var(--space)); min-width: 0; }
 section.card h2 { margin: 0; font: 600 calc(11px * var(--text))/1 var(--font-body); letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }
 section.card h2 span { letter-spacing: 0; text-transform: none; font: 500 calc(12px * var(--text))/1 var(--font-mono); color: var(--ink); }
-.card-toggle { all: unset; box-sizing: border-box; cursor: pointer; display: flex; align-items: baseline; justify-content: space-between; gap: calc(8px * var(--space)); width: 100%;
+.card-head { all: unset; box-sizing: border-box; display: flex; align-items: baseline; justify-content: space-between; gap: calc(8px * var(--space)); width: 100%;
   font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; margin: -6px -6px; padding: calc(6px * var(--space)); border-radius: calc(6px * var(--corner)); width: calc(100% + 12px); }
-.card-toggle:hover { color: var(--ink); }
-.card-toggle:focus-visible { outline: 2px solid var(--accent); outline-offset: 0; }
-.card-toggle .t { font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
-.card-toggle .t::before { content: "▸"; display: inline-block; margin-right: calc(7px * var(--space)); transition: transform .15s; transform: rotate(90deg); }
-section.card.collapsed .card-toggle .t::before { transform: rotate(0deg); }
-section.card.collapsed { gap: 0; }
-section.card.collapsed > .card-body { display: none; }
+.card-head .t { font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; }
 .card-body { display: grid; gap: calc(12px * var(--space)); min-width: 0; }
 body:not([data-view="design"]) .design-only, body:not([data-view="choc"]) .choc-only, body:not([data-view="plot"]) .plot-only, body:not([data-view="art"]) .art-only { display: none !important; }
 canvas.page { display: block; border-radius: calc(6px * var(--corner)); background: var(--paper); }
@@ -86,7 +80,6 @@ canvas.page.picking { cursor: pointer; }
 .pen-row .f-x { grid-area: cross; align-self: center; }
 .pen-row input[type=color], #penColor { width: 100%; height: calc(30px * var(--space)); padding: 0 2px; border: 1px solid var(--rule); border-radius: calc(6px * var(--corner)); background: var(--surface); }
 .pen-row .pen-del { grid-area: del; justify-self: end; align-self: center; }
-.view-tabs label { padding: calc(8px * var(--space)); }
 .construction { margin: 0; padding: calc(10px * var(--space)) calc(12px * var(--space)); border-radius: calc(8px * var(--corner)); background: color-mix(in srgb, var(--warn) 12%, transparent); color: var(--ink); font-size: calc(13px * var(--text)); line-height: 1.45; }
 .construction b { color: var(--warn); }
 /* (sized from its pane, like the page and plate: a percentage here falls back to the canvas's own drawing size when
@@ -219,7 +212,6 @@ th:first-child, td:first-child { text-align: left; }
 .minimap { position: absolute; right: 10px; bottom: 10px; width: 150px; padding: calc(5px * var(--space)) calc(5px * var(--space)) calc(3px * var(--space)); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); background: var(--surface); cursor: pointer; display: grid; gap: calc(2px * var(--space)); font: 500 calc(10.5px * var(--text))/1.2 var(--font-mono); color: var(--muted); text-align: left; }
 .minimap canvas { width: 100%; aspect-ratio: 340 / 232; display: block; border-radius: calc(4px * var(--corner)); }
 @media (max-width: 600px) { .minimap { width: 96px; right: 6px; bottom: 6px; font-size: calc(9.5px * var(--text)); } }   /* phones: cover less of the drawing */
-.fold-all { display: inline-flex; gap: calc(6px * var(--space)); }
 .minimap.bad { border-color: var(--warn); color: var(--warn); }
 .minimap:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .canvas-box.dropping::after { content: "Drop a file: an image, an STL model or a saved design"; position: absolute; inset: 10px; border: 2px dashed var(--accent); border-radius: calc(8px * var(--corner));
@@ -252,7 +244,7 @@ th:first-child, td:first-child { text-align: left; }
 .dropzone .dz-sub { font-size: calc(11.5px * var(--text)); }
 .dropzone:hover, .dropzone:focus-visible, .dropzone.over, body:has(.canvas-box.dropping) .dropzone { border-color: var(--accent); background: var(--surface); outline: none; }
 #sample { width: 100%; }
-.card-toggle .hval { font: 500 calc(11px * var(--text))/1.2 var(--font-mono); color: var(--muted); }
+.card-head .hval { font: 500 calc(11px * var(--text))/1.2 var(--font-mono); color: var(--muted); }
 
 /* Fine-tuning (3D): a value changed from its profile says what the profile has */
 .tune .field small.from { color: var(--muted); font-size: calc(11px * var(--text)); min-height: 1em; }
@@ -269,7 +261,7 @@ button.info { border: 0; background: none; padding: 0 0.25em; margin-left: 0.15e
   font: inherit; font-size: 0.95em; line-height: 1; vertical-align: baseline; text-transform: none; letter-spacing: 0; }
 button.info:hover, button.info[aria-expanded="true"] { color: var(--accent); }
 .card h2 { display: flex; align-items: center; }
-.card h2 > .card-toggle { flex: 1; }
+.card h2 > .card-head { flex: 1; }
 p.hint.help { border-left: 2px solid var(--rule); padding-left: 0.6em; }
 
 /* Test print: the best strip's number beside its button */
@@ -294,8 +286,8 @@ p.hint.help { border-left: 2px solid var(--rule); padding-left: 0.6em; }
 .ready li button { all: unset; cursor: pointer; color: var(--ink); }
 .ready li button:hover, .ready li button:focus-visible { text-decoration: underline; }
 .ready li.bad button { color: var(--warn); font-weight: 600; }
-.card-toggle .hval.ok { color: var(--good); }
-.card-toggle .hval.warn, .card-toggle .hval.bad { color: var(--warn); }
+.card-head .hval.ok { color: var(--good); }
+.card-head .hval.warn, .card-head .hval.bad { color: var(--warn); }
 
 /* the Art tab: the input in use shows its own card (art.js sets data-art) */
 body:not([data-art="picture"]) .art-picture, body:not([data-art="text"]) .art-text, body:not([data-art="pattern"]) .art-pattern, body:not([data-art="model"]) .art-model, body:not([data-art="molecule"]) .art-molecule { display: none !important; }
@@ -308,12 +300,6 @@ body:not([data-art="picture"]) .art-picture, body:not([data-art="text"]) .art-te
 .level-name { font-size: 0.85em; }
 .seg.mini label { padding: 4px 10px; font-size: 0.85em; }
 
-/* The workflow (workflow.js): what it's made for, then the steps Art → Line → Print or Plot */
-.output-row { display: grid; grid-template-columns: auto 1fr; align-items: center; gap: calc(8px * var(--space)); margin-bottom: calc(8px * var(--space)); }
-.output-row .name { font-size: calc(12px * var(--text)); text-transform: uppercase; letter-spacing: 0.06em; color: var(--muted); }
-.steps label b { display: inline-block; min-width: 1.4em; height: 1.4em; line-height: 1.4em; margin-right: 4px; border-radius: 50%; background: var(--rule); font-size: 0.8em; text-align: center; }
-.steps input:checked + label b { background: var(--accent); color: var(--paper); }
-body[data-out="plot"] label[for="viewChoc"], body[data-out="print"] label[for="view2D"] { display: none; }
 /* the preview follows the step: its own tabs only on Print, for the plate or the layers */
 body:not([data-view="choc"]) .stage-tabs { display: none; }
 body[data-view="choc"] .stage-tabs label[for="stLine"], body[data-view="choc"] .stage-tabs label[for="stPage"] { display: none; }
@@ -368,15 +354,6 @@ body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; 
   body:not([data-pv="big"]) #minimap { display: none !important; }
 }
 
-/* The Wheel (scroll.js): cards tip as they turn past; room at the end so the last card can reach the top. (No scroll
-   snapping: it kept pulling the step tabs out of view.) */
-body.wheel .panel section.card { transform-origin: 50% 50%; transition: transform 120ms ease-out, opacity 120ms ease-out; will-change: transform; }
-body.wheel .panel { padding-bottom: 55vh; }
-.wheel-sw { margin-right: auto; font-size: calc(12px * var(--text)); }
-@media (prefers-reduced-motion: reduce) { body.wheel .panel section.card { transition: none; } }
-/* a card scrolled to (help, a warning, a test) lands below the phone's pinned preview, not under it */
-.panel section.card { scroll-margin-top: var(--snap-top, 12px); }
-body.wheel { overflow-anchor: none; } /* scroll.js keeps the landed card in place itself */
 /* a filled grey's own settings, under its row (levels.js) */
 .level-fill { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; align-items: end; margin: -2px 0 6px 30px; padding: 6px 8px; border-left: 2px solid var(--rule); }
 .level-fill input[type="color"] { width: 40px; height: 32px; padding: 0 2px; border: 1px solid var(--rule); border-radius: calc(6px * var(--corner)); background: var(--surface); }
@@ -446,9 +423,6 @@ body[data-empty="1"] .pv-size { display: none; }
 .trace-needed p { margin: 0; max-width: 40ch; font-weight: 550; }
 
 /* ---------- v113: the Next bar, the photo in the Picture card ---------- */
-.nextbar { position: sticky; bottom: 0; z-index: 5; display: flex; align-items: center; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) calc(12px * var(--space)) max(calc(10px * var(--space)), env(safe-area-inset-bottom)); margin-top: calc(4px * var(--space)); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)) calc(10px * var(--corner)) 0 0; background: color-mix(in srgb, var(--surface) 94%, transparent); backdrop-filter: blur(6px); box-shadow: 0 -4px 14px rgb(0 0 0 / .06); }
-.nextbar .nb-hint { flex: 1; min-width: 0; color: var(--muted); font-size: calc(12.5px * var(--text)); text-align: right; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.nextbar .btn.primary { white-space: nowrap; }
 .photo-box { display: grid; gap: calc(8px * var(--space)); padding: calc(10px * var(--space)) 0 0; margin-top: calc(4px * var(--space)); border-top: 1px solid var(--rule); }
 .photo-box[hidden] { display: none; }
 /* the examples, once something is in: one row that scrolls sideways */
@@ -473,12 +447,7 @@ body:not([data-empty="1"]) .examples .chips .chip-btn { flex: none; }
 }
 
 /* ---------- v115: a slim top to the settings, the tools on the Line step, notices that go, a bigger preview ---------- */
-.output-seg label small, .steps label small { display: none; }
-.output-seg label, .steps label { padding: calc(5px * var(--space)) calc(8px * var(--space)); }
-.steps { margin-bottom: calc(4px * var(--space)); }
 .viewpanel .vhead { font-size: calc(11.5px * var(--text)); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-.viewpanel .fold-all { display: flex; gap: calc(6px * var(--space)); }
-.viewpanel .wheel-sw { margin: 0; font-size: inherit; }
 /* the trace's tools (select area, erase, set start…) belong to the Line step */
 body[data-view="art"] .toolbar.tools { display: none; }
 /* a notice that can be put away (views.js) */
@@ -523,12 +492,6 @@ body[data-view="art"] .toolbar.tools { display: none; }
 .me-bar .me-gap { flex: 1; }
 
 /* ---------- v119: More print settings, the empty start, the printer's Line step ---------- */
-body:not([data-moreprint="1"]) .print-more { display: none !important; }
-.more-print { display: flex; flex-wrap: wrap; align-items: center; gap: calc(4px * var(--space)) calc(10px * var(--space)); padding: calc(4px * var(--space)) 0; }
-.more-print .more-btn { font-weight: 650; }
-.more-print .hint { margin: 0; }
-/* empty: the preview shows the examples and how to start, so the Input card shows only what to start from */
-body[data-empty="1"] :is(#examplesRow, #dropZone) { display: none; }
 /* a printer makes one continuous line: the Line step has nothing to choose there (unless Trace is off, to say so) */
 body[data-out="print"]:not([data-line="drawn"]):not([data-line="none"]) #card-h-src { display: none; }
 
@@ -556,7 +519,6 @@ body[data-ui="map"] .map { display: block; position: relative; height: 124px; ba
 }
 /* (its gestures stay its own: dragging, pinching and scrolling over it never move the page) */
 body[data-ui="map"] .canvas-box { touch-action: none; overscroll-behavior: contain; }
-body[data-ui="map"] :is(.output-row, .view-tabs.steps, .nextbar, .more-print, [data-examples], #examplesRow) { display: none !important; }
 body[data-ui="map"] .panel section.card:not([data-map]) { display: none !important; }
 body[data-ui="map"] .map-head { display: flex; flex-direction: column; gap: calc(10px * var(--space)); }
 body[data-ui="map"] .map-rows:not([hidden]) { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding-bottom: 6px; }
@@ -630,8 +592,6 @@ label.field.changed > .map-reset { display: block; }
 .map-calc .val { font: 400 13px var(--font-mono); color: var(--muted); grid-column: 2 / 4; justify-self: end; padding-right: 4px; }
 /* a step's cards read as groups of rows: no fold, no frame of their own */
 body[data-ui="map"] .panel section.card[data-map] { padding: 0 0 6px; }
-body[data-ui="map"] .panel section.card[data-map] .card-toggle { pointer-events: none; }
-body[data-ui="map"] .panel section.card[data-map] .card-toggle .t::before { display: none; }
 body[data-ui="map"] .panel section.card[data-map] > .card-body { gap: 0; padding: 0; }
 /* the examples tray, over the preview */
 .map-tray { position: absolute; left: 12px; right: 12px; top: 12px; z-index: 6; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); box-shadow: var(--shadow-menu); padding: 14px 16px 16px; display: flex; flex-direction: column; gap: 12px; max-height: calc(100% - 24px); overflow: auto; }
@@ -643,9 +603,6 @@ body[data-ui="map"] .panel section.card[data-map] > .card-body { gap: 0; padding
 .map-ex b { font-weight: 600; }
 .map-ex span { font-size: calc(12px * var(--text)); color: var(--muted); }
 .map-ex:hover { border-color: var(--accent); }
-/* the empty preview: the map's examples are in their own tray */
-.es-map, body[data-ui="map"] .es-classic { display: none; }
-body[data-ui="map"] .es-map { display: inline; }
 /* the map's preview is narrower than the window: its overlays take the compact arrangement at every width, so the
    view's own label, the zoom, One copy / Whole plate and the Layer slider never sit on each other */
 body[data-ui="map"] .zoombar { flex-direction: column; align-items: flex-end; top: 34px; }
@@ -659,5 +616,5 @@ body[data-ui="map"] .pathbar { max-width: calc(100% - 96px); }
 body[data-ui="map"][data-out="print"] #card-h-line label.field:is(:has(#lineW), :has(#lineGapMM)) { display: none; }
 body[data-ui="map"] .math { display: none; }
 body[data-ui="map"] .map-extra .math { display: block; }
-body[data-ui="map"]:not([data-art="model"]) #dropZone { display: none; }
+body[data-ui="map"]:not([data-art="model"]) #dropZone, body[data-empty="1"] #dropZone { display: none; }
 

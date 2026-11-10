@@ -491,29 +491,10 @@ function readyItems() {
     );
   return out;
 }
-// Bring a card into view and open it. A card on another tab (the Line step's cards, from the Print step's ready list)
-// is
-// hidden, so its tab is shown first; if no tab shows it, the tab you were on stays.
+// Show a card: the step of the map that holds it (map.js)
 function showCard(card) {
-  if (card.classList.contains("print-more")) morePrintSet(true); // views.js: the card is among More print settings
-  const seen = () => card.getClientRects().length > 0,
-    pick = (r) => {
-      const lab = document.querySelector(`label[for="${r.id}"]`);
-      if (lab) lab.click();
-    };
-  if (!seen()) {
-    const was = document.querySelector('input[name="view"]:checked');
-    for (const r of document.querySelectorAll('input[name="view"]')) {
-      pick(r);
-      if (seen()) break;
-    }
-    if (!seen()) {
-      if (was) pick(was);
-      return;
-    }
-  }
-  if (card.classList.contains("collapsed")) card.querySelector(".card-toggle").click();
-  card.scrollIntoView({ behavior: "smooth", block: "start" });
+  const id = mapNodeOf(card.querySelector("h2").id);
+  if (id) mapOpen(id);
 }
 function readyUI() {
   const items = readyItems(),

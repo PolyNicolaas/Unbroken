@@ -16,7 +16,7 @@ module.exports = {
     await page.selectOption("#chocolate", { index: 1 }); await idle();
     checks.push(check(`after a ${modelH} mm model: the drawing's layers`, await page.evaluate(() => st.layers.S.N + st.layers.S.M), "==", 1),
       check("… and the Height box shows the drawing's height (mm)", +(await page.inputValue("#printHeightMM")), "<", 1));
-    await page.click("#card-h-machine .card-toggle");
+    await A.card(page, "h-machine");
     await page.fill("#gZ", ""); await page.dispatchEvent("#gZ", "input"); await A.setValue(page, "#gLift", -3); await idle();
     await page.evaluate(() => readyUI());
     checks.push(check("empty Z and negative lift: the ready list warns", +/out of range/.test(await page.textContent("#readyList")), "==", 1));

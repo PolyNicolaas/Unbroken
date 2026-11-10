@@ -29,7 +29,7 @@ module.exports = {
     await A.setValue(page, "#copies", 1); await page.fill("#printHeightMM", "1.8"); await page.press("#printHeightMM", "Tab"); await A.setValue(page, "#baseLayers", 2); await idle(); await idle();
     await page.click("label[for=stLayers]"); await page.waitForTimeout(300); await A.setValue(page, "#layerUpTo", 2); await page.waitForTimeout(300);
     checks.push(check("layer slider: 2 of 6", await page.textContent("#layerUpToVal"), "==", "2 of 6"), check("… names the layer", +/^base · lines at 90°/.test(await page.textContent("#layerWhat")), "==", 1));
-    await page.click("#card-h-test .card-toggle");
+    await A.card(page, "h-test");
     const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#testBtn")]);
     const { execSync } = require("child_process"), zip = await dl.path(), gc = execSync(`unzip -p "${zip}"`).toString();
     const firstZ = [...gc.matchAll(/^G1 Z([\d.]+) F600$/gm)].map((m) => +m[1]);   // each path's first move down: layer 1 of each strip first

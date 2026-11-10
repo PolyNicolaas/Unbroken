@@ -3,18 +3,18 @@ module.exports = {
   id: "A60", title: "The map of the steps: a band through the steps the design takes, settings as rows, examples in their own tray",
   guards: "a map whose line doesn't follow the design (a model sent through the Line step, a plotter ending in Print), a node that opens the wrong settings, a row moved out of its card and not put back (the step tabs would lose it), a warning from the ready list that doesn't reach its node, and the examples tray opening by itself",
   why: "Nicolaas (9 November 2026) chose the steps as a map: a band on top, the preview biggest, settings in a narrow column as one row each (like a slicer), Material first, quiet steps faded, and examples as a module of the map that opens only when asked. The map moves the real controls into its rows while a node is open, so this checks they come back.",
-  how: "Opens the empty start with the map on and reads Line, Size and Print. Opens the leaf with the map on: reads the spine and the chips, checks the tray is closed and no example chips show in the settings. Opens Material, sets Flow to 110 and reads its row, presses ↺. Opens Line (the math in its panel, no drop area, line width only in Material). Opens Size, scrolls and drags over the preview, then opens Layers. Opens Examples and picks the Wavy vase: reads the spine, opens Movement. Makes it for a pen plotter. Turns the map off and finds every moved control in its card.",
-  pass: "The 3D preview no taller than its pane after the window shrinks; no step or chip of the band on another (leaf, vase, plotter); Empty: Line and Print say nothing yet, Size blank; Leaf: the spine is Material, Art, Line, Size, Print, with Examples, Picture prep, Tracing, Plate, Machine, Layers and Tests as chips, Tracing and Tests faded; the tray closed and no example chips in the settings; Material: its settings as rows (printer, chocolate, needle, line width, gap, layer height, speed, flow), Flow 110 marked changed with ↺, which puts back 100; Size: only the Size card, and scrolling over the preview zooms it and dragging pans it without moving the page; Layers: Print height and Seconds per layer as rows, the Walls and support group hidden for a drawing; the tray lists every example and the Wavy vase from it gives Material, Art, Print with Profile, Texture and Movement chips and a dot on Layers; Movement opens the 3D model card; a pen plotter: Art, Line, Size, Plot, no Material; off: every control and the math back in its place; no page errors.",
+  how: "Opens the empty start with the map on and reads Line, Size and Print. Opens the leaf with the map on: reads the spine and the chips, checks the tray is closed and no example chips show in the settings. Opens Material, sets Flow to 110 and reads its row, presses ↺. Opens Line (the math in its panel, no drop area, line width only in Material). Opens Size, scrolls and drags over the preview, then opens Layers. Opens Examples and picks the Wavy vase: reads the spine, opens Movement. Makes it for a pen plotter. Opens another step and finds every moved control back in its card.",
+  pass: "The 3D preview no taller than its pane after the window shrinks; no step or chip of the band on another (leaf, vase, plotter); Empty: Line and Print say nothing yet, Size blank; Leaf: the spine is Material, Art, Line, Size, Print, with Examples, Picture prep, Tracing, Plate, Machine, Layers and Tests as chips, Tracing and Tests faded; the tray closed and no example chips in the settings; Material: its settings as rows (printer, chocolate, needle, line width, gap, layer height, speed, flow), Flow 110 marked changed with ↺, which puts back 100; Size: only the Size card, and scrolling over the preview zooms it and dragging pans it without moving the page; Layers: Print height and Seconds per layer as rows, the Walls and support group hidden for a drawing; the tray lists every example and the Wavy vase from it gives Material, Art, Print with Profile, Texture and Movement chips and a dot on Layers; Movement opens the 3D model card; a pen plotter: Art, Line, Size, Plot, no Material; another step opened: every control and the math back in its place; no page errors.",
   slow: true,
   async run(ctx) {
     const checks = [];
     // the empty start: nothing to report yet, so no "ready" and no line
-    { const { page, errors, close } = await A.open(ctx, { map: true, art: true, clean: true });
+    { const { page, errors, close } = await A.open(ctx, { art: true, clean: true });
       await A.idle(page, 800);
       const v = await page.evaluate(() => ["line", "size", "print"].map((n) => document.querySelector(`[data-node="${n}"] .map-val`)?.textContent.trim() ?? "").join("|"));
       checks.push(check("empty: Line, Size and Print report nothing yet", v, "==", "nothing yet||nothing to print yet"), check("empty: page errors", errors.length, "==", 0));
       await close(); }
-    const { page, errors, close } = await A.open(ctx, { map: true, art: true });
+    const { page, errors, close } = await A.open(ctx, { art: true });
     await A.idle(page, 1500);
     const nodes = () => page.$$eval("#mapNodes .map-node", (els) => els.map((e) => e.dataset.node).sort().join(","));
     const spine = () => page.$$eval("#mapNodes .map-node.big", (els) => els.sort((a, b) => a.offsetLeft - b.offsetLeft).map((e) => e.dataset.node).join(","));
@@ -26,7 +26,7 @@ module.exports = {
     checks.push(check("leaf: the spine", await spine(), "==", "material,art,line,size,print"));
     checks.push(check("leaf: every node", await nodes(), "==", "art,examples,layers,line,machine,material,plate,prep,print,size,tests,tracing"));
     checks.push(check("leaf: Tracing and Tests faded", +(await page.$eval('[data-node="tracing"]', (e) => e.classList.contains("quiet"))) + +(await page.$eval('[data-node="tests"]', (e) => e.classList.contains("quiet"))), "==", 2));
-    checks.push(check("the examples tray closed, no example chips in the settings", +!(await page.$("#mapTray:not([hidden])")) + +(await page.$$eval("[data-examples] .chip-btn", (els) => els.every((e) => !e.getClientRects().length))), "==", 2));
+    checks.push(check("the examples tray closed, no example chips in the settings", +!(await page.$("#mapTray:not([hidden])")) + +!(await page.$("[data-examples]")), "==", 2));
     await page.click('[data-node="material"]'); await A.idle(page, 1200);
     const mat = ["printer", "chocolate", "needle", "lineW", "lineGapMM", "layerH", "gFeed", "gFlow"];
     checks.push(check("Material: its settings as rows", await inRows(mat), "==", mat.length), check("… no cards beside them", await cards(), "==", ""));
@@ -68,9 +68,10 @@ module.exports = {
     checks.push(check("pen plotter: the line ends in Plot, no Material", +/plot$/.test(await spine()) + +!/material|machine/.test(await nodes()), "==", 2));
     await page.click('.map-for[data-for="print"]'); await A.idle(page, 800);
     await page.click('[data-node="material"]'); await A.idle(page, 800);
-    await page.evaluate(() => { $("mapUI").checked = false; $("mapUI").dispatchEvent(new Event("change")); }); await A.idle(page, 500);
+    // a control moved into a node's rows goes back to its card when another node opens
+    await page.click('[data-node="size"]'); await A.idle(page, 400);
     const home = await page.evaluate(() => ({ flow: !!$("gFlow").closest("#card-h-machine"), printer: !!$("printer").closest("#card-h-choc"), gap: !!$("lineGapMM").closest("#card-h-line"), height: !!$("printHeightMM").closest("#card-h-layers"), math: !$("math").closest("#mapExtra") }));
-    checks.push(check("off: every control back in its card", +home.flow + +home.printer + +home.gap + +home.height + +home.math, "==", 5), check("off: the step tabs back", +(await page.$eval(".view-tabs.steps", (e) => e.getClientRects().length > 0)), "==", 1));
+    checks.push(check("another step opened: every control and the math back in its place", +home.flow + +home.printer + +home.gap + +home.height + +home.math, "==", 5));
     checks.push(check("page errors", errors.length, "==", 0));
     await close();
     return { checks, notes: errors.join("  \n") };

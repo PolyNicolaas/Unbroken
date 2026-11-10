@@ -1,5 +1,5 @@
 // Unbroken · web app · map.js
-// The steps as a map (View ▸ Map of the steps; on by default): a band across the top with one thick line through the
+// The steps as a map: a band across the top with one thick line through the
 // steps the design takes (for a printer: Material, Art, Line, Size, Print), the less-used settings as chips above and
 // below their step, faded until they matter. Each node shows its result (from the cards' own readouts) and a dot when
 // the ready list has something for it. Tapping a node shows its settings beside the preview: for Material, Machine
@@ -144,7 +144,7 @@ const sizeText = () => {
 const mapCard = (hid) => $(hid) && $(hid).closest("section.card");
 function mapCardVal(hid) {
   const c = mapCard(hid),
-    b = c && c.querySelector(".card-toggle");
+    b = c && c.querySelector(".card-head");
   if (!b) return "";
   const t = b.querySelector(".t");
   return b.textContent
@@ -187,7 +187,6 @@ let mapOpenId = null,
 // (or over) it and the gap to the next step, so nothing overlaps; chips 28 px tall (the map is dense: many settings)
 const MAP_CHIP_H = 28;
 function mapRender() {
-  if (!mapOn()) return;
   const box = $("map"),
     W = box.clientWidth,
     H = box.clientHeight,
@@ -372,16 +371,14 @@ function mapOpen(id) {
   mapOpenId = id;
   mapTray(false);
   const r = $(MAP_STEP_RADIO[N.step]);
-  if (r && !r.checked) document.querySelector(`label[for="${r.id}"]`).click();
+  if (r && !r.checked) mapPick(r);
   const cards = N.cards || [];
-  if (cards.some((h) => mapCard(h) && mapCard(h).classList.contains("print-more"))) morePrintSet(true, false);
   document.querySelectorAll(".panel section.card").forEach((c) => c.removeAttribute("data-map"));
   mapRows(N);
   for (const h of cards) {
     const c = mapCard(h);
     if (!c) continue;
     c.dataset.map = "1";
-    if (c.classList.contains("collapsed") && cardSetOpen) cardSetOpen(c, true, false);
   }
   // a node's extra parts (the math, for the Line step) move into the panel after its cards
   for (const ref of N.extra || []) if (mapFieldOf(ref)) mapMove(mapFieldOf(ref), $("mapExtra"));
@@ -391,7 +388,6 @@ function mapOpen(id) {
 }
 // the node that holds the step now showing (a step changed some other way: an example, a ready-list link)
 function mapFollowStep() {
-  if (!mapOn()) return;
   const v = document.body.dataset.view,
     S = mapShape(),
     shown = S.spine.concat(...Object.values(S.up), ...Object.values(S.down)),
@@ -438,34 +434,15 @@ function mapTray(on) {
     $("box").appendChild(t);
   }
   if (t) t.hidden = !on;
-  if (mapOn()) mapRender();
+  mapRender();
 }
 
-// ---------- on and off ----------
-const mapOn = () => document.body.dataset.ui === "map";
-function mapSet(on, store = true) {
-  document.body.dataset.ui = on ? "map" : "";
-  $("mapUI").checked = on;
-  if (store)
-    try {
-      localStorage.setItem(storeKey("mapUI"), on ? "1" : "0");
-    } catch (e) {}
-  if (on) {
-    // the Wheel folds every card but the one scrolled to; the map opens a node's settings itself
-    if ($("wheel").checked) {
-      $("wheel").checked = false;
-      $("wheel").dispatchEvent(new Event("change"));
-    }
-    mapOpenId = null;
-    mapFollowStep();
-  } else {
-    mapPutBack();
-    mapTray(false);
-    document.querySelectorAll(".panel section.card").forEach((c) => c.removeAttribute("data-map"));
-  }
-  window.dispatchEvent(new Event("resize")); // (the preview's canvas sizes itself to its new box)
+// ---------- starting up ----------
+// choosing a radio that holds the app's state (the step, what it's made for), as a tap on it would
+function mapPick(r) {
+  r.checked = true;
+  r.dispatchEvent(new Event("change", { bubbles: true }));
 }
-$("mapUI").addEventListener("change", () => mapSet($("mapUI").checked));
 // the For chips sit in the page's header, beside the name
 document
   .querySelector("header.top")
@@ -473,7 +450,7 @@ document
 {
   let raf = 0;
   new ResizeObserver(() => {
-    if (!mapOn() || raf) return;
+    if (raf) return;
     raf = requestAnimationFrame(() => {
       raf = 0;
       window.dispatchEvent(new Event("resize")); // (the preview's canvases size themselves to their box on a resize)
@@ -482,8 +459,8 @@ document
 }
 document.querySelectorAll(".map-for").forEach((b) =>
   b.addEventListener("click", () => {
-    const lab = document.querySelector(`label[for="${b.dataset.for === "plot" ? "artForPlot" : "artForPrint"}"]`);
-    if (lab) lab.click();
+    const r = $(b.dataset.for === "plot" ? "artForPlot" : "artForPrint");
+    if (!r.checked) mapPick(r);
     setTimeout(mapFollowStep, 0);
   })
 );
@@ -494,7 +471,7 @@ $("mapRecipeReset").addEventListener("click", () => $("tuneReset").click());
   readyUI = function () {
     const items = ready();
     mapReady = items;
-    if (mapOn()) mapDots();
+    mapDots();
     return items;
   };
 }
@@ -504,14 +481,7 @@ document
 new ResizeObserver(() => mapRender()).observe($("map"));
 // the readouts change as traces, slicing and edits finish: refresh the nodes a few times a second (reads only)
 setInterval(() => {
-  if (!mapOn()) return;
   mapRender();
   mapFollowStep();
 }, 500);
-{
-  let on = true;
-  try {
-    on = localStorage.getItem(storeKey("mapUI")) !== "0";
-  } catch (e) {}
-  mapSet(on, false);
-}
+mapFollowStep();

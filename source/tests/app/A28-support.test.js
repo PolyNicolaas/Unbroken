@@ -20,7 +20,7 @@ module.exports = {
       checks.push(check(`${name}: named in the ready list, no overhang warning`, +(r.includes(`Support (${name})`) && !/Overhang: a layer/.test(r)), "==", 1));
     }
     checks.push(check("line length: skirt − none (mm)", got.skirt - L0, ">", 0), check("… thin wall − none (mm)", got.thin - L0, ">", 0));
-    await page.selectOption("#support", "off"); await page.click("#card-h-machine .card-toggle"); await page.fill("#gOver", "2"); await page.press("#gOver", "Tab"); await A.idle(page);
+    await page.selectOption("#support", "off"); await A.card(page, "h-machine"); await page.fill("#gOver", "2"); await page.press("#gOver", "Tab"); await A.idle(page);
     checks.push(check("Overhang per layer 2 mm: no overhang warning", +/No overhang past 2\.00 mm/.test(await ready()), "==", 1));
     checks.push(check("page errors", errors.length, "==", 0));
     await close(); return { checks };

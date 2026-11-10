@@ -16,7 +16,7 @@ module.exports = {
     await page.click("label[for=level1s]"); await A.idle(page, 3000);
     const sk = await page.evaluate(() => ({ n: st.walk.px.length, m: $("levelModes").value }));
     checks.push(check("the second grey set to Skip: the line changed again", +(sk.m === "tstts" && sk.n !== lv.n), "==", 1));
-    await page.click('[aria-labelledby="h-prep"] .card-toggle'); // (Image prep starts folded)
+    await A.card(page, "h-prep");
     await page.click("#bgPick"); await A.idle(page, 200);
     await page.evaluate(() => window.scrollTo(0, 0)); // (the card's controls are further down the page)
     const box = await page.locator("#view").boundingBox();

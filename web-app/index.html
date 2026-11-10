@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="css/app.css">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
-<body data-view="art" data-stage="line" data-art="picture" data-copies="one">
+<body data-ui="map" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
@@ -109,8 +109,7 @@
         <div class="empty-state" id="emptyState" hidden>
           <p class="es-title">Start with a picture, text, a pattern or a 3D model</p>
           <p class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
-          <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>.<span class="es-classic"> Or try an example:</span><span class="es-map"> Not sure where to start? Tap Examples on the map.</span></p>
-          <div class="chips" data-examples></div>
+          <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>. Not sure where to start? Tap Examples on the map.</p>
         </div>
         <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
         <div class="pathbar" role="group" aria-label="What the view shows">
@@ -175,11 +174,6 @@
             <label class="check" title="Show the smallest box around the printed line, at any angle, with its size"><input type="checkbox" id="dims" checked> <span>Size box</span></label>
             <label class="check" title="Mark where the line crosses itself or breaks the minimum spacing"><input type="checkbox" id="showProb"> <span>Problems</span><span class="swatch dot"></span><span class="val" id="probInfo"></span></label>
             <label class="check" title="Small plate in the corner of the preview"><input type="checkbox" id="showMini" checked> <span>Plate mini-map</span></label>
-            <hr>
-            <span class="vhead">The settings</span>
-            <label class="check" title="The steps as a map: the line from the art to the print, each step a node you tap to open its settings. Off: the step tabs"><input type="checkbox" id="mapUI" checked> <span>Map of the steps</span></label>
-            <label class="check wheel-sw" title="The settings as a wheel: the card you scroll to opens, the others fold to their headers"><input type="checkbox" id="wheel" checked> <span>Wheel: open the card scrolled to</span></label>
-            <span class="fold-all"><button class="btn mini" type="button" id="collapseAll">Collapse all</button><button class="btn mini" type="button" id="expandAll">Expand all</button></span>
           </div>
         </details>
       </div>
@@ -273,18 +267,10 @@
       <div id="mapRowsBody"></div>
       <div hidden><div class="map-calc" id="mapSpacing"><span>Line spacing <small class="from">width + gap</small></span><span class="val"></span></div></div>
     </section>
-    <div class="output-row">
-      <span class="name">For</span>
-      <div class="seg output-seg" role="radiogroup" aria-label="Making it for">
-        <input type="radio" name="artFor" id="artForPrint" value="print" checked><label for="artForPrint" title="Chocolate, clay: one continuous line">A printer<small>chocolate, clay · one line</small></label>
-        <input type="radio" name="artFor" id="artForPlot" value="plot"><label for="artForPlot" title="Pens: any detail">A pen plotter<small>pens · any detail</small></label>
-      </div>
-    </div>
-    <div class="seg view-tabs steps" role="radiogroup" aria-label="Step">
-      <input type="radio" name="view" id="viewArt" value="art" checked><label for="viewArt"><b>1</b> Art<small>picture, text, pattern, model</small></label>
-      <input type="radio" name="view" id="viewDesign" value="design"><label for="viewDesign"><b>2</b> Line<small id="stepLineSub">traced into one line</small></label>
-      <input type="radio" name="view" id="view2D" value="plot"><label for="view2D"><b>3</b> Plot<small>the page, pens, SVG</small></label>
-      <input type="radio" name="view" id="viewChoc" value="choc"><label for="viewChoc"><b>3</b> Print<small>plate, layers, G-code</small></label>
+    <!-- what it's made for and the step now showing: the app's state, set from the map (map.js) -->
+    <div hidden>
+      <input type="radio" name="artFor" id="artForPrint" value="print" checked><input type="radio" name="artFor" id="artForPlot" value="plot">
+      <input type="radio" name="view" id="viewArt" value="art" checked><input type="radio" name="view" id="viewDesign" value="design"><input type="radio" name="view" id="view2D" value="plot"><input type="radio" name="view" id="viewChoc" value="choc">
     </div>
     <section class="card choc-only" aria-labelledby="h-choc">
       <h2 id="h-choc">Printer</h2>
@@ -358,11 +344,7 @@
       <div class="inline"><span class="spacer" style="flex:1"></span><button class="btn" type="button" id="dxfBtn" title="The printed line as one closed curve, flat, for choc OS's 2D curve upload (a fallback)">DXF for choc OS</button><button class="btn primary" type="button" id="gcodeBtn">Export G-code</button></div>
       <p class="status" id="gcodeMsg" role="status"></p>
     </section>
-    <div class="more-print choc-only" id="morePrint">
-      <button class="btn more-btn" type="button" id="morePrintBtn" aria-expanded="false" aria-controls="morePrintHint"><span class="more-tri" aria-hidden="true">▸</span> More print settings</button>
-      <span class="hint" id="morePrintHint">Base, infill, fine-tuning, a test print, the printer profile</span>
-    </div>
-    <section class="card choc-only print-more" aria-labelledby="h-base" data-fold="closed">
+    <section class="card choc-only" aria-labelledby="h-base">
       <h2 id="h-base">Base <span id="infillVal">none</span></h2>
       <div class="two">
         <label class="field" title="Filled layers at the bottom (0: no base)"><span>Base layers</span><input type="number" id="baseLayers" min="0" max="50" step="1" value="0"></label>
@@ -382,7 +364,7 @@
       </div>
       <p class="hint help" id="infillHint">Fills every area the line encloses with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); up to 125% overlaps them a little (rows 0.8 of a line width apart), for a base that's surely solid with no gaps between rows; 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
     </section>
-    <section class="card choc-only print-more" aria-labelledby="h-infill" data-fold="closed">
+    <section class="card choc-only" aria-labelledby="h-infill">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>
       <div class="row">
         <div class="lab"><label for="fillDensity">Density</label><span class="val" id="fillDensityVal">0% · hollow</span></div>
@@ -399,7 +381,7 @@
       </div>
       <p class="hint help" id="fillHint">Fills the inside of the layers above the base, as part of the same line: 0% leaves them hollow (walls only), 20–30% is a light support, 100% is solid.</p>
     </section>
-    <section class="card choc-only print-more" aria-labelledby="h-machine" data-fold="closed">
+    <section class="card choc-only" aria-labelledby="h-machine">
       <h2 id="h-machine">Fine-tuning <span class="hval" id="tuneVal">as the profiles</span></h2>
       <div class="tune tune-list">
         <label class="field" title="One layer of chocolate. Starts at the chocolate's own (settings.js), else the printer's."><span>Layer height (mm)</span><input type="number" id="layerH" min="0.05" max="3" step="0.05" value="0.3"><small class="from" id="fromLayerH"></small></label>
@@ -414,7 +396,7 @@
       </div>
       <div class="inline"><button class="btn mini" type="button" id="tuneReset" disabled>Back to the profile values</button></div>
     </section>
-    <section class="card choc-only print-more" aria-labelledby="h-test" data-fold="closed">
+    <section class="card choc-only" aria-labelledby="h-test">
       <h2 id="h-test">Test print <span class="hval" id="testVal"></span></h2>
       <div class="two">
         <label class="field" title="The setting that changes from strip to strip; everything else is as set above"><span>Vary</span><select id="testVary">
@@ -432,7 +414,7 @@
       <p class="status" id="testMsg" role="status"></p>
       <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it: it becomes the setting (a Flow strip sets the Flow in Fine-tuning). First layer Z strips each start at their own height above the plate, to find the one that sticks; 1 or 2 layers are enough for those.</p>
     </section>
-    <section class="card choc-only print-more" aria-labelledby="h-matrix" data-fold="closed">
+    <section class="card choc-only" aria-labelledby="h-matrix">
       <h2 id="h-matrix">Test matrix <span class="hval" id="mxVal"></span></h2>
       <p class="hint">Nine copies of this design on one plate, each printed with its own speed, flow and layer height: a Taguchi L9, three levels of each setting in nine prints. Score the copies and the best level of each setting is worked out.</p>
       <table class="mx-levels">
@@ -454,7 +436,7 @@
       <div class="inline"><button class="btn mini" type="button" id="mxUse" disabled>Use the best levels</button></div>
       <p class="hint help">The copies are numbered by the comb printed in front of each (1 to 9 teeth), and print one after another, 1 first, in rows from the front left. Every level of a setting meets every level of the other two once, so the average score of the three copies at a level shows that setting's own effect. Score each copy from 1 (failed) to 5 (perfect) for what matters to you: a whole, even line, a first layer that stuck, sharp facets. A copy's first layer starts one of its own layer heights up, unless First layer Z is set apart from the layer height.</p>
     </section>
-    <section class="card choc-only print-more" aria-labelledby="h-profile" data-fold="closed">
+    <section class="card choc-only" aria-labelledby="h-profile">
       <h2 id="h-profile">Printer profile <span class="hval">edit in settings.js</span></h2>
           <table class="profile" id="profileTable"><!-- filled from the printer in settings.js --></table>
 
@@ -467,10 +449,6 @@
         <input type="radio" name="srcType" id="srcPattern" value="pattern"><label for="srcPattern">Pattern<small>geometric art</small></label>
         <input type="radio" name="srcType" id="srcMolecule" value="molecule"><label for="srcMolecule">Molecule<small>a structure</small></label>
         <input type="radio" name="srcType" id="srcModel" value="model"><label for="srcModel">3D model<small>an STL</small></label>
-      </div>
-      <div class="examples" role="group" aria-label="Examples" id="examplesRow">
-        <span class="name">Or start from an example</span>
-        <div class="chips" data-examples></div>
       </div>
       <div class="dropzone" id="dropZone" role="button" tabindex="0" aria-label="Choose or drop a file: an image, an STL model or a saved design">
         <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 15V4m0 0-4 4m4-4 4 4M5 15v3a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-3" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/></svg>
@@ -653,7 +631,7 @@
         </div>
       </div>
     </section>
-    <section class="card art-only art-picture" aria-labelledby="h-prep" data-fold="closed">
+    <section class="card art-only art-picture" aria-labelledby="h-prep">
       <h2 id="h-prep">Image prep <span id="prepVal">off</span></h2>
           <div class="row" id="cutRow">
             <div class="lab"><span class="name">Cut out the object</span><span class="val" id="cutVal">off</span></div>
@@ -827,7 +805,7 @@
       <p class="hint" id="sizeHint">Drag to scale the print, type a width or height, or fit it inside a box. It can't go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. Aspect ratio stays locked.</p>
     </section>
 
-    <section class="card design-only" aria-labelledby="h-fit" data-fold="closed">
+    <section class="card design-only" aria-labelledby="h-fit">
       <h2 id="h-fit">Fit <span id="fitinfo"></span></h2>
       <div class="row">
         <div class="lab"><label for="terms">Complexity (terms)</label><span class="val" id="termsVal"></span></div>
@@ -901,16 +879,6 @@
       <p class="status" id="exportMsg" role="status"></p>
     </section>
     <div class="map-extra" id="mapExtra"></div>
-    <div class="nextbar" role="group" aria-label="The steps">
-      <button class="btn design-only" type="button" id="toArt">← Art</button>
-      <button class="btn choc-only" type="button" id="backLine">← Line</button>
-      <button class="btn plot-only" type="button" id="backLine2">← Line</button>
-      <span class="nb-hint" id="nextHint" aria-live="polite"></span>
-      <button class="btn primary art-only" type="button" id="goTrace">Next: the line →</button>
-      <button class="btn primary design-only" type="button" id="goOut">Next: print it →</button>
-      <button class="btn primary choc-only" type="button" id="nbGcode" title="The G-code for the printer (the Export card has the rest: DXF, the ZIP)">Export G-code</button>
-      <button class="btn primary plot-only" type="button" id="nbSvg" title="The SVG for Saxi (the Export card has its options)">Export SVG</button>
-    </div>
   </div>
 
   <details class="math" id="math">

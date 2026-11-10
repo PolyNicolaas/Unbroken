@@ -475,7 +475,6 @@ function viewChanged() {
   // view tabs can change it
   setStage(stageFor(document.body.dataset.view)); // workflow.js: the preview follows the step
   traceNeededUI(); // workflow.js: Print (or Plot a picture) with Trace off says to turn it on
-  nextBarUI(); // workflow.js: the Next bar's note
   drawPlate();
   drawMini();
   render(); // the Print step shows the filled base layer (or a model's layers)
@@ -529,62 +528,26 @@ function redrawStage() {
 new ResizeObserver(drawPlate).observe($("plate"));
 new ResizeObserver(drawMini).observe($("box"));
 
-// ---------- collapsible control sections ----------
-// cardSetOpen(card, open, store): open or fold a card (store: remember it for the next visit); cardRestore(): every
-// card back as you left it (scroll.js, when the wheel is turned off)
-let cardSetOpen = null,
-  cardRestore = null;
-(() => {
-  const KEY = storeKey("collapsed");
-  let saved = {};
-  try {
-    saved = JSON.parse(localStorage.getItem(KEY) || "{}");
-  } catch {}
-  // every card has a heading; the toggle goes in it
-  const cards = [...document.querySelectorAll("section.card")].filter((c) => c.querySelector("h2"));
-  const setOpen = (card, open, store = true) => {
-    card.classList.toggle("collapsed", !open);
-    card.querySelector(".card-toggle").setAttribute("aria-expanded", String(open));
-    if (open && card.querySelector("canvas")) drawChart();
-    if (store) {
-      saved[card.id] = !open;
-      try {
-        localStorage.setItem(KEY, JSON.stringify(saved));
-      } catch {}
-    }
-  };
-  for (const card of cards) {
-    const h2 = card.querySelector("h2"),
-      body = document.createElement("div");
-    card.id = card.id || "card-" + h2.id;
-    body.className = "card-body";
-    body.id = card.id + "-body";
-    while (h2.nextSibling) body.appendChild(h2.nextSibling);
-    card.appendChild(body);
-    const btn = document.createElement("button");
-    btn.type = "button";
-    btn.className = "card-toggle";
-    btn.setAttribute("aria-controls", body.id);
-    const t = document.createElement("span");
-    t.className = "t";
-    t.textContent = h2.firstChild.textContent.trim();
-    h2.firstChild.remove();
-    btn.appendChild(t);
-    // keep the info readout (e.g. "7 parts") visible when collapsed
-    while (h2.firstChild) btn.appendChild(h2.firstChild);
-    h2.appendChild(btn);
-    btn.addEventListener("click", () => setOpen(card, card.classList.contains("collapsed")));
-    // data-fold="closed": starts folded until opened
-    setOpen(card, saved[card.id] === undefined ? card.dataset.fold !== "closed" : !saved[card.id], false);
-  }
-  cardSetOpen = setOpen;
-  cardRestore = () => {
-    for (const card of cards)
-      setOpen(card, saved[card.id] === undefined ? card.dataset.fold !== "closed" : !saved[card.id], false);
-  };
-  $("collapseAll").addEventListener("click", () => cards.forEach((c) => setOpen(c, false)));
-  $("expandAll").addEventListener("click", () => cards.forEach((c) => setOpen(c, true)));
-})();
+// ---------- the cards' headings ----------
+// every card's heading holds its title and its readout (e.g. "7 parts"); the rest of the card is its body
+for (const card of document.querySelectorAll("section.card")) {
+  const h2 = card.querySelector("h2");
+  if (!h2) continue;
+  const body = document.createElement("div"),
+    head = document.createElement("div"),
+    t = document.createElement("span");
+  card.id = card.id || "card-" + h2.id;
+  body.className = "card-body";
+  while (h2.nextSibling) body.appendChild(h2.nextSibling);
+  card.appendChild(body);
+  head.className = "card-head";
+  t.className = "t";
+  t.textContent = h2.firstChild.textContent.trim();
+  h2.firstChild.remove();
+  head.appendChild(t);
+  while (h2.firstChild) head.appendChild(h2.firstChild);
+  h2.appendChild(head);
+}
 
 // ---------- help behind ⓘ ----------
 // Explanations (p.hint.help) stay out of the way: an ⓘ next to the control they explain (the row's label) or, for a
@@ -608,7 +571,7 @@ let cardSetOpen = null,
     b.type = "button";
     b.className = "info";
     b.textContent = "ⓘ";
-    const name = (lab ? lab.textContent : card.querySelector(".card-toggle .t").textContent).trim();
+    const name = (lab ? lab.textContent : card.querySelector(".card-head .t").textContent).trim();
     b.setAttribute("aria-label", `About ${name}`);
     b.setAttribute("aria-expanded", "false");
     b.setAttribute("aria-controls", p.id);
@@ -653,25 +616,3 @@ document.querySelectorAll("[data-notice]").forEach((el) => {
   });
   el.appendChild(x);
 });
-
-// ---------- the Print step's More print settings (Base, Infill, Fine-tuning, Test print, the printer profile)
-// ----------
-// folded away under one button until wanted; remembered in this browser
-function morePrintSet(on, store = true) {
-  document.body.dataset.moreprint = on ? "1" : "";
-  $("morePrintBtn").setAttribute("aria-expanded", String(on));
-  $("morePrintBtn").querySelector(".more-tri").textContent = on ? "▾" : "▸";
-  $("morePrintBtn").lastChild.textContent = on ? " Fewer print settings" : " More print settings";
-  if (store)
-    try {
-      localStorage.setItem(storeKey("morePrint"), on ? "1" : "");
-    } catch {}
-}
-$("morePrintBtn").addEventListener("click", () => morePrintSet(document.body.dataset.moreprint !== "1"));
-(() => {
-  let on = false;
-  try {
-    on = localStorage.getItem(storeKey("morePrint")) === "1";
-  } catch {}
-  morePrintSet(on, false);
-})();

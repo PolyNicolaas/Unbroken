@@ -47,7 +47,7 @@ module.exports = {
     await page.mouse.click(5, 5); await page.keyboard.press("Control+z"); await idle();
     checks.push(check("undo: back to 6 layers above, 2.4 mm", +((await page.inputValue("#wallLayers")) === "6" && +(await page.inputValue("#printHeightMM")) === 2.4), "==", 1));
     // Fine-tuning: a thicker layer keeps the height, fewer layers; Z follows; the card says what changed; Back to the profile
-    await page.click("#card-h-machine .card-toggle"); await A.setValue(page, "#layerH", 0.4); await idle(); await idle();
+    await A.card(page, "h-machine"); await A.setValue(page, "#layerH", 0.4); await idle(); await idle();
     checks.push(check("layer height 0.4: the height stays 2.4 mm, 6 layers (2 base + 4)", await page.textContent("#layerCount"), "==", "6 layers: 2 base + 4 above · 0.40 mm each"),
       check("… first layer Z follows (mm)", +(await page.inputValue("#gZ")), "==", 0.4), check("… Fine-tuning says one changed", await page.textContent("#tuneVal"), "==", "1 changed"));
     await page.click('[data-node="material"]'); await page.click("#mapRecipeReset"); await idle(); await idle();

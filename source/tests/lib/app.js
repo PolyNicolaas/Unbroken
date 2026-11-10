@@ -100,7 +100,7 @@ async function reveal(page, sel, method) {
   if (typeof sel !== "string") return null;
   return page.evaluate(
     ([sel, method]) => {
-      if (typeof mapOpen !== "function" || !mapOn()) return null;
+      if (typeof mapOpen !== "function") return null;
       const S = mapShape(),
         shown = S.spine.concat(...Object.values(S.up), ...Object.values(S.down));
       const step = sel.match(/^(?:label\[for="?|#)(viewArt|viewDesign|viewChoc|view2D)"?\]?$/);
@@ -109,13 +109,6 @@ async function reveal(page, sel, method) {
         const v = document.getElementById(step[1]).value,
           id = S.spine.find((k) => MAP_NODES[k].step === v);
         if (id) mapOpen(id);
-        return { done: true, opened: id || null };
-      }
-      // a card's heading (the tests used to unfold a card by it): the node that holds the card, on any step shown
-      const fold = sel.match(/^(?:#card-|\[aria-labelledby=")(h-[\w-]+)(?:"\])? \.card-toggle$/);
-      if (fold && method === "click") {
-        const id = shown.find((k) => (MAP_NODES[k].holds || MAP_NODES[k].cards || []).includes(fold[1]));
-        if (id && id !== mapOpenId) mapOpen(id);
         return { done: true, opened: id || null };
       }
       const out = sel.match(/^(?:label\[for="?|#)artFor(Plot|Print)"?\]?$/);
@@ -208,4 +201,6 @@ async function out(page) {
 }
 // the steps on the map's line, left to right ("material,art,line,size,print")
 const spine = (page) => page.$$eval("#mapNodes .map-node.big", (els) => els.sort((a, b) => a.offsetLeft - b.offsetLeft).map((e) => e.dataset.node).join(","));
-module.exports = { spine, example, out, mapNav, SETTLE, withExample, open, idle, source, chip, terms, errorMM, setValue, longestFreeze, plot, print };
+// open the step of the map that holds a card ("h-machine": Fine-tuning's settings)
+const card = (page, heading) => page.evaluate((h) => { const id = mapNodeOf(h); if (id && id !== mapOpenId) mapOpen(id); }, heading);
+module.exports = { card, spine, example, out, mapNav, SETTLE, withExample, open, idle, source, chip, terms, errorMM, setValue, longestFreeze, plot, print };
