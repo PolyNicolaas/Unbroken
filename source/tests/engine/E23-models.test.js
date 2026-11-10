@@ -4,11 +4,26 @@ module.exports = {
   guards: "STL files read wrongly, slices that miss or break a loop, walls on the wrong side of the surface, separate parts or holes left out, layers that don't add up to the model's height, and seams between layers",
   why: "A sliced model has to print the model: the chocolate's outside edge on its surface, every part and hole of a layer joined into the one line the needle can't stop, as many layers as the height holds, and each layer starting where the last one ended so the walls spiral up without a jump.",
   how: "Builds a 20 mm cylinder (64 sides), a 10 / 8 mm tube, two 5 mm posts 20 mm apart and a cone, as binary STL (and the cylinder as ASCII too). Reads them, stands them on the plate, slices them at 0.3 mm with an 18G needle (0.84 mm line, 1.34 mm spacing) and fits each layer with a series (0.05 mm). Measures radii, loops, connectors, layer counts, the start of each layer and the filled base. Then a 40 mm disc with 3 walls, and filled at 100, 50 and 25%, and a solid 24 mm cylinder at 25% on a 2-layer base.",
-  pass: "Binary and ASCII read the same 384 triangles; a slice of the cylinder is one closed loop; its fitted line sits half a line width inside the surface (9.58 mm ± 0.05, the 64-sided polygon's middle) in under 20 terms; the tube's layer is its outside only (1 loop, no connector, nothing on its inner wall at 8.42 mm; was both walls until October 2026), its line at 9.58 mm; the posts' layer joins both posts; layers = ⌊(20 − 0.8) / 0.3⌋ + 1 = 65; each layer starts within 0.3 mm of the one below; a 2-layer filled base is longer than the wall; the cone's walls shrink from about 14.6 to 5 mm. A 40 mm disc with 3 walls has 3 loops joined by 2 connectors, the innermost 16.9 mm out; its fill at 50% is 35–65% as long as at 100%, at 25% under 40%; a solid model at 25% fills its wall layers (over 1.5× a hollow layer) while its base stays solid (over 1.5× a 25% layer).",
+  pass: "Spiral base: a cylinder's 3 base layers become 4 open lines, from the rim (9.4 mm or more out) to within 1.5 mm of the middle and back out, into the wall with no step over 2 mm; two separate boxes get rings (2 closed layers) and the result says it didn't spiral. Binary and ASCII read the same 384 triangles; a slice of the cylinder is one closed loop; its fitted line sits half a line width inside the surface (9.58 mm ± 0.05, the 64-sided polygon's middle) in under 20 terms; the tube's layer is its outside only (1 loop, no connector, nothing on its inner wall at 8.42 mm; was both walls until October 2026), its line at 9.58 mm; the posts' layer joins both posts; layers = ⌊(20 − 0.8) / 0.3⌋ + 1 = 65; each layer starts within 0.3 mm of the one below; a 2-layer filled base is longer than the wall; the cone's walls shrink from about 14.6 to 5 mm. A 40 mm disc with 3 walls has 3 loops joined by 2 connectors, the innermost 16.9 mm out; its fill at 50% is 35–65% as long as at 100%, at 25% under 40%; a solid model at 25% fills its wall layers (over 1.5× a hollow layer) while its base stays solid (over 1.5× a 25% layer).",
   async run() {
     const opt = { scale: 1, z0: 0.8, h: 0.3, base: 0, w: 0.84, d: 1.34, tol: 0.05 };
     const stack = (tris, o) => { const om = UNB.orientMesh(UNB.parseSTL(M.stl(tris)).tri, {}); const it = UNB.modelStack(om.tri, Object.assign({}, opt, o)); let r = it.next(); while (!r.done) r = it.next(); return r.value; };
+    let spiralChecks = [];
     const radii = (L) => Array.from(L.x, (v, i) => Math.hypot(v, L.y[i]));
+    // a spiral base (10 November 2026): a 10 mm cylinder's base goes round and in to the middle, then out again, an
+    // even number of layers, and runs into the wall; two boxes apart (two islands) get rings
+    {
+      const sp = stack(M.cylinder(10, 20), { base: 3, baseDensity: 1, basePattern: "spiral" }), [b0, b1] = sp.base, n = b0.x.length, e = b1.x.length - 1;
+      const S = UNB.layerStack({ base: sp.base, baseLayers: sp.N, walls: sp.walls, wallLayers: sp.walls.length, h: 0.3, open: false });
+      let jump = 0; for (let i = 1; i < S.x.length; i++) jump = Math.max(jump, Math.hypot(S.x[i] - S.x[i - 1], S.y[i] - S.y[i - 1]));
+      const rr = radii(b0);
+      const two = stack(M.box(-12, -4, 0, -4, 4, 6).concat(M.box(4, -4, 0, 12, 4, 6)), { base: 2, baseDensity: 1, basePattern: "spiral" });
+      spiralChecks = [check("spiral base (cylinder): 3 asked, 4 made, open lines", +(sp.N === 4) + +sp.base.every((b) => b.open === true) + +(sp.spiralBase === true), "==", 3),
+        check("… from the rim (10 − half a line, mm)", +rr[0].toFixed(2), ">=", 9.4), check("… to the middle (mm)", +rr[n - 1].toFixed(2), "<=", 1.5),
+        check("… the layer above ends back on the rim (mm)", +Math.hypot(b1.x[e], b1.y[e]).toFixed(2), ">=", 9.4),
+        check("… stacked into the wall without a jump (mm)", +jump.toFixed(2), "<=", 2),
+        check("two islands: rings, and it says so", +(two.spiralBase === false) + +two.base.every((b) => !b.open) + +(two.N === 2), "==", 3)];
+    }
     // binary and ASCII
     const cyl = M.cylinder(10, 20), bin = UNB.parseSTL(M.stl(cyl));
     const ascii = "solid c\n" + cyl.map((t) => ` facet normal 0 0 0\n  outer loop\n${t.map((p) => `   vertex ${p.join(" ")}\n`).join("")}  endloop\n endfacet\n`).join("") + "endsolid c\n";
@@ -46,6 +61,7 @@ module.exports = {
       check("cylinder: furthest jump between layer starts (mm)", Math.max(...starts), "<", 0.3),
       check("filled base: 2 filled layers, each longer than a wall (×)", F.N === 2 ? len(F.base[0]) / len(F.walls[0]) : 0, ">", 3),
       check("cone: bottom wall radius (mm)", r0, ">", 14), check("cone: top wall radius (mm)", r1, "<", 6),
+      ...spiralChecks,
     ], notes: `cylinder layer: ${layer.N} terms, mean radius ${mean.toFixed(3)} mm; tube: ${tube.N} terms; cone ${cone.T} layers` };
   },
 };

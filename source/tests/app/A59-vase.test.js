@@ -80,6 +80,10 @@ module.exports = {
     await page.waitForTimeout(1500); await A.idle(page, 20000); await page.waitForTimeout(1500);
     const sp = await page.evaluate(() => ({ n: +$("baseLayers").value, N: st.layers && st.layers.S.N, open: st.layers ? st.layers.base.filter((b) => b.open).length : -1 }));
     checks.push(check("spiral base: offered for a vase", offered, "==", 1), check("… 3 layers asked becomes 4", sp.n, "==", 4), check("… 4 base layers made, each an open line", +(sp.N === 4) + +(sp.open === 4), "==", 2));
+    await A.example(page, "skull"); await A.idle(page, 12000);
+    await page.evaluate(() => mapOpen("layers")); await A.idle(page, 20000); await page.waitForTimeout(1500);
+    const sk = await page.evaluate(() => ({ off: +!$("basePattern").querySelector('[value="spiral"]').disabled, pat: $("basePattern").value, n: +$("baseLayers").value, N: st.layers && st.layers.S.N, open: st.layers ? st.layers.base.filter((b) => b.open).length : -1 }));
+    checks.push(check("… offered for a sliced model too (the skull cup): still Spiral", +sk.off + +(sk.pat === "spiral"), "==", 2), check("… its base layers spiral (open lines of an even number)", +(sk.N > 0 && sk.N % 2 === 0 && sk.open === sk.N), "==", 1));
     await A.example(page, "leaf"); await A.idle(page, 6000);
     checks.push(check("… not offered for a picture, and the pattern back to rings", await page.evaluate(() => { const o = $("basePattern").querySelector('[value="spiral"]'); return +(o.hidden && o.disabled) + +($("basePattern").value !== "spiral"); }), "==", 2));
     await close();

@@ -468,15 +468,22 @@ function layerReadout() {
       hint = $("layerHint");
     hint.className = lf.short ? "hint warn" : "hint";
     hint.hidden = false;
+    // (a spiral base asked for, where the shape has no single way in)
+    const noSpiral =
+      S.spiral === false
+        ? " The base couldn't spiral everywhere (a layer in more than one piece, or one that pinches in two as it narrows): those layers are rings."
+        : "";
     if (L.vase) {
       hint.textContent =
         timing +
-        `The vase's path is written lap by lap from its profile, texture and movement (no slicing): the profile is the middle of the bead${S.N ? `; the first ${S.N} layer${S.N === 1 ? " is" : "s are"} filled at ${dens}% for the base` : "; no base, so the bottom is open"}. The layers spiral up with no seam; the top is open.`;
+        `The vase's path is written lap by lap from its profile, texture and movement (no slicing): the profile is the middle of the bead${S.N ? `; the first ${S.N} layer${S.N === 1 ? " is" : "s are"} filled at ${dens}% for the base` : "; no base, so the bottom is open"}. The layers spiral up with no seam; the top is open.` +
+        noSpiral;
       return;
     }
     hint.textContent =
       timing +
       `Sliced every ${fmt(S.h, 2)} mm through the model (the first at ${fmt(z0 / 2, 2)} mm); each layer's outside contour is moved in half a line width${L.walls > 1 ? ` with ${L.walls} walls` : ""} (inside surfaces and holes aren't traced; separate parts are joined by connector strands), ${S.N ? `filled at ${dens}% for the base, ` : ""}${S.F.infillDensity > 0 ? `filled at ${Math.round(S.F.infillDensity * 100)}% above it, ` : ""}and fitted with a Fourier series (${lo === hi ? lo : `${lo}–${hi}`} terms). The layers spiral up with no seam${S.F.infillDensity > 0 ? "" : "; the top is open"}.` +
+      noSpiral +
       (L.empty ? ` ${L.empty} layer${L.empty === 1 ? " had" : "s had"} nothing to cut and repeat the one below.` : "") +
       (L.support && L.support.layers
         ? ` Support: ${L.support.layers} layer${L.support.layers === 1 ? "" : "s"} widened from the plate up so no layer steps out more than ${fmt(overhangMM(), 2)} mm.`

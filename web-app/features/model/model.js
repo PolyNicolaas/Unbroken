@@ -318,7 +318,7 @@ async function buildModelLayers(o = {}) {
     N = base.length,
     Mw = walls.length;
   const stack = UNB.layerStack({ base, baseLayers: N, walls, wallLayers: Mw, h: S0.h, open: false });
-  const S = { on: N > 0, pat: S0.pat, N, M: Mw, h: S0.h, F: S0.F };
+  const S = { on: N > 0, pat: S0.pat, N, M: Mw, h: S0.h, F: S0.F, spiral: R.spiralBase };
   return {
     key: key + "|" + JSON.stringify(lay.xf),
     S,
@@ -776,3 +776,29 @@ on("modelPlate", modelPlate); // its footprint on the plate
 on("modelLayers", buildModelLayers); // sliced into layers
 on("modelPrintedMM", printedMM); // the height it prints at
 on("modelHeight", setModelHeight); // scaled evenly to a height
+
+// ---------- the spiral base ----------
+// A model's or a vase's base can spiral (the Base settings' Pattern): round the rim and in to the middle on one layer,
+// up, and out again on the next, ending where the wall starts. So it takes two layers at a time: an odd number goes
+// up by one. The choice is only there for a model (a drawing's base is the line's own fill).
+function spiralBaseUI() {
+  const sel = $("basePattern"),
+    opt = sel.querySelector('option[value="spiral"]'),
+    model = isModel();
+  opt.hidden = opt.disabled = !model;
+  if (!model && sel.value === "spiral") {
+    sel.value = "rings";
+    sel.dispatchEvent(new Event("input", { bubbles: true }));
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  const spiral = model && sel.value === "spiral",
+    n = $("baseLayers");
+  n.step = spiral ? 2 : 1;
+  if (spiral && +n.value % 2) {
+    n.value = +n.value + 1;
+    n.dispatchEvent(new Event("input", { bubbles: true }));
+    n.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+}
+for (const id of ["basePattern", "baseLayers"]) $(id).addEventListener("change", spiralBaseUI);
+on("artUI", spiralBaseUI);

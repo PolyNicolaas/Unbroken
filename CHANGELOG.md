@@ -26,11 +26,12 @@ changes on screen with everything on.
   circle (the wall without its movement), so a deep wave stood on a base that neither filled it nor matched it. The
   base is now the first wall lap laid flat, movement and all. Loops, which cross themselves, keep the plain base
   (test E57).
-- **A spiral base for a vase** (Layers → Base → Pattern: Spiral). The needle goes round the rim and in, one row
-  further in each time round, to the middle; steps up; and comes out the same way on the next layer, ending on the
-  rim where the wall's spiral starts. No joins and nothing crossed. It takes two layers at a time, so an odd number
-  of base layers goes up by one. A base that pinches in two as it narrows has no single way in and gets rings.
-  (`UNB.spiralFill`; tests E57, A59.)
+- **A spiral base for 3D prints** (Layers → Base → Pattern: Spiral; a sliced model or a vase). The needle goes
+  round the rim and in, one row further in each time round, to the middle; steps up; and comes out again on the next
+  layer, ending on the rim where the wall's spiral starts. No joins and nothing crossed. It takes two layers at a
+  time, so an odd number of base layers goes up by one. A sliced model spirals each layer's own outline; a pair of
+  layers that is more than one piece (a model on feet), or pinches in two as it narrows, has no single way in and
+  gets rings, and the Layers note says so. (`UNB.spiralFill`; tests E23, E57, A59.)
 - **Brightness, contrast and background are with the picture.** The Image prep card (brightness, contrast, remove
   plain background, even out lighting, cut out the object) is on the Art step, under the Picture card, where a photo
   is taken or a file chosen. It was behind the faded Picture prep chip. Grey levels keeps a chip of its own, added

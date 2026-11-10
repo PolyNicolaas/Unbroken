@@ -10,8 +10,8 @@ work on one, its folder, its marked parts of the page and its tests are everythi
 | Feature | What it is | Scripts | Lines | Parts of the page | Tests |
 |---|---|---|---|---|---|
 | **plotter** | made for a pen plotter: the Plot step, pens, fills, SVG | `plot.js` | 1062 | 6 | E22, A15, A16, A32 |
-| **model** | a 3D model (STL) sliced into layers | `model.js`, `sample-skull.js` | 796 | 8 | E23, E30, E50, A17, A28 |
-| **vase** | Make a vase (needs model) | `vase.js` | 462 | 2 | E57, A59 |
+| **model** | a 3D model (STL) sliced into layers | `model.js`, `sample-skull.js` | 822 | 9 | E23, E30, E50, A17, A28 |
+| **vase** | Make a vase (needs model) | `vase.js` | 434 | 1 | E57, A59 |
 | **patterns** | the pattern styles (labyrinth, spirograph, wave portrait …) | `pathpad.js`, `patterns.js` | 570 | 4 | E33, A31 |
 | **molecule** | a molecule drawn from its name | `molecule.js`, `moleditor.js` | 939 | 5 | E39, E40, E44, A40, A45, A50 |
 | **pieces** | a text printed as a piece per line | `pieces.js` | 357 | 1 | E31, A29 |
@@ -40,7 +40,7 @@ a 3D model (STL) sliced into layers
 
 - examples: skull
 - kinds of art: model
-- moments it answers: ready, buildFile, save, modelRestore, modelEnter, modelFile, modelDraw, modelPlate, modelLayers, modelPrintedMM, modelHeight
+- moments it answers: ready, buildFile, save, modelRestore, modelEnter, modelFile, modelDraw, modelPlate, modelLayers, modelPrintedMM, modelHeight, artUI
 - moments it announces: modelSized, redraw, preset, modelSave, modelRestoring
 
 ### vase
@@ -49,7 +49,7 @@ Make a vase (needs model) Needs: model.
 
 - examples: wavyvase
 - steps and chips of the map: vprofile, vtexture, vmove
-- moments it answers: ready, modelSave, modelRestoring, modelSized, artUI
+- moments it answers: ready, modelSave, modelRestoring, modelSized
 
 ### patterns
 

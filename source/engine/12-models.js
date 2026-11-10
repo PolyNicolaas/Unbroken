@@ -385,7 +385,7 @@
       // solid)
       dens = Math.min(base ? 1.25 : 1, Math.max(0, +opt[p + "Density"] || 0));
     if (!(dens > 0.001)) return { pattern: null, spacing: 0, angle: 0, minArea: 0 };
-    // (spiral: a base only, and only where the layer's maker can spiral: UNB.vaseStack; elsewhere it's rings)
+    // (spiral: a base only, of a vase or a sliced model: UNB.vaseStack, UNB.modelStack; elsewhere it's rings)
     const want = opt[p + "Pattern"],
       pattern = want === "rings" || (want === "spiral" && !base) ? "rings" : want === "spiral" ? "spiral" : "lines",
       turn = Math.max(1, opt[p + "Turn"] | 0 || 1);
@@ -928,7 +928,10 @@
       Hfull = top * sc,
       Hmm = Math.max(h, Hfull - cb - ct);
     const T = Math.max(1, Math.floor((Hmm - z0) / h + 1e-9) + 1),
-      NB = Math.min(T, Math.max(0, o.base | 0));
+      // (a spiral base goes in on one layer and out on the next: an even number of layers, one more if need be)
+      wantSpiral = UNB.fillPlan(o, true, 0).pattern === "spiral",
+      NB0 = Math.min(T, Math.max(0, o.base | 0)),
+      NB = wantSpiral && NB0 % 2 ? (NB0 + 1 <= T ? NB0 + 1 : NB0 - 1) : NB0;
     // slice every layer first (support is worked out from the top down), then fit them from the bottom up
     const outl = [];
     for (let k = 0; k < T; k++) {
@@ -977,10 +980,60 @@
     let prev = null,
       empty = 0,
       last = null;
+    // A spiral base, two layers at a time: in from the rim to the middle on one, out again on the next, each layer
+    // its own outline's spiral (the rim is the outline moved in half a line width, as a wall is). A pair spirals when
+    // both layers are one piece with a single way in; otherwise that pair is rings.
+    const w0 = o.w || 0.8,
+      spirals = [];
+    let spiralBase = wantSpiral && NB > 0 ? true : null;
+    if (wantSpiral) {
+      const rimOf = (k) => {
+        const O = outsideLoops(outl[k]);
+        if (O.length !== 1) return null;
+        const P0 = resampleLoop(O[0], Math.min(0.2, w0 / 4)),
+          P = loopArea(P0) < 0 ? P0.reverse() : P0,
+          m = P.length,
+          R = P.map((p, i) => {
+            const a = P[(i - 2 + m) % m],
+              b = P[(i + 2) % m],
+              tx = b[0] - a[0],
+              ty = b[1] - a[1],
+              l = Math.hypot(tx, ty) || 1;
+            return [p[0] - (ty / l) * (w0 / 2), p[1] + (tx / l) * (w0 / 2)];
+          });
+        return loopArea(R) > w0 * w0 ? R : null;
+      };
+      let at = null;
+      for (let k = 0; k + 1 < NB; k += 2) {
+        const F = UNB.fillPlan(o, true, k),
+          Ra = rimOf(k),
+          Rb = Ra && rimOf(k + 1),
+          A = Rb && UNB.spiralFill(Ra, F.spacing, at && at[0], at && at[1]),
+          B = A && UNB.spiralFill(Rb, F.spacing, A.x[0], A.y[0]);
+        if (!B) {
+          spiralBase = false;
+          continue;
+        }
+        spirals[k] = { x: A.x, y: A.y, open: true };
+        spirals[k + 1] = { x: B.x.slice().reverse(), y: B.y.slice().reverse(), open: true };
+        at = [B.x[0], B.y[0]];
+      }
+    }
     for (let k = 0; k < T; k++) {
       const baseL = k < NB,
         j = baseL ? k : k - NB,
-        F = UNB.fillPlan(o, baseL, j);
+        F = Object.assign({}, UNB.fillPlan(o, baseL, j));
+      if (F.pattern === "spiral") F.pattern = "rings"; // (a pair that couldn't spiral)
+      if (spirals[k]) {
+        const Sk = spirals[k],
+          e = Sk.x.length - 1;
+        base.push(Sk);
+        terms.push(0);
+        joins.push(0);
+        prev = [Sk.x[e], Sk.y[e]]; // (where the needle is: the middle, or back on the rim)
+        yield { done: k + 1, of: T };
+        continue;
+      }
       let L = outl[k].length
         ? UNB.modelLayer(outl[k], {
             w: o.w,
@@ -1014,6 +1067,7 @@
       walls,
       T: base.length + walls.length,
       N: base.length,
+      spiralBase,
       terms,
       joins,
       empty,
