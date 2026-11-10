@@ -7,7 +7,8 @@
 // ---------- undo / redo and design files ----------
 // A design = the source (image, or typed text), every setting that shapes the line or the plate, and the
 // hand edits (selection, erasing, start point, painted areas). View options (line view, box, …) are not part of it.
-const DESIGN_IDS = [
+// (a feature adds the controls it owns to this list itself: state.js addSaved)
+addSaved(
   "designName",
   "srcImage",
   "srcText",
@@ -75,24 +76,12 @@ const DESIGN_IDS = [
   "copyGap",
   "plateRot",
   "textPieces",
-  "molPieces",
   "gOx",
   "gOy",
   "gZ",
   "gLift",
   "gFlow",
   "gOver",
-  "mxS1",
-  "mxS2",
-  "mxS3",
-  "mxF1",
-  "mxF2",
-  "mxF3",
-  "mxH1",
-  "mxH2",
-  "mxH3",
-  "mxSlow",
-  "mxScores",
   "support",
   "gFeed",
   "layerTime",
@@ -101,22 +90,8 @@ const DESIGN_IDS = [
   "wallLayers",
   "layerH",
   "printer",
-  "paper",
-  "paperOrient",
-  "paperMargin",
-  "paperW",
-  "paperH",
-  "penW",
-  "penColor",
-  "wallCount",
-  "crease",
-  "gapClose",
-  "minShape",
-  "drawBridges",
-  "plotTraced",
-  "plotArt",
-];
-const DESIGN_SET = new Set(DESIGN_IDS);
+  "wallCount"
+);
 // A model is recognised by what it is, not by its id: the id is a counter that starts again every session, so a saved
 // design could put its turns and height on a different model loaded later. The fingerprint is the model's name, its
 // triangle count and its size as loaded (to 0.001), worked out once per mesh.
@@ -158,7 +133,6 @@ function designState() {
       cutout: st.cutout && st.cutout.box ? { box: st.cutout.box, strokes: st.cutout.strokes } : null,
       lineChosen: !!st.lineChosen,
       zones: st.zones,
-      penFill: structuredClone(st.penFill),
       model: st.model
         ? {
             id: st.model.id,
@@ -174,6 +148,7 @@ function designState() {
       art: artSaved(), // art.js: the layers (their pictures are kept apart)
       feedUnit: "mm/s",
       posManual,
+      ...Object.assign({}, ...ask("save")), // what a feature keeps with the design (the pen plotter's fill pens)
     },
   };
 }
@@ -233,20 +208,14 @@ function syncDesignUI() {
   $("outW").value = +st.outW.toFixed(1);
   infillUI();
   baseUI();
-  if (typeof mxUI === "function") mxUI(); // matrix.js: the Test matrix's levels and scores
   applyPrinter(false);
   forgetHeightGoal();
   showHeight();
   tuneUI();
-  $("paperCustomRow").hidden = $("paper").value !== "custom";
-  renderPens();
-  shapesUI();
-  drawPage();
-  fillsSoon();
   syncSpacingUI();
   labels();
   updateToolLabels();
-  plotFromUI(); // plot.js: Traced line or Art as drawn
+  ask("designUI"); // a feature's own controls follow the design (the pen plotter's page and pens, the test matrix)
   artUI(); // art.js: the layer list and the chosen layer's cards
 }
 // Returns a note when part of the design couldn't come back (a 3D model that isn't the one loaded), else "".
@@ -303,8 +272,7 @@ function applyDesign(d, src, imageSource, pics, picMore) {
     st.zm = {};
     st.wk = null;
     posManual = !!s.posManual;
-    st.penFill = s.penFill ? structuredClone(s.penFill) : defaultPenFill();
-    st.pfill = null; // older design files: no fill pens
+    ask("restore", s); // what a feature kept with the design
     // the Art step's input (art.js); a design from before the Art step comes back as its source was
     if (s.art) artRestore(s.art, pics || null, picMore || null);
     else artFromOld($("srcModel").checked ? "model" : textMode() ? "text" : "picture", src, s.srcLabel, s.pattern);
@@ -412,7 +380,7 @@ for (const ev of ["input", "change"])
   document.addEventListener(
     ev,
     (e) => {
-      if (e.target && DESIGN_SET.has(e.target.id)) recordSoon();
+      if (e.target && DESIGN_IDS.includes(e.target.id)) recordSoon();
     },
     true
   );

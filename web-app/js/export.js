@@ -421,61 +421,7 @@ function readyItems() {
       "h-layers"
     );
   else add("ok", `Every layer takes at least ${need} s to set`, "h-layers");
-  if (L.vase && L.overhang) {
-    // a vase made here: does each lap sit on the one below, and can the bead follow its turns?
-    const step = overhangMM(),
-      zAt = (k) => fmt(firstZ() + k * L.S.h, 1),
-      fix = "a gentler profile there, a smaller movement or less shift";
-    if (L.overhang.worst > step + 0.02)
-      add(
-        "warn",
-        `The wall steps out ${fmt(L.overhang.worst, 2)} mm in a layer at ${zAt(L.overhang.at)} mm (a bead holds ${fmt(step, 2)}): ${fix}`,
-        "h-model"
-      );
-    if (L.overhang.inWorst > 0.02)
-      add(
-        "warn",
-        `The wall steps in ${fmt(L.overhang.inWorst + step, 2)} mm in a layer at ${zAt(L.overhang.inAt)} mm, over the empty inside (a bead holds ${fmt(step, 2)}): ${fix}`,
-        "h-model"
-      );
-    if (!(L.overhang.worst > step + 0.02) && !(L.overhang.inWorst > 0.02))
-      add("ok", `Every lap sits on the one below (within ${fmt(step, 2)} mm)`, "h-layers");
-    const T = L.tightest,
-      half = lineWidthMM() / 2;
-    if (T && T.r < half)
-      add(
-        "warn",
-        `Turns as tight as a ${fmt(T.r, 2)} mm radius at ${zAt(T.at)} mm, for a bead ${fmt(2 * half, 2)} mm wide: the chocolate rounds them off (fewer or smaller movements keep their shape)`,
-        "h-model"
-      );
-  } else if (L.model && L.overhang) {
-    // a model: does any part reach out past what a bead can hold?
-    const step = overhangMM(),
-      S = L.support,
-      zAt = (k) => fmt(firstZ() + k * L.S.h, 1);
-    const kind = { thin: "thin wall", slope: "slope", skirt: "flared skirt" }[$("support").value] || "flared skirt";
-    // (a hollow single-wall print: a layer stepping in past its wall hangs over the empty inside; Support: Slope)
-    const inward = L.overhang.inWorst > 0.02 && !(S && S.layers && $("support").value === "slope");
-    if (S && S.layers)
-      add(
-        "ok",
-        `Support (${kind}): ${S.layers} layer${S.layers === 1 ? "" : "s"} ${$("support").value === "slope" ? "sloped" : "widened"}, from ${zAt(S.from)} mm`,
-        "h-layers"
-      );
-    else if (L.overhang.worst > step + 0.02)
-      add(
-        "warn",
-        `Overhang: a layer steps out ${fmt(L.overhang.worst, 2)} mm at ${zAt(L.overhang.at)} mm (a bead holds ${fmt(step, 2)}): turn on Support`,
-        "h-layers"
-      );
-    else if (!inward) add("ok", `No overhang past ${fmt(step, 2)} mm a layer`, "h-layers");
-    if (inward)
-      add(
-        "warn",
-        `A layer steps in ${fmt(L.overhang.inWorst, 2)} mm at ${zAt(L.overhang.inAt)} mm, over the empty inside (the wall holds ${fmt(step, 2)}): Support: Slope`,
-        "h-layers"
-      );
-  }
+  ask("ready", L, add); // what a feature checks about its own layers (a vase's laps, a model's overhangs)
   const c = cartridgeUse();
   if (c)
     add(

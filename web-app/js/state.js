@@ -60,6 +60,11 @@ function addOutput(key, output) {
 // The map's shape for the design in hand can be changed by a feature: each of these gets the shape { spine, up, down }
 // and may add its chips (a vase's Profile, Texture and Movement under Art).
 const MAP_SHAPERS = [];
+// The controls a design keeps (history.js saves and restores their values): each script adds the ones it owns
+const DESIGN_IDS = [];
+function addSaved(...ids) {
+  DESIGN_IDS.push(...ids);
+}
 const joined = {}; // moment → the functions given for it
 function on(moment, fn) {
   (joined[moment] ||= []).push(fn);

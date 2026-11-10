@@ -988,3 +988,33 @@ addMapNode("plot", {
 });
 addMapNode("fills", { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" });
 addMapNode("pexport", { cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" });
+
+// with a design: its controls are saved, the fill pens kept, and the page follows a design that was restored
+addSaved(
+  "paper",
+  "paperOrient",
+  "paperMargin",
+  "paperW",
+  "paperH",
+  "penW",
+  "penColor",
+  "crease",
+  "gapClose",
+  "minShape",
+  "drawBridges",
+  "plotTraced",
+  "plotArt"
+);
+on("save", () => ({ penFill: structuredClone(st.penFill) }));
+on("restore", (s) => {
+  st.penFill = s.penFill ? structuredClone(s.penFill) : defaultPenFill();
+  st.pfill = null; // older design files: no fill pens
+});
+on("designUI", () => {
+  $("paperCustomRow").hidden = $("paper").value !== "custom";
+  renderPens();
+  shapesUI();
+  drawPage();
+  fillsSoon();
+  plotFromUI(); // Traced line or Art as drawn
+});

@@ -669,3 +669,33 @@ async function modelViewSVG() {
 $("drawSvg").addEventListener("click", () => exportAs("viewsvg", $("drawMsg")));
 
 addExample(110, "skull", "Skull cup", "a 3D model", () => artUse("model"), true);
+
+// the ready list (export.js): does any part of the model reach out past what a bead can hold?
+on("ready", (L, add) => {
+  if (!(L.model && L.overhang) || L.vase) return;
+  const step = overhangMM(),
+    S = L.support,
+    zAt = (k) => fmt(firstZ() + k * L.S.h, 1);
+  const kind = { thin: "thin wall", slope: "slope", skirt: "flared skirt" }[$("support").value] || "flared skirt";
+  // (a hollow single-wall print: a layer stepping in past its wall hangs over the empty inside; Support: Slope)
+  const inward = L.overhang.inWorst > 0.02 && !(S && S.layers && $("support").value === "slope");
+  if (S && S.layers)
+    add(
+      "ok",
+      `Support (${kind}): ${S.layers} layer${S.layers === 1 ? "" : "s"} ${$("support").value === "slope" ? "sloped" : "widened"}, from ${zAt(S.from)} mm`,
+      "h-layers"
+    );
+  else if (L.overhang.worst > step + 0.02)
+    add(
+      "warn",
+      `Overhang: a layer steps out ${fmt(L.overhang.worst, 2)} mm at ${zAt(L.overhang.at)} mm (a bead holds ${fmt(step, 2)}): turn on Support`,
+      "h-layers"
+    );
+  else if (!inward) add("ok", `No overhang past ${fmt(step, 2)} mm a layer`, "h-layers");
+  if (inward)
+    add(
+      "warn",
+      `A layer steps in ${fmt(L.overhang.inWorst, 2)} mm at ${zAt(L.overhang.inAt)} mm, over the empty inside (the wall holds ${fmt(step, 2)}): Support: Slope`,
+      "h-layers"
+    );
+});

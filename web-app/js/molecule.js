@@ -553,3 +553,4 @@ $("molPieces").addEventListener("change", () => {
 });
 
 addExample(100, "theobromine", "Theobromine", "a molecule: chocolate's own", () => moleculeExample("theobromine"));
+addSaved("molPieces"); // (the Plate card's Molecule: saved with the design)
