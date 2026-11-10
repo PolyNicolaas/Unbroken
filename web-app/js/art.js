@@ -578,4 +578,3 @@ document.querySelectorAll('input[name="artFor"]').forEach((r) =>
     recordSoon();
   })
 );
-

@@ -69,7 +69,7 @@ module.exports = {
       checks.push(check("a pattern as drawn from the empty start: saved under its name", +/^labyrinth/.test(name), "==", 1));
       allErrors.push(...errors); await close(); }
     // 8: the phone
-    { const { page, errors, close } = await A.open(ctx, { example: "lettering", viewport: { width: 390, height: 844 }, folded: true });
+    { const { page, errors, close } = await A.open(ctx, { example: "lettering", viewport: { width: 390, height: 844 } });
       const right = await page.evaluate(() => Math.round(document.querySelector("#viewMenu summary").getBoundingClientRect().right));
       checks.push(check("phone: the View button inside the screen (right edge, px)", right, "<=", 390));
       await page.click("label[for=viewChoc]"); await A.idle(page, 2000); await page.click("label[for=stLayers]"); await A.idle(page, 1500);
