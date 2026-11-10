@@ -104,7 +104,7 @@ What it's made for comes first, at the top: **a printer** (chocolate, clay) or *
 a **map** across the top of the page (`web-app/js/map.js`): one thick line through the steps this design takes
 (**Material → Art → Line → Size → Print** for a printer; a pen plotter ends in **Plot** and has no Material; a 3D
 model or a vase goes straight from Art to Print), with the less-used settings as small chips above and below their
-step (Examples, Picture prep, Tracing, Plate, Machine, Layers, Tests), faded until they matter. Each step shows its
+step (Examples, Grey levels, Tracing, Plate, Machine, Layers, Tests), faded until they matter. Each step shows its
 result, and a dot when the ready list has something for it. Tapping a step opens its settings beside the preview,
 one row per setting. The step tabs this replaced were taken out in v144 (`web-app/js/workflow.js` still holds the
 workflow's rules, [`docs/WORKFLOW-PLAN.md`](docs/WORKFLOW-PLAN.md)). Tests A60, A12.

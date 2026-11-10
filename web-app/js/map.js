@@ -39,7 +39,8 @@ const MAP_CORE = {
   art: {
     cap: "Art",
     step: "art",
-    cards: ["h-input", "h-pic", "h-text", "h-art", "h-mol", "h-model"],
+    // (a picture's brightness, contrast and background are with the picture: Image prep)
+    cards: ["h-input", "h-pic", "h-prep", "h-text", "h-art", "h-mol", "h-model"],
     val: () => {
       const kind =
         { picture: "Picture", text: "Text", pattern: "Pattern", molecule: "Molecule" }[st.art.kind] ||
@@ -47,12 +48,6 @@ const MAP_CORE = {
       const what = st.art.kind === "model" ? (st.model && !st.model.vase && st.model.name) || "" : st.srcLabel || "";
       return what ? `${kind} · ${what}` : kind;
     },
-  },
-  prep: {
-    cap: "Picture prep",
-    step: "art",
-    cards: ["h-prep", "h-levels"],
-    quiet: () => mapText("prepVal") === "off" && /off/.test(mapCardVal("h-levels") || "off"),
   },
   tracing: { cap: "Tracing", step: "design", cards: ["h-trace"], quiet: () => true, val: () => "" },
   line: {
@@ -163,7 +158,6 @@ function mapShape() {
   if (!model) spine.push("line", "size");
   spine.push(O.step);
   const S = { spine, up: { art: ["examples"], [O.step]: [...(O.up || [])] }, down: { [O.step]: [...(O.down || [])] } };
-  if (picture) S.down.art = ["prep"];
   if (!model && picture) S.up.line = ["tracing"];
   for (const shaper of MAP_SHAPERS) shaper(S);
   // a chip whose node no script added (its feature is off) isn't on the map

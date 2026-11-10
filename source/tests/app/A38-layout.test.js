@@ -4,16 +4,16 @@ module.exports = {
   id: "A38", title: "The layout: picture prep on the Art step, the tools on Line, the preview inside the window",
   guards: "Image prep or Grey levels back on the Line step (or missing from Art), the photo's settings outside the Picture card, the trace's tools showing on Art, a preview taller than the window on a laptop, a closed notice coming back, a Line card for a printer",
   why: "What changes the picture (Image prep, Grey levels) is on the Art step with the Picture card (v113), so the Line step is only how it's traced; the trace's tools belong to the Line step; on a laptop the preview takes the room and stays inside the window; notices can be put away (v115). Since the map of the steps (v140) each of these is a step on the map.",
-  how: "Opens the leaf (a printer) at a laptop and an iPad size: reads the cards on Art, on Picture prep and on Line; checks the tools show on Line and not on Art, and the Photo box is inside the Picture card. On a 1512 × 900 laptop: the preview's width and bottom; closes a notice and reloads; the play speed's place; the printer's Line step. Opens empty: what the preview and the Input card offer.",
-  pass: "Art: Input and Picture; Picture prep: Image prep and Grey levels; Line: neither; the tools on Line, not on Art; the Photo box inside the Picture card; on a 1512 × 900 laptop the preview at least 1000 px wide and inside the window; a closed notice stays closed after a reload; the play speed in the View menu; a printer's Line step has no Line card; empty: choose a file in the preview, Examples on the map, no drop zone in the Input card; no page errors.",
+  how: "Opens the leaf (a printer) at a laptop and an iPad size: reads the cards on Art, on Grey levels and on Line; checks the tools show on Line and not on Art, and the Photo box is inside the Picture card. On a 1512 × 900 laptop: the preview's width and bottom; closes a notice and reloads; the play speed's place; the printer's Line step. Opens empty: what the preview and the Input card offer.",
+  pass: "Art: Input, Picture and Image prep; Grey levels: its own card; Line: neither; the tools on Line, not on Art; the Photo box inside the Picture card; on a 1512 × 900 laptop the preview at least 1000 px wide and inside the window; a closed notice stays closed after a reload; the play speed in the View menu; a printer's Line step has no Line card; empty: choose a file in the preview, Examples on the map, no drop zone in the Input card; no page errors.",
   async run(ctx) {
     const checks = [];
     for (const vp of [{ width: 1300, height: 900 }, { width: 1024, height: 768 }]) {
       const { page, errors, close } = await A.open(ctx, { art: true, viewport: vp }), W = vp.width;
       const art = await shownCards(page);
-      await page.click('[data-node="prep"]'); await A.idle(page, 400);
+      await page.click('[data-node="levels"]'); await A.idle(page, 400);
       const prep = await shownCards(page);
-      checks.push(check(`${W}: Art has Input and Picture`, +["card-h-input", "card-h-pic"].every((c) => art.includes(c)), "==", 1), check(`${W}: Picture prep has Image prep and Grey levels`, prep.join(","), "==", "card-h-prep,card-h-levels"));
+      checks.push(check(`${W}: Art has Input, Picture and Image prep (brightness and contrast with the picture, 10 November 2026)`, +["card-h-input", "card-h-pic", "card-h-prep"].every((c) => art.includes(c)), "==", 1), check(`${W}: Grey levels has its own chip`, prep.join(","), "==", "card-h-levels"));
       const toolsArt = await page.isVisible("#selectBtn");
       await page.click("label[for=viewDesign]"); await A.idle(page, 800);
       const line = await shownCards(page), toolsLine = await page.isVisible("#selectBtn");

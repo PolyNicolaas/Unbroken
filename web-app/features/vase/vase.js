@@ -51,6 +51,7 @@ function vaseUI() {
   vaseLabels();
   vaseHint();
   vaseDraw();
+  spiralBaseUI(); // (the Base settings' Spiral is a vase's)
 }
 function vaseLabels() {
   const V = vaseCur,
@@ -431,3 +432,30 @@ on("modelRestoring", (m) => {
   } else if (st.model && st.model.vase) leaveVase(); // a design made with an STL: the vase steps aside
 });
 on("modelSized", vaseUI); // its Height box follows the model's height
+
+// ---------- the spiral base ----------
+// A vase's base can spiral (the Base settings' Pattern): round the rim and in to the middle on one layer, up, and out
+// again on the next, ending where the wall starts. So it takes two layers at a time: an odd number goes up by one.
+// The choice is only there for a vase (anything else's base is the line's own fill, or a sliced model's).
+function spiralBaseUI() {
+  const sel = $("basePattern"),
+    opt = sel.querySelector('option[value="spiral"]'),
+    vase = isModel() && !!(st.model && st.model.vase);
+  opt.hidden = opt.disabled = !vase;
+  if (!vase && sel.value === "spiral") {
+    sel.value = "rings";
+    sel.dispatchEvent(new Event("input", { bubbles: true }));
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+  const spiral = vase && sel.value === "spiral",
+    n = $("baseLayers");
+  n.step = spiral ? 2 : 1;
+  if (spiral && +n.value % 2) {
+    n.value = +n.value + 1;
+    n.dispatchEvent(new Event("input", { bubbles: true }));
+    n.dispatchEvent(new Event("change", { bubbles: true }));
+  }
+}
+for (const id of ["basePattern", "baseLayers"]) $(id).addEventListener("change", spiralBaseUI);
+on("artUI", spiralBaseUI);
+on("modelSized", spiralBaseUI);

@@ -311,7 +311,8 @@ async function buildModelLayers(o = {}) {
     modelStacks.set(key, R);
     if (modelStacks.size > 6) modelStacks.delete(modelStacks.keys().next().value);
   }
-  const place = (L) => UNB.plateLocal(L.x, L.y, lay.xf);
+  // (a spiral base's lines are open, rim to middle: UNB.layerStack doesn't close them)
+  const place = (L) => Object.assign(UNB.plateLocal(L.x, L.y, lay.xf), L.open ? { open: true } : null);
   const base = R.base.map(place),
     walls = R.walls.map(place),
     N = base.length,

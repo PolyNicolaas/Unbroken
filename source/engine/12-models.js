@@ -5,7 +5,17 @@
   "use strict";
   const UNB = root.UNB,
     // shared helpers (00-util.js)
-    { f3, svgPolylines, cumLength, resampleLoop, isoContours, labelComponents, segDist2, startNearest } = UNB._u;
+    {
+      f3,
+      svgPolylines,
+      cumLength,
+      resampleLoop,
+      isoContours,
+      labelComponents,
+      segDist2,
+      startNearest,
+      rasterPolyline,
+    } = UNB._u;
 
   // a mesh corner as a text key, matched to 0.0001 units so float noise between neighbouring triangles doesn't split it
   const cornerKey = (tri, i) =>
@@ -375,7 +385,9 @@
       // solid)
       dens = Math.min(base ? 1.25 : 1, Math.max(0, +opt[p + "Density"] || 0));
     if (!(dens > 0.001)) return { pattern: null, spacing: 0, angle: 0, minArea: 0 };
-    const pattern = opt[p + "Pattern"] === "rings" ? "rings" : "lines",
+    // (spiral: a base only, and only where the layer's maker can spiral: UNB.vaseStack; elsewhere it's rings)
+    const want = opt[p + "Pattern"],
+      pattern = want === "rings" || (want === "spiral" && !base) ? "rings" : want === "spiral" ? "spiral" : "lines",
       turn = Math.max(1, opt[p + "Turn"] | 0 || 1);
     // each its own smallest area filled (fillMinArea: both)
     const minArea = opt[p + "MinArea"] != null ? +opt[p + "MinArea"] || 0 : +opt.fillMinArea || 0;
@@ -385,6 +397,85 @@
       angle: (+opt[p + "Angle"] || 0) + (pattern === "lines" && Math.floor(j / turn) % 2 ? 90 : 0),
       minArea,
     };
+  };
+
+  // A spiral fill: from a closed rim (the loop P of [x, y], mm, the bead's centre line) the line goes round just
+  // inside itself, one row spacing (rs) further in each time round, to the middle: rings following the rim's shape,
+  // each left a row spacing before it closes for a short slant in to the next. One open line, no joins, nothing
+  // crossed. Starts on the rim nearest (gx, gy). Returns { x, y, open: true, rings } (rim → middle), or null when
+  // there's no single way in: the shape splits in two as it narrows (a waist), or it's too big for the grid.
+  UNB.spiralFill = function (P0, rs, gx, gy) {
+    if (!P0 || P0.length < 8 || !(rs > 0)) return null;
+    const step = Math.min(0.25, rs / 4),
+      g = Math.max(0.05, rs / 6),
+      xs = P0.map((p) => p[0]),
+      ys = P0.map((p) => p[1]),
+      pad = 3,
+      ox = Math.min(...xs) - pad * g,
+      oy = Math.min(...ys) - pad * g,
+      w = Math.ceil((Math.max(...xs) - ox) / g) + pad + 1,
+      h = Math.ceil((Math.max(...ys) - oy) / g) + pad + 1;
+    if (w * h > 12e6) return null;
+    const line = new Uint8Array(w * h);
+    rasterPolyline(line, w, xs, ys, true, ox, oy, g, 0.5);
+    const dist = UNB.edt(line, w, h).dist,
+      lab = new Int32Array(w * h).fill(-1);
+    // the cells inside the rim (even-odd, at cell centres)
+    for (let r = 0; r < h; r++) {
+      const Y = oy + r * g,
+        cut = [];
+      for (let i = 0; i < P0.length; i++) {
+        const p = P0[i],
+          q = P0[(i + 1) % P0.length];
+        if (p[1] > Y !== q[1] > Y) cut.push(p[0] + ((Y - p[1]) / (q[1] - p[1])) * (q[0] - p[0]));
+      }
+      cut.sort((a, b) => a - b);
+      for (let k = 0; k + 1 < cut.length; k += 2)
+        for (
+          let c = Math.max(0, Math.ceil((cut[k] - ox) / g));
+          c <= Math.min(w - 1, Math.floor((cut[k + 1] - ox) / g));
+          c++
+        )
+          lab[r * w + c] = 0;
+    }
+    const box = { x0: [0], y0: [0], x1: [w - 1], y1: [h - 1] },
+      len = (R) =>
+        R.reduce((a, p, i) => a + Math.hypot(p[0] - R[(i + 1) % R.length][0], p[1] - R[(i + 1) % R.length][1]), 0),
+      acw = (R) => (loopArea(R) < 0 ? R.slice().reverse() : R),
+      rings = [acw(resampleLoop(P0, step))];
+    for (let k = 1; k < 4000; k++) {
+      const C = isoContours(dist, lab, 0, (k * rs) / g, w, h, box, ox, oy, g).filter(
+        (R) => R.length > 3 && len(R) > rs
+      );
+      if (!C.length) break;
+      if (C.length > 1) return null;
+      rings.push(acw(resampleLoop(C[0], step)));
+    }
+    const x = [],
+      y = [];
+    let sx = gx == null ? rings[0][0][0] : gx,
+      sy = gy == null ? rings[0][0][1] : gy;
+    for (const R of rings) {
+      const n = R.length;
+      let i0 = 0,
+        best = Infinity;
+      for (let i = 0; i < n; i++) {
+        const d2 = (R[i][0] - sx) ** 2 + (R[i][1] - sy) ** 2;
+        if (d2 < best) {
+          best = d2;
+          i0 = i;
+        }
+      }
+      // (all but the last row spacing of it: the slant in to the next ring takes that)
+      const m = Math.max(2, n - Math.max(1, Math.round((Math.min(rs, len(R) / 4) / len(R)) * n)));
+      for (let i = 0; i < m; i++) {
+        x.push(R[(i0 + i) % n][0]);
+        y.push(R[(i0 + i) % n][1]);
+      }
+      sx = R[i0][0];
+      sy = R[i0][1];
+    }
+    return { x: Float64Array.from(x), y: Float64Array.from(y), open: true, rings: rings.length };
   };
 
   // ---------- a grid for regions ----------

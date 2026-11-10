@@ -308,7 +308,7 @@
   // wall, one lap each. opt: z0, h, base, w, d, tol, overhang (the step a bead holds, mm), cx, cy (subtracted from
   // every
   // point: the middle of the footprint, as the preview's mesh is centred), and UNB.fillPlan's base settings. Returns
-  // { base: [lines], walls: [lines], T, N, terms, joins, empty: 0, height, overhang: { worst, at, inWorst, inAt }
+  // { base: [lines] (a spiral base's are open: { x, y, open: true }), walls: [lines], T, N, spiralBase, terms, joins, empty: 0, height, overhang: { worst, at, inWorst, inAt }
   // (as UNB.modelStack: inWorst is how far a step inwards goes past what a bead holds), support: null,
   // stacking: { out, outAt, in, inAt }, tightest: { r, at }, points (per lap) }; lines are mm, y up.
   UNB.vaseStack = function* (V0, opt) {
@@ -319,7 +319,10 @@
       w = o.w || 0.8,
       H = Math.max(h, V.height),
       T = Math.max(1, Math.floor((H - z0) / h + 1e-9) + 1),
-      NB = Math.min(T - 1, Math.max(0, o.base | 0)),
+      // (a spiral base goes in on one layer and out on the next: an even number of layers, one more if need be)
+      spiral = UNB.fillPlan(o, true, 0).pattern === "spiral",
+      NB0 = Math.min(T - 1, Math.max(0, o.base | 0)),
+      NB = spiral && NB0 % 2 ? (NB0 + 1 <= T - 1 ? NB0 + 1 : NB0 - 1) : NB0,
       n = vaseLapPoints(V),
       cx = o.cx || 0,
       cy = o.cy || 0;
@@ -342,6 +345,7 @@
     const base = [],
       terms = [],
       joins = [];
+    let spiralBase = null; // (asked for a spiral base: true it is one, false it had to be rings)
     if (NB > 0) {
       const nb = Math.min(n, 1440),
         flat = vaseLap(V, NB, z0, 0, nb),
@@ -357,14 +361,30 @@
         out.push(ring.x[i] + (ty / l) * (w / 2) - cx, ring.y[i] - (tx / l) * (w / 2) - cy);
       }
       const goal = [walls[0].x[0], walls[0].y[0]];
-      for (let k = NB - 1; k >= 0; k--) {
-        const F = UNB.fillPlan(o, true, k),
+      // a spiral base: in from the rim to the middle on one layer, up, and out again on the next, ending on the rim
+      // where the wall starts (the rim is the wall's own line). A shape with no single way in gets rings instead.
+      const F0 = UNB.fillPlan(o, true, 0),
+        rim = [];
+      for (let i = 0; i < nb; i++) rim.push([ring.x[i] - cx, ring.y[i] - cy]);
+      const S = F0.pattern === "spiral" ? UNB.spiralFill(rim, F0.spacing, goal[0], goal[1]) : null;
+      if (F0.pattern === "spiral") spiralBase = !!S;
+      if (S) {
+        const back = { x: S.x.slice().reverse(), y: S.y.slice().reverse(), open: true };
+        for (let k = 0; k < NB; k++) {
+          base.push(k % 2 ? back : { x: S.x, y: S.y, open: true });
+          terms.push(0);
+          joins.push(0);
+          yield { done: T - NB + k + 1, of: T };
+        }
+      }
+      for (let k = S ? -1 : NB - 1; k >= 0; k--) {
+        const F = Object.assign({}, UNB.fillPlan(o, true, k)),
           L = UNB.modelLayer([out], {
             w,
             d: o.d,
             walls: 1,
             tol: o.tol || 0.05,
-            fill: F.pattern,
+            fill: F.pattern === "spiral" ? "rings" : F.pattern,
             fillSpacing: F.spacing,
             fillAngle: F.angle,
             fillMinArea: F.minArea,
@@ -389,6 +409,7 @@
       walls,
       T: base.length + walls.length,
       N: base.length,
+      spiralBase,
       terms,
       joins,
       empty: 0,

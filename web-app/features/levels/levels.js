@@ -265,3 +265,14 @@ on("noLinesAdvice", levelNoLinesAdvice); // what to say when nothing was traced
 on("fillMask", levelFillMask); // the greys set to Fill, as a mask (a printer's layers)
 on("levelFills", levelFillList); // the greys set to Fill or Both (a plotter's strokes)
 on("levelWord", () => (levelColour() ? "colour" : "grey"));
+
+// ---------- the map: Grey levels, a chip under Art while a picture is the input ----------
+addMapNode("levels", {
+  cap: "Grey levels",
+  step: "art",
+  cards: ["h-levels"],
+  quiet: () => /off/.test(mapCardVal("h-levels") || "off"),
+});
+MAP_SHAPERS.push((S) => {
+  if (st.art.kind === "picture") S.down.art = [...(S.down.art || []), "levels"];
+});

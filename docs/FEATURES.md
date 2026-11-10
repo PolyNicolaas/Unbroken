@@ -10,14 +10,14 @@ work on one, its folder, its marked parts of the page and its tests are everythi
 | Feature | What it is | Scripts | Lines | Parts of the page | Tests |
 |---|---|---|---|---|---|
 | **plotter** | made for a pen plotter: the Plot step, pens, fills, SVG | `plot.js` | 1062 | 6 | E22, A15, A16, A32 |
-| **model** | a 3D model (STL) sliced into layers | `model.js`, `sample-skull.js` | 795 | 8 | E23, E30, E50, A17, A28 |
-| **vase** | Make a vase (needs model) | `vase.js` | 434 | 1 | E57, A59 |
+| **model** | a 3D model (STL) sliced into layers | `model.js`, `sample-skull.js` | 796 | 8 | E23, E30, E50, A17, A28 |
+| **vase** | Make a vase (needs model) | `vase.js` | 462 | 2 | E57, A59 |
 | **patterns** | the pattern styles (labyrinth, spirograph, wave portrait …) | `pathpad.js`, `patterns.js` | 570 | 4 | E33, A31 |
 | **molecule** | a molecule drawn from its name | `molecule.js`, `moleditor.js` | 939 | 5 | E39, E40, E44, A40, A45, A50 |
 | **pieces** | a text printed as a piece per line | `pieces.js` | 357 | 1 | E31, A29 |
 | **camera** | a photo of a drawing, straightened | `camera.js` | 508 | 5 | E37, E43, A36, A44 |
 | **cutout** | cut the subject out of a picture | `cutout.js` | 311 | 2 | E38, E43, A39 |
-| **levels** | Grey levels | `levels.js` | 268 | 2 | E34, E36, E41, E45, A32, A42, A43, A46 |
+| **levels** | Grey levels | `levels.js` | 279 | 2 | E34, E36, E41, E45, A32, A42, A43, A46 |
 | **optimize** | Optimize and the starting points | `optimize.js` | 266 | 2 | A08 |
 | **testprint** | the test print | `testprint.js` | 169 | 1 | A25, A48 |
 | **matrix** | the test matrix | `matrix.js` | 277 | 1 | E46, A49 |
@@ -49,7 +49,7 @@ Make a vase (needs model) Needs: model.
 
 - examples: wavyvase
 - steps and chips of the map: vprofile, vtexture, vmove
-- moments it answers: ready, modelSave, modelRestoring, modelSized
+- moments it answers: ready, modelSave, modelRestoring, modelSized, artUI
 
 ### patterns
 
@@ -92,6 +92,7 @@ cut the subject out of a picture
 
 Grey levels
 
+- steps and chips of the map: levels
 - moments it answers: prepUI, levelSettings, levelFlags, noLinesAdvice, fillMask, levelFills, levelWord
 
 ### optimize

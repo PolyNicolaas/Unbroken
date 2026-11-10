@@ -545,7 +545,7 @@ function layerName(k) {
   if (j >= S.N + S.M) return "the last lap: level, the flow easing out";
   const plan = UNB.fillPlan(F, base, base ? j : j - S.N),
     fill = plan.pattern
-      ? `${plan.pattern === "lines" ? `lines at ${fmt(((plan.angle % 180) + 180) % 180, 0)}°` : "rings"} · ${Math.round((base ? S.F.baseDensity : S.F.infillDensity) * 100)}%`
+      ? `${plan.pattern === "lines" ? `lines at ${fmt(((plan.angle % 180) + 180) % 180, 0)}°` : plan.pattern === "spiral" ? (j % 2 ? "spiral, middle to rim" : "spiral, rim to middle") : "rings"} · ${Math.round((base ? S.F.baseDensity : S.F.infillDensity) * 100)}%`
       : base
         ? "open"
         : "no infill";

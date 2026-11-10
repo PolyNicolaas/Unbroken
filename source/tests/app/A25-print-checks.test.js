@@ -12,7 +12,7 @@ module.exports = {
       check("help paragraphs showing at the start", await page.$$eval("p.hint.help", (p) => p.filter((e) => !e.hidden).length), "==", 0));
     await page.click("#cornerRow button.info");
     checks.push(check("ⓘ opens its explanation", +(await page.isVisible("#cornerHint")), "==", 1));
-    await page.click('[data-node="material"]'); // (line width and gap are Material's, made for a printer)
+    await page.click('[data-node="line"]'); // (line width and gap are the Line step's)
     const gapInfo = page.locator('button.info[aria-label="About Gap between lines (mm)"]');
     checks.push(check("Gap between lines has its own ⓘ", await gapInfo.count(), "==", 1));
     await gapInfo.click();
