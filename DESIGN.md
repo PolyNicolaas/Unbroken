@@ -78,6 +78,43 @@ In practice:
   four files and relying on listener order. (Step 6 removes the rest.)
 - **Shared state** is written by its owners only (test E27), but there is still one shared `st`.
 
+## Modules: features that can be switched off
+
+Decided 10 November 2026: the app is to be used for chocolate printers, pen plotters and clay printers, and new
+features are to be built and tried without touching the rest. So a feature is a module: the core doesn't name it,
+and it adds itself when its script loads. Leaving its script out leaves it out of the app.
+
+**How a feature joins in** (`web-app/js/state.js`):
+
+| It adds | With | Read by |
+|---|---|---|
+| an example | `addExample(order, key, name, what, use)` | the Examples tray (map.js) |
+| a step or chip of the map | `addMapNode(id, node)`; `MAP_SHAPERS.push(fn)` for chips that depend on the design | the map (map.js) |
+| something to make the line for | `addOutput(key, { name, radio, before, step, up, down })` | the map's line and the For chips |
+| controls saved with a design | `addSaved(...ids)` | history.js |
+| an answer to a moment | `on(moment, fn)`; the core calls `ask(moment, …)` | whoever announces it |
+
+The moments so far: `ready` (the ready list: add your own checks), `save` / `restore` / `designUI` (a design saved,
+restored, shown again), `redraw` (draw your own view), `lineReady` (the line changed), `lineMode` (how it's traced
+changed), `fitWidth` (a width the design should take), `drawnAsIs` and `buildFile` (exports).
+
+**The measure** is test A61: each feature's scripts are left out, and the app is asked to open, trace and export.
+0 the app breaks · 1 it runs with errors · 2 it runs clean · 3 clean, and nothing of the feature left on the page.
+The record per feature only goes up. On 10 November: 15 of 36 (was 13 of 39 with Examples counted as a feature; the
+examples are now a list each feature adds to).
+
+**What's still tied** (the next steps, in order):
+
+1. *The pen plotter's own line modes.* Separate strokes and As drawn are the plotter's, but live in workflow.js and
+   art.js, which read the plotter's controls (`paperSize()`, `#penW`, `#paperMargin`). They run only when made for a
+   plotter, so the app is clean without plot.js, but they belong in the module.
+2. *Features the core calls by name*: the cut-out, grey levels, optimize (the app breaks without them), patterns,
+   the molecule, a text's pieces (errors without them). Each needs its calls turned into moments.
+3. *Each feature's cards and styles* are in index.html and app.css: a feature left out leaves its buttons behind
+   (no feature is at 3). A feature's markup moves next to its script.
+4. *One list of what's on* (settings.js), read by the page and the build, once 1 to 3 make it true.
+5. *Clay* as a machine profile of the printer, plus the rules that differ.
+
 ## The plan
 
 Done: 1 (version and changelog, v65), 2 (fast test tier), 3 (image prep in the worker), 5 (state owners, E27),

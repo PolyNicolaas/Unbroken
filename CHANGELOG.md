@@ -3,6 +3,22 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v145 · 2026-11-10
+
+The start of modules: features that add themselves, so one can be left out (DESIGN.md, Modules). Nothing changes on
+screen.
+
+- **Where features join in** (`state.js`): lists a feature adds to (examples, the map's steps and chips, what the
+  line is made for, the controls saved with a design) and moments the core announces and a feature answers
+  (`on` / `ask`: the ready list, a design saved and restored, redraw, the line changed, exports).
+- **Turned around**: the examples list (each feature adds its own; `examples.js` is gone, the clean start is in
+  art.js), the map (the vase's chips, the plotter's steps and its For chip, the Tests chip's cards come from their
+  own scripts), the ready list (the vase's and the model's checks), what a design keeps (the plotter's pens, the
+  test matrix's levels).
+- **The pen plotter** is the first output added as a module: the core no longer calls plot.js by name, and the app
+  opens, traces and exports without it (its Separate strokes and As drawn modes are still in the core: next).
+- **A61, the scoreboard**: each feature's scripts left out, scored 0 to 3. 15 of 36 today; the record only goes up.
+
 ## v144 · 2026-11-09
 
 The step tabs are retired: the map of the steps is the only interface.
