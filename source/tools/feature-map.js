@@ -10,9 +10,9 @@ const read = (f) => fs.readFileSync(path.join(ROOT, f), "utf8");
 const html = read("web-app/index.html"), settings = read("web-app/settings.js"), state = read("web-app/js/state.js");
 // what a test's file name says it's about, per feature
 const TEST_WORDS = {
-  plotter: ["plot"], model: ["model", "support", "slope"], vase: ["vase"], patterns: ["pattern", "geometric", "art-tab"],
+  plotter: ["plot", "pen-"], model: ["model", "support", "slope"], vase: ["vase"], patterns: ["pattern", "geometric", "art-tab"],
   molecule: ["molecule"], pieces: ["pieces"], camera: ["camera", "photo"], cutout: ["cutout", "cut-out"],
-  levels: ["levels"], optimize: ["optimi", "preset"], testprint: ["test-print", "testprint"], matrix: ["matrix"],
+  levels: ["level"], optimize: ["optimi", "preset"], testprint: ["print-checks", "first-z"], matrix: ["matrix"],
 };
 const tests = [...fs.readdirSync(path.join(ROOT, "source/tests/engine")), ...fs.readdirSync(path.join(ROOT, "source/tests/app"))].filter((f) => f.endsWith(".test.js"));
 const names = Object.keys(JSON.parse("{" + (settings.match(/features: \{([\s\S]*?)\n  \},/)[1].match(/^\s*(\w+): (true|false)/gm) || []).map((l) => l.trim().replace(/^(\w+): (true|false)/, '"$1": $2')).join(",") + "}"));
