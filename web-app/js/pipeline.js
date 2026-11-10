@@ -821,8 +821,10 @@ function finalizeReadout() {
   const sc = scale(),
     b = st.fb,
     m = st.marks;
+  // (the line as it prints; the Width and Height below are the drawing's box, which the line can sit inside or
+  // just over)
   $("sizeInfo").textContent =
-    `${fmt((b.x1 - b.x0) * sc, 1)} × ${fmt((b.y1 - b.y0) * sc, 1)} mm` +
+    `line ${fmt((b.x1 - b.x0) * sc, 1)} × ${fmt((b.y1 - b.y0) * sc, 1)} mm` +
     (m && m.fits ? ` · ×${fmt(st.outW / m.smallest, 1)} smallest` : "");
   const share = (st.problems && st.problems.driftShare) || 0,
     dh = $("driftHint"); // the line pushed off the drawing (shaded in the preview)
