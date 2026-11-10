@@ -1,6 +1,6 @@
-Unbroken · web app build v145
-Built:  2026-11-10T19:20:54.975Z
-Tests:  116 of 116 tests passed (the app tests run in batches)
+Unbroken · web app build v146
+Built:  2026-11-10T20:53:00.561Z
+Tests:  118 of 118 tests passed (the app tests run in batches)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -13,7 +13,7 @@ Files (sha1, first 12):
   340aeaecfe87  06-fourier.js
   b867178253c0  07-measure.js
   d0cc374de0d6  08-shape.js
-  0bbb008066e0  09-plate.js
+  096d9ec88b4a  09-plate.js
   a6db241501bf  10-export.js
   ac3de470b974  11-stages.js
   4ca26e705902  12-models.js
@@ -21,15 +21,15 @@ Files (sha1, first 12):
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   755c4b83e7df  16-molecule.js
-  ae9d6e7f4e9f  17-vase.js
-  0c43a183f78a  core.js
-  8cca468dba4a  css/app.css
+  40898856eeb8  17-vase.js
+  6822432d82dc  core.js
+  eb09f5dd7889  css/app.css
   2e7b02cdb930  css/theme.css
   97fd98808bcf  features/camera/camera.js
   7912725e6092  features/cutout/cutout.js
   c78689907075  features/levels/levels.js
   86a7dd76f6ff  features/matrix/matrix.js
-  1be5c4e3394f  features/model/model.js
+  f7e6ea5fab32  features/model/model.js
   ce0678154019  features/model/sample-skull.js
   da8e563b27ca  features/molecule/molecule.js
   add9b908520a  features/molecule/moleditor.js
@@ -39,13 +39,13 @@ Files (sha1, first 12):
   03fdbbebd1dd  features/pieces/pieces.js
   fb8a31e61650  features/plotter/plot.js
   cd3e7072869b  features/testprint/testprint.js
-  8069c0c45eea  features/vase/vase.js
+  1fd8a3a4cef7  features/vase/vase.js
   84cc740df42b  fonts.js
-  3e5cdafb3049  index.html
+  072726bb4163  index.html
   eab5ab4fbcb0  js/art.js
   4da8ce58240f  js/config.js
   bc30d5e4275a  js/controls.js
-  69ae84f17dc0  js/engine-bridge.js
+  be2364af8dbc  js/engine-bridge.js
   cf884cc5f6e1  js/export.js
   f35074efcb34  js/history.js
   5e4ff10394d3  js/layers.js
@@ -64,4 +64,4 @@ Files (sha1, first 12):
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
   bf1dbfa6b3f8  settings.js
-  c2f7a51586ad  worker.js
+  d195edc549b1  worker.js

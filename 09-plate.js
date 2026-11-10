@@ -477,9 +477,10 @@
       // a lap's points in order (closed lines come back to their start)
       const n = line.x.length,
         out = [];
+      // (a line can lift its points, dz in mm, and change their flow, ef: a vase's scalloped rim)
       for (let i = 0; i < n; i++) {
         const k = rev ? n - 1 - i : i;
-        out.push([line.x[k], line.y[k]]);
+        out.push(line.dz ? [line.x[k], line.y[k], line.dz[k], line.ef ? line.ef[k] : 1] : [line.x[k], line.y[k]]);
       }
       if (!open && !line.open && n > 1) out.push(out[0].slice()); // (line.open: a spiral base, rim to middle)
       return out;
@@ -494,12 +495,12 @@
         len = c[P.length],
         L = len || 1,
         from = X.length;
-      P.forEach(([x, y], i) => {
+      P.forEach(([x, y, dz, f], i) => {
         const s = c[i] / L;
         X.push(x);
         Y.push(y);
-        Z.push(zf(s));
-        E.push(ef(s));
+        Z.push(zf(s) + (dz || 0));
+        E.push(ef(s) * (f === undefined ? 1 : f));
       });
       laps.push({ kind, from, to: X.length - 1, z0: zf(0), z1: zf(1), length: len });
     };

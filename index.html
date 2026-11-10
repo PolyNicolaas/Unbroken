@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v145">
-<link rel="stylesheet" href="css/app.css?v=v145">
+<link rel="stylesheet" href="css/theme.css?v=v146">
+<link rel="stylesheet" href="css/app.css?v=v146">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v145</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v146</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -587,16 +587,57 @@
           <div class="lab"><span class="name">Start from</span></div>
           <div class="chips" id="vaseShapes" role="group" aria-label="Start the profile from a shape"></div>
           <label class="field" title="From the plate to the rim. The profile's points keep their share of the height; their radii stay."><span>Height (mm)</span><input type="number" id="vaseH" min="2" max="500" step="1" value="40"></label>
+          <div class="lab" id="vaseShapeLab"><span class="name">Shape from above</span><span class="val" id="vasePlanVal"></span></div>
+          <div class="seg small" role="radiogroup" aria-label="Shape from above">
+            <input type="radio" name="vasePlan" id="vpCircle" value="circle" checked><label for="vpCircle">Circle</label>
+            <input type="radio" name="vasePlan" id="vpPolygon" value="polygon"><label for="vpPolygon">Polygon</label>
+            <input type="radio" name="vasePlan" id="vpStar" value="star"><label for="vpStar">Star</label>
+            <input type="radio" name="vasePlan" id="vpFlower" value="flower"><label for="vpFlower">Flower</label>
+            <input type="radio" name="vasePlan" id="vpDrawing" value="drawing"><label for="vpDrawing">Drawing</label>
+          </div>
+          <div class="row vp-sides"><div class="lab"><label for="vpSides" id="vpSidesLab">Corners</label><span class="val" id="vpSidesVal"></span></div><input type="range" id="vpSides" min="2" max="24" step="1" value="6"></div>
+          <div class="row vp-depth" title="How far in between the points or petals, as a share of the reach"><div class="lab"><label for="vpDepth" id="vpDepthLab">Depth</label><span class="val" id="vpDepthVal"></span></div><input type="range" id="vpDepth" min="0" max="90" step="1" value="30"></div>
+          <div class="row vp-round" title="Corners and dips rounded off"><div class="lab"><label for="vpRound" id="vpRoundLab">Rounded</label><span class="val" id="vpRoundVal"></span></div><input type="range" id="vpRound" min="0" max="100" step="1" value="20"></div>
+          <div class="row vp-drawing"><div class="inline"><button class="btn mini" type="button" id="vpUseLine" title="The outside edge of the line last traced from a picture or a text, as the shape from above">Use the last traced line</button></div><p class="hint" id="vpDrawMsg" role="status"></p></div>
+          <div class="lab"><span class="name">At the rim</span><span class="val" id="vaseTopVal"></span></div>
+          <div class="seg small" role="radiogroup" aria-label="The shape at the rim">
+            <input type="radio" name="vaseTop" id="vrSame" value="same" checked><label for="vrSame">Same</label>
+            <input type="radio" name="vaseTop" id="vrCircle" value="circle"><label for="vrCircle">Circle</label>
+            <input type="radio" name="vaseTop" id="vrPolygon" value="polygon"><label for="vrPolygon">Polygon</label>
+            <input type="radio" name="vaseTop" id="vrStar" value="star"><label for="vrStar">Star</label>
+            <input type="radio" name="vaseTop" id="vrFlower" value="flower"><label for="vrFlower">Flower</label>
+          </div>
+          <div class="row vr-sides"><div class="lab"><label for="vrSides" id="vrSidesLab">Corners</label><span class="val" id="vrSidesVal"></span></div><input type="range" id="vrSides" min="2" max="24" step="1" value="6"></div>
+          <div class="row vr-depth"><div class="lab"><label for="vrDepth" id="vrDepthLab">Depth</label><span class="val" id="vrDepthVal"></span></div><input type="range" id="vrDepth" min="0" max="90" step="1" value="30"></div>
+          <div class="row vr-round"><div class="lab"><label for="vrRound" id="vrRoundLab">Rounded</label><span class="val" id="vrRoundVal"></span></div><input type="range" id="vrRound" min="0" max="100" step="1" value="20"></div>
+          <div class="row " title="The whole shape turns as it rises (ribs and movement with it)"><div class="lab"><label for="vaseTwist" id="vaseTwistLab">Turn the shape, bottom to rim</label><span class="val" id="vaseTwistVal"></span></div><input type="range" id="vaseTwist" min="-360" max="360" step="5" value="0"></div>
+          <div class="lab"><span class="name">Lean</span><span class="val" id="vaseLeanVal"></span></div>
+          <div class="row " title="How far the rim sits off the middle of the base"><div class="lab"><label for="vlSize" id="vlSizeLab">Rim moves sideways</label><span class="val" id="vlSizeVal"></span></div><input type="range" id="vlSize" min="0" max="20" step="0.5" value="0"></div>
+          <div class="row vl-on"><div class="lab"><label for="vlDir" id="vlDirLab">Which way</label><span class="val" id="vlDirVal"></span></div><input type="range" id="vlDir" min="0" max="355" step="5" value="0"></div>
+          <div class="vl-on">
+          <div class="seg small" role="radiogroup" aria-label="How it leans">
+            <input type="radio" name="vaseLean" id="vlStraight" value="straight" checked><label for="vlStraight">Straight</label>
+            <input type="radio" name="vaseLean" id="vlCurve" value="curve"><label for="vlCurve">Curve</label>
+            <input type="radio" name="vaseLean" id="vlBow" value="bow"><label for="vlBow">Bow</label>
+          </div>
+          </div>
           <div class="lab"><span class="name">Surface texture</span><span class="val" id="vaseTexVal"></span></div>
           <div class="seg small" role="radiogroup" aria-label="Surface texture">
             <input type="radio" name="vaseTex" id="vtNone" value="none" checked><label for="vtNone">None</label>
             <input type="radio" name="vaseTex" id="vtRibs" value="ribs"><label for="vtRibs">Ribs</label>
             <input type="radio" name="vaseTex" id="vtRings" value="rings"><label for="vtRings">Rings</label>
+            <input type="radio" name="vaseTex" id="vtGrid" value="grid"><label for="vtGrid">Grid</label>
+            <input type="radio" name="vaseTex" id="vtWeave" value="weave"><label for="vtWeave">Weave</label>
+            <input type="radio" name="vaseTex" id="vtDiamond" value="diamond"><label for="vtDiamond">Diamond</label>
           </div>
-          <div class="row vt-ribs"><div class="lab"><label for="vtCount">Ribs round</label><span class="val" id="vtCountVal"></span></div><input type="range" id="vtCount" min="2" max="60" step="1" value="12"></div>
-          <div class="row vt-ribs"><div class="lab"><label for="vtTwist">Twist, bottom to rim</label><span class="val" id="vtTwistVal"></span></div><input type="range" id="vtTwist" min="-360" max="360" step="5" value="0"></div>
-          <div class="row vt-rings"><div class="lab"><label for="vtSpacing">Rings apart</label><span class="val" id="vtSpacingVal"></span></div><input type="range" id="vtSpacing" min="1" max="20" step="0.5" value="4"></div>
-          <div class="row vt-on"><div class="lab"><label for="vtDepth">Depth</label><span class="val" id="vtDepthVal"></span></div><input type="range" id="vtDepth" min="0.2" max="6" step="0.1" value="1.5"></div>
+          <div class="row vt-ribs"><div class="lab"><label for="vtCount" id="vtCountLab">Ribs round</label><span class="val" id="vtCountVal"></span></div><input type="range" id="vtCount" min="2" max="60" step="1" value="12"></div>
+          <div class="row vt-twist"><div class="lab"><label for="vtTwist" id="vtTwistLab">Twist, bottom to rim</label><span class="val" id="vtTwistVal"></span></div><input type="range" id="vtTwist" min="-360" max="360" step="5" value="0"></div>
+          <div class="row vt-rings"><div class="lab"><label for="vtSpacing" id="vtSpacingLab">Rings apart</label><span class="val" id="vtSpacingVal"></span></div><input type="range" id="vtSpacing" min="1" max="20" step="0.5" value="4"></div>
+          <div class="row vt-on"><div class="lab"><label for="vtDepth" id="vtDepthLab">Depth</label><span class="val" id="vtDepthVal"></span></div><input type="range" id="vtDepth" min="0.2" max="6" step="0.1" value="1.5"></div>
+          <div class="row vt-on vase-curve"><div class="lab"><span class="name">Strength up the wall</span><span class="val" id="vtCurveVal"></span></div>
+            <canvas id="vtCurve" class="vase-curve-cv" tabindex="0" aria-label="How much of the texture at each height: drag a point left (less) or right (all of it); tap beside the line to add one, tap a point to remove it"></canvas>
+            <div class="chips" data-curve="vtCurve" role="group" aria-label="Start the strength from"><button class="chip-btn" type="button" data-k="even">Even</button><button class="chip-btn" type="button" data-k="in">Fade in</button><button class="chip-btn" type="button" data-k="out">Fade out</button><button class="chip-btn" type="button" data-k="middle">Middle</button><button class="chip-btn" type="button" data-k="ends">Ends</button></div>
+          </div>
           <div class="lab"><span class="name">Movement along the path</span><span class="val" id="vaseMoveVal"></span></div>
           <div class="seg small" role="radiogroup" aria-label="Movement along the path">
             <input type="radio" name="vaseMove" id="vmNone" value="none"><label for="vmNone">None</label>
@@ -604,11 +645,26 @@
             <input type="radio" name="vaseMove" id="vmZigzag" value="zigzag"><label for="vmZigzag">Zigzag</label>
             <input type="radio" name="vaseMove" id="vmLoops" value="loops"><label for="vmLoops">Loops</label>
           </div>
-          <div class="row vm-on"><div class="lab"><label for="vmSize">Size</label><span class="val" id="vmSizeVal"></span></div><input type="range" id="vmSize" min="0.1" max="4" step="0.1" value="0.5"></div>
-          <div class="row vm-on"><div class="lab"><label for="vmCount">How many round</label><span class="val" id="vmCountVal"></span></div><input type="range" id="vmCount" min="2" max="120" step="1" value="16"></div>
-          <div class="row vm-on"><div class="lab"><label for="vmShift">Shift each layer</label><span class="val" id="vmShiftVal"></span></div><input type="range" id="vmShift" min="-50" max="50" step="1" value="0"></div>
+          <div class="row vm-on"><div class="lab"><label for="vmSize" id="vmSizeLab">Size</label><span class="val" id="vmSizeVal"></span></div><input type="range" id="vmSize" min="0.1" max="4" step="0.1" value="0.5"></div>
+          <div class="row vm-on"><div class="lab"><label for="vmCount" id="vmCountLab">How many round</label><span class="val" id="vmCountVal"></span></div><input type="range" id="vmCount" min="2" max="120" step="1" value="16"></div>
+          <div class="row vm-on"><div class="lab"><label for="vmShift" id="vmShiftLab">Shift each layer</label><span class="val" id="vmShiftVal"></span></div><input type="range" id="vmShift" min="-50" max="50" step="1" value="0"></div>
+          <div class="row vm-on" title="Every few layers the movement flips to the other side, so each layer touches the one below only where they cross: a lattice with holes. 0: off"><div class="lab"><label for="vmFlip" id="vmFlipLab">Lattice: layers each way</label><span class="val" id="vmFlipVal"></span></div><input type="range" id="vmFlip" min="0" max="10" step="1" value="0"></div>
+          <div class="row vm-on vase-curve"><div class="lab"><span class="name">Strength up the wall</span><span class="val" id="vmCurveVal"></span></div>
+            <canvas id="vmCurve" class="vase-curve-cv" tabindex="0" aria-label="How much of the movement at each height: drag a point left (less) or right (all of it); tap beside the line to add one, tap a point to remove it"></canvas>
+            <div class="chips" data-curve="vmCurve" role="group" aria-label="Start the strength from"><button class="chip-btn" type="button" data-k="even">Even</button><button class="chip-btn" type="button" data-k="in">Fade in</button><button class="chip-btn" type="button" data-k="out">Fade out</button><button class="chip-btn" type="button" data-k="middle">Middle</button><button class="chip-btn" type="button" data-k="ends">Ends</button></div>
+          </div>
+          <div class="lab"><span class="name">Rim</span><span class="val" id="vaseRimVal"></span></div>
+          <div class="seg small" role="radiogroup" aria-label="The rim">
+            <input type="radio" name="vaseRim" id="vrimNone" value="none" checked><label for="vrimNone">Plain</label>
+            <input type="radio" name="vaseRim" id="vrimFlare" value="flare"><label for="vrimFlare">Flare</label>
+            <input type="radio" name="vaseRim" id="vrimRolled" value="rolled"><label for="vrimRolled">Rolled</label>
+            <input type="radio" name="vaseRim" id="vrimScallop" value="scallop"><label for="vrimScallop">Scalloped</label>
+          </div>
+          <div class="row vrim-size"><div class="lab"><label for="vrimSize" id="vrimSizeLab">Flares out</label><span class="val" id="vrimSizeVal"></span></div><input type="range" id="vrimSize" min="0.5" max="10" step="0.5" value="3"></div>
+          <div class="row vrim-on"><div class="lab"><label for="vrimHeight" id="vrimHeightLab">How far down</label><span class="val" id="vrimHeightVal"></span></div><input type="range" id="vrimHeight" min="1" max="30" step="0.5" value="5"></div>
+          <div class="row vrim-scallop"><div class="lab"><label for="vrimCount" id="vrimCountLab">Scallops round</label><span class="val" id="vrimCountVal"></span></div><input type="range" id="vrimCount" min="3" max="24" step="1" value="8"></div>
           <p class="hint" id="vaseHint" role="status"></p>
-          <p class="hint help">The profile is the radius from the middle to the middle of the bead, from the plate (bottom) to the rim (top); the vase is that curve turned round. Surface texture shapes the wall itself: ribs run up it (twisting if you like), rings go round it. Movement is what the needle does as it goes round: a wave or a zigzag in and out of the wall, or loops. Shift each layer moves the movement on by a share of one, so 0 stacks it in straight columns, a little twists them into spirals, and 50% alternates them. Every lap has to sit on the one below, so a big shift needs a small size: the hint above and the Print step's ready list check it. The path prints exactly as made, one lap per layer, spiralling up with no seam.</p>
+          <p class="hint help">The shape from above is what the profile turns round: a circle, a polygon, a star, a flower, or the outline of a drawing traced earlier (the profile is the reach of its furthest point). At the rim it can blend into another shape; the whole shape can turn as it rises, and lean. A strength curve fades the texture or the movement in and out up the wall. A lattice flips the movement to the other side every few layers, so the layers touch only where they cross. A flared rim bends the top out; a rolled rim doubles the wall at the top for strength. The profile is the radius from the middle to the middle of the bead, from the plate (bottom) to the rim (top); the vase is that curve turned round. Surface texture shapes the wall itself: ribs run up it (twisting if you like), rings go round it. Movement is what the needle does as it goes round: a wave or a zigzag in and out of the wall, or loops. Shift each layer moves the movement on by a share of one, so 0 stacks it in straight columns, a little twists them into spirals, and 50% alternates them. Every lap has to sit on the one below, so a big shift needs a small size: the hint above and the Print step's ready list check it. The path prints exactly as made, one lap per layer, spiralling up with no seam.</p>
         </div>
         <div class="lab stl-only"><span class="name">Which way up it prints</span></div>
         <div class="inline stl-only">
@@ -901,63 +957,63 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v145"></script>
-<script src="01-image.js?v=v145"></script>
-<script src="02-lines.js?v=v145"></script>
-<script src="03-text.js?v=v145"></script>
-<script src="04-walk.js?v=v145"></script>
-<script src="05-fill.js?v=v145"></script>
-<script src="06-fourier.js?v=v145"></script>
-<script src="07-measure.js?v=v145"></script>
-<script src="08-shape.js?v=v145"></script>
-<script src="09-plate.js?v=v145"></script>
-<script src="10-export.js?v=v145"></script>
-<script src="11-stages.js?v=v145"></script>
-<script src="12-models.js?v=v145"></script>
-<script src="13-patterns.js?v=v145"></script>
-<script src="14-photo.js?v=v145"></script>
-<script src="15-cutout.js?v=v145"></script>
-<script src="16-molecule.js?v=v145"></script>
-<script src="17-vase.js?v=v145"></script>
-<script src="core.js?v=v145"></script>
-<script src="fonts.js?v=v145"></script>
-<script src="settings.js?v=v145"></script>
-<script src="js/state.js?v=v145"></script>
-<script src="js/ui.js?v=v145"></script>
-<script src="js/config.js?v=v145"></script>
-<script src="js/engine-bridge.js?v=v145"></script>
-<script src="js/source.js?v=v145"></script>
-<script src="js/pipeline.js?v=v145"></script>
-<script src="js/preview.js?v=v145"></script>
-<script src="js/tools.js?v=v145"></script>
-<script src="js/art.js?v=v145"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v145");</script>
-<script src="js/readouts.js?v=v145"></script>
-<script src="js/controls.js?v=v145"></script>
-<script>feature("levels", "features/levels/levels.js?v=v145");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v145");</script>
-<script src="js/export.js?v=v145"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v145");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v145");</script>
-<script src="js/views.js?v=v145"></script>
-<script src="js/zoom.js?v=v145"></script>
-<script src="js/layers.js?v=v145"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v145");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v145");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v145");</script>
-<script src="js/workflow.js?v=v145"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v145");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v145");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v145");</script>
-<script>feature("camera", "features/camera/camera.js?v=v145");</script>
-<script src="js/steppers.js?v=v145"></script>
-<script src="js/scroll.js?v=v145"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v145");</script>
-<script>feature("model", "features/model/model.js?v=v145");</script>
-<script>feature("vase", "features/vase/vase.js?v=v145");</script>
-<script src="js/history.js?v=v145"></script>
-<script src="js/map.js?v=v145"></script>
-<script src="js/main.js?v=v145"></script>
+<script src="00-util.js?v=v146"></script>
+<script src="01-image.js?v=v146"></script>
+<script src="02-lines.js?v=v146"></script>
+<script src="03-text.js?v=v146"></script>
+<script src="04-walk.js?v=v146"></script>
+<script src="05-fill.js?v=v146"></script>
+<script src="06-fourier.js?v=v146"></script>
+<script src="07-measure.js?v=v146"></script>
+<script src="08-shape.js?v=v146"></script>
+<script src="09-plate.js?v=v146"></script>
+<script src="10-export.js?v=v146"></script>
+<script src="11-stages.js?v=v146"></script>
+<script src="12-models.js?v=v146"></script>
+<script src="13-patterns.js?v=v146"></script>
+<script src="14-photo.js?v=v146"></script>
+<script src="15-cutout.js?v=v146"></script>
+<script src="16-molecule.js?v=v146"></script>
+<script src="17-vase.js?v=v146"></script>
+<script src="core.js?v=v146"></script>
+<script src="fonts.js?v=v146"></script>
+<script src="settings.js?v=v146"></script>
+<script src="js/state.js?v=v146"></script>
+<script src="js/ui.js?v=v146"></script>
+<script src="js/config.js?v=v146"></script>
+<script src="js/engine-bridge.js?v=v146"></script>
+<script src="js/source.js?v=v146"></script>
+<script src="js/pipeline.js?v=v146"></script>
+<script src="js/preview.js?v=v146"></script>
+<script src="js/tools.js?v=v146"></script>
+<script src="js/art.js?v=v146"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v146");</script>
+<script src="js/readouts.js?v=v146"></script>
+<script src="js/controls.js?v=v146"></script>
+<script>feature("levels", "features/levels/levels.js?v=v146");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v146");</script>
+<script src="js/export.js?v=v146"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v146");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v146");</script>
+<script src="js/views.js?v=v146"></script>
+<script src="js/zoom.js?v=v146"></script>
+<script src="js/layers.js?v=v146"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v146");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v146");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v146");</script>
+<script src="js/workflow.js?v=v146"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v146");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v146");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v146");</script>
+<script>feature("camera", "features/camera/camera.js?v=v146");</script>
+<script src="js/steppers.js?v=v146"></script>
+<script src="js/scroll.js?v=v146"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v146");</script>
+<script>feature("model", "features/model/model.js?v=v146");</script>
+<script>feature("vase", "features/vase/vase.js?v=v146");</script>
+<script src="js/history.js?v=v146"></script>
+<script src="js/map.js?v=v146"></script>
+<script src="js/main.js?v=v146"></script>
 
 </body>
 </html>
