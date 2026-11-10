@@ -130,7 +130,6 @@ function designState() {
       erase: st.erase || [],
       start: st.start || null,
       bgAt: st.bgAt || null,
-      cutout: st.cutout && st.cutout.box ? { box: st.cutout.box, strokes: st.cutout.strokes } : null,
       lineChosen: !!st.lineChosen,
       zones: st.zones,
       model: st.model
@@ -226,7 +225,7 @@ function applyDesign(d, src, imageSource, pics, picMore) {
   try {
     clearTimeout(textTimer);
     clearTimeout(recTimer);
-    stopOptimize();
+    ask("sourceChanged"); // (a running Optimize is for the design that's going)
     if (st.tool) exitTool();
     const s = d.s || {};
     // As drawn (the Line card's third choice until v112) is Trace off now
@@ -319,19 +318,7 @@ function applyDesign(d, src, imageSource, pics, picMore) {
       if (src) st.source = src;
       st.srcLabel = s.srcLabel || st.srcLabel;
     }
-    // the cut-out (cutout.js): its box and strokes come back with the picture, and its mask is worked out again
-    const cut = s.cutout && !textMode() ? structuredClone(s.cutout) : null,
-      same =
-        cut &&
-        st.cutout &&
-        st.cutout.src === (st.source && st.source.__id) &&
-        JSON.stringify([st.cutout.box, st.cutout.strokes]) === JSON.stringify([cut.box, cut.strokes]);
-    if (!cut) st.cutout = null;
-    else if (!same) {
-      st.cutout = { ...cut, src: st.source && st.source.__id, mask: null, ver: (st.cutout && st.cutout.ver) || 0 };
-      cutoutRun();
-    }
-    cutoutUI();
+    ask("restoredSource", s); // what a feature kept that belongs to the source now in place (the cut-out)
     $("srcinfo").textContent = st.srcLabel || "";
     if (![...$("chocolate").options].some((o) => o.value === $("chocolate").value))
       $("chocolate").value = CFG.defaults.chocolate;
@@ -444,7 +431,7 @@ async function openDesign(f) {
     // checked before anything changes, so a file that can't open leaves the design as it was
     const ds = file.design.s;
     // (a v101 file keeps its art as layers, with no kind: artRestore takes those)
-    if (ds && ds.art && !ds.art.layers && ds.art.kind !== undefined && !Object.hasOwn(KIND_RADIO, ds.art.kind))
+    if (ds && ds.art && !ds.art.layers && ds.art.kind !== undefined && !kindRadio(ds.art.kind))
       throw new Error("its art is of a kind this app doesn't know");
     if (ds && ["outW", "spacing", "simplify", "N"].some((k) => ds[k] !== undefined && !Number.isFinite(ds[k])))
       throw new Error("its size or line settings aren't numbers");

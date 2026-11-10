@@ -171,7 +171,7 @@ function render() {
     renderDraw();
     return;
   }
-  if (st.tool === "cut") return renderCutout(); // cutout.js: the picture, what's removed whitened
+  if (ask("toolRender", st.tool).some(Boolean)) return; // (cutout.js draws its own tool: the picture, what's removed whitened)
   if (lineModeNow() === "none") return renderPictureOnly(); // workflow.js: Trace off, a picture
   if (!st.w) return;
   const v = view();
@@ -302,7 +302,7 @@ function renderLine({ g, k, ox, oy, dpr, ink, accent }) {
   const lv = $("lineView").value,
     widthPx = Math.max(1.15 * dpr, (lineWidthMM() / scale()) * k);
   // a text printed as a piece per line: the connectors from one line to the next aren't printed (pieces.js)
-  const lifts = !animating && !baseView && curve === st.final ? lineLifts() : null,
+  const lifts = !animating && !baseView && curve === st.final ? answer("lineLifts") : null,
     up = (s) => !!lifts && lifts.lift[s % S] && lifts.lift[(s + 1) % S];
   const tracePath = () => {
     g.beginPath();

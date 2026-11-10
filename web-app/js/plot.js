@@ -925,7 +925,7 @@ async function plotFile() {
     const w = +$("penW").value || 0.5;
     return {
       // (a pattern made for plotting isn't the traced source)
-      name: designSlug(20, st.art.kind === "pattern" ? patternName(st.art.pattern) : null) + "-art.svg",
+      name: designSlug(20, st.art.kind === "pattern" ? artKind().name() : null) + "-art.svg",
       data: UNB.exportLayersSVG(
         A.layers.map((l, i) => ({ label: `${i + 1} ${l.name}`, color: l.pen, width: w, strokes: l.strokes })),
         { paperW: A.P.w, paperH: A.P.h, what: lineModeNow() === "strokes" ? "traced into separate strokes" : null }
@@ -1039,3 +1039,13 @@ $("fitPage").addEventListener("click", () => {
   const W = pageFitW();
   if (W) setSize(W, false);
 });
+
+// the plotter's own controls, where the rest of the app follows them
+// (an art's width follows the page and the closest lines its pen: art.js)
+for (const id of ["paper", "paperW", "paperH", "paperMargin", "penW", "paperOrient"])
+  $(id).addEventListener(id === "paper" || id === "paperOrient" ? "change" : "input", () => ask("sized"));
+// (pen 1 is the line)
+$("penW").addEventListener("input", () => {
+  if (artForPlot()) lineChanged();
+});
+$("exportBtn").addEventListener("click", () => exportAs("svg", $("exportMsg")));

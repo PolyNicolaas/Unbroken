@@ -35,9 +35,9 @@ function layerSigNow() {
     lineWidthMM(),
     spacingMM(),
     M ? [M.id, M.turns, M.heightMM, M.cut] : null,
-    $("support").value,
+    valOf("support"),
     $("gOver").value,
-    $("wallCount").value,
+    valOf("wallCount"),
   ]);
 }
 // { key, base: [line], wall: line, stack, baseFinal, fillInfo, … } for one copy, mm, plate footprint coordinates
@@ -172,7 +172,7 @@ for (const id of ["infillMin", "fillMin"])
 // bw, spacing and final.
 async function layerLine(plan, D = st) {
   // the levels set to Fill (levels.js, a printer): their blocks print solid, in the layers with no infill of their own
-  const lvMask = D === st ? levelFillMask() : null;
+  const lvMask = D === st ? answer("fillMask") : null;
   if ((!plan || !plan.pattern) && lvMask)
     plan = { pattern: "lines", angle: 45, spacing: pxSpacing(D), minArea: 0, levels: true };
   if (!plan || !plan.pattern) return { final: D.final };
@@ -241,7 +241,8 @@ function lineToPlate(f, xf, D = st) {
 }
 async function buildLayers() {
   if (isModel()) return buildModelLayers(); // model.js: a sliced model
-  if (piecesOn()) return buildPieceLayers(); // pieces.js: a piece for each line of a text
+  const pieces = answer("pieceLayers"); // (pieces.js: a piece for each line of a text)
+  if (pieces) return pieces;
   const lay = plateNow();
   if (!lay || !st.final) return null;
   const ver = st.finalVer,

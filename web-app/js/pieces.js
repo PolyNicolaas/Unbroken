@@ -254,7 +254,6 @@ function piecePlate(n, gap, straight) {
   return lay;
 }
 // a placement's footprint: its piece's (w, h, local line), or the one design's
-const footOf = (lay, p) => (lay.pieces && p.piece != null ? lay.pieces[p.piece] : lay);
 
 // The layers of every piece (layers.js designLayers, each turned and moved into its own footprint). Returns the
 // layers of the piece One copy shows, with every piece's in .pieces, so the readouts, the slider and the One copy
@@ -288,7 +287,7 @@ function pieceMenuUI() {
     on = piecesOn();
   $("piecesRow").hidden = !many && !molLabels;
   $("textPieces").closest(".field").hidden = !many;
-  $("molPiecesField").hidden = !molLabels;
+  if ($("molPiecesField")) $("molPiecesField").hidden = !molLabels; // (molecule.js's, when it's on)
   $("pieceShownField").hidden = !on || piecesTogether(); // (pieces kept together: One copy is every piece)
   $("copiesLab").textContent = on && many && !piecesTogether() ? "Copies of each line" : "Copies";
   const P = piecesNow(),
@@ -317,3 +316,10 @@ $("pieceShown").addEventListener("change", () => {
   drawPlate();
   layersSoon(0);
 });
+
+// what the core asks about pieces
+on("piecesOn", piecesOn);
+on("piecePlate", (n, gap, straight) => (piecesOn() ? piecePlate(n, gap, straight) : null)); // the plate's layout
+on("pieceLayers", () => (piecesOn() ? buildPieceLayers() : null)); // the layers
+on("lineLifts", lineLifts); // where the needle lifts between the lines of a text
+on("plateUI", pieceMenuUI);

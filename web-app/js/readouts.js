@@ -14,7 +14,7 @@ function readouts() {
   $("rMiss").textContent = fmt(e.missing * mm);
   // jumps between separate parts: always drawn, the flow can't stop; but between the lines of a text printed as a
   // piece per line the needle lifts instead (pieces.js)
-  const lifted = (typeof lineLifts === "function" && lineLifts()) || null,
+  const lifted = answer("lineLifts"),
     up = lifted ? lifted.n : 0,
     j = Math.max(0, (st.connRuns || 0) - up);
   setChip(

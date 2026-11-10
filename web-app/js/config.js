@@ -528,14 +528,15 @@ for (const q of CFG.printers) {
   const d = (CFG.raw && CFG.raw.defaults) || {},
     p = CFG.printer,
     notes = CFG.problems;
+  // (a control of a feature that's off isn't on the page: its default is skipped)
   const set = (id, v) => {
-    $(id).value = String(v);
+    if ($(id)) $(id).value = String(v);
   };
   const radio = (id) => {
-    $(id).checked = true;
+    if ($(id)) $(id).checked = true;
   };
   const tick = (id, v) => {
-    $(id).checked = !!v;
+    if ($(id)) $(id).checked = !!v;
   };
   const oneOf = (m) => (v) => Object.prototype.hasOwnProperty.call(m, v);
   const list =

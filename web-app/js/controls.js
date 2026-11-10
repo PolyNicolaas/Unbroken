@@ -92,10 +92,11 @@ function labels() {
     p.contrast && "contrast",
     p.bgTol && "background",
     p.flatten && "lighting",
-    typeof cutoutOn === "function" && cutoutOn() && "cut out",
+    answer("pictureCut") && "cut out",
   ].filter(Boolean);
   $("prepVal").textContent = on.length ? on.join(", ") : "off";
-  if (typeof levelsUI === "function") levelsUI(); // levels.js (loaded after this file): its greys and their shares
+  bgPickUI();
+  ask("prepUI"); // (levels.js: its greys and their shares)
 }
 for (const id of ["sens", "blur", "minLen", "far", "bright", "contrast", "bgTol"])
   $(id).addEventListener("input", () => {
@@ -113,9 +114,10 @@ $("prepReset").addEventListener("click", () => {
   $("contrast").value = 0;
   $("bgTol").value = 0;
   $("flatten").checked = false;
-  $("levels").value = 1;
+  if ($("levels")) $("levels").value = 1;
   st.bgAt = null;
-  levelsUI();
+  bgPickUI();
+  ask("prepUI");
   labels();
   schedule(extract);
 });
@@ -282,10 +284,7 @@ $("needle").addEventListener("change", () => {
   lineChanged();
 });
 for (const id of ["lineW", "lineGapMM"]) $(id).addEventListener("input", lineChanged);
-// made for plotting, pen 1 is the line; Made for switched: the spacing and the size follow (pipeline.js pageFit)
-$("penW").addEventListener("input", () => {
-  if (artForPlot()) lineChanged();
-});
+// (made for: the spacing and the size follow: pipeline.js pageFit)
 document.querySelectorAll('input[name="artFor"]').forEach((r) =>
   r.addEventListener("change", () => {
     lineChanged();
@@ -298,3 +297,22 @@ $("simplify").addEventListener("input", () => {
   layersSoon();
   ask("lineReady");
 }); // exports and the 3D / Plot steps simplify the line too
+
+// ---------- Tap the background (a tool: tools.js handles the tap) ----------
+function bgPickUI() {
+  $("bgPickInfo").textContent = st.bgAt ? "from the point you tapped" : "";
+}
+function bgTapped(p) {
+  st.bgAt = p; // source-normalised (u, v), like the start point
+  if (!+$("bgTol").value) $("bgTol").value = 20; // a tap means "remove it": start with some tolerance
+  labels(); // (its readouts: the tap's note, the greys)
+  recordSoon();
+  schedule(extract);
+}
+$("bgBorder").addEventListener("click", () => {
+  st.bgAt = null;
+  labels(); // (its readouts: the tap's note, the greys)
+  recordSoon();
+  schedule(extract);
+});
+$("bgDone").addEventListener("click", () => exitTool());

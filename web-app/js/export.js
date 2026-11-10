@@ -159,9 +159,9 @@ function autoName(name) {
     name ||
     (st.text || k === "text"
       ? $("textIn").value.split("\n")[0] || "text"
-      : k === "pattern"
-        ? patternName(st.art.pattern)
-        : (k === "molecule" && moleculeName()) || (st.srcLabel || "").replace(/\.[a-z0-9]{2,4}$/i, "") || "design")
+      : (ART_KINDS[k] && k !== "model" && ART_KINDS[k].name()) ||
+        (st.srcLabel || "").replace(/\.[a-z0-9]{2,4}$/i, "") ||
+        "design")
   );
 }
 // Cyrillic and Greek letters spelled in Latin ones for file names (Шоколад → shokolad), so a name in either still
@@ -317,7 +317,6 @@ function chocDXF() {
     info: `${fmt(d.W, 1)} × ${fmt(d.H, 1)} mm, ${st.open ? "open" : "one closed curve"}, ${s.x.length} points, for choc OS`,
   };
 }
-$("exportBtn").addEventListener("click", () => exportAs("svg", $("exportMsg")));
 $("dxfBtn").addEventListener("click", () => exportAs("chocdxf", $("gcodeMsg")));
 $("gcodeBtn").addEventListener("click", () => {
   const bad = readyUI().filter((r) => r.lvl === "bad");

@@ -502,7 +502,7 @@ for (const e of MOL_EXAMPLES) {
 function moleculePiecesOn() {
   const { r } = st.art.kind === "molecule" ? moleculeDrawn() : { r: null };
   // (and the line traced: the pieces take its scale, px per mm)
-  return !!r && r.labels > 0 && !artForPlot() && $("molPieces").value === "apart" && st.bw > 0 && st.outW > 0;
+  return !!r && r.labels > 0 && !artForPlot() && valOf("molPieces") === "apart" && st.bw > 0 && st.outW > 0;
 }
 // each piece as a region of the working image W (pipeline.js working): its strokes drawn a little wider than they
 // are drawn for the trace, so the line map found there is the piece's own. Bonds first, then the labels in atom order.
@@ -544,13 +544,71 @@ function moleculeRegions(W) {
   }
   return out;
 }
-$("molPieces").addEventListener("change", () => {
-  pieceMenuUI(); // pieces.js
-  drawPlate();
-  drawMini();
-  layersSoon(0);
-  readyUI();
-});
+// (the Plate card's Molecule is part of printing in pieces: pieces.js)
+if ($("molPieces"))
+  $("molPieces").addEventListener("change", () => {
+    ask("plateUI"); // (pieces.js)
+    drawPlate();
+    drawMini();
+    layersSoon(0);
+    readyUI();
+  });
 
 addExample(100, "theobromine", "Theobromine", "a molecule: chocolate's own", () => moleculeExample("theobromine"));
 addSaved("molPieces"); // (the Plate card's Molecule: saved with the design)
+
+// ---------- the molecule as the art in use (the Art step, art.js) ----------
+// the Molecule card's Turn: degrees, and the width that keeps the bonds as long
+function artMolTurn(deg, width) {
+  st.art.molTurn = deg;
+  if (width) st.art.molWidth = width;
+}
+// a molecule becomes the input in use; its own size until it's sized by hand
+// (keepTurn: the structure editor's Use it keeps the Turn; a new molecule starts upright)
+function artUseMolecule(M, keepTurn) {
+  st.art.molecule = M;
+  st.art.molWidth = null;
+  if (!keepTurn) st.art.molTurn = 0;
+  moleculeTurnUI();
+  artUse("molecule");
+}
+addArtKind("molecule", {
+  radio: "srcMolecule",
+  name: () => moleculeName(),
+  note: () => `${moleculeName() || "The molecule"}, traced into one line.`,
+  drawnOK: true,
+  sized(W) {
+    st.art.molWidth = W;
+  },
+  // its skeletal formula traced as drawn, like a pattern
+  apply(A) {
+    const D = moleculeDrawn(),
+      c = D.r ? linesPicture(D) : null;
+    if (!c) return useSource("picture", blankPicture(), "no molecule yet");
+    $("modeCenter").checked = true;
+    $("invert").checked = false;
+    $("loopClosed").checked = true; // (every bond out and back: the line ends where it starts)
+    labels();
+    useSource("picture", c, moleculeName());
+    const W = A.molWidth || moleculeWidth();
+    if (W) startSize(W, D.r.box[0] / Math.max(1e-9, D.r.box[1]));
+    $("artMsg").textContent = "";
+  },
+  vectors(pen) {
+    const { r, L } = moleculeDrawn();
+    if (!r) return null;
+    const strokes = r.paths.map((p) => p.map((v) => (v + L.m) * L.s));
+    return { W: L.w, H: L.h, layers: [{ name: moleculeName() || "molecule", pen, strokes }], pictures: 0 };
+  },
+});
+on("artSave", () => ({
+  molecule: st.art.molecule || null,
+  molWidth: st.art.molWidth || null,
+  molTurn: st.art.molTurn || 0,
+}));
+on("artRestore", (a) => {
+  st.art.molecule = a.molecule || null;
+  st.art.molWidth = a.molWidth || null;
+  st.art.molTurn = a.molTurn || 0;
+  moleculeUI(); // the Molecule card's box and message
+});

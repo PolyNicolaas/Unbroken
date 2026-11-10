@@ -620,7 +620,7 @@ $("drawView").addEventListener("click", async () => {
       { yaw: M.yaw, pitch: M.pitch, size: 1400, crease: creaseDeg() },
     ]);
     const c = hlCanvas(r, 3);
-    applyPreset("drawing", true); // first, so the trace already uses it (one trace, not two)
+    ask("preset", "drawing", true); // first, so the trace already uses it (one trace, not two)
     artModelDrawing(c, `${M.name} · drawing`); // art.js: the drawing becomes the picture
     toast("Drawing made: tracing it as a line drawing");
   } catch (e) {
@@ -700,3 +700,13 @@ on("ready", (L, add) => {
     );
 });
 on("buildFile", (fmtName) => (fmtName === "viewsvg" ? modelViewSVG() : undefined)); // the line drawing of a view
+// a 3D model as the art in use (the Art step, art.js): sliced on the Print step, not traced
+addArtKind("model", {
+  radio: "srcModel",
+  name: () => (st.model && st.model.name) || "",
+  note: () => "A 3D model: it is sliced on the Print step.",
+  apply() {
+    if (!st.model) useSampleModel();
+    useSource("model");
+  },
+});

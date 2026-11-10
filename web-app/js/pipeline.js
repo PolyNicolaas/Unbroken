@@ -21,7 +21,7 @@ async function working(res, engine = PIPE) {
     s.invert,
     s.blur,
     JSON.stringify(lv),
-    cutoutKey(), // cutout.js
+    ...ask("workingKey"), // (cutout.js: the cut-out in use)
   ].join("|");
   if (st.wk && st.wk.key === key) return st.wk;
   let sx = 0,
@@ -55,7 +55,7 @@ async function working(res, engine = PIPE) {
   g.fillStyle = "#fff";
   g.fillRect(0, 0, w, h);
   g.drawImage(src, sx, sy, sw, sh, 0, 0, w, h);
-  cutoutApply(g, sx, sy, sw, sh, w, h); // cutout.js: only the object, if it's cut out
+  ask("workingPicture", g, sx, sy, sw, sh, w, h); // (cutout.js: only the object, if it's cut out)
   const r = await engine.call("stagePrep", [
     g.getImageData(0, 0, w, h).data,
     w,
@@ -132,7 +132,7 @@ function lineSpec(W, sens, textMask, region) {
   return {
     blurred: W.blurred,
     // grey levels: their edges, and a filled block's run along the border (levels.js)
-    levels: W.levels ? { lab: W.levels.lab, edge: levelEdgeFlags(), border: levelBorderFlags() } : null,
+    levels: W.levels ? { lab: W.levels.lab, ...answer("levelFlags") } : null,
     mode: s.mode,
     sens,
     split: CFG.engine.packedStrokeSplit,
@@ -225,7 +225,7 @@ async function extract(g, P = Object.create(st), again = false) {
     Object.assign(P, { final: null, plot: null, pfill: null, finalVer: (st.finalVer || 0) + 1 });
     Object.assign(st, P);
     forgetLayers();
-    setChip(levelNoLinesAdvice(false) || "No lines found — lower the threshold or the speck filter");
+    setChip(answer("noLinesAdvice", false) || "No lines found — lower the threshold or the speck filter");
     render();
     drawPlate();
     drawMini();
@@ -830,7 +830,7 @@ function finalizeReadout() {
   if (!dh.hidden)
     dh.textContent = `At this size ${fmt(100 * share, 0)}% of the line is pushed more than ${fmt(CFG.engine.sizeDetail.medium * st.outW, 1)} mm off the drawing to keep the spacing${$("showDrift").checked ? " (shaded orange)" : ""}.${m && m.fits && Number.isFinite(m.medium) && st.outW < m.medium ? ` Medium detail from ${fmt(m.medium, 1)} mm.` : " Make it bigger to bring it back."}`;
   syncSizeUI();
-  artSizeUI(); // art.js: the Pattern card's width and gap
+  ask("sized"); // (patterns.js: the Pattern card's width and gap)
 }
 
 // ---------- error sweep for the chart (its own background engine, so it doesn't hold up the trace) ----------

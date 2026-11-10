@@ -69,9 +69,7 @@ function workflowUI() {
           : `The ${kind} traced into one continuous line: the pen never lifts.`;
   ask("lineMode", mode); // (plot.js: what the page plots follows the line)
   if (mode === "drawn") {
-    setChip(
-      `${st.art.kind === "text" ? "The text" : st.art.kind === "molecule" ? moleculeName() : patternName(st.art.pattern)} as drawn: exact lines, no trace`
-    );
+    setChip(`${st.art.kind === "text" ? "The text" : artKind().name()} as drawn: exact lines, no trace`);
     $("fitinfo").textContent = "as drawn";
   }
   if (mode === "none") {
@@ -156,14 +154,14 @@ async function traceStrokes(g) {
   const r = await PIPE.call("stageStrokes", [lineSpec(W, s.sens), W.w, W.h, { minLen: s.minLen }]);
   guard(g);
   // the greys set to Fill or Both (levels.js), each filled with its own pen, at the page's scale (as artOnPage fits it)
-  const fills = W.levels ? levelFillList() : [];
+  const fills = (W.levels && answer("levelFills")) || [];
   let fillStrokes = [];
   if (fills.length) {
     const P = paperSize(),
       mg = Math.max(0, +$("paperMargin").value || 0),
       k = Math.min((P.w - 2 * mg) / W.w, (P.h - 2 * mg) / W.h), // mm per px
       pen = Math.max(0.05, +$("penW").value || 0.5),
-      pat = fills.some((f) => f.style === "pattern") && st.art.pattern ? patternDrawn().r : null;
+      pat = (fills.some((f) => f.style === "pattern") && ask("fillPattern")[0]) || null;
     const res = await PIPE.call("levelFills", [
       W.levels.lab,
       W.w,
@@ -210,7 +208,7 @@ async function traceStrokes(g) {
     n || nf
       ? `${n} stroke${n === 1 ? "" : "s"} · ${n ? n - 1 : 0} pen lift${n === 2 ? "" : "s"}` +
           (fillStrokes.length ? ` · ${fillStrokes.length} grey${fillStrokes.length === 1 ? "" : "s"} filled` : "")
-      : levelNoLinesAdvice(true) || "No lines found — lower the threshold or the speck filter"
+      : answer("noLinesAdvice", true) || "No lines found — lower the threshold or the speck filter"
   );
   $("fitinfo").textContent = n ? `${n} stroke${n === 1 ? "" : "s"}` : "";
   render();

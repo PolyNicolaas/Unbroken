@@ -124,7 +124,7 @@ $("mxUse").addEventListener("click", () => {
 // each copy's own feed (mm/min), flow (its e, against the export's E per mm) and layer height (sliced at it). Returns
 // { paths, runs, w, h, seconds, ml } or throws with what's in the way.
 async function mxPlan() {
-  if (piecesOn()) throw new Error("this text prints a piece per line: set Lines of text to One piece first");
+  if (answer("piecesOn")) throw new Error("this text prints a piece per line: set Lines of text to One piece first");
   const L = mxLevels();
   if (!mxLevelsOK(L)) throw new Error("every level needs a value (speed 0.5–200 mm/s, flow 50–200%, layers 0.05–3 mm)");
   const lay = plateNow();

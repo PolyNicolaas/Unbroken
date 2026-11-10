@@ -85,7 +85,8 @@ function plateNow() {
     gap = Math.max(0, +$("copyGap").value || 0),
     straight = $("plateRot").value === "straight";
   if (isModel()) return st.model ? modelPlate(n, gap, straight) : null; // model.js: the footprint
-  if (piecesOn()) return piecePlate(n, gap, straight); // pieces.js: a piece for each line of a text
+  const pieces = answer("piecePlate", n, gap, straight); // (pieces.js: a piece for each line of a text)
+  if (pieces) return pieces;
   const d = designMM();
   if (!d) return null;
   const key = [st.finalVer, d.k, n, gap, straight, lineWidthMM(), BED.w, BED.h].join("|");
@@ -300,13 +301,15 @@ function paintMoves(g, s, P, lw, show) {
   }
   g.setLineDash([]);
 }
+// a copy's footprint on a plate layout (a layout in pieces has one per piece: pieces.js)
+const footOf = (lay, p) => (lay.pieces && p.piece != null ? lay.pieces[p.piece] : lay);
 function drawPlate() {
   if (plotWanted()) ask("lineReady"); // (plot.js: the 2D page follows the design)
-  pieceMenuUI(); // pieces.js: the Plate card's Lines of text follows the text
+  ask("plateUI"); // (pieces.js: the Plate card's Lines of text follows the text)
   if (!layersWanted()) return;
   const res = paintPlate($("plate"), true);
   if (!res) {
-    $("plateHint").textContent = piecesOn()
+    $("plateHint").textContent = answer("piecesOn")
       ? st.text
         ? "Tracing each line of the text as a piece of its own…"
         : "Tracing the bonds and each label as pieces of their own…"

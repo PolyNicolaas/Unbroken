@@ -51,10 +51,10 @@ lineUI(); // the spacing from line width + gap, and the needle shown
 // the Art step starts on the sample picture, or the text (art.js)
 const start = CFG.defaults.startFrom;
 if (start === "lettering")
-  applyPreset("lettering"); // starts on the text
+  ask("preset", "lettering"); // (optimize.js: the starting points) starts on the text
 else if (CFG.defaults.source === "text") artUse("text");
 else {
-  if (start) applyPreset(start, true);
+  if (start) ask("preset", start, true);
   startInput(); // art.js: empty, or the sample settings.js or the address names
 }
 viewChanged(); // the tab that opens (Art) brings its view

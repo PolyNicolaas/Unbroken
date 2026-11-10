@@ -7,6 +7,8 @@
 
 const $ = (id) => document.getElementById(id);
 const PX_MM = 25.4 / 96;
+// a control's value, or a fallback when it isn't on the page (it belongs to a feature that's off)
+const valOf = (id, or = "") => ($(id) ? $(id).value : or);
 // The browser's own storage (the folded cards, the map on or off): keys are "unbroken-…". They
 // were "flt-…" until v94, so anything saved under the old name is moved across the first time it's asked for.
 function storeKey(name) {
@@ -85,6 +87,15 @@ function addOutput(key, output) {
 // The map's shape for the design in hand can be changed by a feature: each of these gets the shape { spine, up, down }
 // and may add its chips (a vase's Profile, Texture and Movement under Art).
 const MAP_SHAPERS = [];
+// What the art can be beyond a picture and a text (the Art step's Input switch, art.js): key → { radio: its input,
+// name(): its label now, note(): the Art card's line about it, apply(A): hand it to the trace, drawnOK: its exact
+// lines can go to the page untraced, vectors(pen): those lines, nothing(): what to say when it draws nothing,
+// sized(W): its width set by hand, keepsPicture(): it draws from the Art step's picture, so a new picture stays it }
+const ART_KINDS = {};
+function addArtKind(key, kind) {
+  ART_KINDS[key] = kind;
+}
+const artKind = () => ART_KINDS[st.art.kind];
 // The controls a design keeps (history.js saves and restores their values): each script adds the ones it owns
 const DESIGN_IDS = [];
 function addSaved(...ids) {
@@ -96,6 +107,10 @@ function on(moment, fn) {
 }
 // every answer to a moment (a list, empty when no feature joined it)
 const ask = (moment, ...args) => (joined[moment] || []).map((fn) => fn(...args));
+// whether any feature answers a moment
+const heard = (moment) => !!joined[moment];
+// the first answer to a moment that says something (null when no feature does)
+const answer = (moment, ...args) => ask(moment, ...args).find((x) => x != null && x !== false) ?? null;
 // what the line is made for (the For chips, map.js): a printer or a pen plotter
 const artForPlot = () => $("artForPlot").checked;
 
