@@ -89,6 +89,17 @@ Tests:
   first; Art → Line → Print or Plot; one switch for the line (One continuous line, Separate strokes, As drawn); the
   preview follows the step. v107.
 
+- **The tool palette** (decided 11 November 2026; sketched on the "Vase screen: three directions" canvas, the
+  palette row): the picture fills the screen, a rail of tools down the left opens each panel over it, Print… and
+  Plot… open screens of their own. Replaces the map of the steps. iPad landscape first; no phone layout.
+  - *A 3D object* is one kind of art, made from a file (STL) or as a vase; the rail follows which.
+  - *Live drawings*: a vase's shape from above can be a traced drawing, linked both ways; and any 3D object's
+    **first layer, as it prints** (after support, overhang per layer and cut-off, so always one piece), can be a
+    flat drawing that follows the object (one way for an STL: Use as a copy to edit it). Supports and the other
+    3D fixes stay exactly as they are.
+  - Later: the widest outline seen from above, or a slice at a chosen height, as the drawing; the profile traced
+    from a drawing of a vase's side.
+
 - **Modules** (decided 10 November: for chocolate printers, pen plotters and clay printers, and so each feature can
   be worked on and made better on its own). Done in v145: twelve features that switch off clean (tests A61, E58;
   DESIGN.md, Modules; docs/FEATURES.md). Next:
