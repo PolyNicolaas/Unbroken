@@ -74,6 +74,7 @@ const MAP_CORE = {
   math: { cap: "Math", step: "design", cards: [], extra: ["#math"], val: () => mapText("mathSummary") },
   print: {
     cap: "Print",
+    icon: "printer",
     step: "choc",
     cards: ["h-gexport"],
     val: () => {
@@ -110,6 +111,7 @@ for (const [id, node] of Object.entries(MAP_CORE)) addMapNode(id, node);
 // a printer: Material before Art, Print at the end (a pen plotter adds itself: plot.js)
 addOutput("print", {
   name: "A printer",
+  icon: "printer",
   radio: "artForPrint",
   before: ["material"],
   step: "print",
@@ -217,6 +219,9 @@ const MAP_ICONS = {
   page: "M6 3h9l4 4v14H6z M15 3v4h4",
   fills: "M4 20L20 4M4 14L14 4M10 20L20 10",
   export: "M12 3v12M7 10l5 5 5-5M4 21h16",
+  // what it's made for (the For chips, Print… / Plot…): a printer's nozzle over the plate, a pen plotter's pen
+  printer: "M8 3h8v5l-2.5 3h-3L8 8z M12 11v3 M4 20h16 M7 17h10",
+  plotter: "M15.5 3.5l5 5L9 20H4v-5z M13 6l5 5",
   back: "M15 5l-7 7 7 7",
   dot: "M12 8a4 4 0 1 0 0 8a4 4 0 1 0 0-8",
 };
@@ -320,7 +325,7 @@ function mapRender() {
       mapOpen(OUTPUTS[outputNow()].step);
     });
   }
-  go.innerHTML = `${mapSvg(O.step === "plot" ? "page" : "print")}<span>${O.step === "plot" ? "Plot…" : "Print…"}</span>`;
+  go.innerHTML = `${mapSvg(O.icon || (O.step === "plot" ? "page" : "print"))}<span>${O.step === "plot" ? "Plot…" : "Print…"}</span>`;
   go.title = `${MAP_NODES[O.step].cap}: ${mapVal(MAP_NODES[O.step]) || ""}`;
   want.push(go);
   // the output's own rail: back to the design, then its tools
@@ -622,7 +627,8 @@ for (const [key, O] of Object.entries(OUTPUTS)) {
   b.type = "button";
   b.className = "chip-btn map-for";
   b.dataset.for = key;
-  b.textContent = O.name;
+  b.innerHTML = `${mapSvg(O.icon || "dot")}<span></span>`;
+  b.querySelector("span").textContent = O.name;
   b.addEventListener("click", () => {
     if (!$(O.radio).checked) mapPick($(O.radio));
     setTimeout(mapFollowStep, 0);

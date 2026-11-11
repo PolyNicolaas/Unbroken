@@ -521,6 +521,8 @@ body { padding: 0; height: 100vh; height: 100dvh; overflow: hidden; }
 header.top { max-width: none; height: 52px; box-sizing: border-box; margin: 0; padding: 0 calc(16px * var(--space)); flex-wrap: nowrap; align-items: center; background: var(--surface); border-bottom: 1px solid var(--rule); }
 header.top h1 { white-space: nowrap; }
 header.top p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+/* a narrow window (an iPad upright): the tagline gives way to the For chips, the version stays */
+@media (max-width: 1000px) { header.top p { font-size: 0; overflow: visible; } header.top p .version { font-size: calc(11px * var(--text)); } }
 .wrap { position: fixed; inset: 52px 0 0 0; max-width: none; margin: 0; display: block; }
 .map { position: absolute; left: var(--edge); top: var(--edge); bottom: var(--edge); width: var(--rail); z-index: 25; pointer-events: none; }
 .map-nodes { position: static; display: flex; flex-direction: column; gap: 4px; max-height: 100%; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; box-sizing: border-box; padding: 6px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(16px * var(--corner)); box-shadow: 0 2px 8px rgb(0 0 0 / .06); pointer-events: auto; width: var(--rail); }
@@ -580,6 +582,8 @@ body[data-screen="out"] .map-node[data-rail="design"], body[data-screen="out"] :
 .map-top { display: flex; height: 34px; flex: none; margin-left: auto; align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
 .map-top .name { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
 .map-top[hidden] { display: none; }
+.map-for { display: inline-flex; align-items: center; gap: 6px; }
+.map-for svg { width: 18px; height: 18px; flex: none; }
 .map-for[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
 .map-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: transparent; }
 .map-dot.warn { background: var(--warn); }

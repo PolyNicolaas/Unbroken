@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v149 · 2026-11-11
+
+- **Icons for what it's made for**: the For chips have one each (a printer's nozzle over the plate, a pen plotter's
+  pen), and Print… / Plot… and the output's own tool use the same one. On an upright iPad the tagline gives way to
+  the chips (the version stays).
+- **Where an error came from**: "Something went wrong" now ends with the file and line it happened in
+  (" · in pipeline.js:212"), or says when it came from a browser extension's script rather than the app, so a
+  failure on the iPad can be traced.
+
 ## v148 · 2026-11-11
 
 - **The tool palette** replaces the map across the top. The picture fills the window; a rail of tools at the left

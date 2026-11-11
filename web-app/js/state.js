@@ -78,7 +78,7 @@ function addMapNode(id, node) {
   const had = MAP_NODES[id];
   MAP_NODES[id] = had ? { ...had, ...node, cards: [...(had.cards || []), ...(node.cards || [])] } : node;
 }
-// What the line is made for: key → { name: its chip, radio: the input that holds the choice, before: the steps before
+// What the line is made for: key → { name: its chip, icon: its icon (map.js MAP_ICONS), radio: the input that holds the choice, before: the steps before
 // Art, step: its last step, up / down: the chips over and under that step }. The map draws the For chips from these.
 const OUTPUTS = {};
 function addOutput(key, output) {
