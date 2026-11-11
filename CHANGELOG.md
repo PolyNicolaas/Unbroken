@@ -3,6 +3,22 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v148 · 2026-11-11
+
+- **Nozzles come with the printer.** Each printer in `settings.js` has its own nozzle list (the choc mate 2's needles,
+  14G–27G, are now in its entry), what it calls them (the menu's label: Needle, Nozzle …) and the one to start with.
+  Picking another printer swaps the menu: the same nozzle if the new printer has it, else its default, else the
+  nearest size; a custom width stays. The top-level `needles` list stays as the shared one, for a printer without
+  its own (and older settings files).
+- **A printer's own G-code**: besides its start and end lines, a printer can have lines at the start of each layer
+  and before and after each copy (`layerGcode`, `copyStartGcode`, `copyEndGcode`, with `{layer}`, `{layers}`, `{z}`,
+  `{copy}`, `{copies}` and `{needle}` filled in). All optional; the choc mate 2 needs none, and its files are
+  unchanged.
+- **Adding a printer is one entry**: the commented example at the end of the printer list now has every key,
+  explained, with its default; only the id, name and plate are required. The 3D tab's printer table lists its
+  nozzles and which extra G-code it has. Tests E60 (the G-code lines) and A64 (the example printer switched on, the
+  menu swapping and its lines in the file).
+
 ## v147 · 2026-11-10
 
 A sweep for bugs and crowded screens: every example, every step of the map, at phone, iPad and desktop sizes (test

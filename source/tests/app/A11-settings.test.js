@@ -9,7 +9,7 @@ module.exports = {
   async run(ctx) {
     const S = settings(), checks = [];
     const { page, errors, close } = await A.open(ctx);
-    checks.push(check("needle menu entries (+ Custom)", (await page.$$("#needle option")).length, "==", S.needles.length + 1),
+    checks.push(check("needle menu entries (+ Custom)", (await page.$$("#needle option")).length, "==", (S.printers[0].nozzles || S.needles).length + 1),
       check("chocolate menu entries", (await page.$$("#chocolate option")).length, "==", S.chocolates.length),
       check("default chocolate selected", await page.inputValue("#chocolate"), "==", S.defaults.chocolate));
     for (const c of S.chocolates) {

@@ -58,9 +58,9 @@ window.UNB_SETTINGS = {
     },
   ],
 
-  // ---------- Needles ----------
-  // (used) The Needle menu, in this order. insideDiameter is the printed line width in mm; color is the needle's hub colour.
-  // Colour codes follow the common blunt-needle code; check your packaging, as brands vary slightly.
+  // ---------- Needles (shared) ----------
+  // (used) The nozzle list for a printer without its own nozzles list (each printer below brings its own). Same
+  // entries as there.
   needles: [
     { id: "14G", gauge: 14, colorName: "olive",  color: "#6b7a3a", insideDiameter: 1.54 },
     { id: "15G", gauge: 15, colorName: "amber",  color: "#d99a2b", insideDiameter: 1.37 },
@@ -76,7 +76,9 @@ window.UNB_SETTINGS = {
 
   // ---------- 3D printers ----------
   // (used) The Printer menu in the 3D tab, in this order; the first is used when the app opens (unless defaults.printer
-  // says otherwise). Copy an entry to add another printer; ids are letters, numbers and - only.
+  // says otherwise). Everything about a printer is in its entry: its plate, its speeds, its nozzles and its own G-code.
+  // To add a printer, copy the "my-printer" example at the end of this list (every key is there, explained), fill it
+  // in and remove the // marks; ids are letters, numbers and - only. Nothing else in the app needs changing.
   printers: [
     {
       id: "chocmate2",
@@ -106,6 +108,24 @@ window.UNB_SETTINGS = {
       cartridge: "50 cc plastic syringe",   // (shown) what holds the chocolate
       cartridgeDiameter: 26.5,        // (used) its inside diameter, mm
       cartridgeVolume: 50,            // (used) ml of chocolate in a full cartridge: the 3D tab warns when a plate needs more
+      // (used) Its nozzles: the Needle menu while this printer is picked, in this order. insideDiameter is the printed
+      // line width in mm; color is the needle's hub colour (optional). Colour codes follow the common blunt-needle code;
+      // check your packaging, as brands vary slightly. Switching printer keeps the same id if the new one has it, else
+      // its defaultNozzle, else the nearest size.
+      nozzleName: "Needle",           // (used) what this printer calls them, for the menu's label
+      defaultNozzle: "18G",           // (used) picked when switching to this printer from one without the same nozzle
+      nozzles: [
+      { id: "14G", gauge: 14, colorName: "olive",  color: "#6b7a3a", insideDiameter: 1.54 },
+      { id: "15G", gauge: 15, colorName: "amber",  color: "#d99a2b", insideDiameter: 1.37 },
+      { id: "16G", gauge: 16, colorName: "grey",   color: "#9aa0a6", insideDiameter: 1.19 },
+      { id: "18G", gauge: 18, colorName: "green",  color: "#2e9e4f", insideDiameter: 0.84 },
+      { id: "20G", gauge: 20, colorName: "pink",   color: "#e87fb0", insideDiameter: 0.61 },
+      { id: "21G", gauge: 21, colorName: "purple", color: "#8a4fc4", insideDiameter: 0.51 },
+      { id: "22G", gauge: 22, colorName: "blue",   color: "#2f6fd6", insideDiameter: 0.41 },
+      { id: "23G", gauge: 23, colorName: "orange", color: "#ef7d22", insideDiameter: 0.33 },
+      { id: "25G", gauge: 25, colorName: "red",    color: "#d63a3a", insideDiameter: 0.25 },
+      { id: "27G", gauge: 27, colorName: "clear",  color: "#f4f4f4", insideDiameter: 0.20 },
+      ],
       // (used) lines before and after the print, from choc OS's own file: power, the needle size for the printer's
       // MatchNozzleSize macro ("{needle}" becomes the needle's inside diameter), and the purge line along the back edge
       startGcode: [
@@ -122,10 +142,34 @@ window.UNB_SETTINGS = {
         "G92 E0 ; reset extruder", "G1 F3600 E-0.3 ; retract", "M400 ; finish all moves", "G91 ; relative positioning",
         "G1 Z3 ; move up by 3mm", "G90 ; absolute positioning", "G54 ; first (machine) coordinate system", "G1 X335 Y232 ; park",
       ],
+      // (used, optional) its own lines at other moments; choc mate 2 needs none. layerGcode: at the start of each layer
+      // ("{layer}", "{layers}", "{z}": its number, how many, its height in mm). copyStartGcode / copyEndGcode: before and
+      // after each copy on the plate ("{copy}", "{copies}"). "{needle}" works in all of them.
+      layerGcode: [],
+      copyStartGcode: [],
+      copyEndGcode: [],
     },
+    // An example to copy for another printer: remove the // marks and fill in its numbers. Only id, name and the plate
+    // (bedWidth, bedDepth, buildHeight) are needed; anything left out takes the value shown in the comment.
     // {
-    //   id: "my-printer", name: "My printer", bedWidth: 220, bedDepth: 220, buildHeight: 250, lift: 5,
-    //   layerHeight: 0.2, maxPrintSpeed: 60, minLayerTime: 10, retraction: 0, cartridgeDiameter: 20, startGcode: ["G28"], endGcode: ["M84"],
+    //   id: "my-printer", name: "My printer",
+    //   bedWidth: 220, bedDepth: 220, buildHeight: 250,   // plate and Z travel, mm
+    //   lift: 5,                                          // mm above the print when travelling between copies (5)
+    //   layerHeight: 0.2,                                 // mm (0.3)
+    //   maxPrintSpeed: 60, minLayerTime: 10, minPrintSpeed: 5,   // mm/s, s, mm/s (50, 20, 5)
+    //   retraction: 0, retractSpeed: 0.2, wipeTime: 0, firstUnretractExtra: 0,   // mm, mm/s, s, mm (0.3, 0.2, 0.2, 0)
+    //   unretractPause: "",                               // a line after each push forward, or "" for none
+    //   travelSpeed: 120, zTravelSpeed: 60, zApproachSpeed: 10,   // mm/s (120, 60, 10)
+    //   cartridge: "30 cc syringe", cartridgeDiameter: 20, cartridgeVolume: 30,   // what holds the material: name, mm, ml
+    //   nozzleName: "Nozzle", defaultNozzle: "n0.6",
+    //   nozzles: [                                        // its own list (left out: the shared needles above)
+    //     { id: "n0.4", insideDiameter: 0.4 },
+    //     { id: "n0.6", insideDiameter: 0.6, colorName: "red", color: "#d63a3a" },
+    //   ],
+    //   startGcode: ["G28 ; home", "M83"],                // before the print ("{needle}": the nozzle's size, mm)
+    //   endGcode: ["M84 ; motors off"],                   // after it
+    //   layerGcode: ["M117 Layer {layer} of {layers}"],  // at each layer (optional)
+    //   copyStartGcode: [], copyEndGcode: [],             // before and after each copy (optional)
     // },
   ],
 

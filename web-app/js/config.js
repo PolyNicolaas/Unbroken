@@ -127,8 +127,11 @@ const MAP = {
 const num = (v, lo, hi) => typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi;
 const hexColor = (v) => typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v);
 
-// printer fields an older settings.js may not have yet: the built-in value, without a note
+// printer fields an entry can leave out (an older settings.js, or a new printer kept short): the built-in value, without a note
 const OPTIONAL_PRINTER = [
+  "lift",
+  "layerHeight",
+  "minLayerTime",
   "minPrintSpeed",
   "retraction",
   "retractSpeed",
@@ -146,25 +149,38 @@ const OPTIONAL_PRINTER = [
 const CFG = (() => {
   const raw = window.UNB_SETTINGS,
     notes = [];
-  if (!raw || typeof raw !== "object")
-    return Object.assign(structuredClone(BUILTIN), {
-      printer: structuredClone(BUILTIN.printers[0]),
+  if (!raw || typeof raw !== "object") {
+    // the built-in settings: one printer, with the built-in needles as its nozzles
+    const b = structuredClone(BUILTIN), { needles, ...rest } = b;
+    b.printers[0] = { ...b.printers[0], nozzles: needles, nozzleName: "Needle", defaultNozzle: null };
+    const out = Object.assign(rest, {
+      printer: b.printers[0],
+      sharedNozzles: needles,
       problems: [
         "settings.js couldn't be read (missing, or a typo such as a missing comma or quote), so the built-in settings are in use.",
       ],
       raw: null,
     });
-  const out = { currency: typeof raw.currency === "string" ? raw.currency : BUILTIN.currency, raw };
-  out.needles = (Array.isArray(raw.needles) ? raw.needles : []).filter((n, i) => {
-    const ok = n && typeof n.id === "string" && num(n.insideDiameter, 0.05, 5) && hexColor(n.color);
-    if (!ok) notes.push(`needle ${i + 1} skipped: it needs an id, a colour like "#2e9e4f" and an insideDiameter in mm`);
-    return ok;
-  });
-  if (!out.needles.length) {
-    out.needles = BUILTIN.needles;
-    notes.push("no usable needles, so the built-in list is in use");
+    Object.defineProperty(out, "needles", { get: () => out.printer.nozzles, enumerable: true });
+    return out;
   }
-  const needleIds = new Set(out.needles.map((n) => n.id));
+  const out = { currency: typeof raw.currency === "string" ? raw.currency : BUILTIN.currency, raw };
+  // Nozzles (needles, for a chocolate printer) come with the printer: each printer's nozzles list. The top-level
+  // needles list is the shared one, for a printer without its own (and for a settings.js from before 11 November
+  // 2026, which had only that). An entry: id, insideDiameter (mm: the printed line width), and optionally a colour
+  // ("#2e9e4f": the hub's), colorName and gauge.
+  const nozzleList = (list, what) =>
+    (Array.isArray(list) ? list : []).filter((n, i) => {
+      const ok = n && typeof n.id === "string" && num(n.insideDiameter, 0.05, 10) && (n.color == null || hexColor(n.color));
+      if (!ok) notes.push(`${what} ${i + 1} skipped: it needs an id and an insideDiameter in mm (and a colour like "#2e9e4f", if any)`);
+      return ok;
+    });
+  out.sharedNozzles = nozzleList(raw.needles, "needle");
+  if (!out.sharedNozzles.length) out.sharedNozzles = BUILTIN.needles;
+  const allNozzles = (raw.printers || [])
+    .flatMap((q) => (q && Array.isArray(q.nozzles) ? q.nozzles : []))
+    .concat(out.sharedNozzles);
+  const needleIds = new Set(allNozzles.filter((n) => n && typeof n.id === "string").map((n) => n.id));
   out.chocolates = (Array.isArray(raw.chocolates) ? raw.chocolates : []).filter((c, i) => {
     const ok = c && typeof c.id === "string" && typeof c.name === "string" && hexColor(c.color);
     if (!ok) {
@@ -258,11 +274,23 @@ const CFG = (() => {
       notes.push(`${q.name}: unretractPause should be one line in quotes; ignored`);
       q.unretractPause = "";
     }
-    for (const k of ["startGcode", "endGcode"])
+    // the printer's own lines: at the start and end, at each new layer, before and after each copy (all optional)
+    for (const k of ["startGcode", "endGcode", "layerGcode", "copyStartGcode", "copyEndGcode"])
       if (q[k] != null && !(Array.isArray(q[k]) && q[k].every((l) => typeof l === "string"))) {
         notes.push(`${q.name}: ${k} should be a list of lines in quotes; ignored`);
         q[k] = [];
       }
+    // its nozzles (none of its own: the shared needle list), what it calls them, and the one to start with
+    if (q.nozzles != null) {
+      q.nozzles = nozzleList(q.nozzles, `${q.name}: nozzle`);
+      if (!q.nozzles.length) notes.push(`${q.name}: no usable nozzles, so the shared needle list is in use`);
+    }
+    if (!q.nozzles || !q.nozzles.length) q.nozzles = out.sharedNozzles;
+    if (typeof q.nozzleName !== "string" || !q.nozzleName.trim()) q.nozzleName = "Needle";
+    if (q.defaultNozzle != null && !q.nozzles.some((n) => n.id === q.defaultNozzle)) {
+      notes.push(`${q.name}: defaultNozzle "${q.defaultNozzle}" isn't one of its nozzles; ignored`);
+      q.defaultNozzle = null;
+    }
     return true;
   });
   if (!out.printers.length) {
@@ -270,6 +298,8 @@ const CFG = (() => {
     if (rawPrinters.length) notes.push("no usable printers, so the built-in choc mate 2 is in use");
   }
   out.printer = out.printers[0]; // the one in use; the Printer menu changes it
+  // the nozzles on offer: the printer in use's
+  Object.defineProperty(out, "needles", { get: () => out.printer.nozzles, enumerable: true });
   // presets: each field checked like the matching default; a broken preset falls back to the built-in one
   out.presets = {};
   for (const key of ["drawing", "photo", "logo"]) {
@@ -419,15 +449,19 @@ function fontMenu() {
 }
 fontMenu();
 
-// ---- needle menu
-(() => {
-  const sel = $("needle");
+// ---- needle menu: the printer in use's nozzles (built again when the printer changes, views.js)
+function needleMenu() {
+  const sel = $("needle"),
+    was = sel.selectedOptions[0] && sel.selectedOptions[0].dataset.id,
+    wasD = +sel.value;
   sel.textContent = "";
+  const lab = sel.closest("label") && sel.closest("label").querySelector(":scope > span:first-child");
+  if (lab) lab.textContent = `${CFG.printer.nozzleName} (inside diameter)`;
   for (const n of CFG.needles) {
     const o = document.createElement("option");
     o.value = String(n.insideDiameter);
     o.dataset.id = n.id;
-    o.dataset.c = n.color;
+    o.dataset.c = n.color || "#8a94a3"; // no colour given: grey
     o.textContent = `${n.id} · ${n.colorName || ""} · ${n.insideDiameter.toFixed(2)} mm`.replace(" ·  ·", " ·");
     sel.appendChild(o);
   }
@@ -436,7 +470,9 @@ fontMenu();
   c.dataset.c = "transparent";
   c.textContent = "Custom…";
   sel.appendChild(c);
-})();
+  return { was, wasD };
+}
+needleMenu();
 function selectNeedle(id) {
   const o = [...$("needle").options].find((x) => x.dataset.id === id);
   if (o) {
