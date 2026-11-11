@@ -3,6 +3,12 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v150 · 2026-11-11
+
+- **Draw your own works from the empty start again.** The "Start with a picture …" message stayed over the drawing
+  pad, so the pad couldn't be seen and every stroke landed on the message instead. It now steps aside while a tool
+  is in use on the preview. Test A65 draws from the empty app with real pointer input.
+
 ## v149 · 2026-11-11
 
 - **Icons for what it's made for**: the For chips have one each (a printer's nozzle over the plate, a pen plotter's

@@ -383,6 +383,8 @@ body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; 
 .examples .name { font-size: calc(12px * var(--text)); color: var(--muted); }
 .empty-state { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; justify-items: center; gap: calc(10px * var(--space)); padding: calc(24px * var(--space)); text-align: center; background: color-mix(in srgb, var(--surface) 88%, transparent); }
 .empty-state[hidden], body:not([data-stage="line"]) .empty-state { display: none; }
+/* (a tool on the preview, such as Draw your own from the empty start: the pad is underneath and takes the strokes) */
+.canvas-box.tool-mode .empty-state { display: none; }
 .empty-state .es-title { margin: 0; font: 650 calc(18px * var(--text))/1.3 var(--font-display); }
 .empty-state .es-sub { margin: 0; color: var(--muted); max-width: 46ch; }
 .empty-state .chips { justify-content: center; max-width: 560px; }
