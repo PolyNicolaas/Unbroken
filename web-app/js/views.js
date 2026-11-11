@@ -42,7 +42,15 @@ function applyPrinter(resetFields = true) {
     ],
     ["Slowest print speed", `${P.minPrintSpeed} mm/s`],
     ["Travel speed", `${P.travelSpeed} mm/s`],
+    [`${P.nozzleName}s`, P.nozzles.map((n) => `${n.id} (${n.insideDiameter} mm)`).join(", ")],
     ["Start / end G-code", `${(P.startGcode || []).length} / ${(P.endGcode || []).length} lines`],
+    [
+      "Its own lines",
+      ["layerGcode", "copyStartGcode", "copyEndGcode"]
+        .filter((k) => (P[k] || []).length)
+        .map((k) => ({ layerGcode: "each layer", copyStartGcode: "before each copy", copyEndGcode: "after each copy" })[k])
+        .join(", ") || "none",
+    ],
     ["Coordinates", "absolute, mm"],
   ];
   // the values that shape every print, in one line under the menu (edited only in settings.js)
@@ -60,6 +68,15 @@ function applyPrinter(resetFields = true) {
 $("printer").addEventListener("change", () => {
   const H = goalNow();
   applyPrinter();
+  // its own nozzles: the same one if it has it, else its default, else the nearest size (a custom width stays)
+  const { was, wasD } = needleMenu();
+  if (!st.needleCustom) {
+    const L = CFG.needles,
+      keep = L.find((n) => n.id === was) || L.find((n) => n.id === CFG.printer.defaultNozzle);
+    const near = L.reduce((a, n) => (Math.abs(n.insideDiameter - wasD) < Math.abs(a.insideDiameter - wasD) ? n : a), L[0]);
+    selectNeedle((keep || near).id);
+    $("needle").dispatchEvent(new Event("change", { bubbles: true }));
+  } else $("needle").value = "custom";
   if (!isModel()) layersFromHeight(H);
   posManual = false;
   showHeight();

@@ -44,7 +44,8 @@ maker's paid slicer (choc OS) for these prints.
 chocolate printer: the material can't be stopped or lifted mid-print, so every print must be one continuous line,
 with supports built into that line and a minimum gap set by the nozzle width. The same engine and rules apply; what
 changes is a printer profile (bed size, nozzle sizes, start and end G-code, speeds) and material settings in place of
-the chocolate list. See [`ROADMAP.md`](ROADMAP.md).
+the chocolate list. A printer profile is one entry in `web-app/settings.js`, with its own nozzles and G-code, so adding
+one needs no code: copy the `my-printer` example there. See [`ROADMAP.md`](ROADMAP.md).
 
 **Status:** beta. Prints from the choc mate 2 are working well; settings and file formats may still change.
 

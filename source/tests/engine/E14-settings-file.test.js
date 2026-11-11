@@ -4,7 +4,7 @@ module.exports = {
   id: "E14", title: "The settings file is complete and consistent",
   guards: "a typo or wrong value in settings.js",
   why: "settings.js is meant to be edited by hand: chocolates, needles, the printer and the starting defaults. A missing comma stops the whole file from loading (the app then falls back to its built-in settings), and a wrong unit or a needle that isn't in the list quietly changes prints. Run the tests after editing the file.",
-  how: "Loads web-app/settings.js the way the browser does and checks every entry: chocolates, needles, printer, every starting default (each against the values the app accepts), the starting-point presets, the rules and the engine tuning. It checks types, units and ranges, unique ids, colours written as #rrggbb, that every reference (a chocolate's needle, the default chocolate, needle and font) exists, and that no setting is misspelt or missing.",
+  how: "Loads web-app/settings.js the way the browser does and checks every entry: chocolates, the shared needles, each printer with its own nozzles and G-code lines, every starting default (each against the values the app accepts), the starting-point presets, the rules and the engine tuning. It checks types, units and ranges, unique ids, colours written as #rrggbb, that every reference (a chocolate's needle, the default chocolate, needle and font) exists, and that no setting is misspelt or missing.",
   pass: "The file loads; every chocolate, needle, printer value and default passes its check. The report names any entry that doesn't, and why.",
   async run() {
     const sandbox = { window: {} }; let loadErr = null;
@@ -12,13 +12,20 @@ module.exports = {
     const S = sandbox.window.UNB_SETTINGS, bad = [];
     if (loadErr || !S) return { checks: [check(`settings.js loads${loadErr ? " (" + loadErr + ")" : ""}`, 0, "==", 1)] };
     const num = (v, lo, hi) => typeof v === "number" && Number.isFinite(v) && v >= lo && v <= hi, hex = (v) => typeof v === "string" && /^#[0-9a-fA-F]{6}$/.test(v);
+    // the shared needle list, then each printer's own nozzles: a chocolate's needle and the default needle can be any of them
     const needles = Array.isArray(S.needles) ? S.needles : [], nIds = new Set();
-    needles.forEach((n, i) => {
-      const who = `needle ${i + 1} (${n && n.id})`;
-      if (!n || typeof n.id !== "string" || !n.id) bad.push(`${who}: id missing`); else if (nIds.has(n.id)) bad.push(`${who}: id used twice`); else nIds.add(n.id);
-      if (!num(n.insideDiameter, 0.05, 5)) bad.push(`${who}: insideDiameter should be mm between 0.05 and 5`);
-      if (!hex(n.color)) bad.push(`${who}: color should look like "#2e9e4f"`);
-    });
+    const nozzleCheck = (list, what) => { const ids = new Set(); list.forEach((n, i) => {
+      const who = `${what} ${i + 1} (${n && n.id})`;
+      if (!n || typeof n.id !== "string" || !n.id) bad.push(`${who}: id missing`); else if (ids.has(n.id)) bad.push(`${who}: id used twice`); else { ids.add(n.id); nIds.add(n.id); }
+      if (!num(n.insideDiameter, 0.05, 10)) bad.push(`${who}: insideDiameter should be mm between 0.05 and 10`);
+      if (n.color != null && !hex(n.color)) bad.push(`${who}: color should look like "#2e9e4f"`);
+    }); return ids; };
+    nozzleCheck(needles, "needle");
+    for (const q of Array.isArray(S.printers) ? S.printers : []) if (q && q.nozzles != null) {
+      if (!Array.isArray(q.nozzles) || !q.nozzles.length) { bad.push(`printers ${q.id}: nozzles should be a list (leave it out to use the shared needles)`); continue; }
+      const ids = nozzleCheck(q.nozzles, `printers ${q.id}: nozzle`);
+      if (q.defaultNozzle != null && !ids.has(q.defaultNozzle)) bad.push(`printers ${q.id}: defaultNozzle "${q.defaultNozzle}" isn't one of its nozzles`);
+    }
     const chocs = Array.isArray(S.chocolates) ? S.chocolates : [], cIds = new Set();
     chocs.forEach((c, i) => {
       const who = `chocolate ${i + 1} (${c && (c.name || c.id)})`;
@@ -42,7 +49,8 @@ module.exports = {
       for (const [k, lo, hi] of [["minPrintSpeed", 0.1, 100], ["retraction", 0, 5], ["retractSpeed", 0.01, 50], ["wipeTime", 0, 5], ["firstUnretractExtra", 0, 5], ["travelSpeed", 1, 1000], ["cartridgeDiameter", 1, 200]]) if (p[k] !== undefined && !num(p[k], lo, hi)) bad.push(`printers ${p.id}: ${k} should be ${lo}–${hi}`);
       if (p.unretractPause != null && typeof p.unretractPause !== "string") bad.push(`printers ${p.id}: unretractPause should be one line in quotes`);
       if (!num(p.minLayerTime, 0, 600)) bad.push(`printers ${p.id}: minLayerTime should be a number of seconds (0–600)`);
-      for (const k of ["startGcode", "endGcode"]) if (p[k] != null && !(Array.isArray(p[k]) && p[k].every((l) => typeof l === "string"))) bad.push(`printers ${p.id}: ${k} should be a list of lines in quotes`);
+      if (p.nozzleName != null && (typeof p.nozzleName !== "string" || !p.nozzleName.trim())) bad.push(`printers ${p.id}: nozzleName should be a word in quotes`);
+      for (const k of ["startGcode", "endGcode", "layerGcode", "copyStartGcode", "copyEndGcode"]) if (p[k] != null && !(Array.isArray(p[k]) && p[k].every((l) => typeof l === "string"))) bad.push(`printers ${p.id}: ${k} should be a list of lines in quotes`);
     }
     const p = printers[0] || {};
     for (const c of S.chocolates || []) if (c.layerHeight != null && !num(c.layerHeight, 0.05, 3)) bad.push(`chocolates ${c.id}: layerHeight should be mm (0.05–3)`);
@@ -79,6 +87,6 @@ module.exports = {
     for (const [k, lo, hi] of [["termTolerance", 0.05, 5], ["minStrandGap", 0, 5], ["packedStrokeSplit", 0, 1], ["farGroupShare", 0, 1], ["loopRadius", 0.5, 3], ["maxWorkingResolution", 320, 6000]]) if (!num(E[k], lo, hi)) bad.push(`engine.${k} should be a number from ${lo} to ${hi}`);
     const SD = E.sizeDetail || {};
     if (!["smallest", "medium", "high"].every((k) => num(SD[k], 0.001, 0.2)) || !(SD.smallest >= SD.medium && SD.medium >= SD.high)) bad.push("engine.sizeDetail needs smallest ≥ medium ≥ high, each 0.001–0.2");
-    return { checks: [check("settings.js loads", 1, "==", 1), check("chocolates", chocs.length, ">=", 1), check("needles", needles.length, ">=", 1), check("problems found", bad.length, "==", 0)], notes: bad.length ? bad.join("  \n") : `${chocs.length} chocolates, ${needles.length} needles, printer "${p.name}", defaults ok` };
+    return { checks: [check("settings.js loads", 1, "==", 1), check("chocolates", chocs.length, ">=", 1), check("nozzles (shared or the first printer's)", ((S.printers && S.printers[0] && S.printers[0].nozzles) || needles).length, ">=", 1), check("problems found", bad.length, "==", 0)], notes: bad.length ? bad.join("  \n") : `${chocs.length} chocolates, ${needles.length} needles, printer "${p.name}", defaults ok` };
   },
 };

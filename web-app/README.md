@@ -131,8 +131,8 @@ copying a whole `{ … },` block and giving it a new `id`.
 | Section | What it sets |
 |---|---|
 | `chocolates` | Each chocolate: colour, print speed, needle, cost per 100 g, density, temperatures, product and dietary details, links |
-| `needles` | The Needle menu: gauge, hub colour, inside diameter |
-| `printers` | Each printer: bed, build height, print height, lift, layer height, speed, minimum layer time, retraction and wipe, travel speed, cartridge diameter (sets E per mm with the needle), start and end G-code (choc OS's purge line). The first is the default (or `defaults.printer`). |
+| `needles` | The shared nozzle list, for a printer without its own `nozzles`: gauge, hub colour, inside diameter |
+| `printers` | Everything about each printer, in its own entry: bed, build height, lift, layer height, speeds, minimum layer time, retraction and wipe, travel speeds, cartridge (sets E per mm with the nozzle), its **nozzles** (the Needle menu while it's picked; `nozzleName` labels the menu, `defaultNozzle` is picked on switching to it), and its G-code: start and end (choc OS's purge line), and optional lines at each layer and before and after each copy (`layerGcode`, `copyStartGcode`, `copyEndGcode`; placeholders `{needle}`, `{layer}`, `{layers}`, `{z}`, `{copy}`, `{copies}`). The first is the default (or `defaults.printer`). **To add a printer**, copy the commented `my-printer` example at the end of the list: every key is there, and only id, name and the plate are required. Test A64 switches that example on and checks it works as written. |
 | `defaults` | Every control's starting value, panel by panel: source, tracing, lines and size, text (font, lettering for a printer: `joinLetters`, `closeNearMisses`, `leaveOutIJDots`, `measuredHeight`), plate (`textLines`: in place, packed or one piece), layers, paper and pen, export formats, view, tools |
 | `presets` | What the Start-from buttons (Line drawing, Photo, Logo) set |
 | `rules` | Text limits (lines, readable letter height per font, the measured height's floor `minLetterStrokes`, letter and word gaps) and how many steps Undo remembers |

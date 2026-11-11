@@ -193,6 +193,10 @@
   // needle's inside diameter), needle (mm), travelSpeed (mm/s for the moves between copies, with or without
   // retraction; 50 when not set), zTravelSpeed (mm/s lifting clear before travelling; 60 when not set) and
   // zApproachSpeed (mm/s lowering onto a copy, and the last lift off the print; 10 when not set).
+  // The printer's own lines where it needs them (settings.js; all optional): g.layer at the start of each layer (after
+  // its "; layer" comment; "{layer}", "{layers}" and "{z}" become its number, how many and its height in mm),
+  // g.copyStart once a copy is in place, before it prints, and g.copyEnd after it ("{copy}", "{copies}"); "{needle}"
+  // works in all of them.
   // Retraction, as choc OS does it (source/printer/choc-mate-2/choc-os.md), when g.retract > 0: before the first copy
   // the plunger pulls back g.retract at g.retractSpeed (mm/s); each copy starts with an unretract (the first one
   // g.firstUnretractExtra longer) and g.unretractPause (the printer's own pause line); each copy ends with a wipe: the
@@ -208,7 +212,10 @@
       zNear = Math.round(Math.max(0.5, g.zApproachSpeed || 10) * 60);
     const wipeT = r ? Math.max(0, g.wipeTime || 0) : 0,
       E5 = (v) => Math.round(v * 100000) / 100000;
-    const sub = (l) => l.replace(/\{needle\}/g, f3(g.needle || 0));
+    const sub = (l, v) =>
+      l
+        .replace(/\{needle\}/g, f3(g.needle || 0))
+        .replace(/\{(layer|layers|z|copy|copies)\}/g, (m, k) => (v && v[k] != null ? String(v[k]) : m));
     let bx0 = Infinity,
       bx1 = -Infinity,
       by0 = Infinity,
@@ -235,7 +242,7 @@
           ]
         : []),
       `; size ${bx1 >= bx0 ? `${f3(bx1 - bx0)} x ${f3(by1 - by0)}` : "0 x 0"} mm`,
-      ...((g.start || []).length ? ["; printer start", ...g.start.map(sub)] : []),
+      ...((g.start || []).length ? ["; printer start", ...g.start.map((l) => sub(l))] : []),
       "G21 ; mm",
       "G90 ; absolute XYZ",
       "M82 ; absolute E",
@@ -265,6 +272,8 @@
         lines.push(`G1 E0 F${rF} ; unretract`, ...(g.unretractPause ? [g.unretractPause] : []), "G92 E0");
         e = 0;
       }
+      const cv = { copy: k + 1, copies: paths.length };
+      if ((g.copyStart || []).length) lines.push(...g.copyStart.map((l) => sub(l, cv)));
       // where the wipe starts: wipeLen before the end of the line (only when the line is long enough for it)
       let total = 0;
       for (let i = 1; i < p.x.length; i++) total += Math.hypot(X(p, i) - X(p, i - 1), Y(p, i) - Y(p, i - 1));
@@ -275,13 +284,19 @@
         s = 0,
         wiping = false,
         fNow = null;
+      // each layer's comment, and the printer's own layer lines after it
       const lapAt = new Map(
         (p.laps || []).map((l, li) => [
           l.from,
-          `; layer ${li + 1} of ${p.laps.length} (${l.kind === "base" ? "fill" : "wall"})`,
+          [
+            `; layer ${li + 1} of ${p.laps.length} (${l.kind === "base" ? "fill" : "wall"})`,
+            ...(g.layer || []).map((t) =>
+              sub(t, { layer: li + 1, layers: p.laps.length, z: f3(Z(p, Math.min(l.from, p.x.length - 1))) })
+            ),
+          ],
         ])
       );
-      if (lapAt.has(0)) lines.push(lapAt.get(0));
+      if (lapAt.has(0)) lines.push(...lapAt.get(0));
       const move = (x, y, z, E, fd) => {
         const zs = Math.abs(z - zNow) > 1e-6 ? ` Z${f3(z)}` : "";
         zNow = z;
@@ -297,7 +312,7 @@
           zi = Z(p, i),
           d = Math.hypot(x1 - x0, y1 - y0);
         if (zi > top) top = zi;
-        if (!wiping && lapAt.has(i)) lines.push(lapAt.get(i));
+        if (!wiping && lapAt.has(i)) lines.push(...lapAt.get(i));
         const flow = (t) => g.e * (F(p, i - 1) + (F(p, i) - F(p, i - 1)) * t);
         if (!wiping && s + d > wipeAt) {
           // split this segment where the wipe starts
@@ -320,10 +335,11 @@
         }
       }
       if (r && !wiping) lines.push("G92 E0", `G1 F${rF} E${E5(-r)} ; retract`); // too short to wipe: retract in place
+      if ((g.copyEnd || []).length) lines.push(...g.copyEnd.map((l) => sub(l, cv)));
     });
     lines.push(
       `G1 Z${f3(top + g.lift)} F${zNear}`,
-      ...((g.end || []).length ? ["; printer end", ...g.end.map(sub)] : []),
+      ...((g.end || []).length ? ["; printer end", ...g.end.map((l) => sub(l))] : []),
       "; end"
     );
     return lines.join("\n") + "\n";
