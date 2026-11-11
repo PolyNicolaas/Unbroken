@@ -29,7 +29,7 @@ module.exports = {
       }
       return { missing: sels.filter((s) => !seen.has(s)).join(" "), over };
     };
-    for (const vp of [{ width: 1300, height: 1000 }, { width: 390, height: 844 }]) {
+    for (const vp of [{ width: 1300, height: 1000 }, { width: 1024, height: 768 }]) {
       const { page, errors, close } = await A.open(ctx, { viewport: vp }), w = vp.width;
       checks.push(check(`${w} px: no Simple / Advanced switch`, (await page.$$("#lvlAdv, #lvlSimple, [name=level]")).length, "==", 0));
       if (w < 900) {   // a phone's pinned preview tucks its edit tools away; Bigger shows them (v108)

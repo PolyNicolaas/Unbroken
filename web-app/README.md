@@ -72,6 +72,19 @@ function like `setModelHeight`) to do it.
 
 ## One interface
 
+**The tool palette** (since v148; `js/map.js`). The picture fills the window under a slim top bar (the name, and
+what it's made for: A printer or A pen plotter). A **rail of tools** at the left holds the design: **Start from**
+(the examples, Open a file…, Start over), the art's own tools (Picture, Grey levels and Tracing for a picture; Text;
+Pattern; Molecule; for a vase its Profile, Shape, Texture, Movement and Rim), **Line** and **Size**, **Drawing** (Play
+and its speed: the circles drawing the line) and **Math** (the series, the terms, the error score), and **Material**.
+A tool opens its settings as a **panel** beside the rail; tapping it again, ×, or Esc closes the panel, and the
+picture takes the room back. **Print…** (or **Plot…**) at the rail's foot opens the output's own **screen**: its
+rail on the right (Print with the checks and Export G-code, Plate, Machine, Layers, Tests, Material; for a pen
+plotter Plot, Export, Fills), with **Design** at the top to go back. A 3D object (an STL file or a vase) has no line
+tools, and its **Layers** are on its design rail too. A warning shows as a dot on the tool that holds its setting,
+and on Print…. Start over asks twice, then opens the app as it does at first. Made for an iPad or a computer; a
+phone is not how it is used.
+
 **The big view** (left) has four tabs: **Line** (the traced line, the tools and the plate mini-map; a 3D model turns
 here), **2D page** (the pen plotter's paper; click shapes to fill), **Plate** (every copy on the printer's plate) and
 **3D layers** (drag to turn, double-click to go back). The **settings tabs** (right) are Art, Trace, 2D and 3D; picking

@@ -5,6 +5,14 @@ the page's title (it shows "dev" when the page runs from the source folder). Add
 
 ## v148 · 2026-11-11
 
+- **The tool palette** replaces the map across the top. The picture fills the window; a rail of tools at the left
+  holds the design (Start from, the art and its own tools, Line, Size, Drawing, Math, Material) and each tool opens
+  its settings as a panel beside it (tap it again, ×, or Esc to close it: the picture takes the room back).
+  **Print…** / **Plot…** at the foot of the rail opens the output's own screen, with its tools on the right (Plate,
+  Machine, Layers, Tests, Export) and **Design** to go back. A 3D object's Layers are on its design rail too.
+- **Start from** has Open a file… and **Start over** (tap twice: the app opens again as it does at first).
+- **Drawing** and **Math** are tools of their own: Play with its speed and the circles, and the series, terms and
+  error score, each in its own panel.
 - **Nozzles come with the printer.** Each printer in `settings.js` has its own nozzle list (the choc mate 2's needles,
   14G–27G, are now in its entry), what it calls them (the menu's label: Needle, Nozzle …) and the one to start with.
   Picking another printer swaps the menu: the same nozzle if the new printer has it, else its default, else the

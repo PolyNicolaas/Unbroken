@@ -981,13 +981,14 @@ shapesUI();
 // on the map: made for a pen plotter, the line ends in Plot (no Material step), with Export over it and Fills under
 addOutput("plot", { name: "A pen plotter", radio: "artForPlot", step: "plot", up: ["pexport"], down: ["fills"] });
 addMapNode("plot", {
+  icon: "page",
   cap: "Plot",
   step: "plot",
   cards: ["h-plot"],
   val: () => (mapNothing() ? "nothing yet" : mapCardVal("h-plot") || "the page"),
 });
 addMapNode("fills", { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" });
-addMapNode("pexport", { cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" });
+addMapNode("pexport", { icon: "export", cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" });
 
 // with a design: its controls are saved, the fill pens kept, and the page follows a design that was restored
 addSaved(
