@@ -760,6 +760,7 @@ addExample(120, "wavyvase", "Wavy vase", "a vase made here: profile, texture, mo
 
 // on the map: a vase's parts are chips under Art; each opens the 3D model card at its part
 addMapNode("vprofile", {
+  icon: "profile",
   cap: "Profile",
   step: "art",
   cards: ["h-model"],
@@ -767,6 +768,7 @@ addMapNode("vprofile", {
   val: () => `${vaseCur.profile.length} points · ${fmt(vaseCur.height, 0)} mm tall`,
 });
 addMapNode("vshape", {
+  icon: "shape",
   cap: "Shape",
   step: "art",
   cards: ["h-model"],
@@ -774,6 +776,7 @@ addMapNode("vshape", {
   val: () => vasePlanWords(vaseFill(vaseCur).plan),
 });
 addMapNode("vtexture", {
+  icon: "texture",
   cap: "Texture",
   step: "art",
   cards: ["h-model"],
@@ -781,6 +784,7 @@ addMapNode("vtexture", {
   val: () => $("vaseTexVal").textContent,
 });
 addMapNode("vmove", {
+  icon: "move",
   cap: "Movement",
   step: "art",
   cards: ["h-model"],
@@ -788,6 +792,7 @@ addMapNode("vmove", {
   val: () => $("vaseMoveVal").textContent,
 });
 addMapNode("vrim", {
+  icon: "rim",
   cap: "Rim",
   step: "art",
   cards: ["h-model"],
