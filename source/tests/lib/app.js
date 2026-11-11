@@ -111,6 +111,20 @@ async function reveal(page, sel, method) {
         if (id) mapOpen(id);
         return { done: true, opened: id || null };
       }
+      // a tool on the palette (since v148): open it, from whichever screen it's on (a click on an open tool would
+      // close it; a test clicking a tool means to use it)
+      const tool = sel.match(/^(?:#mapNodes )?\[data-node="?(\w+)"?\]$/);
+      if (tool && method === "click" && MAP_NODES[tool[1]]) {
+        const id = tool[1];
+        if (MAP_NODES[id].tray) mapTray(!mapTrayOpen);
+        else if (!(mapOpenId === id && !mapShut)) {
+          const P = mapPalette();
+          if (!P.design.some((g) => g.includes(id))) mapScreen = "out";
+          else if (!P.out.includes(id)) mapScreen = "design";
+          mapOpen(id);
+        }
+        return { done: true, opened: id };
+      }
       const out = sel.match(/^(?:label\[for="?|#)artFor(Plot|Print)"?\]?$/);
       if (out && method === "click") return { sel: `.map-for[data-for="${out[1].toLowerCase()}"]` };
       let el = null;
@@ -199,8 +213,9 @@ async function example(page, key) {
 async function out(page) {
   await page.click((await page.isChecked("#artForPlot")) ? "label[for=view2D]" : "label[for=viewChoc]");
 }
-// the steps on the map's line, left to right ("material,art,line,size,print")
-const spine = (page) => page.$$eval("#mapNodes .map-node.big", (els) => els.sort((a, b) => a.offsetLeft - b.offsetLeft).map((e) => e.dataset.node).join(","));
+// the steps the design goes through, in order ("material,art,line,size,print"): since the tool palette (v148) these
+// are the rail's groups and the output's screen, not a line across the page
+const spine = (page) => page.evaluate(() => mapShape().spine.join(","));
 // open the step of the map that holds a card ("h-machine": Fine-tuning's settings)
 const card = (page, heading) => page.evaluate((h) => { const id = mapNodeOf(h); if (id && id !== mapOpenId) mapOpen(id); }, heading);
 module.exports = { card, spine, example, out, mapNav, SETTLE, withExample, open, idle, source, chip, terms, errorMM, setValue, longestFreeze, plot, print };

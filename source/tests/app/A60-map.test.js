@@ -1,10 +1,10 @@
 const A = require("../lib/app.js"), { check } = require("../lib/check.js");
 module.exports = {
-  id: "A60", title: "The map of the steps: a band through the steps the design takes, settings as rows, examples in their own tray",
+  id: "A60", title: "The tool palette: the design's rail, the output's screen, a panel per tool, settings as rows, examples in their own tray",
   guards: "a map whose line doesn't follow the design (a model sent through the Line step, a plotter ending in Print), a node that opens the wrong settings, a row moved out of its card and not put back (the step tabs would lose it), a warning from the ready list that doesn't reach its node, and the examples tray opening by itself",
-  why: "Nicolaas (9 November 2026) chose the steps as a map: a band on top, the preview biggest, settings in a narrow column as one row each (like a slicer), Material first, quiet steps faded, and examples as a module of the map that opens only when asked. The map moves the real controls into its rows while a node is open, so this checks they come back.",
+  why: "Nicolaas (11 November 2026) chose the tool palette: the picture fills the screen, a rail of tools opens floating panels, and Print… and Plot… open their own screens; the steps keep the map's shape underneath (the spine, the chips). Before it, he (9 November 2026) chose the steps as a map: a band on top, the preview biggest, settings in a narrow column as one row each (like a slicer), Material first, quiet steps faded, and examples as a module of the map that opens only when asked. The map moves the real controls into its rows while a node is open, so this checks they come back.",
   how: "Opens the empty start with the map on and reads Line, Size and Print. Opens the leaf with the map on: reads the spine and the chips, checks the tray is closed and no example chips show in the settings. Opens Material, sets Flow to 110 and reads its row, presses ↺. Opens Line (the math in its panel, no drop area, line width only in Material). Opens Size, scrolls and drags over the preview, then opens Layers. Opens Examples and picks the Wavy vase: reads the spine, opens Movement. Makes it for a pen plotter. Opens another step and finds every moved control back in its card.",
-  pass: "The 3D preview no taller than its pane after the window shrinks; no step or chip of the band on another (leaf, vase, plotter); Empty: Line and Print say nothing yet, Size blank; Leaf: the spine is Material, Art, Line, Size, Print, with Examples, Grey levels, Tracing, Plate, Machine, Layers and Tests as chips, Tracing and Tests faded; the tray closed and no example chips in the settings; Material: its settings as rows (printer, chocolate, needle, line width, gap, layer height, speed, flow), Flow 110 marked changed with ↺, which puts back 100; Size: only the Size card, and scrolling over the preview zooms it and dragging pans it without moving the page; Layers: Print height and Seconds per layer as rows, the Walls and support group hidden for a drawing; the tray lists every example and the Wavy vase from it gives Material, Art, Print with Profile, Texture and Movement chips and a dot on Layers; Movement opens the 3D model card; a pen plotter: Art, Line, Size, Plot, no Material; another step opened: every control and the math back in its place; no page errors.",
+  pass: "Leaf: the design's rail is Start from, Picture, Grey levels, Tracing, Line, Size, Drawing, Math, Material and Print…, left of the preview; Print… shows Design, Print, Plate, Machine, Layers, Tests and Material right of it with Print open; Design goes back to Line; the open tool tapped, Esc or × closes its panel and the preview grows by more than 300 px, Line staying in use. The 3D preview no taller than its pane after the window shrinks; no step or chip of the band on another (leaf, vase, plotter); Empty: Line and Print say nothing yet, Size blank; Leaf: the spine is Material, Art, Line, Size, Print, with Examples, Grey levels, Tracing, Plate, Machine, Layers and Tests as chips, Tracing and Tests faded; the tray closed and no example chips in the settings; Material: its settings as rows (printer, chocolate, needle, line width, gap, layer height, speed, flow), Flow 110 marked changed with ↺, which puts back 100; Size: only the Size card, and scrolling over the preview zooms it and dragging pans it without moving the page; Layers: Print height and Seconds per layer as rows, the Walls and support group hidden for a drawing; the tray lists every example and the Wavy vase from it gives Material, Art, Print with Profile, Texture and Movement chips and a dot on Layers; Movement opens the 3D model card; a pen plotter: Art, Line, Size, Plot, no Material; another step opened: every control and the math back in its place; no page errors.",
   slow: true,
   async run(ctx) {
     const checks = [];
@@ -16,15 +16,38 @@ module.exports = {
       await close(); }
     const { page, errors, close } = await A.open(ctx, { art: true });
     await A.idle(page, 1500);
-    const nodes = () => page.$$eval("#mapNodes .map-node", (els) => els.map((e) => e.dataset.node).sort().join(","));
-    const spine = () => page.$$eval("#mapNodes .map-node.big", (els) => els.sort((a, b) => a.offsetLeft - b.offsetLeft).map((e) => e.dataset.node).join(","));
+    // (a tool on both rails, Material, is one tool)
+    const nodes = () => page.$$eval("#mapNodes .map-node", (els) => [...new Set(els.map((e) => e.dataset.node))].sort().join(","));
+    const spine = () => A.spine(page);
+    // the tools showing, top to bottom, on the screen now
+    const rail = () => page.$$eval("#mapNodes > *", (els) => els.filter((e) => e.getClientRects().length && !e.classList.contains("map-sep")).map((e) => e.dataset.node || e.id).join(","));
     const cards = () => page.$$eval(".panel section.card", (els) => els.filter((c) => c.getClientRects().length).map((c) => c.querySelector("h2").id).join(","));
     const inRows = (ids) => page.evaluate((ids) => ids.filter((i) => document.getElementById(i).closest("#mapRows")).length, ids);
     // no step or chip of the band sits on another (a vase's Layers chip was under Movement, 9 November 2026)
     const overlaps = () => page.$$eval("#mapNodes .map-node", (els) => { const r = els.map((e) => e.getBoundingClientRect()); let n = 0; for (let i = 0; i < r.length; i++) for (let j = i + 1; j < r.length; j++) if (r[i].left < r[j].right - 1 && r[j].left < r[i].right - 1 && r[i].top < r[j].bottom - 1 && r[j].top < r[i].bottom - 1) n++; return n; });
     checks.push(check("leaf: no step on another", await overlaps(), "==", 0));
     checks.push(check("leaf: the spine", await spine(), "==", "material,art,line,size,print"));
-    checks.push(check("leaf: every node", await nodes(), "==", "art,examples,layers,levels,line,machine,material,plate,print,size,tests,tracing"));
+    checks.push(check("leaf: every node", await nodes(), "==", "art,examples,layers,levels,line,machine,material,math,plate,print,size,tests,tracing,watch"));
+    // the palette: the design's rail at the left, in groups; Print… at its foot
+    checks.push(check("leaf: the design's rail, top to bottom", await rail(), "==", "examples,art,levels,tracing,line,size,watch,math,material,mapGo"),
+      check("… at the left of the preview", await page.evaluate(() => Math.round($("map").getBoundingClientRect().right - document.querySelector(".left").getBoundingClientRect().left)), "<", 0));
+    await page.click("#mapGo"); await A.idle(page, 800);
+    checks.push(check("Print…: the output's screen, its rail on the right", await rail(), "==", "mapBack,print,plate,machine,layers,tests,material"),
+      check("… right of the preview, Print open", await page.evaluate(() => [document.body.dataset.screen, $("map").getBoundingClientRect().left > document.querySelector(".left").getBoundingClientRect().right, mapOpenId].join(",")), "==", "out,true,print"));
+    await page.click("#mapBack"); await A.idle(page, 600);
+    checks.push(check("Design: back to the design's screen, at Line", await page.evaluate(() => [document.body.dataset.screen, mapOpenId].join(",")), "==", "design,line"));
+    // tapping the open tool closes its panel (the preview takes the room), × and Esc too; the tool stays in use
+    const w = () => page.evaluate(() => Math.round(document.querySelector(".left").getBoundingClientRect().width));
+    const w0 = await w();
+    await page.$eval('#mapNodes [data-key="design:line"]', (b) => b.click()); await page.waitForTimeout(300);
+    const w1 = await w(), shut1 = await page.evaluate(() => document.body.dataset.panel);
+    await page.$eval('#mapNodes [data-key="design:line"]', (b) => b.click()); await page.waitForTimeout(300);
+    const shut2 = await page.evaluate(() => document.body.dataset.panel);
+    await page.keyboard.press("Escape"); await page.waitForTimeout(200);
+    const shut3 = await page.evaluate(() => document.body.dataset.panel);
+    await page.$eval('#mapNodes [data-key="design:line"]', (b) => b.click()); await page.click("#mapClose"); await page.waitForTimeout(200);
+    checks.push(check("the open tool tapped: panel off, tapped again: on; Esc: off; ×: off", [shut1, shut2, shut3, await page.evaluate(() => document.body.dataset.panel)].join(","), "==", "off,on,off,off"),
+      check("… the preview wider with the panel closed (px)", w1 - w0, ">", 300), check("… Line still the tool in use", await page.evaluate(() => mapOpenId), "==", "line"));
     checks.push(check("leaf: Tracing and Tests faded", +(await page.$eval('[data-node="tracing"]', (e) => e.classList.contains("quiet"))) + +(await page.$eval('[data-node="tests"]', (e) => e.classList.contains("quiet"))), "==", 2));
     checks.push(check("the examples tray closed, no example chips in the settings", +!(await page.$("#mapTray:not([hidden])")) + +!(await page.$("[data-examples]")), "==", 2));
     await page.click('[data-node="material"]'); await A.idle(page, 1200);
@@ -34,8 +57,10 @@ module.exports = {
     checks.push(check("Flow 110: marked changed, with ↺", +(await page.$eval("#gFlow", (e) => { const l = e.closest("label"); return l.classList.contains("changed") && !!l.querySelector(".map-reset").getClientRects().length; })), "==", 1));
     await page.click("#gFlow >> xpath=ancestor::label//button[contains(@class,'map-reset')]"); await A.idle(page, 600);
     checks.push(check("↺ puts back the recipe's flow", await page.inputValue("#gFlow"), "==", "100"));
+    await page.click('[data-node="math"]'); await A.idle(page, 800);
+    const mathIn = !!(await page.$("#mapExtra #math"));
     await page.click('[data-node="line"]'); await A.idle(page, 800);
-    checks.push(check("Line: the math in its panel, line width and gap on its card (Material only shows them, 10 November 2026)", +!!(await page.$("#mapExtra #math")) + +!!(await page.$eval("#lineW", (e) => e.getClientRects().length && !!e.closest("#card-h-line"))) + +!!(await page.$eval("#lineGapMM", (e) => e.getClientRects().length)), "==", 3));
+    checks.push(check("Math: the math in its own panel; Line: line width and gap on its card (Material only shows them, 10 November 2026)", +mathIn + +!!(await page.$eval("#lineW", (e) => e.getClientRects().length && !!e.closest("#card-h-line"))) + +!!(await page.$eval("#lineGapMM", (e) => e.getClientRects().length)), "==", 3));
     await page.click('[data-node="material"]'); await A.idle(page, 600);
     await page.click("#mapToLine"); await A.idle(page, 600);
     checks.push(check("Material's link to the line's width and gap opens Line", await page.evaluate(() => +!!$("lineW").getClientRects().length), "==", 1));

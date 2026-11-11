@@ -1,10 +1,10 @@
 const A = require("../lib/app.js"), { check } = require("../lib/check.js"), fs = require("fs");
 module.exports = {
   id: "A34", title: "Touch and scrolling: number steppers, the preview in view; fills per grey",
-  guards: "a number box without − and +, a stepper that skips its step or limits or doesn't reach the app, the preview scrolling away with the settings, a phone's pinned preview taking the screen or not growing, and filled greys missing from the page or the SVG",
-  why: "On touch screens a number is easier to nudge than to type, so every number box has − and + (finger-sized on touch screens). The preview stays in view while the settings scroll: a sticky column on wide screens, a compact pinned preview on phones (Bigger shows it in full). Making it for a pen plotter, grey levels can be filled (Fill, or Both with their edges traced), each with its own pen.",
-  how: "Opens the app on a laptop-sized window; opens every step on Print and checks every number box has its buttons; presses + on Copies (Print step) and holds − on the margin; scrolls the settings and checks the preview stays put; Then a phone-sized window: the pinned preview's height, Bigger and Smaller. Then fills per grey: a pen plotter, the still-life sample, 5 greys, the darkest two Both and Fill; the page and the SVG.",
-  pass: "Every number box on the Print step has − and +; + makes Copies 2 and the plate shows two copies; holding − on the margin steps it down more than once and never below its minimum; after scrolling 600 px the preview's top hasn't moved; on a phone the pinned preview is under 40% of the screen and Bigger makes it taller; the two filled greys plot as their own layers (3 in the SVG: strokes and two fills); no page errors.",
+  guards: "a number box without − and +, a stepper that skips its step or limits or doesn't reach the app, the preview scrolling away with the settings, the settings panel moving the preview, or a closed panel leaving its space empty, and filled greys missing from the page or the SVG",
+  why: "On touch screens a number is easier to nudge than to type, so every number box has − and + (finger-sized on touch screens). The preview stays in view while the settings scroll: the picture fills the screen and the settings are a panel beside it that scrolls on its own (the tool palette, v148); closing the panel gives the picture its room. Making it for a pen plotter, grey levels can be filled (Fill, or Both with their edges traced), each with its own pen.",
+  how: "Opens the app on a laptop-sized window; opens every step on Print and checks every number box has its buttons; presses + on Copies (Print step) and holds − on the margin; scrolls the settings and checks the preview stays put; Then an iPad-sized window: the Line panel scrolled, then closed. Then fills per grey: a pen plotter, the still-life sample, 5 greys, the darkest two Both and Fill; the page and the SVG.",
+  pass: "Every number box on the Print step has − and +; + makes Copies 2 and the plate shows two copies; holding − on the margin steps it down more than once and never below its minimum; after scrolling 600 px the preview's top hasn't moved; on an iPad the Line panel scrolls without moving the preview, and closing it widens the preview by more than 300 px while Line stays the tool in use; the two filled greys plot as their own layers (3 in the SVG: strokes and two fills); no page errors.",
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx, { viewport: { width: 1400, height: 900 } }), checks = [];
     await page.click("label[for=viewChoc]"); await A.idle(page, 1200);
@@ -34,13 +34,18 @@ module.exports = {
     const top1 = await page.evaluate(() => document.querySelector(".stage").getBoundingClientRect().top);
     checks.push(check("scrolled 600 px: the preview's top moved (px)", Math.abs(top1 - Math.min(top0, top1)) + Math.max(0, top0 - top1 - 60), "<=", 1));
     await close();
-    // a phone: the pinned preview
-    const ph = await A.open(ctx, { viewport: { width: 390, height: 844 } });
-    const pinned = await ph.page.evaluate(() => document.querySelector(".left").getBoundingClientRect().height);
-    await ph.page.click("#pvSize"); await ph.page.waitForTimeout(400);
-    const big = await ph.page.evaluate(() => document.querySelector(".left").getBoundingClientRect().height);
-    checks.push(check("phone: the pinned preview's share of the screen", pinned / 844, "<", 0.4), check("… Bigger makes it taller (px)", big - pinned, ">", 60));
-    await ph.page.click("#pvSize"); await ph.close();
+    // an iPad: the panel scrolls, the preview stays; closing the panel gives the preview its room
+    const ph = await A.open(ctx, { viewport: { width: 1024, height: 768 } });
+    await ph.page.click('[data-node="line"]'); await A.idle(ph.page, 300);
+    const at = () => ph.page.evaluate(() => { const r = document.querySelector(".stage").getBoundingClientRect(); return { top: r.top, w: r.width }; });
+    const a0 = await at();
+    await ph.page.evaluate(() => (document.querySelector(".panel").scrollTop = 600)); await ph.page.waitForTimeout(200);
+    const scrolled = await ph.page.evaluate(() => document.querySelector(".panel").scrollTop), a1 = await at();
+    await ph.page.click("#mapClose"); await ph.page.waitForTimeout(400);
+    const a2 = await at();
+    checks.push(check("iPad: the Line panel scrolls (px)", scrolled, ">", 100), check("… the preview stays put (px moved)", Math.abs(a1.top - a0.top), "<=", 1),
+      check("… closing the panel widens the preview (px)", a2.w - a0.w, ">", 300), check("… and the tool stays in use", await ph.page.evaluate(() => mapOpenId), "==", "line"));
+    await ph.close();
     // fills per grey
     const F = await A.open(ctx, { art: true });
     await F.page.click("label[for=artForPlot]"); await A.idle(F.page, 800);

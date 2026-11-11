@@ -379,7 +379,7 @@ body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; 
 .chip-btn:hover { border-color: var(--accent); }
 .chip-btn:active { background: color-mix(in srgb, var(--accent) 15%, var(--surface)); }
 @media (pointer: coarse) { .chip-btn { min-height: 40px; } }
-.examples { display: grid; gap: calc(6px * var(--space)); margin-block: calc(8px * var(--space)); }
+.examples { display: grid; min-width: 0; grid-template-columns: minmax(0, 1fr); gap: calc(6px * var(--space)); margin-block: calc(8px * var(--space)); }
 .examples .name { font-size: calc(12px * var(--text)); color: var(--muted); }
 .empty-state { position: absolute; inset: 0; z-index: 3; display: grid; place-content: center; justify-items: center; gap: calc(10px * var(--space)); padding: calc(24px * var(--space)); text-align: center; background: color-mix(in srgb, var(--surface) 88%, transparent); }
 .empty-state[hidden], body:not([data-stage="line"]) .empty-state { display: none; }
@@ -439,6 +439,7 @@ body[data-empty="1"] .pv-size { display: none; }
 /* the examples, once something is in: one row that scrolls sideways */
 body:not([data-empty="1"]) .examples .chips { flex-wrap: nowrap; overflow-x: auto; scrollbar-width: thin; padding-bottom: 2px; }
 body:not([data-empty="1"]) .examples .chips .chip-btn { flex: none; }
+body:not([data-empty="1"]) .panel .examples .chips { flex-wrap: wrap; overflow: visible; }   /* (in a panel: every example in view, wrapped) */
 @media (max-width: 600px) {
   .toolbar .pl-long, .toolbar .tb-sep { display: none; }
   .toolbar { gap: calc(6px * var(--space)); }
@@ -510,60 +511,81 @@ body:not([data-vase="1"]) .vase-only, body[data-vase="1"] .stl-only { display: n
 .vase-profile { display: block; width: 100%; height: calc(230px * var(--space)); background: var(--paper); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); touch-action: none; cursor: crosshair; }
 .vase-profile:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 
-/* ---------- the steps as a map (map.js): the layout ---------- */
-/* a band across the top; under it the preview (the biggest) and the settings (a narrow column) */
-.map, .map-head, .map-rows { display: none; }
-body { --row-line: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); }
-.map { display: block; position: relative; height: 124px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(14px * var(--corner)); overflow: hidden; background-image: radial-gradient(var(--grid) 1px, transparent 1px); background-size: 24px 24px; }
-@media (min-width: 640px) {
-  .wrap { grid-template-columns: minmax(0, 1fr) clamp(300px, 34%, 420px); grid-template-areas: "map map" "left panel" "math math"; }
-  .map { grid-area: map; }
-  .left { grid-area: left; }
-  .panel { grid-area: panel; align-self: start; }
-  .math { grid-area: math; }
-  /* (the preview as tall as the window allows; a phone keeps its pinned preview's own height) */
-  .canvas-box { aspect-ratio: auto; height: calc(100vh - 290px); height: calc(100svh - 290px); min-height: 420px; max-height: none; }
-}
+/* ---------- the tool palette (map.js): the layout ---------- */
+/* The picture fills the window under a slim top bar. The design's tools are a rail at the left; a tool's settings
+   open as a panel floating beside it. The output's screen (Print…, Plot…) has its rail on the right. The preview takes
+   the room the rail and the panel leave. Made for an iPad or a computer (a phone isn't how this is used). */
+body { --row-line: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); --rail: 76px; --pane: 384px; --edge: 12px; }
+.map-head, .map-rows { display: none; }
+body { padding: 0; height: 100vh; height: 100dvh; overflow: hidden; }
+header.top { max-width: none; height: 52px; box-sizing: border-box; margin: 0; padding: 0 calc(16px * var(--space)); flex-wrap: nowrap; align-items: center; background: var(--surface); border-bottom: 1px solid var(--rule); }
+header.top h1 { white-space: nowrap; }
+header.top p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; min-width: 0; }
+.wrap { position: fixed; inset: 52px 0 0 0; max-width: none; margin: 0; display: block; }
+.map { position: absolute; left: var(--edge); top: var(--edge); bottom: var(--edge); width: var(--rail); z-index: 25; pointer-events: none; }
+.map-nodes { position: static; display: flex; flex-direction: column; gap: 4px; max-height: 100%; overflow-y: auto; overflow-x: hidden; scrollbar-width: none; box-sizing: border-box; padding: 6px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(16px * var(--corner)); box-shadow: 0 2px 8px rgb(0 0 0 / .06); pointer-events: auto; width: var(--rail); }
+.panel { position: absolute; left: calc(var(--edge) * 2 + var(--rail)); top: var(--edge); width: var(--pane); max-height: calc(100% - 2 * var(--edge)); box-sizing: border-box; overflow-y: auto; overscroll-behavior: contain; z-index: 24; padding: calc(12px * var(--space)); background: var(--paper); border: 1px solid var(--rule); border-radius: calc(16px * var(--corner)); box-shadow: 0 8px 24px rgb(0 0 0 / .12); scrollbar-width: thin; align-content: start; }
+body[data-panel="off"] .panel { display: none; }
+.left { position: absolute; top: var(--edge); bottom: var(--edge); left: calc(var(--edge) * 2 + var(--rail)); right: var(--edge); max-height: none !important; overflow: hidden !important; display: block; }
+body[data-panel="on"] .left { left: calc(var(--edge) * 3 + var(--rail) + var(--pane)); }
+/* the output's screen: the rail and its panel on the right */
+body[data-screen="out"] .map { left: auto; right: var(--edge); }
+body[data-screen="out"] .panel { left: auto; right: calc(var(--edge) * 2 + var(--rail)); }
+body[data-screen="out"] .left { left: var(--edge); right: calc(var(--edge) * 2 + var(--rail)); }
+body[data-screen="out"][data-panel="on"] .left { left: var(--edge); right: calc(var(--edge) * 3 + var(--rail) + var(--pane)); }
+/* each screen's own tools */
+body[data-screen="design"] .map-node[data-rail="out"], body[data-screen="design"] .map-back { display: none; }
+body[data-screen="out"] .map-node[data-rail="design"], body[data-screen="out"] :is(.map-go, .map-sep) { display: none; }
+/* the preview fills what's left: tabs and bars over and under it */
+.stage { height: 100%; display: flex; flex-direction: column; }
+.stage > .canvas-box { flex: 1 1 auto; min-height: 0; height: auto; aspect-ratio: auto; max-height: none; }
+.stage > :not(.canvas-box) { flex: none; }
+/* a tool: its icon, its name under it */
+.map-node, .map-go, .map-back { position: relative; box-sizing: border-box; width: 100%; min-height: 54px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 2px; padding: 6px 2px 5px; border: 0; border-radius: calc(12px * var(--corner)); background: none; color: var(--ink); font: inherit; cursor: pointer; text-align: center; flex: none; transition: opacity .15s; }
+.map-node:hover, .map-go:hover, .map-back:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); }
+.map-node.open { background: var(--accent); color: #fff; }
+.map-node.open .map-cap { color: #fff; }
+.map-node:focus-visible, .map-go:focus-visible, .map-back:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+.map-ico { display: flex; line-height: 0; }
+.map-cap { font: 500 calc(10.5px * var(--text))/1.15 var(--font-body); letter-spacing: 0; text-transform: none; color: inherit; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.map-node .map-val { display: none; }
+.map-node.quiet { opacity: .55; }
+.map-node.quiet:hover, .map-node.quiet:focus-visible { opacity: 1; }
+.map-node .map-dot { position: absolute; right: 8px; top: 7px; }
+.map-sep { flex: none; height: 1px; margin: 3px 8px; background: var(--rule); }
+.map-go { margin-top: 6px; min-height: 58px; background: var(--accent); color: #fff; }
+.map-go:hover { background: color-mix(in srgb, var(--accent) 85%, #000); }
+.map-go span, .map-back span { font: 600 calc(11.5px * var(--text))/1.1 var(--font-body); }
+.map-go.warn::after { content: ""; position: absolute; right: 8px; top: 7px; width: 9px; height: 9px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 0 2px #fff; }
+.map-back { margin-bottom: 4px; border: 1px solid var(--rule); }
+.map-x { margin-left: auto; width: 36px; height: 36px; margin-right: -6px; display: flex; align-items: center; justify-content: center; border: 0; background: none; color: var(--muted); border-radius: 8px; cursor: pointer; }
+.map-x:hover { background: color-mix(in srgb, var(--accent) 8%, transparent); color: var(--ink); }
+.map-head-t { align-items: center !important; flex-wrap: nowrap !important; }
+.map-head-t h2 { flex: none; }
+.map-head-t .hint { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.btn.danger { border-color: var(--warn); color: var(--warn); }
+.map-tray-own { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.map-tray-own .spacer { flex: 1; }
+/* the math in its own panel: open, at the panel's width */
+.map-extra .math { display: block; border: 0; background: none; }
+.map-extra .math > summary { display: none; }
+.map-extra .math > .math-body { padding: 0; }
+.map-extra .math .table-wrap { max-width: 100%; overflow-x: auto; }
 /* (its gestures stay its own: dragging, pinching and scrolling over it never move the page) */
 .canvas-box { touch-action: none; overscroll-behavior: contain; }
 .panel section.card:not([data-map]) { display: none !important; }
 .panel .part-off { display: none !important; }
 .map-head { display: flex; flex-direction: column; gap: calc(10px * var(--space)); }
 .map-rows:not([hidden]) { display: block; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding-bottom: 6px; }
-.map-top { display: flex; height: 34px; flex: none; margin-left: calc(24px * var(--space)); align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
+.map-top { display: flex; height: 34px; flex: none; margin-left: auto; align-items: center; gap: calc(8px * var(--space)); z-index: 2; }
 .map-top .name { font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); margin-right: 4px; }
 .map-top[hidden] { display: none; }
 .map-for[aria-pressed="true"] { background: var(--accent-soft); border-color: var(--accent); color: var(--ink); }
-.map-lines { position: absolute; left: 0; top: 0; pointer-events: none; }
-.map-lines path { fill: none; stroke-linecap: round; }
-.map-spine { stroke: var(--choc); stroke-width: 5; }
-.map-thin { stroke: var(--rule); stroke-width: 2; }
-.map-nodes { position: absolute; left: 0; top: 0; bottom: 0; }
-.map-node { position: absolute; box-sizing: border-box; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 0; padding: 0 calc(12px * var(--space)); background: var(--surface); color: var(--ink); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); text-align: left; cursor: pointer; font: inherit; box-shadow: 0 1px 2px rgb(0 0 0 / .05); transition: opacity .15s; }
-.map-node.chip { flex-direction: row; align-items: center; justify-content: center; padding: 0 5px; border-radius: 999px; background: color-mix(in srgb, var(--paper) 45%, var(--surface)); box-shadow: none; }
-.map-node.chip .map-val { display: none; }
-.map-node.quiet { opacity: .5; }
-.map-node.quiet:hover, .map-node.quiet:focus-visible { opacity: 1; }
-.map-node:hover { border-color: var(--accent); }
-.map-node.open { border: 2px solid var(--accent); background: var(--accent-soft); opacity: 1; }
-.map-node:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
-.map-cap { font: 600 calc(11.5px * var(--text))/1.25 var(--font-body); letter-spacing: .06em; text-transform: uppercase; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.map-node.chip .map-cap { font: 500 calc(12.5px * var(--text))/1.25 var(--font-body); letter-spacing: 0; text-transform: none; color: var(--ink); }
-.map-node.open .map-cap { color: var(--accent); }
-.map-val { font: 400 calc(13px * var(--text))/1.25 var(--font-mono); color: var(--ink); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 100%; }
-.map-val:empty { display: none; }
-/* a step whose value doesn't fit: two lines; a phone: the steps' names only */
-.map.tall .map-node.big .map-val { white-space: normal; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; line-height: 1.2; }
-.map.narrow .map-node.big { align-items: center; padding: 0 4px; }
-.map.narrow .map-node.big .map-val { display: none; }
-.map.narrow .map-node.big .map-cap { letter-spacing: 0; text-transform: none; font-size: calc(12.5px * var(--text)); color: var(--ink); }
-.map-node .map-dot { position: absolute; right: 9px; top: 9px; }
-.map-node.chip .map-dot { position: static; flex: none; margin-left: 6px; }
 .map-dot { display: inline-block; width: 9px; height: 9px; border-radius: 50%; background: transparent; }
 .map-dot.warn { background: var(--warn); }
 .map-dot.bad { background: var(--warn); box-shadow: 0 0 0 3px color-mix(in srgb, var(--warn) 30%, transparent); }
 /* the panel's head and the rows */
-.map-head-t { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; }
+.map-head-t { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; position: sticky; top: calc(-12px * var(--space)); z-index: 2; background: var(--paper); margin: calc(-12px * var(--space)) calc(-12px * var(--space)) 0; padding: calc(10px * var(--space)) calc(12px * var(--space)) 6px; }
 .map-head-t h2 { margin: 0; font: 600 calc(20px * var(--text))/1.2 var(--font-body); }
 .map-recipe { display: flex; align-items: center; gap: 10px; background: var(--surface); border: 1px solid var(--rule); border-radius: calc(12px * var(--corner)); padding: 9px 12px; }
 .map-recipe:not([hidden]) { display: flex; }
