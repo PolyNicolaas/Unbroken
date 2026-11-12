@@ -1,5 +1,5 @@
-Unbroken · web app build v152
-Built:  2026-11-12T21:48:59.652Z
+Unbroken · web app build v153
+Built:  2026-11-12T22:25:39.615Z
 Tests:  102 of 102 tests passed (quick run)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
@@ -21,8 +21,8 @@ Files (sha1, first 12):
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   755c4b83e7df  16-molecule.js
-  a2a0961e4353  17-vase.js
-  99ea4854233a  core.js
+  9339d07ae525  17-vase.js
+  67c79dc71058  core.js
   71657122516a  css/app.css
   2e7b02cdb930  css/theme.css
   97fd98808bcf  features/camera/camera.js
@@ -39,13 +39,13 @@ Files (sha1, first 12):
   03fdbbebd1dd  features/pieces/pieces.js
   905c9c3f61e4  features/plotter/plot.js
   cd3e7072869b  features/testprint/testprint.js
-  199b5a2ce414  features/vase/vase.js
+  9c492ec1cddb  features/vase/vase.js
   84cc740df42b  fonts.js
-  a7dc4f1141e9  index.html
+  a7090590c51a  index.html
   eab5ab4fbcb0  js/art.js
   5a825c30dfdd  js/config.js
   e568d22d2df0  js/controls.js
-  a70dcf877b05  js/engine-bridge.js
+  5a237f7b74ae  js/engine-bridge.js
   050fd500cdc9  js/export.js
   3e335e69fd69  js/history.js
   d500834ffa7e  js/layers.js
@@ -64,4 +64,4 @@ Files (sha1, first 12):
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
   f7cf37fc4164  settings.js
-  14eb999e7379  worker.js
+  6f4ee8028084  worker.js
