@@ -19,7 +19,7 @@
   // none) }, and these, each optional (left out: as before them):
   //   plan: the shape seen from above, { kind: "circle" | "polygon" | "star" | "flower" | "drawing", sides (corners,
   //     points or petals), depth (star, flower: how far in between them, share of the reach, 0–0.9), round (polygon,
-  //     star: corners rounded off, 0–1), loop (drawing: the outline, [x0, y0, x1, y1, …], from UNB.vaseOutline) }. The
+  //     star: corners rounded off, 0–1), loop (drawing: the traced line, [x0, y0, x1, y1, …], from UNB.vaseLineLoop, or an open line's outline from UNB.vaseOutline) }. The
   //     profile is the reach of its furthest point (a polygon's corners, a star's points).
   //   planTop: the shape at the rim (as plan): the wall blends from plan at the bottom to this at the rim; null: plan
   //   twist: degrees the whole shape turns from the bottom to the rim (the texture's twist turns the ribs on it as well)

@@ -155,7 +155,7 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   profile curve you edit (the radius at each height, turned round the middle), a surface texture (ribs, twisting if
   you like, or rings) and a movement along the path (a wave, a zigzag or loops, shifted from layer to layer: columns,
   spirals or alternating). The Print step writes its path straight from those settings (`UNB.vaseStack`, no slicing)
-  and checks that every lap sits on the one below and that the bead can follow its turns. Tests E57, A59. **Make a vase from this line** (the Line tool) starts one from the traced line itself: the line exactly (`UNB.vaseLineLoop`), at its own size, straight up, no texture or movement, so a pattern such as a labyrinth is what the walls follow (tests E62, A66); the Shape tool's Use the last traced line takes its outside edge instead.
+  and checks that every lap sits on the one below and that the bead can follow its turns. Tests E57, A59. **Make a vase from this line** (the Line tool) starts one from the traced line itself: the line exactly (`UNB.vaseLineLoop`), at its own size, straight up, no texture or movement, so a pattern such as a labyrinth is what the walls follow (tests E62, A66); the Shape tool offers Drawing only for a vase made this way (an open line uses its outside edge). This replaced the Shape tool's Use the last traced line (v153).
 
 **Take a picture** (`web-app/features/camera/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
 phone) outlines the page it finds (`UNB.findPage`: the largest light, plain area on a small copy of the frame, its four

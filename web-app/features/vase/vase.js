@@ -55,6 +55,8 @@ function vaseUI() {
   $(VASE_RADIO.tex[T.kind] || "vtNone").checked = true;
   $(VASE_RADIO.move[M.kind] || "vmNone").checked = true;
   $(VASE_RADIO.plan[P.kind] || "vpCircle").checked = true;
+  // Drawing: only for a vase made from a traced line (Make a vase from this line, the Line tool), to go back to it
+  $("vpDrawing").hidden = $("vpDrawingLab").hidden = !(P.loop && P.loop.length >= 16);
   $(VASE_RADIO.top[Q ? Q.kind : "same"] || "vrSame").checked = true;
   $(VASE_RADIO.lean[V.lean.curve] || "vlStraight").checked = true;
   $(VASE_RADIO.rim[V.rim.kind] || "vrimNone").checked = true;
@@ -444,7 +446,6 @@ for (const id of Object.values(VASE_RADIO.tex))
 for (const id of Object.values(VASE_RADIO.plan))
   $(id).addEventListener("change", () => {
     vaseCur.plan.kind = $(id).value;
-    if (vaseCur.plan.kind === "drawing" && !vaseCur.plan.loop) vaseUseLine();
     if (vaseCur.plan.kind === "flower" && vaseCur.plan.sides > 12) vaseCur.plan.sides = 8;
     vaseLabels();
     vaseSend(true);
@@ -469,32 +470,6 @@ for (const id of Object.values(VASE_RADIO.rim))
     vaseLabels();
     vaseSend(true);
   });
-// the outside edge of the line last traced (a picture's or a text's), as the shape from above
-function vaseUseLine() {
-  const F = st.final,
-    msg = $("vpDrawMsg");
-  if (!F || !F.re || F.re.length < 8) {
-    msg.textContent = "Nothing traced yet: trace a picture or a text (Art), then come back here and use it.";
-    msg.className = "hint warn";
-    return false;
-  }
-  const O = UNB.vaseOutline(
-    Array.from(F.re),
-    Array.from(F.im, (v) => -v)
-  );
-  if (!O) {
-    msg.textContent = "The traced line has no inside to make a shape from.";
-    msg.className = "hint warn";
-    return false;
-  }
-  vaseCur.plan = Object.assign(vaseCur.plan, { kind: "drawing", loop: O.loop, exact: false, from: "" });
-  msg.textContent =
-    O.pieces > 1
-      ? `The outline of the largest of the ${O.pieces} shapes in the line (the others are left out).`
-      : "The outline of the line last traced. Trace another and use it again to change it.";
-  msg.className = "hint";
-  return true;
-}
 // Make a vase from this line (the Line card): the traced line itself, exactly, as the shape from above, at its own size
 // (a straight wall as wide as the drawing, no texture or movement), so the pattern is what the vase shows. Pushed from
 // the trace, so it's plain which line the vase is made of. An open line, or one with no inside, uses its outline.
@@ -548,13 +523,6 @@ function vaseFromLine() {
   if (typeof mapOpen === "function") mapOpen("vshape");
 }
 $("vaseFromLine").addEventListener("click", vaseFromLine);
-$("vpUseLine").addEventListener("click", () => {
-  if (vaseUseLine()) {
-    $("vpDrawing").checked = true;
-    vaseLabels();
-    vaseSend(true);
-  }
-});
 for (const id of ["vmNone", "vmWave", "vmZigzag", "vmLoops"])
   $(id).addEventListener("change", () => {
     vaseCur.move.kind = $(id).value;

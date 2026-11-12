@@ -593,12 +593,12 @@
             <input type="radio" name="vasePlan" id="vpPolygon" value="polygon"><label for="vpPolygon">Polygon</label>
             <input type="radio" name="vasePlan" id="vpStar" value="star"><label for="vpStar">Star</label>
             <input type="radio" name="vasePlan" id="vpFlower" value="flower"><label for="vpFlower">Flower</label>
-            <input type="radio" name="vasePlan" id="vpDrawing" value="drawing"><label for="vpDrawing">Drawing</label>
+            <input type="radio" name="vasePlan" id="vpDrawing" value="drawing"><label for="vpDrawing" id="vpDrawingLab" title="The traced line this vase was made from (Make a vase from this line, on the Line tool)">Drawing</label>
           </div>
           <div data-part="vshape" class="row vp-sides"><div class="lab"><label for="vpSides" id="vpSidesLab">Corners</label><span class="val" id="vpSidesVal"></span></div><input type="range" id="vpSides" min="2" max="24" step="1" value="6"></div>
           <div data-part="vshape" class="row vp-depth" title="How far in between the points or petals, as a share of the reach"><div class="lab"><label for="vpDepth" id="vpDepthLab">Depth</label><span class="val" id="vpDepthVal"></span></div><input type="range" id="vpDepth" min="0" max="90" step="1" value="30"></div>
           <div data-part="vshape" class="row vp-round" title="Corners and dips rounded off"><div class="lab"><label for="vpRound" id="vpRoundLab">Rounded</label><span class="val" id="vpRoundVal"></span></div><input type="range" id="vpRound" min="0" max="100" step="1" value="20"></div>
-          <div data-part="vshape" class="row vp-drawing"><div class="inline"><button class="btn mini" type="button" id="vpUseLine" title="The outside edge of the line last traced from a picture or a text, as the shape from above">Use the last traced line</button></div><p class="hint" id="vpDrawMsg" role="status"></p></div>
+          <div data-part="vshape" class="row vp-drawing"><p class="hint" id="vpDrawMsg" role="status"></p></div>
           <div data-part="vshape" class="lab"><span class="name">At the rim</span><span class="val" id="vaseTopVal"></span></div>
           <div data-part="vshape" class="seg small" role="radiogroup" aria-label="The shape at the rim">
             <input type="radio" name="vaseTop" id="vrSame" value="same" checked><label for="vrSame">Same</label>

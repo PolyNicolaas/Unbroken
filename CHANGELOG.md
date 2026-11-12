@@ -3,6 +3,12 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v153 · 2026-11-12
+
+- **Use the last traced line is gone** from the vase's Shape tool: a vase is made from a trace by pushing it, with
+  the Line tool's **Make a vase from this line**. Drawing shows among the shapes only for a vase made that way, so
+  you can go back to it after trying a star or a polygon. A62 now makes its drawing vase from the Line tool.
+
 ## v152 · 2026-11-12
 
 - **Make a vase from this line**, on the Line tool. The traced line itself, exactly as traced, becomes the vase's
