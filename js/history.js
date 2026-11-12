@@ -61,6 +61,7 @@ addSaved(
   "infillMin",
   "fillMin",
   "basePattern",
+  "baseCover",
   "baseDensity",
   "baseAngle",
   "baseTurn",

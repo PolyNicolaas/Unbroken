@@ -38,6 +38,38 @@
   // fixed(i) → true
   // for path points a fill may not join at. Returns { x, y, idx } with the fills spliced in (fill points have idx -1)
   // and areas / skipped: how many areas were filled, and how many were left open as too small.
+  // The convex hull of points (x, y), grown by r all round (round corners): { x, y } closed, or null
+  function hullOf(xs, ys, r) {
+    const P = [],
+      K = 16;
+    const n0 = xs.length;
+    // the hull of the line's points first (fewer to grow), then each of its corners as a small circle
+    const hull = (Q) => {
+      Q.sort((a, b) => a[0] - b[0] || a[1] - b[1]);
+      const cr = (o, a, b) => (a[0] - o[0]) * (b[1] - o[1]) - (a[1] - o[1]) * (b[0] - o[0]),
+        lo = [],
+        up = [];
+      for (const p of Q) {
+        while (lo.length >= 2 && cr(lo[lo.length - 2], lo[lo.length - 1], p) <= 0) lo.pop();
+        lo.push(p);
+      }
+      for (let i = Q.length - 1; i >= 0; i--) {
+        const p = Q[i];
+        while (up.length >= 2 && cr(up[up.length - 2], up[up.length - 1], p) <= 0) up.pop();
+        up.push(p);
+      }
+      return lo.slice(0, -1).concat(up.slice(0, -1));
+    };
+    for (let i = 0; i < n0; i++) P.push([xs[i], ys[i]]);
+    if (P.length < 3) return null;
+    const H0 = hull(P),
+      G = [];
+    for (const [x, y] of H0)
+      for (let k = 0; k < K; k++) G.push([x + r * Math.cos((2 * Math.PI * k) / K), y + r * Math.sin((2 * Math.PI * k) / K)]);
+    const H = hull(G);
+    return H.length < 3 ? null : { x: H.map((p) => p[0]), y: H.map((p) => p[1]) };
+  }
+
   UNB.infill = function (path, d, opt) {
     const o = opt || {},
       pattern = o.pattern === "lines" ? "lines" : "rings";
@@ -65,6 +97,14 @@
     if (w * h > 12e6) return Object.assign({ areas: 0, tooBig: true }, path);
     const line = new Uint8Array(w * h);
     rasterPolyline(line, w, path.x, path.y, true, ox, oy, g, 0.5);
+    // hull (a base): the whole outline is filled, not only the areas the line closes off. A wall round the line's
+    // convex hull, `first` outside it, closes the gaps that open to the outside (between a labyrinth's branches,
+    // round a letter), so they become areas too and the fill's outer ring runs along the hull. The wall prints
+    // nothing; the fill still joins the printed line where it runs beside it.
+    if (o.hull) {
+      const H = hullOf(path.x, path.y, Math.min(first, d));
+      if (H) rasterPolyline(line, w, H.x, H.y, true, ox, oy, g, 0.5);
+    }
     const dist = UNB.edt(line, w, h).dist; // grid units
     // Areas: 4-connected cells more than 0.6 spacings from the printed line, so the narrow channels between a stroke's
     // two strands and the openings where strokes meet (all about one spacing wide) close an area off. Being inside the
@@ -373,7 +413,15 @@
           loops.push(...lv);
         }
       } else {
-        loops = contours(id, first / g).concat(rowLoops(id));
+        const rows = rowLoops(id);
+        loops = contours(id, first / g).concat(rows);
+        // too small for a row (a corner of a base's outline): rings inside the ring instead, so it isn't left hollow
+        if (!rows.length)
+          for (let k = 1; k < 5000; k++) {
+            const lv = contours(id, (first + k * rs) / g);
+            if (!lv.length) break;
+            loops.push(...lv);
+          }
       }
       if (!loops.length) continue;
       for (const F of merge(loops)) fills.push(F);

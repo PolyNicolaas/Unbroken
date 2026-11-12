@@ -396,6 +396,8 @@
       spacing: opt.w / dens,
       angle: (+opt[p + "Angle"] || 0) + (pattern === "lines" && Math.floor(j / turn) % 2 ? 90 : 0),
       minArea,
+      // a base fills the drawing's whole outline (its convex hull) unless set to what the line encloses only
+      hull: base && opt.baseCover !== "inside",
     };
   };
 

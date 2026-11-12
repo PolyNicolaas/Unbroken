@@ -616,6 +616,7 @@ for (const q of CFG.printers) {
     ["allowOverlaps", bool, (v) => tick("overlaps", v)],
     ["baseDensity", range(0, 125), (v) => set("baseDensity", Math.round(v / 5) * 5)],
     ["basePattern", list("rings", "lines", "spiral"), (v) => set("basePattern", v)],
+    ["baseCover", list("outline", "inside"), (v) => set("baseCover", v)],
     ["baseAngle", range(-90, 90), (v) => set("baseAngle", v)],
     ["baseTurn", range(1, 50), (v) => set("baseTurn", Math.round(v))],
     ["infillDensity", range(0, 100), (v) => set("fillDensity", Math.round(v / 5) * 5)],

@@ -1,6 +1,6 @@
-Unbroken · web app build v150
-Built:  2026-11-11T23:20:50.913Z
-Tests:  122 of 122 tests passed
+Unbroken · web app build v151
+Built:  2026-11-12T21:10:23.168Z
+Tests:  101 of 101 tests passed (quick run)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -9,20 +9,20 @@ Files (sha1, first 12):
   825b635d53a8  02-lines.js
   e12fde15d834  03-text.js
   4fe601a46001  04-walk.js
-  fe735dbb72bf  05-fill.js
+  2d93067cb3b1  05-fill.js
   340aeaecfe87  06-fourier.js
   b867178253c0  07-measure.js
   d0cc374de0d6  08-shape.js
   096d9ec88b4a  09-plate.js
   02d5fe3e4543  10-export.js
-  ac3de470b974  11-stages.js
-  4ca26e705902  12-models.js
+  8e05a43ddbb1  11-stages.js
+  402917eb1019  12-models.js
   3e3d05c682f5  13-patterns.js
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   755c4b83e7df  16-molecule.js
   40898856eeb8  17-vase.js
-  567c08b3f59a  core.js
+  309c9dc610b8  core.js
   71657122516a  css/app.css
   2e7b02cdb930  css/theme.css
   97fd98808bcf  features/camera/camera.js
@@ -41,17 +41,17 @@ Files (sha1, first 12):
   cd3e7072869b  features/testprint/testprint.js
   7fe6abee7da5  features/vase/vase.js
   84cc740df42b  fonts.js
-  c714d0f953a4  index.html
+  56e9deda9dc8  index.html
   eab5ab4fbcb0  js/art.js
-  3f4d57df8633  js/config.js
+  5a825c30dfdd  js/config.js
   e568d22d2df0  js/controls.js
-  f6ab61ffcb1d  js/engine-bridge.js
+  2385b373fc34  js/engine-bridge.js
   050fd500cdc9  js/export.js
-  f35074efcb34  js/history.js
-  5e4ff10394d3  js/layers.js
+  3e335e69fd69  js/history.js
+  d500834ffa7e  js/layers.js
   393e7eec1736  js/main.js
-  77fb82723024  js/map.js
-  d664882a3708  js/pipeline.js
+  5d5eceb7df91  js/map.js
+  4ed8ff8ba13c  js/pipeline.js
   59c6828d224c  js/preview.js
   d3e0b9ad48e5  js/readouts.js
   01f3cf4a980c  js/scroll.js
@@ -63,5 +63,5 @@ Files (sha1, first 12):
   cd9963796d3d  js/views.js
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
-  33f96f8a1db4  settings.js
-  20ea5c25783e  worker.js
+  f7cf37fc4164  settings.js
+  9b4e23bd640c  worker.js

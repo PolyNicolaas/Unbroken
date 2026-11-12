@@ -99,7 +99,7 @@ const MAP_CORE = {
     rows: [
       ["Height and time", ["printHeightMM", "layerTime", "#layerCount", "#layerHint", "#cartHint"]],
       ["Walls and support", ["cutRow", "wallCount", "support"]],
-      ["Base", ["baseLayers", "basePattern", "baseDensity", "baseDirRow", "infillMin"]],
+      ["Base", ["baseLayers", "basePattern", "baseCover", "baseDensity", "baseDirRow", "infillMin"]],
       ["Infill", ["fillDensity", "fillPattern", "fillAngle", "fillTurnF", "fillMin"]],
     ],
     holds: ["h-layers", "h-base", "h-infill"],
