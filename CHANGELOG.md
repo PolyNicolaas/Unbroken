@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v152 · 2026-11-12
+
+- **Make a vase from this line**, on the Line tool. The traced line itself, exactly as traced, becomes the vase's
+  shape from above, at its own size, straight up, with no texture or movement, and the vase's Shape tool opens saying
+  which line it's made from. Before, a vase was pulled from the Shape tool ("Use the last traced line"), so it wasn't
+  clear the trace was used, and it took the line's outside edge on a coarse grid, rounded, on the example's bulb with
+  waves: a labyrinth came out notched and messy. A long plan (a labyrinth's line) also gets a finer table and more
+  points per lap, so its corners and gaps are kept. Tests E62 and A66.
+
 ## v151 · 2026-11-12
 
 - **A base is solid under the whole drawing.** A base under a pattern (a labyrinth) came out as a few rows here and

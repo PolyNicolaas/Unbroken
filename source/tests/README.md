@@ -128,6 +128,7 @@ report.
 | [E59](#e59) | Vase shapes: polygons, stars, flowers and a drawing's outline seen from above, twisting, blending to the rim, leaning; strength curves, grid, weave and diamond textures, a lattice, flared, rolled and scalloped rims, a footed shape | UNB.vaseStack and UNB.vaseOutline (17-vase.js): the vase's plan, twist, planTop, lean, strength, texture kinds, move.flip and rim | – |
 | [E60](#e60) | A printer's own G-code lines: at each layer, and before and after each copy | a printer that needs a line at each layer (a fan, a display, a pause) or around each copy getting no way to say so, and placeholders left unfilled in the file | – |
 | [E61](#e61) | A base fills the drawing's whole outline, not only what the line encloses | a base that leaves the gaps opening to the outside empty (between a labyrinth's branches, round letters), so it isn't a solid layer under the walls | – |
+| [E62](#e62) | A vase from a traced line: the line itself as the shape from above, followed exactly | a long traced line (a labyrinth's) cut short by the plan's 1440-point table or the lap's point limit, so the vase's walls lose its corners and gaps | – |
 
 ### App tests
 
@@ -144,7 +145,7 @@ report.
 | [A09](#a09) | Select area and erase tools | hand edits not reaching the trace | – |
 | [A10](#a10) | Works without background workers, with the same result | the app breaking when opened straight from disk | – |
 | [A11](#a11) | The app follows settings.js, and survives a broken one | edited settings not reaching the app; a typo in settings.js breaking the app | – |
-| [A12](#a12) | One interface: every control on a step of the map, one level only | a control no step of the map shows (the map shows one step's settings at a time, so a card no node holds can't be reached), a panel wider than its column on a phone, and a Simple / Advanced switch coming back | – |
+| [A12](#a12) | One interface: every control on a step of the map, one level only | a control no step of the map shows (the map shows one step's settings at a time, so a card no node holds can't be reached), a panel wider than its column on a phone, and a Simple / Advanced switch coming back | 61.0 s |
 | [A13](#a13) | One size slider: never below the smallest that fits, marks for detail, bigger prints traced finer | a print sized below what the needle can keep apart, marks out of order or in the wrong place, typed sizes slipping under the minimum, and big prints traced no finer than small ones | – |
 | [A14](#a14) | Layers: a base and an infill on the 3D tab, walls as Design draws them; the G-code climbs | infill leaking back into the Design trace, a base or infill whose fill doesn't show or reach the G-code, a density that doesn't change the fill, a layer readout that doesn't follow the settings, and G-code that stays flat | – |
 | [A15](#a15) | 2D tab: the pen line on the page, SVG for Saxi (and the DXF for choc OS on the 3D tab) | a pen file that still carries the chocolate's doubled strands and stroke-end loops, a page that doesn't match the paper chosen, a drawing off the page, and a missing too-big warning | – |
@@ -189,13 +190,14 @@ report.
 | [A56](#a56) | The print's name: typed at the top, it names every file saved or exported, and is saved with the design | files named after the wrong thing, or all called "design" (a Cyrillic text's name used to come out empty) | – |
 | [A57](#a57) | Opening a design: settings it was saved without come back as they were then, and the Text card follows it | an older design opening changed (new options switched on, the last print's name kept), and a Text card left showing the design before | – |
 | [A58](#a58) | Lettering for a printer reads: every letter stroke a pair of strands, connectors along the baseline | two letters printed as one (ll as a single l), connectors across the tops and middles of letters, and a design in a removed font opening blank | – |
-| [A59](#a59) | Make a vase: the profile editor, texture and movement, the Print step's checks, the G-code, undo and design files | a profile point that can't be dragged or added, a change that doesn't reach the print, the STL's controls (turns, cuts, walls, support) showing for a vase, a shift past what a bead holds not flagged, G-code that isn't the vase's height, and a vase lost on undo or from a saved design | – |
+| [A59](#a59) | Make a vase: the profile editor, texture and movement, the Print step's checks, the G-code, undo and design files | a profile point that can't be dragged or added, a change that doesn't reach the print, the STL's controls (turns, cuts, walls, support) showing for a vase, a shift past what a bead holds not flagged, G-code that isn't the vase's height, and a vase lost on undo or from a saved design | 27.2 s |
 | [A60](#a60) | The tool palette: the design's rail, the output's screen, a panel per tool, settings as rows, examples in their own tray | a map whose line doesn't follow the design (a model sent through the Line step, a plotter ending in Print), a node that opens the wrong settings, a row moved out of its card and not put back (the step tabs would lose it), a warning from the ready list that doesn't reach its node, and the examples tray opening by itself | – |
 | [A61](#a61) | Features switched off: how well the app does without each one (the modules' scoreboard) | a feature growing new ties to the rest of the app (the app breaking, or throwing errors, without a feature it used to do without), and the record of how modular the app is going stale | – |
-| [A62](#a62) | Vase shapes in the app: the shape from above (a traced drawing's too), the rim's shape, twist, strength, lattice and rim, undo, and a vase from before them | features/vase/vase.js: the Shape, Texture, Movement and Rim controls and their map chips, the strength curve editors, Use the last traced line; model.js passing the lattice to the ready list | – |
+| [A62](#a62) | Vase shapes in the app: the shape from above (a traced drawing's too), the rim's shape, twist, strength, lattice and rim, undo, and a vase from before them | features/vase/vase.js: the Shape, Texture, Movement and Rim controls and their map chips, the strength curve editors, Use the last traced line; model.js passing the lattice to the ready list | 18.1 s |
 | [A63](#a63) | Layout: no overlapping or cut-off words at iPad and laptop sizes, on every tool of the palette | map.js's layout (the band, the chips, a phone's row of the open step's chips), the cards' rows and readouts (app.css), any card that grows wider than the panel | – |
 | [A64](#a64) | Each printer brings its own nozzles and G-code: adding one is an entry in settings.js | a second printer showing the first one's needles, a needle size kept that the new printer doesn't have, the menu's label stuck on Needle, a printer's own G-code lines not reaching the file, and the example printer in settings.js going stale | – |
 | [A65](#a65) | Draw your own from the empty start: the pad takes the strokes, and Trace drawing traces them | the empty start's message (Start with a picture …) staying over the drawing pad, hiding it and catching every stroke, so nothing could be drawn | – |
+| [A66](#a66) | Make a vase from this line: the traced line itself, pushed from the Line tool, becomes the vase | a vase made from a trace that doesn't say which line it used, a pattern's line turned into a coarse, notched outline, and a vase from a line that takes the example vase's bulb and waves | – |
 
 #### E01
 
@@ -676,6 +678,14 @@ report.
 - **Why:** Nicolaas (12 November 2026): a base made under a pattern (a labyrinth) did a poor job of a solid layer. The fill only went into areas the line closes off, and in a labyrinth most of the space between the line opens to the outside. A base is there to be a solid plate, so it now fills out to the drawing's convex outline (Fill: Whole outline, the default); Only what the line encloses keeps the old fill.
 - **How:** Traces a 6-cell diamond labyrinth at 40 mm with an 18G needle (0.84 mm line, 1.34 mm spacing) and fits it as a base at 100% Lines, with the hull and without; draws each line a spacing (1.34 mm) wide, the room each strand of the drawing has, and measures how much of the drawing's convex outline it covers. Reads UNB.fillPlan's hull for a base, a base set to inside, and an infill.
 - **Pass when:** Whole outline: more areas filled than inside only, the outline at least 90% covered and over 1.3× the coverage of inside only, the line still closed and no further than a spacing outside the hull's area; fillPlan: hull on for a base by default, off for inside and for the infill.
+
+#### E62
+
+**A vase from a traced line: the line itself as the shape from above, followed exactly** · `engine/E62-vase-line.test.js`
+
+- **Why:** Nicolaas (12 November 2026): a labyrinth made into a vase came out messy. Make a vase from this line uses the line itself (UNB.vaseLineLoop) instead of its outside edge on a coarse grid; the plan's table and the lap's points now grow with the plan's length.
+- **How:** Takes a 12-cell, 60 mm labyrinth's line, makes its plan with UNB.vaseLineLoop and a straight 10 mm vase at its reach with no texture or movement; measures how far a wall lap's points are from the line, and the closest approach of parts of the lap more than 3 gaps apart along it.
+- **Pass when:** The plan is exact, over 4000 points; every lap point within 0.1 mm of the line; parts of the lap keep at least 0.9 of the labyrinth's gap apart.
 
 #### A01
 
@@ -1180,6 +1190,14 @@ report.
 - **Why:** Draw your own is a way to start, so it's used from the empty app, on an iPad with a finger or a pencil. Earlier tests drew on the pad with a picture already loaded, where no message covers it.
 - **How:** Opens the empty app at iPad size, taps Draw your own on the Picture panel, drags a stroke across the middle of the preview with real pointer input, then taps Trace drawing.
 - **Pass when:** The empty-start message is hidden while drawing, the element under the preview's middle is the preview's canvas, the stroke is kept, and after Trace drawing the picture is the drawing and it traces. No page errors.
+
+#### A66
+
+**Make a vase from this line: the traced line itself, pushed from the Line tool, becomes the vase** · `app/A66-vase-from-line.test.js` · slow
+
+- **Why:** Nicolaas (12 November 2026): making a vase from a pattern, it wasn't clear the trace was used (it was pulled from the vase's Shape tool), and a nice labyrinth became messy (its outside edge on a coarse grid, rounded, on a bulb with waves). The Line tool now pushes the traced line into a vase: the line exactly, at its own size, straight up, no texture or movement.
+- **How:** Opens the labyrinth example (a printer), opens the Line tool, taps Make a vase from this line; reads the vase in use, the Shape tool's words and the model's size; goes to the Print step.
+- **Pass when:** The vase's shape is the drawing, exact (the line itself, over 2000 points), at the drawing's size (within 1 mm of the trace's width), a straight profile, no movement or texture; the Shape tool is open and says it's made from the traced line; the Print step has walls; no page errors.
 
 <!-- catalogue:end -->
 

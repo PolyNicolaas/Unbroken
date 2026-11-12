@@ -97,7 +97,7 @@ function vasePlanWords(P) {
   if (!P || P.kind === "circle") return "circle";
   if (P.kind === "drawing")
     return P.loop
-      ? `a drawing's outline${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`
+      ? `${P.exact ? `the traced line${P.from ? ` (${P.from})` : ""}, as traced` : "a drawing's outline"}${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`
       : "a drawing (none yet)";
   const n = P.sides;
   if (P.kind === "polygon") return `${n}-sided${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`;
@@ -487,7 +487,7 @@ function vaseUseLine() {
     msg.className = "hint warn";
     return false;
   }
-  vaseCur.plan = Object.assign(vaseCur.plan, { kind: "drawing", loop: O.loop });
+  vaseCur.plan = Object.assign(vaseCur.plan, { kind: "drawing", loop: O.loop, exact: false, from: "" });
   msg.textContent =
     O.pieces > 1
       ? `The outline of the largest of the ${O.pieces} shapes in the line (the others are left out).`
@@ -495,6 +495,59 @@ function vaseUseLine() {
   msg.className = "hint";
   return true;
 }
+// Make a vase from this line (the Line card): the traced line itself, exactly, as the shape from above, at its own size
+// (a straight wall as wide as the drawing, no texture or movement), so the pattern is what the vase shows. Pushed from
+// the trace, so it's plain which line the vase is made of. An open line, or one with no inside, uses its outline.
+function vaseFromLine() {
+  const F = st.final,
+    msg = $("vaseFromMsg");
+  if (!F || !F.re || F.re.length < 8) {
+    msg.textContent = "Nothing traced yet: trace a picture, text or pattern first.";
+    msg.className = "hint warn";
+    return;
+  }
+  const k = scale(), // mm per working px (pipeline.js)
+    xs = Array.from(F.re, (v) => v * k),
+    ys = Array.from(F.im, (v) => -v * k);
+  let O = st.open ? null : UNB.vaseLineLoop(xs, ys);
+  if (!O) {
+    const E = UNB.vaseOutline(xs, ys);
+    if (!E) {
+      msg.textContent = "The traced line has no inside to make a vase from.";
+      msg.className = "hint warn";
+      return;
+    }
+    O = { loop: E.loop, reach: 0, exact: false };
+  }
+  const from = $("designName").value.trim() || (typeof autoName === "function" ? autoName() : ""),
+    R = O.reach > 0 ? +O.reach.toFixed(2) : 15;
+  vaseCur = UNB.vaseDefaults();
+  vaseCur.profile = [
+    [0, R],
+    [0.5, R],
+    [1, R],
+  ];
+  vaseCur.height = 20;
+  vaseCur.move = Object.assign(vaseCur.move, { kind: "none" });
+  vaseCur.texture = Object.assign(vaseCur.texture, { kind: "none" });
+  vaseCur.plan = { kind: "drawing", loop: O.loop, round: 0, exact: O.exact, from, sides: 6, depth: 0.3 };
+  vasePick = -1;
+  artUse("model"); // art.js: the 3D model input
+  $("mfVase").checked = true;
+  useVase(vaseCur, true);
+  vaseUI();
+  msg.textContent = "";
+  const dm = $("vpDrawMsg"),
+    sz = st.model && st.model.om ? st.model.om.size : [2 * R, 2 * R];
+  dm.textContent = O.exact
+    ? `Made from your traced line${from ? ` (${from})` : ""}, exactly as traced, ${fmt(sz[0], 0)} × ${fmt(sz[1], 0)} mm. Widening or narrowing the profile moves its walls closer together or further apart.`
+    : "Made from the outline of your traced line (it's open, so it has no shape of its own to follow).";
+  dm.className = "hint";
+  // on to the vase's own Shape tool, where it says which line it's made of
+  if (!$("viewArt").checked) $("viewArt").click();
+  if (typeof mapOpen === "function") mapOpen("vshape");
+}
+$("vaseFromLine").addEventListener("click", vaseFromLine);
 $("vpUseLine").addEventListener("click", () => {
   if (vaseUseLine()) {
     $("vpDrawing").checked = true;
