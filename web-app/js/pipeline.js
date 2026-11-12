@@ -373,6 +373,7 @@ function fillSettings() {
   return {
     baseDensity: +$("baseDensity").value / 100,
     basePattern: $("basePattern").value,
+    baseCover: $("baseCover").value,
     baseAngle: +$("baseAngle").value || 0,
     baseTurn: intIn("baseTurn", 1, 50, 1),
     infillDensity: +$("fillDensity").value / 100,

@@ -19,7 +19,7 @@ module.exports = {
   guards: "fills that cross the line, crowd it, leave big holes or break it into pieces; small areas filled when they were meant to be left open; the infill counted as error",
   why: "Infill fills every area the line encloses with more of the same continuous line, one spacing apart, so a design can print as solid chocolate (gap 0) or as an open hatch (a gap). Each area's fill is a set of closed loops merged into one by short bridges, and that loop is bridged into the printed line on a straight stretch, so nothing crosses and nothing is drawn twice. Rings follow the area's edge; Lines are straight rows paired into narrow loops inside one ring.",
   how: "Traces the leaf at 80 mm with an 18G needle, gap 0.5 mm and gap 0, and the smiley at 60 mm with gap 0, with no infill, Rings and Lines. Measures crossings, the closest gap, and how far every point enclosed by the printed line is from the nearest line (99th percentile and worst, in spacings). Then fills the shapes sample with a 'leave small areas open' size and counts what is left open, and compares the error with and without infill.",
-  pass: "Density 100% (rows a line width apart) with a 0.5 mm gap: no crossings, lines at least 0.85 line widths apart and every enclosed point within 0.9 line widths of a line for 99% of the area with Lines, 1.1 with Rings (solid); 50%: within 1.6. With infill: no crossings, closest gap ≥ 90% of the spacing, every enclosed point within 1 spacing of a line for 99% of the area (about 4–8 spacings without infill) and within 1.6 at worst; at least one area filled. Leaving areas under 80 mm² open on the shapes sample leaves some open and fills fewer; the error with infill is within 0.1 mm of the error without.",
+  pass: "Density 100% (rows a line width apart) with a 0.5 mm gap: no crossings, lines at least 0.78 line widths apart (a solid fill's rows are only kept 0.8 of a row spacing apart, November 2026: pushing at a whole line width bent packed bases) and every enclosed point within 0.9 line widths of a line for 99% of the area with Lines, 1.1 with Rings (solid); 50%: within 1.6. With infill: no crossings, closest gap ≥ 90% of the spacing, every enclosed point within 1 spacing of a line for 99% of the area (about 4–8 spacings without infill) and within 1.6 at worst; at least one area filled. Leaving areas under 80 mm² open on the shapes sample leaves some open and fills fewer; the error with infill is within 0.1 mm of the error without.",
   slow: true,
   async run() {
     const checks = [], notes = [];
@@ -38,7 +38,7 @@ module.exports = {
     // lines), 50% two line widths apart
     for (const [fill, dens] of [["lines", 1], ["rings", 1], ["lines", 0.5]]) {
       const r = trace(S.sample("leaf"), { spacingMM: W + 0.5, lineMM: W, outW: 80, fill, fillDensity: dens }), wpx = W / r.scale, e = emptiest(r.fin.final, wpx), tag = `leaf 80 mm, gap 0.5, ${fill} at ${dens * 100}%`;
-      checks.push(check(`${tag}: crossings`, r.fin.after, "==", 0), check(`${tag}: closest gap (line widths)`, r.fin.gap / wpx, ">=", 0.85),
+      checks.push(check(`${tag}: crossings`, r.fin.after, "==", 0), check(`${tag}: closest gap (line widths)`, r.fin.gap / wpx, ">=", 0.78),
         check(`${tag}: emptiest 1% of the enclosed area (line widths to a line)`, e.p99, "<=", dens === 1 ? (fill === "rings" ? 1.1 : 0.9) : 1.6));   // rings leave a small hole where they close up
       notes.push(`${tag}: emptiest 1% ${e.p99.toFixed(2)} line widths, closest gap ${(r.fin.gap / wpx).toFixed(2)}`);
     }

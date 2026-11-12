@@ -347,6 +347,7 @@
         <label class="field" title="Filled layers at the bottom (0: no base)"><span>Base layers</span><input type="number" id="baseLayers" min="0" max="50" step="1" value="0"></label>
         <label class="field" title="Rows straight across, or rings following the edge. A 3D model or a vase can also spiral: round and in to the middle on one layer, up, and out again on the next"><span>Pattern</span><select id="basePattern"><option value="lines" selected>Lines</option><option value="rings">Rings</option><option value="spiral" data-feature="model" hidden disabled>Spiral (in, then out)</option></select></label>
       </div>
+      <label class="field" title="Whole outline: the base is solid under the whole drawing, gaps that open to the outside (between a labyrinth's branches, round letters) included, out to its convex outline. Only what the line encloses: just the areas the line closes off, as before"><span>Fill</span><select id="baseCover"><option value="outline" selected>Whole outline</option><option value="inside">Only what the line encloses</option></select></label>
       <div class="row">
         <div class="lab"><label for="baseDensity">Density</label><span class="val" id="baseDensityVal">100%</span></div>
         <input type="range" id="baseDensity" min="0" max="125" step="5" value="100">
@@ -359,7 +360,7 @@
         <div class="lab"><label for="infillMin">Leave small areas open</label><span class="val" id="infillMinVal">fill all</span></div>
         <input type="range" id="infillMin" min="0" max="100" value="0">
       </div>
-      <p class="hint help" id="infillHint">Fills every area the line encloses with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); up to 125% overlaps them a little (rows 0.8 of a line width apart), for a base that's surely solid with no gaps between rows; 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
+      <p class="hint help" id="infillHint">Fills the whole outline of the drawing (or only the areas the line encloses) with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); up to 125% overlaps them a little (rows 0.8 of a line width apart), for a base that's surely solid with no gaps between rows; 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
     </section>
     <section class="card choc-only" aria-labelledby="h-infill">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>

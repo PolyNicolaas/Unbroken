@@ -294,6 +294,7 @@
         pattern: opt.fill || "lines",
         angle: opt.fillAngle || 0,
         minArea: opt.fillMinArea || 0,
+        hull: !!opt.fillHull, // (a base: the whole outline, the gaps open to the outside too)
         areaMask: opt.fillMask || null, // (only these areas: the levels set to Fill, on a printer)
         fixed: (k) => jmp[k] || (k > 0 && jmp[k - 1]) || tip[k] || jd[k] < 2 * d,
       });
@@ -479,14 +480,17 @@
   // layer variants (the line without infill for the walls, the base turned 90°) that aren't on screen.
   // opt: as stageSignal (w, loop, round, fill, fillAngle, fillMinArea, fillSpacing) plus termTol, unx, minGap, allow,
   // closed.
-  // A fill closer than the spacing (solid) keeps its rows that close: the strands are only pushed that far apart.
+  // A fill closer than the spacing (solid) keeps its rows that close: the strands are only pushed 0.8 of the fill's
+  // row spacing apart. A solid fill has no room to spare, so pushing at the row spacing itself caught every small
+  // wobble of the series and set off a chain of pushes across the packed rows that bent the whole layer (a labyrinth's
+  // base came out wavy, its rows lost; November 2026).
   UNB.stagePrint = function (walk, d, w, h, opt) {
     const o = opt || {},
       sg = UNB.stageSignal(walk, d, w, h, o),
       open = sg.open,
       n0 = open ? sg.S / 2 + 1 : sg.S;
     const { N, curve: c } = UNB.autoTerms(sg.sp.ax, sg.sp.order, sg.Nmax, sg.jumpS, open, o.termTol);
-    const dKeep = o.fill && sg.filled && o.fillSpacing > 0 ? Math.min(d, o.fillSpacing) : d;
+    const dKeep = o.fill && sg.filled && o.fillSpacing > 0 ? Math.min(d, 0.8 * o.fillSpacing) : d;
     const fin = UNB.stageFinal(c.re.slice(0, n0), c.im.slice(0, n0), {
       closed: !open,
       d: dKeep,

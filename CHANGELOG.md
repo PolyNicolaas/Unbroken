@@ -3,6 +3,16 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v151 · 2026-11-12
+
+- **A base is solid under the whole drawing.** A base under a pattern (a labyrinth) came out as a few rows here and
+  there, for two reasons. The fill only went into areas the line closes off, and most of the space in a labyrinth
+  opens to the outside; the Base card's new **Fill** setting, *Whole outline* (the default), fills out to the
+  drawing's convex outline, with rings in corners too small for a row (*Only what the line encloses* keeps the old
+  fill). And after the fit, keeping a solid fill's rows a full row spacing apart set off a chain of pushes across the
+  packed rows that bent the whole layer into waves; they're now kept 0.8 of a row spacing apart. Test E61; E20's
+  closest gap for a solid fill is 0.78 line widths (was 0.85).
+
 ## v150 · 2026-11-11
 
 - **Draw your own works from the empty start again.** The "Start with a picture …" message stayed over the drawing

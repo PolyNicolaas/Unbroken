@@ -78,6 +78,7 @@ for (const id of [
   "baseLayers",
   "baseDensity",
   "basePattern",
+  "baseCover",
   "baseAngle",
   "baseTurn",
   "fillDensity",
@@ -194,6 +195,7 @@ async function layerLine(plan, D = st) {
       D.outW,
       plan.minArea,
       plan.levels ? lvMask.key : null,
+      !!plan.hull,
     ]);
   let m = layerLinesCache.get(walk);
   if (!m) layerLinesCache.set(walk, (m = new Map()));
@@ -211,6 +213,7 @@ async function layerLine(plan, D = st) {
       fillAngle: angle,
       fillSpacing: plan.spacing,
       fillMinArea: (plan.minArea || 0) / sc ** 2,
+      fillHull: !!plan.hull, // (a base: the whole outline)
       fillMask: plan.levels ? { mask: lvMask.mask, w: lvMask.w, h: lvMask.h } : null,
       termTol: CFG.engine.termTolerance,
       unx: +$("uncross").value,

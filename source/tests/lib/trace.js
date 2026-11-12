@@ -41,7 +41,7 @@ function trace(src, options) {
   const fit = { ax: sg.sp.ax, codes: sg.sp.order.slice(0, N), curve: UNB.synth(sg.sp.ax, sg.sp.order.slice(0, N)) };
   ms.fit = performance.now() - t; t = performance.now();
   const fin = UNB.stageFinal(fit.curve.re.slice(0, n0), fit.curve.im.slice(0, n0), {
-    closed: !open, d: fillPx && sg.filled ? Math.min(dpx, fillPx) : dpx, unx: o.uncross, minGap: MIN_GAP_PX, allow: null,
+    closed: !open, d: fillPx && sg.filled ? Math.min(dpx, 0.8 * fillPx) : dpx, unx: o.uncross, minGap: MIN_GAP_PX, allow: null,
     tags: { group: null, jid: sg.tagS.jid.slice(0, n0), jd: sg.tagS.jd.slice(0, n0) },
     jumps: sg.jumpS.slice(0, n0), pad: 0, walk, path: sg.path, w, h, driftTol: dpx > 0 ? 0.013 * bw : 0 });   // the app: engine.sizeDetail.medium × drawing width
   ms.final = performance.now() - t; ms.total = performance.now() - t0;

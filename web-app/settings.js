@@ -261,6 +261,7 @@ window.UNB_SETTINGS = {
     baseLayers: 0,                    // how many base layers (0 = no base; up to 50)
     baseDensity: 100,                 // (0–125: past 100 the base's rows overlap, for a surely solid base)
     basePattern: "lines",             // "lines" (straight rows) or "rings" (following the edge)
+    baseCover: "outline",             // "outline": solid under the whole drawing, out to its convex outline; "inside": only the areas the line encloses
     baseAngle: 0,                     // degrees, direction of the rows for "lines" (-90 to 90)
     baseTurn: 1,                      // the rows turn 90° every this many layers (1–50)
     // Infill: inside the layers above the base, as part of the same line. Density 0 = hollow (walls only).
