@@ -156,8 +156,10 @@
   };
 
   // ---------- the shape seen from above ----------
-  // A plan as PLAN_M points evenly along its outline, anticlockwise, starting where it crosses +x, its furthest point 1
-  // from the middle. Kept by its settings (a drawing's by its outline), so each lap only reads it.
+  // A plan as m points evenly along its outline (1440, more for a long one: a traced labyrinth's line goes round many
+  // times as far as a circle, and 1440 points cut its corners by a millimetre), anticlockwise, starting where it
+  // crosses +x, its furthest point 1 from the middle. Kept by its settings (a drawing's by its outline), so each lap
+  // only reads it.
   const PLAN_M = 1440,
     planCache = new Map();
   function planTable(P) {
@@ -245,17 +247,18 @@
     const c = [0];
     for (let i = 1; i < R.length; i++) c.push(c[i - 1] + Math.hypot(R[i][0] - R[i - 1][0], R[i][1] - R[i - 1][1]));
     const L = c[c.length - 1],
-      x = new Float64Array(PLAN_M),
-      y = new Float64Array(PLAN_M);
+      m = Math.min(32768, Math.max(PLAN_M, Math.ceil(L * 240))),
+      x = new Float64Array(m),
+      y = new Float64Array(m);
     let j = 0;
-    for (let i = 0; i < PLAN_M; i++) {
-      const s = (i / PLAN_M) * L;
+    for (let i = 0; i < m; i++) {
+      const s = (i / m) * L;
       while (j < R.length - 2 && c[j + 1] < s) j++;
       const f = (s - c[j]) / Math.max(1e-12, c[j + 1] - c[j]);
       x[i] = R[j][0] + f * (R[j + 1][0] - R[j][0]);
       y[i] = R[j][1] + f * (R[j + 1][1] - R[j][1]);
     }
-    T = { x, y, perimeter: L };
+    T = { x, y, m, perimeter: L };
     if (planCache.size > 40) planCache.clear();
     planCache.set(key, T);
     return T;
@@ -264,9 +267,9 @@
   function planPoint(A, B, s, t) {
     const at = (T) => {
       if (!T) return [Math.cos(2 * Math.PI * s), Math.sin(2 * Math.PI * s)];
-      const u = (((s % 1) + 1) % 1) * PLAN_M,
-        i = Math.floor(u) % PLAN_M,
-        j = (i + 1) % PLAN_M,
+      const u = (((s % 1) + 1) % 1) * T.m,
+        i = Math.floor(u) % T.m,
+        j = (i + 1) % T.m,
         f = u - Math.floor(u);
       return [T.x[i] + f * (T.x[j] - T.x[i]), T.y[i] + f * (T.y[j] - T.y[i])];
     };
@@ -280,6 +283,52 @@
     const T = planTable(P);
     return T ? T.perimeter / (2 * Math.PI) : 1;
   };
+  // A traced line itself, for a plan (Make a vase from this line): a closed line that doesn't cross itself (a
+  // labyrinth's) followed exactly, not its outside edge. x, y: any units, y up. Returns { loop ([x0, y0, …], the middle
+  // of its area at 0, its furthest point 1, anticlockwise, evenly spaced, up to 8192 points), reach (its furthest
+  // point from that middle, in the units given), exact: true } or null (too few points, or no area).
+  UNB.vaseLineLoop = function (x, y) {
+    const n = x.length;
+    if (n < 8) return null;
+    let R = [];
+    for (let i = 0; i < n; i++) R.push([x[i], y[i]]);
+    if (Math.hypot(R[0][0] - R[n - 1][0], R[0][1] - R[n - 1][1]) < 1e-9) R.pop();
+    let A = 0,
+      cx = 0,
+      cy = 0;
+    for (let i = 0; i < R.length; i++) {
+      const p = R[i],
+        q = R[(i + 1) % R.length],
+        k = p[0] * q[1] - q[0] * p[1];
+      A += k;
+      cx += (p[0] + q[0]) * k;
+      cy += (p[1] + q[1]) * k;
+    }
+    if (!(Math.abs(A) > 1e-9)) return null;
+    cx /= 3 * A;
+    cy /= 3 * A;
+    if (A < 0) R.reverse();
+    let mx = 0;
+    for (const p of R) mx = Math.max(mx, Math.hypot(p[0] - cx, p[1] - cy));
+    let len = 0;
+    for (let i = 0; i < R.length; i++) {
+      const q = R[(i + 1) % R.length];
+      len += Math.hypot(q[0] - R[i][0], q[1] - R[i][1]);
+    }
+    // evenly spaced, about every 0.1% of the reach (fewer than 8192), so its corners stay
+    const N = Math.min(8192, Math.max(512, Math.ceil(len / mx / 0.002)));
+    const E = resampleLoop(
+      R.map((p) => [(p[0] - cx) / mx, (p[1] - cy) / mx]),
+      len / mx / N
+    );
+    const loop = [];
+    for (let i = 0; i < N; i++) {
+      const p = E[Math.floor((i / N) * E.length)];
+      loop.push(+p[0].toFixed(4), +p[1].toFixed(4));
+    }
+    return { loop, reach: mx, exact: true };
+  };
+
   // A drawing's outline, for a plan: the outside edge of the line (x, y: any units, y up; closed or not) as one loop,
   // holes and gaps inside filled, the largest piece if it's in several. Returns { loop ([x0, y0, …], its furthest
   // point 1 from the middle of its area, anticlockwise, 512 points), pieces (how many there were) } or null.
@@ -598,7 +647,7 @@
         Math.max(planLength(V.plan), V.planTop ? planLength(V.planTop) : 0) *
         (T.kind && T.kind !== "none" && T.kind !== "rings" ? 1.3 : 1),
       m = M.kind && M.kind !== "none" ? Math.max(1, Math.round(M.count || 1)) : 0;
-    return Math.min(6000, Math.max(256, Math.ceil(L / 0.25), m * (M.kind === "loops" ? 32 : 24)));
+    return Math.min(24000, Math.max(256, Math.ceil(L / 0.25), m * (M.kind === "loops" ? 32 : 24)));
   }
 
   // ---------- the checks ----------
@@ -900,7 +949,8 @@
       layers = Math.max(1, Math.round(H / h)),
       every = Math.max(1, Math.ceil((layers + 1) / (o.maxRows || 240))),
       n = vaseLapPoints(V),
-      cols = Math.max(24, Math.min(o.cols || 360, n));
+      // (a long plan, a traced line's, gets more columns, so the preview keeps its turns)
+      cols = Math.max(24, Math.min(o.cols || Math.ceil(360 * Math.max(1, planLength(V.plan))), n, 4000));
     const rows = [];
     for (let k = 0; ; k += every) {
       const z = Math.min(H, k * h),
