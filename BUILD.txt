@@ -1,5 +1,5 @@
-Unbroken · web app build v153
-Built:  2026-11-12T22:25:39.615Z
+Unbroken · web app build v154
+Built:  2026-11-13T00:12:38.102Z
 Tests:  102 of 102 tests passed (quick run)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
@@ -22,8 +22,8 @@ Files (sha1, first 12):
   db42a3da56bd  15-cutout.js
   755c4b83e7df  16-molecule.js
   9339d07ae525  17-vase.js
-  67c79dc71058  core.js
-  71657122516a  css/app.css
+  94f09f47dd15  core.js
+  185274b603c2  css/app.css
   2e7b02cdb930  css/theme.css
   97fd98808bcf  features/camera/camera.js
   7912725e6092  features/cutout/cutout.js
@@ -41,16 +41,16 @@ Files (sha1, first 12):
   cd3e7072869b  features/testprint/testprint.js
   9c492ec1cddb  features/vase/vase.js
   84cc740df42b  fonts.js
-  a7090590c51a  index.html
+  1a3ed8d7e5fa  index.html
   eab5ab4fbcb0  js/art.js
   5a825c30dfdd  js/config.js
   e568d22d2df0  js/controls.js
-  5a237f7b74ae  js/engine-bridge.js
+  f04ec92bfabd  js/engine-bridge.js
   050fd500cdc9  js/export.js
   3e335e69fd69  js/history.js
-  d500834ffa7e  js/layers.js
+  ee77a48720bf  js/layers.js
   393e7eec1736  js/main.js
-  5d5eceb7df91  js/map.js
+  f0ca49e9a729  js/map.js
   4ed8ff8ba13c  js/pipeline.js
   59c6828d224c  js/preview.js
   d3e0b9ad48e5  js/readouts.js
@@ -60,8 +60,8 @@ Files (sha1, first 12):
   49125f92bd01  js/steppers.js
   b891ae4f0539  js/tools.js
   e651a30c34d9  js/ui.js
-  cd9963796d3d  js/views.js
+  9e8c5269b174  js/views.js
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
   f7cf37fc4164  settings.js
-  6f4ee8028084  worker.js
+  e51cf85874d5  worker.js

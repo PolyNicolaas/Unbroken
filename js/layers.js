@@ -896,22 +896,84 @@ function drawPlateStack(c) {
   note = `${pl.length} ${pc ? "piece" : "cop"}${pl.length === 1 ? (pc ? "" : "y") : pc ? "s" : "ies"} on the plate, as the G-code prints them${note}`;
   return { tip, note };
 }
+// Each lap's points to draw: all of a small print; for a big one (a tall labyrinth vase: 800 000 points) the points a
+// straight run doesn't need, dropped within a tolerance (0.02 mm, more until it fits the budget), so corners and every
+// layer stay. Taking every few points instead cut a long lap's corners, so the vase looked angular and wrong though
+// its G-code was right (12 November 2026). Kept per stack and budget.
+const lapKeepCache = new WeakMap();
+function lapKeep(S, budget) {
+  let C = lapKeepCache.get(S);
+  if (!C) lapKeepCache.set(S, (C = new Map()));
+  if (C.has(budget)) return C.get(budget);
+  let out = S.laps.map((lap) => {
+    const I = [];
+    for (let i = lap.from; i <= lap.to; i++) I.push(i);
+    return I;
+  });
+  if (S.x.length > budget)
+    for (const tol of [0.02, 0.05, 0.12, 0.3, 0.8]) {
+      out = S.laps.map((lap) => dpKeep(S, lap.from, lap.to, tol));
+      if (out.reduce((a, I) => a + I.length, 0) <= budget) break;
+    }
+  C.set(budget, out);
+  return out;
+}
+// Douglas–Peucker on S's points a…b (3D): the indices kept
+function dpKeep(S, a, b, tol) {
+  if (b - a < 2) return a === b ? [a] : [a, b];
+  const keep = new Uint8Array(b - a + 1),
+    stack = [[a, b]],
+    t2 = tol * tol;
+  keep[0] = keep[b - a] = 1;
+  while (stack.length) {
+    const [p, q] = stack.pop(),
+      dx = S.x[q] - S.x[p],
+      dy = S.y[q] - S.y[p],
+      dz = S.z[q] - S.z[p],
+      L2 = dx * dx + dy * dy + dz * dz;
+    let best = -1,
+      bi = -1;
+    for (let i = p + 1; i < q; i++) {
+      const ex = S.x[i] - S.x[p],
+        ey = S.y[i] - S.y[p],
+        ez = S.z[i] - S.z[p],
+        t = L2 ? (ex * dx + ey * dy + ez * dz) / L2 : 0,
+        fx = ex - t * dx,
+        fy = ey - t * dy,
+        fz = ez - t * dz,
+        d = fx * fx + fy * fy + fz * fz;
+      if (d > best) {
+        best = d;
+        bi = i;
+      }
+    }
+    if (best > t2) {
+      keep[bi - a] = 1;
+      stack.push([p, bi], [bi, q]);
+    }
+  }
+  const I = [];
+  for (let i = 0; i < keep.length; i++) if (keep[i]) I.push(a + i);
+  return I;
+}
 // One copy: its layers (beads, or lines darker towards the top), the slider's layer marked
 function drawLapStack(c) {
   const { g, S, n, anim, show, solid, choc, acc, lw, TP, cut, picked, mark } = c;
   let tip = null,
     note = "";
   const upTo = anim ? Math.max(1, Math.floor(st.t * (n - 1))) : n - 1,
-    step = Math.max(1, Math.floor(n / 40000));
+    K = lapKeep(S, solid ? 80000 : 300000);
   if (solid) {
     // the chocolate as lit beads; the slider's layer is marked below
     const segs = [],
       lapOf = [];
     S.laps.forEach((lap, li) => {
       if (lap.from > upTo || li >= cut - (picked ? 1 : 0) || !show[lap.kind === "base" ? "fill" : "wall"]) return;
-      const end = Math.min(lap.to, upTo);
-      for (let i = lap.from; i < end; i += step) {
-        const j = Math.min(end, i + step);
+      const end = Math.min(lap.to, upTo),
+        I = K[li];
+      for (let q = 0; q < I.length - 1 && I[q] < end; q++) {
+        const i = I[q],
+          j = Math.min(end, I[q + 1]);
         segs.push(S.x[i], S.y[i], S.z[i], S.x[j], S.y[j], S.z[j]);
         lapOf.push(li);
       }
@@ -922,9 +984,15 @@ function drawLapStack(c) {
     if (lap.from > upTo || li >= cut || !show[lap.kind === "base" ? "fill" : "wall"]) return;
     const end = Math.min(lap.to, upTo),
       path = new Path2D();
-    for (let i = lap.from; i <= end; i += i + step <= end ? step : 1) {
-      const [X, Y] = TP(S.x[i], S.y[i], S.z[i]);
-      i === lap.from ? path.moveTo(X, Y) : path.lineTo(X, Y);
+    const I = K[li];
+    for (let q = 0; q < I.length && I[q] <= end; q++) {
+      const i = I[q],
+        [X, Y] = TP(S.x[i], S.y[i], S.z[i]);
+      q ? path.lineTo(X, Y) : path.moveTo(X, Y);
+    }
+    if (end < lap.to) {
+      const [X, Y] = TP(S.x[end], S.y[end], S.z[end]);
+      path.lineTo(X, Y);
     }
     if (picked && li === cut - 1) {
       mark(path);

@@ -401,7 +401,7 @@ for (const m of MENUS) {
       });
     placeMenu(m);
   });
-  m.querySelectorAll(".mitem").forEach((b) =>
+  m.querySelectorAll(".mitem:not(.keep)").forEach((b) => // (keep: Start over asks first, the menu open)
     b.addEventListener("click", () => {
       m.open = false;
     })
