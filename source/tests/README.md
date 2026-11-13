@@ -198,7 +198,7 @@ report.
 | [A64](#a64) | Each printer brings its own nozzles and G-code: adding one is an entry in settings.js | a second printer showing the first one's needles, a needle size kept that the new printer doesn't have, the menu's label stuck on Needle, a printer's own G-code lines not reaching the file, and the example printer in settings.js going stale | – |
 | [A65](#a65) | Draw your own from the empty start: the pad takes the strokes, and Trace drawing traces them | the empty start's message (Start with a picture …) staying over the drawing pad, hiding it and catching every stroke, so nothing could be drawn | – |
 | [A66](#a66) | Make a vase from this line: the traced line itself, pushed from the Line tool, becomes the vase | a vase made from a trace that doesn't say which line it used, a pattern's line turned into a coarse, notched outline, and a vase from a line that takes the example vase's bulb and waves | – |
-| [A67](#a67) | Start over in the File menu: two taps clear the design and every setting | a full reset that's hard to find (it was only on the Examples tray), one that clears on a single slip of the finger, or one that keeps the design or a setting | 10.2 s |
+| [A67](#a67) | Start over in the File menu: two taps clear the design and every setting | a full reset that's hard to find (it was only on the Examples tray), one that clears on a single slip of the finger, or one that keeps the design or a setting | – |
 
 #### E01
 
@@ -685,8 +685,8 @@ report.
 **A vase from a traced line: the line itself as the shape from above, followed exactly** · `engine/E62-vase-line.test.js`
 
 - **Why:** Nicolaas (12 November 2026): a labyrinth made into a vase came out messy. Make a vase from this line uses the line itself (UNB.vaseLineLoop) instead of its outside edge on a coarse grid; the plan's table and the lap's points now grow with the plan's length.
-- **How:** Takes a 12-cell, 60 mm labyrinth's line, makes its plan with UNB.vaseLineLoop and a straight 10 mm vase at its reach with no texture or movement; measures how far a wall lap's points are from the line, and the closest approach of parts of the lap more than 3 gaps apart along it.
-- **Pass when:** The plan is exact, over 4000 points; every lap point within 0.1 mm of the line; parts of the lap keep at least 0.9 of the labyrinth's gap apart.
+- **How:** Takes a 12-cell, 60 mm labyrinth's line, makes its plan with UNB.vaseLineLoop and a straight 10 mm vase at its reach with no texture or movement; then narrows it to 0.45 at the rim and compares the rim lap's closest point to the middle with the line's; measures how far a wall lap's points are from the line, and the closest approach of parts of the lap more than 3 gaps apart along it.
+- **Pass when:** Narrowed to 0.45 at the rim, the rim lap comes as close to the middle as the line does (the smallest-radius push cut a round hole there); the plan is exact, over 4000 points; every lap point within 0.1 mm of the line; parts of the lap keep at least 0.9 of the labyrinth's gap apart.
 
 #### A01
 

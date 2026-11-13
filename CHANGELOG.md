@@ -3,6 +3,13 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v155 · 2026-11-12
+
+- **Fixed: a round hole in a vase made from a line, when its top is narrower.** Every vase kept its wall at least
+  1 mm from the middle, pushing any point closer out onto a 1 mm circle. A labyrinth's line runs right through the
+  middle, so narrowing the top brought part of it that close and the push cut a round hole in it. A vase made from a
+  line now follows the line all the way in. E62 checks it.
+
 ## v154 · 2026-11-12
 
 - **Fixed: the Shape panel shifted when you changed Rounded.** A vase made from a line has a long shape name in the

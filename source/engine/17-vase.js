@@ -510,7 +510,8 @@
                       (D / 4) * (Math.cos(2 * Math.PI * c * (s - tw * t)) + Math.cos(2 * Math.PI * c * (s + tw * t)))
                   : null;
     const px = new Float64Array(n),
-      py = new Float64Array(n);
+      py = new Float64Array(n),
+      onLine = !!(V.plan && V.plan.kind === "drawing");
     for (let i = 0; i < n; i++) {
       const [ux, uy] = planPoint(A, B, i / n, t);
       px[i] = reach * (ux * cr - uy * sr);
@@ -530,9 +531,10 @@
         X += (ty / l) * d;
         Y -= (tx / l) * d;
       }
-      // (never closer to the middle than the smallest radius)
+      // (never closer to the middle than the smallest radius; not a drawing's line, which may pass right through the
+      // middle: a labyrinth's did, and the push cut a round hole in it, 12 November 2026)
       const r = Math.hypot(X, Y);
-      if (r < VASE_MIN_R) {
+      if (r < VASE_MIN_R && !onLine) {
         X = r > 1e-9 ? (X / r) * VASE_MIN_R : VASE_MIN_R;
         Y = r > 1e-9 ? (Y / r) * VASE_MIN_R : 0;
       }

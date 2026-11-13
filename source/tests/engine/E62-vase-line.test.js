@@ -14,8 +14,8 @@ module.exports = {
   id: "E62", title: "A vase from a traced line: the line itself as the shape from above, followed exactly",
   guards: "a long traced line (a labyrinth's) cut short by the plan's 1440-point table or the lap's point limit, so the vase's walls lose its corners and gaps",
   why: "Nicolaas (12 November 2026): a labyrinth made into a vase came out messy. Make a vase from this line uses the line itself (UNB.vaseLineLoop) instead of its outside edge on a coarse grid; the plan's table and the lap's points now grow with the plan's length.",
-  how: "Takes a 12-cell, 60 mm labyrinth's line, makes its plan with UNB.vaseLineLoop and a straight 10 mm vase at its reach with no texture or movement; measures how far a wall lap's points are from the line, and the closest approach of parts of the lap more than 3 gaps apart along it.",
-  pass: "The plan is exact, over 4000 points; every lap point within 0.1 mm of the line; parts of the lap keep at least 0.9 of the labyrinth's gap apart.",
+  how: "Takes a 12-cell, 60 mm labyrinth's line, makes its plan with UNB.vaseLineLoop and a straight 10 mm vase at its reach with no texture or movement; then narrows it to 0.45 at the rim and compares the rim lap's closest point to the middle with the line's; measures how far a wall lap's points are from the line, and the closest approach of parts of the lap more than 3 gaps apart along it.",
+  pass: "Narrowed to 0.45 at the rim, the rim lap comes as close to the middle as the line does (the smallest-radius push cut a round hole there); the plan is exact, over 4000 points; every lap point within 0.1 mm of the line; parts of the lap keep at least 0.9 of the labyrinth's gap apart.",
   run() {
     const L = line(), O = UNB.vaseLineLoop(L.x, L.y);
     const V = Object.assign(UNB.vaseDefaults(), { height: 10, profile: [[0, O.reach], [1, O.reach]], move: { kind: "none", size: 0, count: 0, shift: 0, flip: 0 }, plan: { kind: "drawing", loop: O.loop, round: 0 } });
@@ -35,7 +35,16 @@ module.exports = {
     const H = new Map(); for (let i = 0; i < m; i++) { const q = key(Math.floor(W.x[i] / 2), Math.floor(W.y[i] / 2)); if (!H.has(q)) H.set(q, []); H.get(q).push(i); }
     let near = Infinity;
     for (let i = 0; i < m; i++) { const a = Math.floor(W.x[i] / 2), b = Math.floor(W.y[i] / 2); for (let da = -1; da <= 1; da++) for (let db = -1; db <= 1; db++) for (const j of H.get(key(a + da, b + db)) || []) { let al = Math.abs(cum[j] - cum[i]); al = Math.min(al, tot - al); if (al > 3 * L.gap) near = Math.min(near, Math.hypot(W.x[i] - W.x[j], W.y[i] - W.y[j])); } }
+    // narrowed to 0.45 at the rim: the line passes close to the middle, and stays there (no round hole pushed out)
+    const V2 = Object.assign({}, V, { profile: [[0, O.reach], [1, 0.45 * O.reach]] });
+    const it2 = UNB.vaseStack(V2, { h: 0.3, base: 0, w: 0.84, d: 1.34, tol: 0.05 }); let r2; while (!(r2 = it2.next()).done);
+    const Wt = r2.value.walls[r2.value.walls.length - 1];
+    let lineMin = Infinity, lapMin = Infinity;
+    for (let i = 0; i < O.loop.length; i += 2) lineMin = Math.min(lineMin, Math.hypot(O.loop[i], O.loop[i + 1]) * 0.45 * O.reach);
+    for (let i = 0; i < Wt.x.length; i++) lapMin = Math.min(lapMin, Math.hypot(Wt.x[i], Wt.y[i]));
     return { checks: [
+      check("narrowed rim: the line's closest point to the middle (mm, should be under 1 for this test)", lineMin, "<", 1),
+      check("… the rim lap's closest point, minus the line's (mm)", lapMin - lineMin, "<", 0.15),
       check("the plan: exact", O.exact, "==", true), check("… points", O.loop.length / 2, ">", 4000),
       check("lap points from the line, worst (mm)", worst, "<=", 0.1),
       check("closest approach of the lap's parts ÷ the labyrinth's gap", near / L.gap, ">=", 0.9),
