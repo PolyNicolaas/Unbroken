@@ -1,5 +1,5 @@
-Unbroken · web app build v154
-Built:  2026-11-13T00:12:38.102Z
+Unbroken · web app build v155
+Built:  2026-11-13T02:27:54.084Z
 Tests:  102 of 102 tests passed (quick run)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
@@ -21,8 +21,8 @@ Files (sha1, first 12):
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   755c4b83e7df  16-molecule.js
-  9339d07ae525  17-vase.js
-  94f09f47dd15  core.js
+  f3fedcab78d5  17-vase.js
+  194db801a294  core.js
   185274b603c2  css/app.css
   2e7b02cdb930  css/theme.css
   97fd98808bcf  features/camera/camera.js
@@ -41,11 +41,11 @@ Files (sha1, first 12):
   cd3e7072869b  features/testprint/testprint.js
   9c492ec1cddb  features/vase/vase.js
   84cc740df42b  fonts.js
-  1a3ed8d7e5fa  index.html
+  ff5326a9cf1e  index.html
   eab5ab4fbcb0  js/art.js
   5a825c30dfdd  js/config.js
   e568d22d2df0  js/controls.js
-  f04ec92bfabd  js/engine-bridge.js
+  16075dfa3e57  js/engine-bridge.js
   050fd500cdc9  js/export.js
   3e335e69fd69  js/history.js
   ee77a48720bf  js/layers.js
@@ -64,4 +64,4 @@ Files (sha1, first 12):
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
   f7cf37fc4164  settings.js
-  e51cf85874d5  worker.js
+  fc2254cfea09  worker.js

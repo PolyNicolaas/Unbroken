@@ -116,7 +116,7 @@
     module.exports = root.UNB;
   } else if (typeof importScripts === "function") {
     // a Web Worker (worker.js): the parts sit next to this file
-    importScripts(...PARTS.map((p) => p + "?v=v154"));
+    importScripts(...PARTS.map((p) => p + "?v=v155"));
     root.UNB.PARTS = PARTS;
   } else if (root.UNB) root.UNB.PARTS = PARTS; // the page: index.html loads the parts itself, before this file
 })(typeof window !== "undefined" ? window : globalThis);
