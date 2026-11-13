@@ -193,11 +193,12 @@ report.
 | [A59](#a59) | Make a vase: the profile editor, texture and movement, the Print step's checks, the G-code, undo and design files | a profile point that can't be dragged or added, a change that doesn't reach the print, the STL's controls (turns, cuts, walls, support) showing for a vase, a shift past what a bead holds not flagged, G-code that isn't the vase's height, and a vase lost on undo or from a saved design | – |
 | [A60](#a60) | The tool palette: the design's rail, the output's screen, a panel per tool, settings as rows, examples in their own tray | a map whose line doesn't follow the design (a model sent through the Line step, a plotter ending in Print), a node that opens the wrong settings, a row moved out of its card and not put back (the step tabs would lose it), a warning from the ready list that doesn't reach its node, and the examples tray opening by itself | – |
 | [A61](#a61) | Features switched off: how well the app does without each one (the modules' scoreboard) | a feature growing new ties to the rest of the app (the app breaking, or throwing errors, without a feature it used to do without), and the record of how modular the app is going stale | – |
-| [A62](#a62) | Vase shapes in the app: the shape from above (a traced drawing's too), the rim's shape, twist, strength, lattice and rim, undo, and a vase from before them | features/vase/vase.js: the Shape, Texture, Movement and Rim controls and their map chips, the strength curve editors, Make a vase from this line; model.js passing the lattice to the ready list | 17.7 s |
+| [A62](#a62) | Vase shapes in the app: the shape from above (a traced drawing's too), the rim's shape, twist, strength, lattice and rim, undo, and a vase from before them | features/vase/vase.js: the Shape, Texture, Movement and Rim controls and their map chips, the strength curve editors, Make a vase from this line; model.js passing the lattice to the ready list | – |
 | [A63](#a63) | Layout: no overlapping or cut-off words at iPad and laptop sizes, on every tool of the palette | map.js's layout (the band, the chips, a phone's row of the open step's chips), the cards' rows and readouts (app.css), any card that grows wider than the panel | – |
 | [A64](#a64) | Each printer brings its own nozzles and G-code: adding one is an entry in settings.js | a second printer showing the first one's needles, a needle size kept that the new printer doesn't have, the menu's label stuck on Needle, a printer's own G-code lines not reaching the file, and the example printer in settings.js going stale | – |
 | [A65](#a65) | Draw your own from the empty start: the pad takes the strokes, and Trace drawing traces them | the empty start's message (Start with a picture …) staying over the drawing pad, hiding it and catching every stroke, so nothing could be drawn | – |
 | [A66](#a66) | Make a vase from this line: the traced line itself, pushed from the Line tool, becomes the vase | a vase made from a trace that doesn't say which line it used, a pattern's line turned into a coarse, notched outline, and a vase from a line that takes the example vase's bulb and waves | – |
+| [A67](#a67) | Start over in the File menu: two taps clear the design and every setting | a full reset that's hard to find (it was only on the Examples tray), one that clears on a single slip of the finger, or one that keeps the design or a setting | 10.2 s |
 
 #### E01
 
@@ -1197,7 +1198,15 @@ report.
 
 - **Why:** Nicolaas (12 November 2026): making a vase from a pattern, it wasn't clear the trace was used (it was pulled from the vase's Shape tool), and a nice labyrinth became messy (its outside edge on a coarse grid, rounded, on a bulb with waves). The Line tool now pushes the traced line into a vase: the line exactly, at its own size, straight up, no texture or movement.
 - **How:** Opens the labyrinth example (a printer), opens the Line tool, taps Make a vase from this line; reads the vase in use, the Shape tool's words and the model's size; goes to the Print step.
-- **Pass when:** The vase's shape is the drawing, exact (the line itself, over 2000 points), at the drawing's size (within 1 mm of the trace's width), a straight profile, no movement or texture; the Shape tool is open and says it's made from the traced line; the Print step has walls; no page errors.
+- **Pass when:** Rounded to 84% leaves the panel its width; the vase's shape is the drawing, exact (the line itself, over 2000 points), at the drawing's size (within 1 mm of the trace's width), a straight profile, no movement or texture; the Shape tool is open and says it's made from the traced line; the Print step has walls; no page errors.
+
+#### A67
+
+**Start over in the File menu: two taps clear the design and every setting** · `app/A67-start-over.test.js` · slow
+
+- **Why:** Nicolaas (12 November 2026) asked for a full reset or start-over button. The File menu has Start over: the first tap asks (and the menu stays open), the second opens the app as it first opens.
+- **How:** Opens the labyrinth example, sets the base layers to 3, opens File, taps Start over once and reads the menu and the button, taps it again and reads the page after it reloads.
+- **Pass when:** One tap: the menu stays open, the button says Tap again, nothing is cleared; two taps: the app is empty (no design in use), the base layers back to 0, no example in the address; no page errors.
 
 <!-- catalogue:end -->
 

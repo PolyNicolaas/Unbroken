@@ -12,6 +12,33 @@
 // the order listed in index.html.
 "use strict";
 
+// Start over: two taps, the first asks, the second clears: the page opens again as it does at first (no design, every
+// setting back to settings.js; only the browser's layout choices, such as a folded card, are kept). On the Examples
+// tray and in the File menu. b: the button; its first text node is what changes.
+function startOverButton(b) {
+  let sure = 0;
+  const t = [...b.childNodes].find((n) => n.nodeType === 3),
+    was = t.textContent;
+  b.addEventListener("click", (e) => {
+    if (!sure) {
+      e.preventDefault();
+      t.textContent = "Tap again to clear it all";
+      b.classList.add("danger");
+      sure = setTimeout(() => {
+        sure = 0;
+        t.textContent = was;
+        b.classList.remove("danger");
+      }, 4000);
+      return;
+    }
+    clearTimeout(sure);
+    const q = new URLSearchParams(location.search);
+    q.delete("example");
+    location.assign(location.pathname + (q.toString() ? "?" + q : ""));
+  });
+}
+startOverButton($("fileStartOver"));
+
 // ---------- the nodes ----------
 // step: the step (input name="view") its settings are on; cards: the headings of the cards it shows; rows: groups of
 // settings shown as rows ([title, [element ids or fields' control ids]]); cap: its label; val(): its result now
@@ -557,25 +584,7 @@ function mapTray(on) {
       mapTray(false);
       $("anyFile").click();
     });
-    // two taps: the first asks, the second clears (the page opens again as it does at first: nothing in use)
-    let sure = 0;
-    own.querySelector("#startOver").addEventListener("click", (e) => {
-      const b = e.currentTarget;
-      if (!sure) {
-        b.textContent = "Tap again to clear it all";
-        b.classList.add("danger");
-        sure = setTimeout(() => {
-          sure = 0;
-          b.textContent = "Start over";
-          b.classList.remove("danger");
-        }, 4000);
-        return;
-      }
-      clearTimeout(sure);
-      const q = new URLSearchParams(location.search);
-      q.delete("example");
-      location.assign(location.pathname + (q.toString() ? "?" + q : ""));
-    });
+    startOverButton(own.querySelector("#startOver"));
     const grid = document.createElement("div");
     grid.className = "map-tray-grid";
     for (const { key, name, what } of EXAMPLES) {

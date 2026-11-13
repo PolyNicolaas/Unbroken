@@ -3,6 +3,19 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v154 · 2026-11-12
+
+- **Fixed: the Shape panel shifted when you changed Rounded.** A vase made from a line has a long shape name in the
+  panel's header ("the traced line (Labyrinth), as traced, rounded 84%"); it widened the panel past its edge, so
+  everything moved each time the value changed. Long header values are now cut off with "…". A66 checks it.
+- **Start over in the File menu.** A full reset: the first tap asks ("Tap again to clear it all", the menu stays
+  open), the second opens the app as it first opens, with no design and every setting back to its default. It was
+  only on the Examples tray before (still there too). Test A67.
+- **Fixed: a big print looked wrong in the 3D layers view.** With many points (a 75 mm labyrinth vase: 800 000) the
+  view drew only every 20th or so point of each lap, which cut the labyrinth's corners into a jagged mess though the
+  G-code was right. It now drops only the points a straight run doesn't need (within 0.02 mm, more only if it has
+  to), so every corner and every layer is drawn.
+
 ## v153 · 2026-11-12
 
 - **Use the last traced line is gone** from the vase's Shape tool: a vase is made from a trace by pushing it, with

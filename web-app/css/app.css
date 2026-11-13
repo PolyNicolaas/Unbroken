@@ -567,7 +567,12 @@ body[data-screen="out"] .map-node[data-rail="design"], body[data-screen="out"] :
 .map-head-t { align-items: center !important; flex-wrap: nowrap !important; }
 .map-head-t h2 { flex: none; }
 .map-head-t .hint { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+/* a long value in the header (a vase's shape: "the traced line (Labyrinth), as traced, rounded 84%") is cut off with an
+   ellipsis instead of widening the panel, which shifted everything in it each time the value changed */
+.panel > *, .map-head, .map-head-t { min-width: 0; }
+.map-head-t .hint { flex: 1 1 0; }
 .btn.danger { border-color: var(--warn); color: var(--warn); }
+.mitem.danger { color: var(--warn); }
 .map-tray-own { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
 .map-tray-own .spacer { flex: 1; }
 /* the math in its own panel: open, at the panel's width */
