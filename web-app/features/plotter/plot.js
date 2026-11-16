@@ -979,7 +979,14 @@ renderPens();
 shapesUI();
 
 // on the map: made for a pen plotter, the line ends in Plot (no Material step), with Export over it and Fills under
-addOutput("plot", { name: "A pen plotter", icon: "plotter", radio: "artForPlot", step: "plot", up: ["pexport"], down: ["fills"] });
+addOutput("plot", {
+  name: "A pen plotter",
+  icon: "plotter",
+  radio: "artForPlot",
+  step: "plot",
+  up: ["pexport"],
+  down: ["fills"],
+});
 addMapNode("plot", {
   icon: "plotter",
   cap: "Plot",
