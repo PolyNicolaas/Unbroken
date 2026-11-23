@@ -365,6 +365,34 @@ function readyItems() {
       d = st.spacing,
       gap = st.gap * sc;
     add("ok", `Traced: ${st.N} terms, error ${fmt(st.err ? st.err.score * sc : 0)} mm`, "h-fit");
+    if (sizePicked && Math.abs(sizePicked.widthMM - st.outW) < 0.2)
+      add(
+        "ok",
+        `Size picked for you: ${sizePicked.mark}, ${fmt(sizePicked.widthMM, 1)} mm wide (change it under Size)`,
+        "h-size"
+      );
+    // what the trace left out of the picture
+    const far = st.walk && st.walk.dropped;
+    if (far)
+      add(
+        "warn",
+        `${far} far-away part${far === 1 ? "" : "s"} of the picture left out (Drop far-away parts, under Tracing)`,
+        "h-trace"
+      );
+    const cv = coverageNow();
+    if (cv && cv.share >= COVER_WARN)
+      add(
+        "warn",
+        `About ${fmt(100 * cv.share, 0)}% of the picture's dark parts are more than ${fmt(st.spacing, 1)} mm from the line: thin or light parts may be missing. Try Optimize tracing (Line, Fit)`,
+        "h-fit"
+      );
+    const drift = (st.problems && st.problems.driftShare) || 0;
+    if (drift >= 0.025)
+      add(
+        "warn",
+        `${fmt(100 * drift, 0)}% of the line is pushed off the drawing to keep the spacing (bigger keeps it)`,
+        "h-size"
+      );
     if (d > 0 && Number.isFinite(st.gap) && gap < d * 0.8)
       add(
         st.gap < 0.05 ? "bad" : "warn",
@@ -439,12 +467,83 @@ function readyItems() {
     );
   return out;
 }
+// How much of the picture the line reaches: the picture's dark parts read the neutral way Optimize tracing scores
+// against (its inkReference: threshold 0, light smoothing), and the share of them more than one line spacing from the line.
+// The error readout can't tell: it measures the line against the strokes that were traced, not against the picture,
+// so a light or thin part the threshold missed doesn't count there. Worked out once per trace, after it's on screen.
+const COVER_WARN = 0.08;
+let cover = { ver: -1, share: 0 },
+  coverJob = null;
+function coverageNow() {
+  if (!st.final || st.text || isModel() || !st.art || st.art.kind !== "picture" || !heard("inkReference")) return null;
+  if (cover.ver === st.finalVer) return cover;
+  if (!coverJob) coverJob = setTimeout(coverageRun, 60);
+  return null;
+}
+async function coverageRun() {
+  const ver = st.finalVer;
+  try {
+    const W = await working(),
+      ref = answer("inkReference", W), // (optimize.js: the picture read the way Optimize tracing scores it)
+      w = W.w,
+      h = W.h,
+      f = st.final,
+      n = f.re.length,
+      line = new Uint8Array(w * h);
+    if (ver !== st.finalVer) return;
+    for (let i = 0; i < n; i++) {
+      const j = (i + 1) % n,
+        x0 = f.re[i],
+        y0 = f.im[i],
+        steps = Math.max(1, Math.ceil(2 * Math.hypot(f.re[j] - x0, f.im[j] - y0)));
+      for (let k = 0; k < steps; k++) {
+        const x = Math.round(x0 + ((f.re[j] - x0) * k) / steps),
+          y = Math.round(y0 + ((f.im[j] - y0) * k) / steps);
+        if (x >= 0 && y >= 0 && x < w && y < h) line[y * w + x] = 1;
+      }
+    }
+    const dist = UNB.edt(line, w, h).dist,
+      far = Math.max(1.5, st.spacing / scale());
+    let ink = 0,
+      out = 0;
+    for (let i = 0; i < w * h; i++)
+      if (ref.mask[i]) {
+        ink++;
+        if (dist[i] > far) out++;
+      }
+    cover = { ver, share: ink ? out / ink : 0 };
+  } catch (e) {
+    cover = { ver, share: 0 };
+  } finally {
+    coverJob = null;
+  }
+  if (ver === st.finalVer) readyUI();
+}
 // Show a card: the step of the map that holds it (map.js)
 function showCard(card) {
   const id = mapNodeOf(card.querySelector("h2").id);
   if (id) mapOpen(id);
 }
+// An export's message says which file was made; once the design changes it no longer describes what's on screen
+const exportedFor = new Map(); // message element → the design it was made from
+const exportKey = () =>
+  [
+    st.finalVer,
+    $("designName").value,
+    $("copies").value,
+    $("outW").value,
+    lineWidthMM(),
+    isModel() && st.model ? st.model.__id || st.srcLabel : "",
+  ].join("|");
+function clearStaleExports() {
+  for (const [el, k] of exportedFor)
+    if (k !== exportKey()) {
+      setStatus(el, "", "");
+      exportedFor.delete(el);
+    }
+}
 function readyUI() {
+  clearStaleExports();
   const items = readyItems(),
     ul = $("readyList");
   ul.textContent = "";
@@ -473,7 +572,8 @@ async function exportAs(fmtName, msg) {
     setStatus(msg, "bad", "Load a model first.");
     return;
   }
-  const asDrawn = fmtName === "svg" && ask("drawnAsIs").some(Boolean); // (plot.js: the art's lines as drawn, no trace needed)
+  // (plot.js: the art's lines as drawn, no trace needed)
+  const asDrawn = fmtName === "svg" && ask("drawnAsIs").some(Boolean);
   if (isModel() && fmtName === "svg" && !asDrawn) {
     setStatus(
       msg,
@@ -510,6 +610,7 @@ async function exportAs(fmtName, msg) {
   try {
     await saveFile(f.name, data);
     setStatus(msg, "ok", `Exported ${f.name} · ${f.info}`);
+    exportedFor.set(msg, exportKey());
   } catch (e) {
     setStatus(msg, "bad", saveError(e, "Export") + ".");
   }

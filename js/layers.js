@@ -1024,6 +1024,7 @@ function drawLapStack(c) {
     if (!drag) return;
     stackTurn.az = drag.az + (e.clientX - drag.x) * 0.01;
     stackTurn.el = Math.min(Math.PI / 2, Math.max(0, drag.el + (e.clientY - drag.y) * 0.01));
+    $("pvAbove").checked = false;
     drawStack();
   });
   for (const ev of ["pointerup", "pointercancel"])
@@ -1033,9 +1034,15 @@ function drawLapStack(c) {
     });
   cv.addEventListener("dblclick", () => {
     Object.assign(stackTurn, STACK_TURN0);
+    $("pvAbove").checked = false;
     drawStack();
   });
 })();
+// From above: straight down on the plate (a turn or tilt by hand leaves it)
+$("pvAbove").addEventListener("change", () => {
+  Object.assign(stackTurn, $("pvAbove").checked ? { az: 0, el: Math.PI / 2 } : STACK_TURN0);
+  drawStack();
+});
 new ResizeObserver(() => drawStack()).observe($("stackView"));
 for (const id of ["gFeed", "gZ", "layerTime"])
   $(id).addEventListener("input", () => {

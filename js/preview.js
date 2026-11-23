@@ -171,7 +171,8 @@ function render() {
     renderDraw();
     return;
   }
-  if (ask("toolRender", st.tool).some(Boolean)) return; // (cutout.js draws its own tool: the picture, what's removed whitened)
+  // (cutout.js draws its own tool: the picture, what's removed whitened)
+  if (ask("toolRender", st.tool).some(Boolean)) return;
   if (lineModeNow() === "none") return renderPictureOnly(); // workflow.js: Trace off, a picture
   if (!st.w) return;
   const v = view();
@@ -567,11 +568,17 @@ function drawBox(g, T, dpr) {
     right = sides.filter((s2, k) => k % 2 === 1).sort((a, z) => z.mid[0] - a.mid[0])[0];
   label(`${fmt(bottom.len * sc, dec)} ${u}`, bottom.p, bottom.q, outward(bottom.p, bottom.q));
   label(`${fmt(right.len * sc, dec)} ${u}`, right.p, right.q, outward(right.p, right.q));
-  if (Math.abs(b.angle) >= 0.5) {
+  // what the box is: the smallest round the printed line (needle width included), at its own angle; the drawing
+  // itself isn't turned
+  {
     const top = c.slice().sort((a, z) => a[1] - z[1])[0];
     g.fillStyle = css("--accent");
     g.textAlign = "left";
-    g.fillText(`tilted ${fmt(Math.abs(b.angle), 0)}°`, top[0] + 6 * dpr, top[1] - 10 * dpr);
+    g.fillText(
+      Math.abs(b.angle) >= 0.5 ? `as printed · smallest box at ${fmt(Math.abs(b.angle), 0)}°` : "as printed",
+      top[0] + 6 * dpr,
+      top[1] - 10 * dpr
+    );
   }
   g.restore();
 }

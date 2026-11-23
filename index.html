@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v155">
-<link rel="stylesheet" href="css/app.css?v=v155">
+<link rel="stylesheet" href="css/theme.css?v=v156">
+<link rel="stylesheet" href="css/app.css?v=v156">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
-<body data-view="art" data-stage="line" data-art="picture" data-copies="one">
+<body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v155</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v156</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -39,7 +39,7 @@
         <div class="stage-pane" id="panePlate"><canvas class="plate" id="plate" aria-label="The drawing placed on the 340 by 232 mm print plate"></canvas></div>
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
-        <div class="chip" id="chip">loading…</div>
+        <div class="chip" id="chip" role="status" aria-live="polite">loading…</div>
         <div data-feature="patterns" class="moled" id="pathEd" hidden role="dialog" aria-modal="true" aria-label="Draw the centre's path">
           <div class="me-top"><p class="hint" id="peHint">Drag the path the ring's centre should follow, from its start to its end. The faint figure is the ring at rest; the dashed box is the frame. Start outside it if you like.</p></div>
           <div class="me-stage"><canvas id="peView" aria-label="The centre's path being drawn"></canvas></div>
@@ -111,6 +111,7 @@
         <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
         <div class="pathbar" role="group" aria-label="What the view shows">
           <label class="check pv-3d" title="Each line as the chocolate bead it prints: the needle's width, one layer tall, at true height"><input type="checkbox" id="pvSolid" checked> <span>Solid (as printed)</span></label>
+          <label class="check pv-3d" title="Look straight down on the print, the way it lies on the plate: easiest for checking lettering"><input type="checkbox" id="pvAbove"> <span>From above</span></label>
           <label class="check" title="The line's layers"><input type="checkbox" id="pvWall" checked> <span class="pv-sw" data-k="wall"></span>Walls</label>
           <label class="check" title="The filled base's lines (Print step, Filled base)"><input type="checkbox" id="pvFill" checked> <span class="pv-sw" data-k="fill"></span>Fill</label>
           <label class="check pv-whole" title="Moves between copies, needle up: no chocolate"><input type="checkbox" id="pvTravel" checked> <span class="pv-sw" data-k="travel"></span>Travel</label>
@@ -461,6 +462,7 @@
     <section class="card art-only art-picture" aria-labelledby="h-pic">
       <h2 id="h-pic">Picture <span id="picVal"></span></h2>
       <div class="inline"><button data-feature="camera" class="btn primary" type="button" id="picCamera" title="A drawing, a print or anything else, with the camera: the page is found and straightened">Take a picture</button><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
+      <div class="inline link-row"><input type="url" id="picUrl" placeholder="or paste a link: https://…/picture.png" aria-label="Link to a picture"><button class="btn" type="button" id="picUrlGo">Open link</button></div>
       <input type="file" id="picFile" accept="image/*" hidden>
       <input data-feature="camera" type="file" id="camFile" accept="image/*" capture="environment" hidden>
       <div data-feature="camera" class="photo-box" id="photoBox">
@@ -843,7 +845,7 @@
     <section class="card design-only" aria-labelledby="h-size">
       <h2 id="h-size">Size</h2>
       <div class="row" id="sizeRow">
-        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo"></span></div>
+        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo" title="Width and Height are the drawing's box; the line itself can sit just inside or over it. The preview's dashed box is the smallest box round the printed line at any angle, the needle's width included."></span></div>
         <div class="size-track">
           <input type="range" id="sizeSlider" min="0" max="1000" value="500" aria-describedby="sizeHint">
           <div class="size-marks" id="sizeMarks" aria-hidden="true"></div>
@@ -867,6 +869,10 @@
 
     <section class="card design-only" aria-labelledby="h-fit">
       <h2 id="h-fit">Fit <span id="fitinfo"></span></h2>
+      <div data-feature="optimize" class="inline opt-row">
+        <button class="btn" type="button" id="optBtn" title="Try tracing settings and keep the printable result closest to the image">Optimize tracing</button>
+        <span class="hint" id="optInfo">Tries tracing settings; your size, needle and painted areas stay as they are. <span class="slow">Can take a minute.</span></span>
+      </div>
       <div class="row">
         <div class="lab"><label for="terms">Complexity (terms)</label><span class="val" id="termsVal"></span></div>
         <div class="inline"><input type="range" id="terms" min="0" max="1000" value="600"><button class="btn" type="button" id="auto" title="Fewest terms that keep 95% of the line within about a third of a traced pixel of its path">Auto</button></div>
@@ -876,10 +882,6 @@
         <div title="How far the drawn line strays from the path it was fitted to (the strokes, their doubled strands and loops): half stray plus missing"><b id="rScore">–</b><small>error (mm)</small></div>
         <div><b id="rStray">–</b><small>stray (mm)</small></div>
         <div><b id="rMiss">–</b><small>missing (mm)</small></div>
-      </div>
-      <div data-feature="optimize" class="inline">
-        <button class="btn" type="button" id="optBtn" title="Try tracing settings and keep the printable result closest to the image">Optimize tracing</button>
-        <span class="hint" id="optInfo">Tries tracing settings; your size, needle and painted areas stay as they are. <span class="slow">Can take a minute.</span></span>
       </div>
     </section>
 
@@ -971,63 +973,63 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v155"></script>
-<script src="01-image.js?v=v155"></script>
-<script src="02-lines.js?v=v155"></script>
-<script src="03-text.js?v=v155"></script>
-<script src="04-walk.js?v=v155"></script>
-<script src="05-fill.js?v=v155"></script>
-<script src="06-fourier.js?v=v155"></script>
-<script src="07-measure.js?v=v155"></script>
-<script src="08-shape.js?v=v155"></script>
-<script src="09-plate.js?v=v155"></script>
-<script src="10-export.js?v=v155"></script>
-<script src="11-stages.js?v=v155"></script>
-<script src="12-models.js?v=v155"></script>
-<script src="13-patterns.js?v=v155"></script>
-<script src="14-photo.js?v=v155"></script>
-<script src="15-cutout.js?v=v155"></script>
-<script src="16-molecule.js?v=v155"></script>
-<script src="17-vase.js?v=v155"></script>
-<script src="core.js?v=v155"></script>
-<script src="fonts.js?v=v155"></script>
-<script src="settings.js?v=v155"></script>
-<script src="js/state.js?v=v155"></script>
-<script src="js/ui.js?v=v155"></script>
-<script src="js/config.js?v=v155"></script>
-<script src="js/engine-bridge.js?v=v155"></script>
-<script src="js/source.js?v=v155"></script>
-<script src="js/pipeline.js?v=v155"></script>
-<script src="js/preview.js?v=v155"></script>
-<script src="js/tools.js?v=v155"></script>
-<script src="js/art.js?v=v155"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v155");</script>
-<script src="js/readouts.js?v=v155"></script>
-<script src="js/controls.js?v=v155"></script>
-<script>feature("levels", "features/levels/levels.js?v=v155");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v155");</script>
-<script src="js/export.js?v=v155"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v155");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v155");</script>
-<script src="js/views.js?v=v155"></script>
-<script src="js/zoom.js?v=v155"></script>
-<script src="js/layers.js?v=v155"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v155");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v155");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v155");</script>
-<script src="js/workflow.js?v=v155"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v155");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v155");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v155");</script>
-<script>feature("camera", "features/camera/camera.js?v=v155");</script>
-<script src="js/steppers.js?v=v155"></script>
-<script src="js/scroll.js?v=v155"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v155");</script>
-<script>feature("model", "features/model/model.js?v=v155");</script>
-<script>feature("vase", "features/vase/vase.js?v=v155");</script>
-<script src="js/history.js?v=v155"></script>
-<script src="js/map.js?v=v155"></script>
-<script src="js/main.js?v=v155"></script>
+<script src="00-util.js?v=v156"></script>
+<script src="01-image.js?v=v156"></script>
+<script src="02-lines.js?v=v156"></script>
+<script src="03-text.js?v=v156"></script>
+<script src="04-walk.js?v=v156"></script>
+<script src="05-fill.js?v=v156"></script>
+<script src="06-fourier.js?v=v156"></script>
+<script src="07-measure.js?v=v156"></script>
+<script src="08-shape.js?v=v156"></script>
+<script src="09-plate.js?v=v156"></script>
+<script src="10-export.js?v=v156"></script>
+<script src="11-stages.js?v=v156"></script>
+<script src="12-models.js?v=v156"></script>
+<script src="13-patterns.js?v=v156"></script>
+<script src="14-photo.js?v=v156"></script>
+<script src="15-cutout.js?v=v156"></script>
+<script src="16-molecule.js?v=v156"></script>
+<script src="17-vase.js?v=v156"></script>
+<script src="core.js?v=v156"></script>
+<script src="fonts.js?v=v156"></script>
+<script src="settings.js?v=v156"></script>
+<script src="js/state.js?v=v156"></script>
+<script src="js/ui.js?v=v156"></script>
+<script src="js/config.js?v=v156"></script>
+<script src="js/engine-bridge.js?v=v156"></script>
+<script src="js/source.js?v=v156"></script>
+<script src="js/pipeline.js?v=v156"></script>
+<script src="js/preview.js?v=v156"></script>
+<script src="js/tools.js?v=v156"></script>
+<script src="js/art.js?v=v156"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v156");</script>
+<script src="js/readouts.js?v=v156"></script>
+<script src="js/controls.js?v=v156"></script>
+<script>feature("levels", "features/levels/levels.js?v=v156");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v156");</script>
+<script src="js/export.js?v=v156"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v156");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v156");</script>
+<script src="js/views.js?v=v156"></script>
+<script src="js/zoom.js?v=v156"></script>
+<script src="js/layers.js?v=v156"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v156");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v156");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v156");</script>
+<script src="js/workflow.js?v=v156"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v156");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v156");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v156");</script>
+<script>feature("camera", "features/camera/camera.js?v=v156");</script>
+<script src="js/steppers.js?v=v156"></script>
+<script src="js/scroll.js?v=v156"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v156");</script>
+<script>feature("model", "features/model/model.js?v=v156");</script>
+<script>feature("vase", "features/vase/vase.js?v=v156");</script>
+<script src="js/history.js?v=v156"></script>
+<script src="js/map.js?v=v156"></script>
+<script src="js/main.js?v=v156"></script>
 
 </body>
 </html>

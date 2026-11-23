@@ -329,6 +329,10 @@ $("picAngle").addEventListener("input", () => {
 
 // the picture card
 $("picChoose").addEventListener("click", () => $("picFile").click());
+$("picUrlGo").addEventListener("click", () => loadURL($("picUrl").value)); // controls.js
+$("picUrl").addEventListener("keydown", (e) => {
+  if (e.key === "Enter") loadURL($("picUrl").value);
+});
 $("picFile").addEventListener("change", () => {
   loadFile($("picFile").files[0]); // controls.js: becomes the picture
   $("picFile").value = "";
@@ -394,4 +398,6 @@ function startInput() {
   if ((EXAMPLES.find((x) => x.key === key) || {}).blank) artUse("picture");
   if (useExample(key)) return;
   artUse("picture"); // empty: no picture yet
+  const src = new URLSearchParams(location.search).get("src");
+  if (src) loadURL(src); // controls.js: ?src=https://… opens that picture
 }
