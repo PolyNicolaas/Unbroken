@@ -517,7 +517,7 @@ async function coverageRun() {
   } finally {
     coverJob = null;
   }
-  if (ver === st.finalVer) readyUI();
+  if (ver === st.finalVer && st.layers) readyUI(); // (before the layers are built, they'll call it themselves)
 }
 // Show a card: the step of the map that holds it (map.js)
 function showCard(card) {

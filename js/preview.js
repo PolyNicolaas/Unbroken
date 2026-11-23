@@ -574,11 +574,13 @@ function drawBox(g, T, dpr) {
     const top = c.slice().sort((a, z) => a[1] - z[1])[0];
     g.fillStyle = css("--accent");
     g.textAlign = "left";
-    g.fillText(
-      Math.abs(b.angle) >= 0.5 ? `as printed · smallest box at ${fmt(Math.abs(b.angle), 0)}°` : "as printed",
-      top[0] + 6 * dpr,
-      top[1] - 10 * dpr
-    );
+    const t = Math.abs(b.angle) >= 0.5 ? `as printed · smallest box at ${fmt(Math.abs(b.angle), 0)}°` : "as printed",
+      // over the box's left side, kept on the canvas (a box near the right edge would push it off)
+      x = Math.max(
+        4 * dpr,
+        Math.min(Math.min(...c.map((p) => p[0])), g.canvas.width - g.measureText(t).width - 4 * dpr)
+      );
+    g.fillText(t, x, Math.max(10 * dpr, top[1] - 10 * dpr));
   }
   g.restore();
 }
