@@ -65,7 +65,8 @@
     const H0 = hull(P),
       G = [];
     for (const [x, y] of H0)
-      for (let k = 0; k < K; k++) G.push([x + r * Math.cos((2 * Math.PI * k) / K), y + r * Math.sin((2 * Math.PI * k) / K)]);
+      for (let k = 0; k < K; k++)
+        G.push([x + r * Math.cos((2 * Math.PI * k) / K), y + r * Math.sin((2 * Math.PI * k) / K)]);
     const H = hull(G);
     return H.length < 3 ? null : { x: H.map((p) => p[0]), y: H.map((p) => p[1]) };
   }

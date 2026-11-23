@@ -48,7 +48,9 @@ function applyPrinter(resetFields = true) {
       "Its own lines",
       ["layerGcode", "copyStartGcode", "copyEndGcode"]
         .filter((k) => (P[k] || []).length)
-        .map((k) => ({ layerGcode: "each layer", copyStartGcode: "before each copy", copyEndGcode: "after each copy" })[k])
+        .map(
+          (k) => ({ layerGcode: "each layer", copyStartGcode: "before each copy", copyEndGcode: "after each copy" })[k]
+        )
         .join(", ") || "none",
     ],
     ["Coordinates", "absolute, mm"],
@@ -73,7 +75,10 @@ $("printer").addEventListener("change", () => {
   if (!st.needleCustom) {
     const L = CFG.needles,
       keep = L.find((n) => n.id === was) || L.find((n) => n.id === CFG.printer.defaultNozzle);
-    const near = L.reduce((a, n) => (Math.abs(n.insideDiameter - wasD) < Math.abs(a.insideDiameter - wasD) ? n : a), L[0]);
+    const near = L.reduce(
+      (a, n) => (Math.abs(n.insideDiameter - wasD) < Math.abs(a.insideDiameter - wasD) ? n : a),
+      L[0]
+    );
     selectNeedle((keep || near).id);
     $("needle").dispatchEvent(new Event("change", { bubbles: true }));
   } else $("needle").value = "custom";
@@ -401,7 +406,8 @@ for (const m of MENUS) {
       });
     placeMenu(m);
   });
-  m.querySelectorAll(".mitem:not(.keep)").forEach((b) => // (keep: Start over asks first, the menu open)
+  m.querySelectorAll(".mitem:not(.keep)").forEach((b) =>
+    // (keep: Start over asks first, the menu open)
     b.addEventListener("click", () => {
       m.open = false;
     })

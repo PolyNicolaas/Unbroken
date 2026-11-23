@@ -256,7 +256,13 @@ const mapSvg = (name) =>
   `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${MAP_ICONS[name] || MAP_ICONS.dot}"/></svg>`;
 // the source tool's icon and name follow what the art is
 const mapArtKind = () =>
-  st.art.kind === "model" ? (st.model && st.model.vase ? "vase" : "model") : st.art.kind in MAP_ICONS ? st.art.kind : "picture";
+  st.art.kind === "model"
+    ? st.model && st.model.vase
+      ? "vase"
+      : "model"
+    : st.art.kind in MAP_ICONS
+      ? st.art.kind
+      : "picture";
 const mapIcon = (id) => (id === "art" ? mapArtKind() : MAP_NODES[id].icon || id);
 const mapCap = (id) =>
   id === "art"
@@ -312,7 +318,8 @@ function mapButton(id, rail) {
     el.className = "map-node";
     el.dataset.node = id;
     el.dataset.key = key;
-    el.innerHTML = '<span class="map-ico"></span><span class="map-cap"></span><span class="map-val"></span><span class="map-dot"></span>';
+    el.innerHTML =
+      '<span class="map-ico"></span><span class="map-cap"></span><span class="map-val"></span><span class="map-dot"></span>';
     el.addEventListener("click", () => {
       if (MAP_NODES[id].tray) return mapTray(!mapTrayOpen);
       if (mapOpenId === id && !mapShut && mapScreen === rail) return mapClose();
@@ -649,7 +656,13 @@ $("mapRecipeReset").addEventListener("click", () => $("tuneReset").click());
 $("mapClose").addEventListener("click", mapClose);
 // Esc closes the panel (not while typing in it)
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !e.defaultPrevented && !/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && !mapShut && mapOpenId)
+  if (
+    e.key === "Escape" &&
+    !e.defaultPrevented &&
+    !/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) &&
+    !mapShut &&
+    mapOpenId
+  )
     mapClose();
 });
 // the Drawing tool: Play, and the speed and circles (the View menu's, kept the same both ways)

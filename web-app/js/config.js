@@ -151,7 +151,8 @@ const CFG = (() => {
     notes = [];
   if (!raw || typeof raw !== "object") {
     // the built-in settings: one printer, with the built-in needles as its nozzles
-    const b = structuredClone(BUILTIN), { needles, ...rest } = b;
+    const b = structuredClone(BUILTIN),
+      { needles, ...rest } = b;
     b.printers[0] = { ...b.printers[0], nozzles: needles, nozzleName: "Needle", defaultNozzle: null };
     const out = Object.assign(rest, {
       printer: b.printers[0],
@@ -171,8 +172,12 @@ const CFG = (() => {
   // ("#2e9e4f": the hub's), colorName and gauge.
   const nozzleList = (list, what) =>
     (Array.isArray(list) ? list : []).filter((n, i) => {
-      const ok = n && typeof n.id === "string" && num(n.insideDiameter, 0.05, 10) && (n.color == null || hexColor(n.color));
-      if (!ok) notes.push(`${what} ${i + 1} skipped: it needs an id and an insideDiameter in mm (and a colour like "#2e9e4f", if any)`);
+      const ok =
+        n && typeof n.id === "string" && num(n.insideDiameter, 0.05, 10) && (n.color == null || hexColor(n.color));
+      if (!ok)
+        notes.push(
+          `${what} ${i + 1} skipped: it needs an id and an insideDiameter in mm (and a colour like "#2e9e4f", if any)`
+        );
       return ok;
     });
   out.sharedNozzles = nozzleList(raw.needles, "needle");
