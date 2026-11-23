@@ -3,6 +3,16 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v157 · 2026-11-23
+
+- **Fixed: the preview's "as printed" label ran off the edge** when the box reached the right side of the view (the
+  Polimeks logo showed "as"). It now sits over the box's left side, kept on the canvas.
+- **Fixed: a warning dot on Print… straight after a trace.** v156's check of how much of the picture the line misses
+  refreshed the ready list before the layers were built, so it said "Layers still being worked out". It now leaves
+  that to the layers.
+- Tried on the live site: the Polimeks logo from its Wikimedia link (`?src=`) now comes in at 1600 × 685 px in its own
+  shape and traces with the thin ring round the "P" (817 terms, 64.4 mm, the line missing under 1% of the picture).
+
 ## v156 · 2026-11-23
 
 Fixes from the first agent trial (docs/AGENT-TRIAL.md: the Polimeks logo from a link to G-code, pointing and
