@@ -166,12 +166,30 @@ function loadFile(f, label) {
     setChip("That file isn't an image. Try a PNG, JPG or SVG.");
     return;
   } // checked first, so a wrong file changes nothing
+  busyFor("load", true); // until the picture is read (body data-state stays "working")
   const url = URL.createObjectURL(f),
-    img = new Image();
-  img.onload = () => {
+    img = new Image(),
+    svg = /svg/.test(f.type || "") || /\.svg$/i.test(f.name || "");
+  img.onload = async () => {
+    // An SVG is drawn at a size worth tracing (its longest side 1600 px), in the shape of its viewBox: one with only a
+    // viewBox has no size of its own, and the browser would give it 300 × 150 or nothing.
+    let w = img.naturalWidth,
+      h = img.naturalHeight;
+    if (svg) {
+      const vb = ((await f.text().catch(() => "")).match(/viewBox\s*=\s*["']([^"']+)["']/i) || [])[1],
+        n = vb
+          ? vb
+              .trim()
+              .split(/[\s,]+/)
+              .map(Number)
+          : [];
+      if (n.length === 4 && n[2] > 0 && n[3] > 0) [w, h] = [n[2], n[3]];
+      const k = w > 0 && h > 0 ? 1600 / Math.max(w, h) : 0;
+      if (k > 1) [w, h] = [Math.round(w * k), Math.round(h * k)];
+    }
     const c = document.createElement("canvas");
-    c.width = img.naturalWidth || 800;
-    c.height = img.naturalHeight || 600;
+    c.width = w || 800;
+    c.height = h || 600;
     const g = c.getContext("2d");
     g.fillStyle = "#fff";
     g.fillRect(0, 0, c.width, c.height);
@@ -180,12 +198,46 @@ function loadFile(f, label) {
     const name = label || f.name || "image";
     artUsePicture(c, name.length > 22 ? name.slice(0, 20) + "…" : name); // art.js: into the chosen picture layer
     $("selectBtn").textContent = "Select area";
+    busyFor("load", false);
   };
   img.onerror = () => {
+    busyFor("load", false);
     URL.revokeObjectURL(url);
     setChip("That file couldn't be read as an image");
   };
   img.src = url;
+}
+
+// A picture from a link (the Picture card's link box, a pasted link, or ?src= in the page's address): fetched and
+// opened
+// like a chosen file. Works when the site allows other pages to load its pictures (most image hosts and Wikimedia do);
+// when it doesn't, the message says to save the picture and choose the file.
+async function loadURL(url) {
+  url = String(url || "").trim();
+  if (!/^https?:\/\/\S+$/i.test(url)) {
+    setChip("That isn't a link to a picture: it should start with https://");
+    return false;
+  }
+  setChip("Opening the picture from the link…");
+  busyFor("link", true);
+  try {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error(`the site answered ${r.status}`);
+    const b = await r.blob(),
+      name = decodeURIComponent(new URL(url).pathname.split("/").pop() || "linked picture"),
+      type =
+        b.type && b.type !== "application/octet-stream" ? b.type : /\.svg$/i.test(name) ? "image/svg+xml" : "image/png";
+    if (!type.startsWith("image/")) throw new Error("the link isn't a picture");
+    loadFile(new File([b], name, { type }));
+    return true;
+  } catch (e) {
+    setChip(
+      `Couldn't open that link (${/fetch|network/i.test(e.message) ? "the site doesn't share its pictures with other pages" : e.message}). Save the picture and choose the file instead.`
+    );
+    return false;
+  } finally {
+    busyFor("link", false);
+  }
 }
 
 // size + units

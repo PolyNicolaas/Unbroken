@@ -591,6 +591,7 @@ function setSize(W, byUser) {
   st.outW = W;
   if (byUser) {
     st.sizeUser = true;
+    sizePicked = null;
     if (artForPlot()) st.pageFit = false; // a size set by hand: no longer fitted to the page (Fit the page)
     recordSoon();
     artSized(W); // art.js: a pattern keeps the width set by hand
@@ -720,12 +721,18 @@ async function sizeMarks(g) {
 // size stays where it is when the line width, gap or anything else moves the marks, so changing the gap doesn't change
 // the print's size. Only when the size has become too small to keep the lines apart does it grow, to the new smallest,
 // and says so.
+// The size the app picked for a new picture (its starting mark), until a size is set by hand: said in the ready list
+// and window.unbroken.status(), so nobody wonders why the print shrank. { mark, widthMM } or null.
+let sizePicked = null;
 function placeSize() {
   const m = st.marks,
     pref = CFG.defaults.size,
     first = !st.sizeUser;
   let target = first && m.fits && typeof pref === "string" ? m[pref] : st.outW;
   if (!Number.isFinite(target)) target = st.outW;
+  if (first) sizePicked = null;
+  if (first && m.fits && typeof pref === "string" && Number.isFinite(m[pref]))
+    sizePicked = { mark: (SIZE_MARKS.find(([k]) => k === pref) || [pref, pref])[1], widthMM: +target.toFixed(1) };
   const page = ask("fitWidth").find(Boolean); // (plot.js: made for plotting, it fills the page)
   if (page) target = page;
   if (first && m.fits) st.sizeUser = true; // placed once: the size is yours now
@@ -825,7 +832,7 @@ function finalizeReadout() {
   // (the line as it prints; the Width and Height below are the drawing's box, which the line can sit inside or
   // just over)
   $("sizeInfo").textContent =
-    `line ${fmt((b.x1 - b.x0) * sc, 1)} × ${fmt((b.y1 - b.y0) * sc, 1)} mm` +
+    `the line itself ${fmt((b.x1 - b.x0) * sc, 1)} × ${fmt((b.y1 - b.y0) * sc, 1)} mm` +
     (m && m.fits ? ` · ×${fmt(st.outW / m.smallest, 1)} smallest` : "");
   const share = (st.problems && st.problems.driftShare) || 0,
     dh = $("driftHint"); // the line pushed off the drawing (shaded in the preview)

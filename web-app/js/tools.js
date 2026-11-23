@@ -177,7 +177,7 @@ function updateSelHint() {
     ? "Drag again to redo it, or trace this selection."
     : lasso
       ? "Draw around the part of the image you want traced."
-      : "Drag a box over the part of the image you want traced.";
+      : "The preview shows the whole picture now: drag a box over the part you want traced.";
 }
 function applySel(poly) {
   st.sel = poly;
@@ -494,5 +494,13 @@ document.addEventListener("paste", (e) => {
   if (item) {
     e.preventDefault();
     loadFile(item.getAsFile(), "pasted image");
+    return;
+  }
+  // a pasted link to a picture, outside a text box, opens it (controls.js loadURL)
+  const t = e.clipboardData && e.clipboardData.getData("text/plain").trim(),
+    inBox = e.target && /^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName);
+  if (t && !inBox && /^https?:\/\/\S+\.(png|jpe?g|gif|webp|svg|bmp)(\?\S*)?$/i.test(t)) {
+    e.preventDefault();
+    loadURL(t);
   }
 });

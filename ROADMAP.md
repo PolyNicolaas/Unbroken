@@ -20,6 +20,14 @@ Last sorted: 10 November 2026 (v143: the map of the steps and its next steps add
 - **Side-by-side checks on the Mac** (written for v92): the six drawing challenges (their SVGs are only on the Mac),
   then `compare.js` against the last run. *Now v99: replace with a fresh baseline run.*
 
+- **Agents** (23 November 2026, [`docs/AGENT-TRIAL.md`](docs/AGENT-TRIAL.md)): an agent takes a picture to G-code
+  for Nicolaas, and later for makers through the hosted app (DATA-PLAN.md). Options first, then refine in plain words.
+  Next: **picture pieces** ([`docs/PICTURE-PIECES.md`](docs/PICTURE-PIECES.md): each piece its own G-code, at the
+  picture's scale), then **variations side by side** (keep several versions of a design with their numbers and pick
+  one). Later: the recipe format and the engine running in Node (a CLI), an MCP server on top of it, then hosted.
+  Small ones left from the trial: the smallest letter feature against the needle in the ready list; size as something
+  Optimize tracing can change. How an agent drives the app: [`web-app/AGENT.md`](web-app/AGENT.md).
+
 ## 1 · Bugs and quality
 
 Known bugs:

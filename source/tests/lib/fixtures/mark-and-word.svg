@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 340 146">
+  <!-- A test logo made for Unbroken's tests (no real company): a bold P with a thin light-grey ring round its stem,
+       over a bold word with a dotted İ. Only a viewBox, no width or height, like many logos. -->
+  <ellipse cx="170" cy="48" rx="62" ry="12" fill="none" stroke="#8a8f99" stroke-width="3"/>
+  <path d="M150 8 h32 a26 22 0 0 1 0 44 h-14 v38 h-18 z M168 22 v16 h12 a8 8 0 0 0 0 -16 z" fill="#1d3550" fill-rule="evenodd"/>
+  <g fill="#1d3550" font-family="DejaVu Sans, Arial, sans-serif" font-weight="bold" font-size="40">
+    <text x="170" y="138" text-anchor="middle" letter-spacing="1">TOVARKE</text>
+  </g>
+  <circle cx="170" cy="100" r="3.5" fill="#1d3550"/>
+</svg>

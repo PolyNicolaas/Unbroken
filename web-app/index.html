@@ -10,7 +10,7 @@
 <link rel="stylesheet" href="css/app.css">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
-<body data-view="art" data-stage="line" data-art="picture" data-copies="one">
+<body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
@@ -39,7 +39,7 @@
         <div class="stage-pane" id="panePlate"><canvas class="plate" id="plate" aria-label="The drawing placed on the 340 by 232 mm print plate"></canvas></div>
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
-        <div class="chip" id="chip">loading…</div>
+        <div class="chip" id="chip" role="status" aria-live="polite">loading…</div>
         <div data-feature="patterns" class="moled" id="pathEd" hidden role="dialog" aria-modal="true" aria-label="Draw the centre's path">
           <div class="me-top"><p class="hint" id="peHint">Drag the path the ring's centre should follow, from its start to its end. The faint figure is the ring at rest; the dashed box is the frame. Start outside it if you like.</p></div>
           <div class="me-stage"><canvas id="peView" aria-label="The centre's path being drawn"></canvas></div>
@@ -111,6 +111,7 @@
         <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
         <div class="pathbar" role="group" aria-label="What the view shows">
           <label class="check pv-3d" title="Each line as the chocolate bead it prints: the needle's width, one layer tall, at true height"><input type="checkbox" id="pvSolid" checked> <span>Solid (as printed)</span></label>
+          <label class="check pv-3d" title="Look straight down on the print, the way it lies on the plate: easiest for checking lettering"><input type="checkbox" id="pvAbove"> <span>From above</span></label>
           <label class="check" title="The line's layers"><input type="checkbox" id="pvWall" checked> <span class="pv-sw" data-k="wall"></span>Walls</label>
           <label class="check" title="The filled base's lines (Print step, Filled base)"><input type="checkbox" id="pvFill" checked> <span class="pv-sw" data-k="fill"></span>Fill</label>
           <label class="check pv-whole" title="Moves between copies, needle up: no chocolate"><input type="checkbox" id="pvTravel" checked> <span class="pv-sw" data-k="travel"></span>Travel</label>
@@ -461,6 +462,7 @@
     <section class="card art-only art-picture" aria-labelledby="h-pic">
       <h2 id="h-pic">Picture <span id="picVal"></span></h2>
       <div class="inline"><button data-feature="camera" class="btn primary" type="button" id="picCamera" title="A drawing, a print or anything else, with the camera: the page is found and straightened">Take a picture</button><button class="btn" type="button" id="picChoose">Choose an image…</button><button class="btn" type="button" id="picDraw" title="Sketch with a mouse, finger or stylus on the preview">Draw your own</button></div>
+      <div class="inline link-row"><input type="url" id="picUrl" placeholder="or paste a link: https://…/picture.png" aria-label="Link to a picture"><button class="btn" type="button" id="picUrlGo">Open link</button></div>
       <input type="file" id="picFile" accept="image/*" hidden>
       <input data-feature="camera" type="file" id="camFile" accept="image/*" capture="environment" hidden>
       <div data-feature="camera" class="photo-box" id="photoBox">
@@ -843,7 +845,7 @@
     <section class="card design-only" aria-labelledby="h-size">
       <h2 id="h-size">Size</h2>
       <div class="row" id="sizeRow">
-        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo"></span></div>
+        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo" title="Width and Height are the drawing's box; the line itself can sit just inside or over it. The preview's dashed box is the smallest box round the printed line at any angle, the needle's width included."></span></div>
         <div class="size-track">
           <input type="range" id="sizeSlider" min="0" max="1000" value="500" aria-describedby="sizeHint">
           <div class="size-marks" id="sizeMarks" aria-hidden="true"></div>
@@ -867,6 +869,10 @@
 
     <section class="card design-only" aria-labelledby="h-fit">
       <h2 id="h-fit">Fit <span id="fitinfo"></span></h2>
+      <div data-feature="optimize" class="inline opt-row">
+        <button class="btn" type="button" id="optBtn" title="Try tracing settings and keep the printable result closest to the image">Optimize tracing</button>
+        <span class="hint" id="optInfo">Tries tracing settings; your size, needle and painted areas stay as they are. <span class="slow">Can take a minute.</span></span>
+      </div>
       <div class="row">
         <div class="lab"><label for="terms">Complexity (terms)</label><span class="val" id="termsVal"></span></div>
         <div class="inline"><input type="range" id="terms" min="0" max="1000" value="600"><button class="btn" type="button" id="auto" title="Fewest terms that keep 95% of the line within about a third of a traced pixel of its path">Auto</button></div>
@@ -876,10 +882,6 @@
         <div title="How far the drawn line strays from the path it was fitted to (the strokes, their doubled strands and loops): half stray plus missing"><b id="rScore">–</b><small>error (mm)</small></div>
         <div><b id="rStray">–</b><small>stray (mm)</small></div>
         <div><b id="rMiss">–</b><small>missing (mm)</small></div>
-      </div>
-      <div data-feature="optimize" class="inline">
-        <button class="btn" type="button" id="optBtn" title="Try tracing settings and keep the printable result closest to the image">Optimize tracing</button>
-        <span class="hint" id="optInfo">Tries tracing settings; your size, needle and painted areas stay as they are. <span class="slow">Can take a minute.</span></span>
       </div>
     </section>
 

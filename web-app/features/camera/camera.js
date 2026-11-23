@@ -505,3 +505,4 @@ $("camFile").addEventListener("change", () => {
   img.src = url;
 });
 on("artUI", photoUI); // the Photo card follows the picture
+on("engines", () => PHO); // main.js: busy while cleaning a photo

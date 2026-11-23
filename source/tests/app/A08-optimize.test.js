@@ -9,7 +9,7 @@ module.exports = {
   guards: "the optimizer making things worse, or leaving settings changed after Undo",
   why: "Optimize tracing tries tracing settings for you and shows a before/after. It must never hand back something worse, must say what it changed, and Undo must put every setting back.",
   how: "With the 18G needle on the leaf, runs Optimize tracing, reads its result, applies Undo and compares the settings with the starting ones; then runs it on the Lettering preset.",
-  pass: "Each run finishes with either an improvement (\"Closer to the image … → …\" with a lower number) or \"already the best\"; the result has no crossings; Undo restores threshold, smoothing, specks and loose ends; no page errors.",
+  pass: "Each run finishes with either an improvement (\"Line to picture … → …\" with a lower number) or \"already the best\"; the result has no crossings; Undo restores threshold, smoothing, specks and loose ends; no page errors.",
   slow: true,
   async run(ctx) {
     const { page, errors, close } = await A.open(ctx), checks = [];
@@ -18,7 +18,7 @@ module.exports = {
     const s0 = await settings();
     for (const [label, prep] of [["leaf, 18G needle", null], ["lettering", "lettering"]]) {
       if (prep) { await A.source(page, "text"); await page.click("label[for=viewDesign]"); await A.idle(page, 1000); }
-      const msg = await optimize(page), m = msg.match(/Closer to the image: ([\d.]+) → ([\d.]+) mm/);
+      const msg = await optimize(page), m = msg.match(/Line to picture: ([\d.]+) → ([\d.]+) mm/);
       checks.push(check(`${label}: finished with a result`, +(!!m || /already the best/.test(msg)), "==", 1));
       if (m) checks.push(check(`${label}: got closer (px)`, +m[2], "<=", +m[1], 2));
       checks.push(check(`${label}: crossings after`, +((await page.textContent("#uncrossVal")).split("→").pop()), "==", 0));

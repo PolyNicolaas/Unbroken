@@ -8,6 +8,7 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | File | What's in it |
 |---|---|
 | `index.html` | The page: layout and controls only. Loads the files below in order. |
+| `AGENT.md` | How an agent (or a script) drives the app: `?src=`, `body[data-state]`, `window.unbroken.status()`, and the controls it uses. |
 | **`settings.js`** | **Settings you can edit:** chocolates, needles, the printers, paper, every control's starting value, the Start-from presets, the text and undo rules, and engine tuning. See below. |
 | **`css/theme.css`** | **The look, in one file you can edit:** every colour (light and dark mode), the fonts, and three dials for corner roundness, text size and spacing. See below. |
 | `css/app.css` | Layout and styling, built entirely on the names in `theme.css`. |

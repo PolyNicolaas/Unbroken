@@ -11,6 +11,7 @@
 "use strict";
 
 const CUT = makeEngine("cutout"); // engine-bridge.js
+on("engines", () => CUT); // main.js: busy while cutting out
 BARS.cut = "cutbar"; // tools.js
 BTNS.cut = "cutBtn";
 st.cutout = null;

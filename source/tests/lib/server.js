@@ -1,7 +1,7 @@
 // Minimal static file server for the browser tests: serves the repo root so web-app/index.html can load
 // ../source/engine/core.js and start its background workers (workers need http, not file://).
 const http = require("http"), fs = require("fs"), path = require("path");
-const ROOT = path.resolve(__dirname, "../../.."), TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".png": "image/png", ".css": "text/css" };
+const ROOT = path.resolve(__dirname, "../../.."), TYPES = { ".html": "text/html", ".js": "text/javascript", ".json": "application/json", ".png": "image/png", ".css": "text/css", ".svg": "image/svg+xml" };
 function start() {
   return new Promise((res) => {
     const srv = http.createServer((req, rsp) => {

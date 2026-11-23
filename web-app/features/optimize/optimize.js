@@ -168,7 +168,7 @@ async function optRun() {
     const changed = keys.filter((k) => String(best[k]) !== String(optBefore[k]));
     if (!bestR || !changed.length || bestR.score >= start.score - 1e-6) {
       show(
-        `Your current settings were already the best of ${tries} tries${start ? ` (${fmt(start.fid * scale(), 2)} mm from the image)` : ""}.`
+        `Your current settings were already the best of ${tries} tries${start ? ` (line to picture ${fmt(start.fid * scale(), 2)} mm)` : ""}.`
       );
       setTimeout(() => {
         if (my === optTok) $("optbar").hidden = true;
@@ -183,7 +183,7 @@ async function optRun() {
           : v;
     optApply(best);
     show(
-      `Closer to the image: ${fmt(start.fid * scale(), 2)} → ${fmt(bestR.fid * scale(), 2)} mm${bestR.cross ? "" : ", no crossings"}${bestR.gapR < 1.95 && st.spacing > 0 ? `, closest gap ${fmt(bestR.gapR * 100, 0)}% of spacing` : ""}. Changed: ` +
+      `Line to picture: ${fmt(start.fid * scale(), 2)} → ${fmt(bestR.fid * scale(), 2)} mm (measured against the whole picture; the error readout measures the line against its traced strokes)${bestR.cross ? "" : ", no crossings"}${bestR.gapR < 1.95 && st.spacing > 0 ? `, closest gap ${fmt(bestR.gapR * 100, 0)}% of spacing` : ""}. Changed: ` +
         changed.map((k) => `${OPT_LABELS[k]} ${nice(k, optBefore[k])} → ${nice(k, best[k])}`).join(" · ") +
         `. (${tries} tries)`
     );
@@ -262,4 +262,5 @@ $("optUndo").addEventListener("click", () => {
 
 // what the core announces
 on("sourceChanged", stopOptimize); // a run still going is for the old source
+on("inkReference", optReference); // the picture's ink, the yardstick (export.js: how much of it the line reaches)
 on("preset", applyPreset); // a starting point asked for by name (settings.js startFrom, a model's drawing)

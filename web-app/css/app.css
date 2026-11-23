@@ -157,7 +157,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); margin: calc(2px
 .seg input { position: absolute; opacity: 0; pointer-events: none; }
 .seg label { text-align: center; padding: calc(6px * var(--space)) calc(8px * var(--space)); border-radius: calc(6px * var(--corner)); cursor: pointer; font-weight: 500; line-height: 1.25; }
 .seg label small { display: block; font-weight: 400; color: var(--muted); font-size: calc(11.5px * var(--text)); }
-.seg input:checked + label { background: var(--surface); box-shadow: 0 0 0 1px var(--rule); }
+.seg input:checked + label { background: var(--surface); box-shadow: 0 0 0 1.5px var(--accent); }
 .seg input:checked + label small { color: var(--accent); }
 .two { display: grid; grid-template-columns: 1fr 1fr; gap: calc(8px * var(--space)); }
 .three { display: grid; grid-template-columns: repeat(3, 1fr); gap: calc(8px * var(--space)); }
@@ -166,6 +166,8 @@ input[type="range"] { width: 100%; accent-color: var(--accent); margin: calc(2px
 .check { display: flex; gap: calc(8px * var(--space)); align-items: center; }
 .check input { accent-color: var(--accent); width: 16px; height: 16px; }
 .inline { display: flex; gap: calc(8px * var(--space)); align-items: center; }
+.link-row { margin-top: calc(6px * var(--space)); }
+.link-row input[type="url"] { flex: 1 1 auto; min-width: 0; font: inherit; color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: calc(7px * var(--corner)); padding: calc(6px * var(--space)) calc(8px * var(--space)); }
 .inline input[type="range"] { flex: 1; }
 /* size slider: ticks at the detail marks (smallest, medium, high) and the plate width, taking turns below and above
    the track (.up) so neighbouring labels have a row each */

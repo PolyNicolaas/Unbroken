@@ -199,6 +199,7 @@ report.
 | [A65](#a65) | Draw your own from the empty start: the pad takes the strokes, and Trace drawing traces them | the empty start's message (Start with a picture …) staying over the drawing pad, hiding it and catching every stroke, so nothing could be drawn | – |
 | [A66](#a66) | Make a vase from this line: the traced line itself, pushed from the Line tool, becomes the vase | a vase made from a trace that doesn't say which line it used, a pattern's line turned into a coarse, notched outline, and a vase from a line that takes the example vase's bulb and waves | – |
 | [A67](#a67) | Start over in the File menu: two taps clear the design and every setting | a full reset that's hard to find (it was only on the Examples tray), one that clears on a single slip of the finger, or one that keeps the design or a setting | – |
+| [A68](#a68) | Ready for an agent: a picture from a link, a done signal, status() as data, readouts that say what they are | an agent (or a person) unable to load a picture from a link, guessing when the app has finished, misreading a choice from a screenshot, or acting on an export message for a design that has since changed | 12.7 s |
 
 #### E01
 
@@ -750,7 +751,7 @@ report.
 
 - **Why:** Optimize tracing tries tracing settings for you and shows a before/after. It must never hand back something worse, must say what it changed, and Undo must put every setting back.
 - **How:** With the 18G needle on the leaf, runs Optimize tracing, reads its result, applies Undo and compares the settings with the starting ones; then runs it on the Lettering preset.
-- **Pass when:** Each run finishes with either an improvement ("Closer to the image … → …" with a lower number) or "already the best"; the result has no crossings; Undo restores threshold, smoothing, specks and loose ends; no page errors.
+- **Pass when:** Each run finishes with either an improvement ("Line to picture … → …" with a lower number) or "already the best"; the result has no crossings; Undo restores threshold, smoothing, specks and loose ends; no page errors.
 
 #### A09
 
@@ -1207,6 +1208,14 @@ report.
 - **Why:** Nicolaas (12 November 2026) asked for a full reset or start-over button. The File menu has Start over: the first tap asks (and the menu stays open), the second opens the app as it first opens.
 - **How:** Opens the labyrinth example, sets the base layers to 3, opens File, taps Start over once and reads the menu and the button, taps it again and reads the page after it reloads.
 - **Pass when:** One tap: the menu stays open, the button says Tap again, nothing is cleared; two taps: the app is empty (no design in use), the base layers back to 0, no example in the address; no page errors.
+
+#### A68
+
+**Ready for an agent: a picture from a link, a done signal, status() as data, readouts that say what they are** · `app/A68-agent-ready.test.js`
+
+- **Why:** The first agent trial (23 November 2026, docs/AGENT-TRIAL.md) took the Polimeks logo from a link to G-code by pointing and clicking. It had to load the picture with a script (no link import; an SVG with only a viewBox came in at the wrong size), caught the page half-built, couldn't tell Centerline from Outline in a screenshot, wondered why the print shrank to 58 mm, and saw the last export's message after the design had changed.
+- **How:** Opens the app with ?src= pointing at a test logo (an SVG with only a viewBox: a bold P with a thin grey ring over a bold word), waits on window.unbroken.whenReady(), and reads body data-state, the picture's shape, status() and the ready list. Exports G-code, changes the width and reads the message again. Opens a second page and loads the same logo through the Picture card's link box. Checks the corner label is a live region, Optimize tracing is at the top of the Fit card, the preview box says what it measures, and From above turns the 3D view straight down.
+- **Pass when:** data-state goes to ready; the picture keeps the SVG's 340 : 146 shape and is 1600 px wide; status() gives the trace (terms, error, style centerline), the size the app picked and the ready list as data; the ready list says the size was picked for you until a width is typed; the export message clears when the width changes; the link box loads the same picture; the corner label has role status and aria-live; #optBtn sits at the top of the Fit card; From above sets the 3D view to look straight down; no page errors.
 
 <!-- catalogue:end -->
 

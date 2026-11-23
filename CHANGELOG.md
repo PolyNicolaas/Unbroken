@@ -3,6 +3,44 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v156 · 2026-11-23
+
+Fixes from the first agent trial (docs/AGENT-TRIAL.md: the Polimeks logo from a link to G-code, pointing and
+clicking), which help people as much as agents:
+
+- **A picture from a link.** The Picture card has a link box (paste a link, Open link); a link to a picture pasted
+  anywhere on the page opens it too, and `?src=https://…` in the page's address starts on it. Works when the site lets
+  other pages load its pictures (Wikimedia and most image hosts do); when it doesn't, the label says to save the
+  picture and choose the file.
+- **Fixed: an SVG with only a viewBox** (most logos) came in at the browser's default 300 × 150, stretched. It now
+  comes in at 1600 px on its long side, in the viewBox's shape.
+- **The app says when it's done.** `<body data-state>` is loading, empty, working or ready, and the corner label is a
+  live region (a screen reader reads the new trace's numbers). `window.unbroken.status()` gives what's on screen as
+  data (the trace, the size, the ready list, the last export) and `window.unbroken.whenReady()` waits for it.
+  `web-app/AGENT.md` lists these and the controls an agent uses.
+- **The ready list says more:**
+  - when the app picked the size for a new picture ("Size picked for you: medium detail, 58.1 mm wide"), until you
+    set one;
+  - far-away parts the trace left out;
+  - how much of the picture the line misses: the share of the picture's dark parts more than a line spacing from
+    the line (from 8%: "thin or light parts may be missing. Try Optimize tracing (Line, Fit)"). The error readout can't see
+    this: it measures the line against the strokes that were traced;
+  - when more than 2.5% of the line is pushed off the drawing to keep the spacing.
+- **Readouts that say what they measure.** Optimize tracing reports **Line to picture** (against the whole picture),
+  not "Closer to the image", so it isn't mistaken for the error readout. The Size card's line reads "the line itself
+  … mm", with a tip on how it differs from Width and Height. The preview's dashed box says **as printed** (the
+  smallest box round the printed line, needle included); when that box sits at an angle it says so ("smallest box at
+  16°"), where it used to say "tilted", which read as if the drawing had been turned.
+- **Optimize tracing moved to the top of the Fit card**, from under the error chart, and the ready list points to
+  it when the line misses part of the picture.
+- **From above** in the 3D layers view: straight down on the plate, to check lettering by eye.
+- **A chosen option is clearer**: the picked side of every two- or three-way switch (Centerline / Outline, the views,
+  One copy / Whole plate) has an accent outline.
+- **Fixed: an export's message stayed after the design changed** ("Exported polimeks-90mm…" while a new trace was on
+  screen). It clears once the design, name, copies, width or needle changes.
+- Select area's hint says the preview now shows the whole picture.
+- Tests: A68 checks these with a test logo (`source/tests/lib/fixtures/mark-and-word.svg`).
+
 ## v155 · 2026-11-12
 
 - **Fixed: a round hole in a vase made from a line, when its top is narrower.** Every vase kept its wall at least
