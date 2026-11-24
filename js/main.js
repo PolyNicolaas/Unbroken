@@ -75,7 +75,8 @@ let appCalm = 0;
 function appStateTick() {
   if (st.final && !appWorking()) coverageNow(); // export.js: how much of the picture the new line reaches
   appCalm = appWorking() ? 0 : appCalm + 1;
-  const now = isEmpty() ? "empty" : appCalm >= 4 ? "ready" : "working";
+  // (a picture still on its way, from a link or a file, is working, not empty)
+  const now = appCalm < 4 ? "working" : isEmpty() ? "empty" : "ready";
   if (document.body.dataset.state !== now) document.body.dataset.state = now;
 }
 setInterval(appStateTick, 125);

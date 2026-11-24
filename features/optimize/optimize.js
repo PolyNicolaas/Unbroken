@@ -126,10 +126,20 @@ function optEvaluate(c, W, ref) {
 async function optRun() {
   if (!st.source || !st.walk) return;
   const my = ++optTok;
+  // straight away, before the picture is read: busy, and the last run's result and buttons gone (an agent or a person
+  // looking now mustn't take the previous run's message for this one)
+  busyFor("optimize", true);
+  $("optbar").hidden = false;
+  $("optUndo").hidden = true;
+  $("optAccept").hidden = true;
+  $("optCancel").hidden = false;
+  $("optMsg").textContent = "Optimize tracing: starting…";
   let W;
   try {
     W = await working(undefined, OPT);
   } catch (e) {
+    busyFor("optimize", false);
+    $("optbar").hidden = true;
     if (e !== CANCELLED) toast(`Optimize couldn't start: ${(e && e.message) || e}`, true);
     return;
   }
@@ -251,12 +261,12 @@ function stopOptimize() {
 $("optCancel").addEventListener("click", stopOptimize);
 for (const id of ["sens", "blur", "minLen", "loose"]) $(id).addEventListener("input", stopOptimize);
 $("optAccept").addEventListener("click", () => {
-  $("optbar").hidden = true;
+  $("optbar").hidden = $("optAccept").hidden = $("optUndo").hidden = true;
   optBefore = null;
 });
 $("optUndo").addEventListener("click", () => {
   if (optBefore) optApply(optBefore);
-  $("optbar").hidden = true;
+  $("optbar").hidden = $("optAccept").hidden = $("optUndo").hidden = true;
   optBefore = null;
 });
 
