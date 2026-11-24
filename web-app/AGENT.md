@@ -1,7 +1,8 @@
 # Driving Unbroken as an agent
 
 How an agent (Claude in Chrome, a Playwright script, a test) works the web app the way a person does, and reads what
-it did as data instead of screenshots. Written after the first agent trial (`docs/AGENT-TRIAL.md`). Since v156.
+it did as data instead of screenshots. Written after the first agent trial (`docs/AGENT-TRIAL.md`); the calls since
+v159.
 
 The ids and calls here are kept stable: a change to any of them is a breaking change, listed in CHANGELOG.md.
 
@@ -24,27 +25,48 @@ SVGs with only a viewBox (most logos) come in at 1600 px on their long side, in 
 - `await window.unbroken.whenReady(ms)` resolves with `status()` once it's ready (or empty).
 - The corner label (`#chip`) is a live region: terms · error · connectors.
 
+## The calls (window.unbroken, since v159)
+
+Every call works through the same controls a person uses, waits until the app is ready, and answers with plain data.
+Prefer them to clicking: they don't depend on the layout and don't break when a panel moves.
+
+| Call | Does |
+|---|---|
+| `await open(url)` | Opens a picture from a link. Answers `status()`. |
+| `parts({ widthMM, bandGapMM = 1, sideGapMM = 4 })` | The picture's parts, the way a logo is laid out: bands one above the other, then groups side by side within a band (a dot over an i joins its line). Each: `box` (fractions of the picture, for `select`), `widthMM`, `heightMM`, `strokeMM` (typical stroke width), `shapes`, `share` of the ink. Sizes are for the whole picture's ink at `widthMM` (default: the width now, with no selection). |
+| `await select(box \| null)` | Traces only that part (`[x0, y0, x1, y1]`, fractions), or the whole picture again. A new selection starts at the app's size: set the width after. |
+| `await set({ … })` | Settings by name, applied in this order, each settled before the next: `madeFor` ("printer" / "plotter"), `input`, `text`, `font`, `needle`, `chocolate` (by value or part of the name: "0.84", "Dark"), `style` ("centerline" / "outline"), `threshold` (−60 … 60), `smoothing` (the slider, 0 … 30), `ignoreSpecks` (0 … 200), `dropFarAway` (0 … 40), `looseEnds`, `cornersMM`, `crossings`, `allowOverlaps`, `lineGapMM`, `widthMM`, `heightMM`, `letterHeightMM`, `fitInside` ([w, h]), `terms` (a number or "auto"), `copies`, `printHeightMM`, `name`. An unknown name is refused. Answers `status()`. |
+| `await optimize({ keep = true })` | Optimize tracing at the size now. Answers `{ ok, kept, changed: { sens: { from, to }, … }, message, status }`; `keep: false` shows what it would change and puts the settings back. Run it after the last size change. |
+| `snapshot({ pxPerMM = 8 })` | The printed line from above at a fixed scale, as `{ png (data URL), widthMM, heightMM }`. Snapshots at the same `pxPerMM` compare truly: use them for option sheets. |
+| `await export(kind, { download = true, anyway })` | `"gcode"`, `"dxf"` (for choc OS) or `"svg"` (the plotter's page). `download: false` answers the file's text instead. A red line in the ready list stops a G-code export unless `anyway: true`: answers `{ ok: false, notReady }`. |
+| `await view(v)` | What the big view shows: `"line"`, `"plate"`, `"layers"`, `"page"`. |
+| `status()` | What's on screen (below). |
+| `await whenReady(ms)` | Waits for ready (or empty), answers `status()`. |
+
 ## Read what's on screen
 
 `window.unbroken.status()` returns:
 
 ```js
 {
-  state, version, madeFor: "printer" | "pen plotter", input: "picture" | "text" | …, source, name,
-  trace: { style: "centerline" | "outline", terms, errorMM, connectors, threshold, smoothing },
+  state, version, madeFor: "printer" | "pen plotter", input: "picture" | "text" | …, source, selection, name,
+  trace: { style: "centerline" | "outline", terms, errorMM, connectors, threshold, smoothing, smoothingSlider },
   size: { widthMM, heightMM, pickedByApp: { mark: "medium detail", widthMM } | null },
-  line: { widthMM, spacingMM },
+  line: { widthMM, spacingMM, needle },
   ready: [{ level: "ok" | "warn" | "bad", text }],   // the Print step's ready list
   lastExport,                                        // "Exported … · …" for the design on screen, else null
 }
 ```
 
 - **error** is the line against the strokes that were traced. It can't see a part of the picture the trace left out.
-- The ready list's **coverage** line catches that: the share of the picture's dark parts more than one line spacing
-  from the line. **Line to picture** in Optimize tracing's result is the same yardstick, as an average distance.
+- The ready list's **coverage** line catches some of that: the share of the picture's dark parts more than one line
+  spacing from the line. It reads the picture with the trace's own threshold, so a part too light for the threshold
+  doesn't count: compare `parts()` with a `snapshot()` to see what's missing.
 - **pickedByApp**: the app sets the size of a new picture to its medium-detail mark. It's null once a size is typed.
 
-## The controls an agent uses
+## The controls behind the calls
+
+For an agent that clicks instead (or to find a setting on screen):
 
 | Refinement in plain words | Control |
 |---|---|
@@ -71,7 +93,6 @@ Steps: `label[for=viewArt]`, `label[for=viewDesign]` (Line), `label[for=viewChoc
 
 The full playbook, with what the trials taught (sizes for lettering, when to split into pieces, what made things
 worse): [`docs/AGENT-PLAYBOOK.md`](../docs/AGENT-PLAYBOOK.md).
-
 
 Make options first, then refine (decided 23 November 2026): people rarely know what they want before they see it.
 Ask up front only what a preview can't show: printer or plotter, and a rough size or box. Then show a few distinct

@@ -48,6 +48,7 @@ It loads the engine parts from `../source/engine/` (listed in `index.html`) and 
 | `js/map.js` | The map of the steps (the interface since v141): the band of steps the design takes with chips for the less-used ones (faded until they matter), each node's result and a dot from the ready list (`readyUI`); a node's settings as rows (Material, Machine, Layers: the controls moved in while it's open, `mapRows`, and put back, `mapPutBack`) or its cards (`data-map`); the Examples tray (`mapTray`, from `EXAMPLES`). |
 | `js/history.js` | Undo / redo and design files. |
 | `js/main.js` | Start-up. |
+| `js/agent.js` | `window.unbroken`: the calls an agent or a script drives the app with (AGENT.md). |
 
 The scripts are plain scripts, not ES modules, so the app still works when `index.html` is opened straight from disk
 (browsers block modules there). They share top-level names, so the load order in `index.html` matters: a file may use

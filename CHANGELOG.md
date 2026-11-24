@@ -3,6 +3,24 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v159 · 2026-11-24
+
+- **The agent API** (`js/agent.js`, `window.unbroken`): an agent or a script drives the app through the same controls
+  a person uses, without reaching into the app's own functions, and every call waits for the app and answers with
+  plain data:
+  - `open(url)`: a picture from a link;
+  - `parts()`: the picture's parts the way a logo is laid out (bands one above the other, groups side by side within
+    them), each with its box, size and typical stroke width in mm, to hold against the needle;
+  - `select(box)`: trace one part (or the whole picture again);
+  - `set({ … })`: settings by name (size, style, threshold, needle, copies, name …), applied in order;
+  - `optimize({ keep })`: Optimize tracing, answering what it changed;
+  - `snapshot({ pxPerMM })`: the printed line from above at a fixed scale, as a PNG, for option sheets;
+  - `export("gcode" | "dxf" | "svg", { download })`: save the file, or get its text;
+  - `view()`, `status()`, `whenReady()` as before.
+  web-app/AGENT.md lists them; docs/AGENT-PLAYBOOK.md says how an agent works with them, now with the difference
+  between several small pieces (best at about 10 mm) and one large decorative piece.
+- Tests: A69 drives the test logo through every call.
+
 ## v158 · 2026-11-24
 
 From the second agent trial (the +Jakarta logo):

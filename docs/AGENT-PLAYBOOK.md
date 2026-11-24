@@ -1,4 +1,4 @@
-# Agent playbook and the fixes it needs · 24 November 2026 (v158)
+# Agent playbook and the fixes it needs · 24 November 2026 (v159)
 
 How an agent takes a picture to a print with Unbroken, written from two trials on the live site: the Polimeks logo
 (a mark over a bold word) and the +Jakarta logo (a word with a small "+" and a tagline). The controls and calls it
@@ -8,12 +8,20 @@ uses are in `web-app/AGENT.md`; the first trial is in `AGENT-TRIAL.md`.
 
 ### 1 · Ask only what a preview can't show
 - **Printer or pen plotter**, and **a rough size or box** if there is one (and copies, if it matters).
+- **Several pieces, or one large decorative piece?** The two are made differently (Nicolaas, 24 November 2026):
+  - **Several pieces** (a set in a box, a logo's parts, names): each piece small. Single pieces print best at about
+    **10 mm** for the smaller pieces. Split the picture into parts (`parts()`), every piece at the same scale, each
+    its own G-code.
+  - **One large decorative piece**: one continuous line, as big as the detail needs (strokes wide enough for the
+    needle, step 2), with small text dropped or folded in.
+  When the person hasn't said, the options in step 3 show both.
 - Everything else is shown as options, not asked (decided 23 November 2026: people don't know what they want until
   they see it).
 
 ### 2 · Load the picture and read it before tracing
 - Open it from its link (`?src=`, the link box) or the file. Wait on `window.unbroken.whenReady()`.
-- **Find its parts**: the gaps between a mark, a word and a tagline (rows and columns with no ink).
+- **Find its parts** with `unbroken.parts()`: the bands (a mark, a word, a tagline) and the groups side by side
+  within them, each with its size and stroke width in mm.
 - **Measure what's small**: at a candidate width, how tall is each line of text and how wide are the strokes, in mm?
   Compare with the needle. With the 0.84 mm needle the line spacing is 1.34 mm and a stroke prints as a loop 2.18 mm
   wide, so:
@@ -34,7 +42,7 @@ uses are in `web-app/AGENT.md`; the first trial is in `AGENT-TRIAL.md`.
 - Options should differ in kind, not in one setting.
 
 ### 4 · Show them side by side
-- One sheet: every option **at the same scale, as printed, from above** (the Print step's Plate view), with its size,
+- One sheet: every option **at the same scale, as printed, from above** (`unbroken.snapshot()` at one `pxPerMM`), with its size,
   terms, error, connectors and ready-list warnings, and one plain line on what's good and bad about it.
 - End with a recommendation and why, and ask which to refine.
 
@@ -74,12 +82,9 @@ export messages; the "as printed" label; ready-list wrapping.
    it, or make the print 3× bigger"), in the ready list and `status()`.
 4. **A starting size for lettering**: for a picture with text, start where the strokes are wide enough for the needle
    (fix 3's measure), not at medium detail.
-5. **An agent API instead of poking internals**: `unbroken.set({ widthMM, style, threshold, … })`,
-   `unbroken.select(box)`, `unbroken.optimize()` (a promise with its result), `unbroken.export("gcode")`. The trials
-   called `applySel`, `artUse` and fired input events by hand.
-6. **A picture of the result**: `unbroken.snapshot({ view: "plate", pxPerMM })` returning a PNG of the printed line
-   from above at a fixed scale, for option sheets (the Plate view zooms to each design, so screenshots don't share a
-   scale).
+5. ~~**An agent API instead of poking internals**~~: done in v159 (`open`, `parts`, `select`, `set`, `optimize`,
+   `export`, `view`; web-app/AGENT.md).
+6. ~~**A picture of the result**~~: done in v159 (`unbroken.snapshot({ pxPerMM })`).
 
 ### Smaller
 7. **Optimize and size**: offer size as something to try; when the size changes after optimizing, say the smoothing
