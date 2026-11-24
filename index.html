@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v160">
-<link rel="stylesheet" href="css/app.css?v=v160">
+<link rel="stylesheet" href="css/theme.css?v=v161">
+<link rel="stylesheet" href="css/app.css?v=v161">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v160</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v161</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -303,6 +303,8 @@
       <div data-feature="pieces" class="two" id="piecesRow" hidden>
         <label class="field" title="A piece for each line: every line of the text is traced on its own and printed as a separate piece, one continuous line each, with no strand joining one line to the next. In place: the lines keep the layout you typed, one under the other (a card or a message); packed: they're moved wherever they fit, to save room (a set of name labels). One piece: the lines print joined, as the Line step draws them."><span>Lines of text</span><select id="textPieces"><option value="place" selected>A piece for each line, in place</option><option value="each">A piece for each line, packed</option><option value="one">One piece, lines joined</option></select></label>
         <label data-feature="molecule" class="field" id="molPiecesField" title="One piece: all of it as one continuous line, as the Line step draws it, connectors and all. Bonds and labels apart: the bonds print as one continuous line and each atom's letters as a small piece of their own, in their places, so no strand joins a label to the bonds."><span>Molecule</span><select id="molPieces"><option value="one" selected>One piece</option><option value="apart">Bonds and labels apart</option></select></label>
+        <label class="field" id="picPiecesField" title="One line: the whole picture as one continuous line. Pieces: each part of the picture (a mark, a word, a line of text: split where there's an empty gap between them) traced on its own at the picture's scale, and exported as its own G-code file, to print separately and set together, e.g. in a box."><span>Picture</span><select id="picPieces"><option value="one" selected>One line</option><option value="pieces">Pieces, a file each</option></select></label>
+        <div class="row" id="picSplitRow" hidden style="grid-column: 1 / -1" title="Parts one above the other split where there's at least this much empty space between them; side by side, where the gap is wider than a fifth of their height. Bigger: fewer, larger pieces."><div class="lab"><label for="picSplit">Split at gaps of</label><span class="val" id="picSplitVal">1.0 mm</span></div><input type="range" id="picSplit" min="0.5" max="10" step="0.5" value="1"></div>
         <label class="field" id="pieceShownField" title="The piece One copy shows, in the Plate and 3D layers views"><span>One copy shows</span><select id="pieceShown"><option value="0">line 1</option></select></label>
       </div>
       <div class="inline"><button class="btn" type="button" id="plateCenter">Center on plate</button></div>
@@ -973,64 +975,65 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v160"></script>
-<script src="01-image.js?v=v160"></script>
-<script src="02-lines.js?v=v160"></script>
-<script src="03-text.js?v=v160"></script>
-<script src="04-walk.js?v=v160"></script>
-<script src="05-fill.js?v=v160"></script>
-<script src="06-fourier.js?v=v160"></script>
-<script src="07-measure.js?v=v160"></script>
-<script src="08-shape.js?v=v160"></script>
-<script src="09-plate.js?v=v160"></script>
-<script src="10-export.js?v=v160"></script>
-<script src="11-stages.js?v=v160"></script>
-<script src="12-models.js?v=v160"></script>
-<script src="13-patterns.js?v=v160"></script>
-<script src="14-photo.js?v=v160"></script>
-<script src="15-cutout.js?v=v160"></script>
-<script src="16-molecule.js?v=v160"></script>
-<script src="17-vase.js?v=v160"></script>
-<script src="core.js?v=v160"></script>
-<script src="fonts.js?v=v160"></script>
-<script src="settings.js?v=v160"></script>
-<script src="js/state.js?v=v160"></script>
-<script src="js/ui.js?v=v160"></script>
-<script src="js/config.js?v=v160"></script>
-<script src="js/engine-bridge.js?v=v160"></script>
-<script src="js/source.js?v=v160"></script>
-<script src="js/pipeline.js?v=v160"></script>
-<script src="js/preview.js?v=v160"></script>
-<script src="js/tools.js?v=v160"></script>
-<script src="js/art.js?v=v160"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v160");</script>
-<script src="js/readouts.js?v=v160"></script>
-<script src="js/controls.js?v=v160"></script>
-<script>feature("levels", "features/levels/levels.js?v=v160");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v160");</script>
-<script src="js/export.js?v=v160"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v160");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v160");</script>
-<script src="js/views.js?v=v160"></script>
-<script src="js/zoom.js?v=v160"></script>
-<script src="js/layers.js?v=v160"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v160");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v160");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v160");</script>
-<script src="js/workflow.js?v=v160"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v160");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v160");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v160");</script>
-<script>feature("camera", "features/camera/camera.js?v=v160");</script>
-<script src="js/steppers.js?v=v160"></script>
-<script src="js/scroll.js?v=v160"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v160");</script>
-<script>feature("model", "features/model/model.js?v=v160");</script>
-<script>feature("vase", "features/vase/vase.js?v=v160");</script>
-<script src="js/history.js?v=v160"></script>
-<script src="js/map.js?v=v160"></script>
-<script src="js/main.js?v=v160"></script>
-<script src="js/agent.js?v=v160"></script>
+<script src="00-util.js?v=v161"></script>
+<script src="01-image.js?v=v161"></script>
+<script src="02-lines.js?v=v161"></script>
+<script src="03-text.js?v=v161"></script>
+<script src="04-walk.js?v=v161"></script>
+<script src="05-fill.js?v=v161"></script>
+<script src="06-fourier.js?v=v161"></script>
+<script src="07-measure.js?v=v161"></script>
+<script src="08-shape.js?v=v161"></script>
+<script src="09-plate.js?v=v161"></script>
+<script src="10-export.js?v=v161"></script>
+<script src="11-stages.js?v=v161"></script>
+<script src="12-models.js?v=v161"></script>
+<script src="13-patterns.js?v=v161"></script>
+<script src="14-photo.js?v=v161"></script>
+<script src="15-cutout.js?v=v161"></script>
+<script src="16-molecule.js?v=v161"></script>
+<script src="17-vase.js?v=v161"></script>
+<script src="core.js?v=v161"></script>
+<script src="fonts.js?v=v161"></script>
+<script src="settings.js?v=v161"></script>
+<script src="js/state.js?v=v161"></script>
+<script src="js/ui.js?v=v161"></script>
+<script src="js/config.js?v=v161"></script>
+<script src="js/engine-bridge.js?v=v161"></script>
+<script src="js/source.js?v=v161"></script>
+<script src="js/pipeline.js?v=v161"></script>
+<script src="js/preview.js?v=v161"></script>
+<script src="js/tools.js?v=v161"></script>
+<script src="js/art.js?v=v161"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v161");</script>
+<script src="js/readouts.js?v=v161"></script>
+<script src="js/controls.js?v=v161"></script>
+<script>feature("levels", "features/levels/levels.js?v=v161");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v161");</script>
+<script src="js/export.js?v=v161"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v161");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v161");</script>
+<script src="js/views.js?v=v161"></script>
+<script src="js/zoom.js?v=v161"></script>
+<script src="js/layers.js?v=v161"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v161");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v161");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v161");</script>
+<script src="js/workflow.js?v=v161"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v161");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v161");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v161");</script>
+<script>feature("camera", "features/camera/camera.js?v=v161");</script>
+<script src="js/steppers.js?v=v161"></script>
+<script src="js/scroll.js?v=v161"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v161");</script>
+<script>feature("model", "features/model/model.js?v=v161");</script>
+<script>feature("vase", "features/vase/vase.js?v=v161");</script>
+<script src="js/history.js?v=v161"></script>
+<script src="js/map.js?v=v161"></script>
+<script src="js/main.js?v=v161"></script>
+<script src="js/parts.js?v=v161"></script>
+<script src="js/agent.js?v=v161"></script>
 
 </body>
 </html>

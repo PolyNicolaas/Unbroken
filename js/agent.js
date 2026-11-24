@@ -50,6 +50,8 @@ const AGENT_SETTINGS = [
   ["allowOverlaps", (v) => agentSet("overlaps", v)],
   ["lineGapMM", (v) => agentSet("lineGapMM", v)], // between lines, on top of the line width
   ["widthMM", (v) => agentSet("outW", v)],
+  ["pieces", (v) => agentSet("picPieces", v === true || /piece/i.test(v) ? "pieces" : "one")], // a picture: a file a piece
+  ["splitMM", (v) => agentSet("picSplit", v)], // a picture in pieces: split at gaps of (mm)
   ["heightMM", (v) => agentSet("outH", v)],
   ["letterHeightMM", (v) => agentSet("capH", v)],
   [
@@ -92,128 +94,23 @@ function agentParts(o = {}) {
     const v = (d[4 * i] + d[4 * i + 1] + d[4 * i + 2]) / 3;
     ink[i] = light ? v > 160 : v < 160;
   }
-  // components
-  const lab = new Int32Array(w * h).fill(-1),
-    comps = [],
-    stack = [];
-  for (let s = 0; s < w * h; s++) {
-    if (!ink[s] || lab[s] >= 0) continue;
-    const C = { x0: w, y0: h, x1: -1, y1: -1, area: 0, edge: 0 };
-    lab[s] = comps.length;
-    stack.push(s);
-    while (stack.length) {
-      const p = stack.pop(),
-        x = p % w,
-        y = (p / w) | 0;
-      C.area++;
-      if (x < C.x0) C.x0 = x;
-      if (x > C.x1) C.x1 = x;
-      if (y < C.y0) C.y0 = y;
-      if (y > C.y1) C.y1 = y;
-      for (let dy = -1; dy <= 1; dy++)
-        for (let dx = -1; dx <= 1; dx++) {
-          if (!dx && !dy) continue;
-          const X = x + dx,
-            Y = y + dy;
-          if (X < 0 || Y < 0 || X >= w || Y >= h || !ink[Y * w + X]) {
-            if (!dx || !dy) C.edge++; // an outline step (4-neighbours only)
-            continue;
-          }
-          const q = Y * w + X;
-          if (lab[q] < 0) {
-            lab[q] = comps.length;
-            stack.push(q);
-          }
-        }
-    }
-    comps.push(C);
-  }
-  let all = { x0: w, y0: h, x1: -1, y1: -1 };
-  const big = comps.filter((C) => C.area >= 4); // specks out
-  for (const C of big)
-    all = {
-      x0: Math.min(all.x0, C.x0),
-      y0: Math.min(all.y0, C.y0),
-      x1: Math.max(all.x1, C.x1),
-      y1: Math.max(all.y1, C.y1),
-    };
-  if (!big.length) return { parts: [], note: "no ink found" };
-  const widthMM = +o.widthMM || (st.sel ? null : +$("outW").value) || null,
-    mmPerPx = widthMM ? widthMM / (all.x1 - all.x0 + 1) : null;
-  // Parts in two steps, the way a logo is laid out: bands one above the other (rows of ink with more than bandGapMM of
-  // empty rows between them), then within a band, groups side by side with more than sideGapMM of empty columns
-  // between them (letters of a word stay together; a mark beside a word doesn't). A band much narrower and shorter
-  // than its nearest neighbour (a dot over an i between the lines) joins it.
-  const gapPx = mmPerPx ? (+o.bandGapMM || 1) / mmPerPx : 0.01 * (all.y1 - all.y0 + 1),
-    sidePx = mmPerPx ? (+o.sideGapMM || 4) / mmPerPx : 0.04 * (all.x1 - all.x0 + 1);
-  const box = (L) =>
-    L.reduce(
-      (G, C) => ({
-        x0: Math.min(G.x0, C.x0),
-        y0: Math.min(G.y0, C.y0),
-        x1: Math.max(G.x1, C.x1),
-        y1: Math.max(G.y1, C.y1),
-      }),
-      { x0: w, y0: h, x1: -1, y1: -1 }
-    );
-  const runs = (L, a, b, gap) => {
-    // members grouped where their [a, b] spans come within gap of each other
-    const S = [...L].sort((p, q) => p[a] - q[a]),
-      out = [];
-    for (const C of S) {
-      const R = out[out.length - 1];
-      if (R && C[a] - R.end <= gap) {
-        R.list.push(C);
-        R.end = Math.max(R.end, C[b]);
-      } else out.push({ list: [C], end: C[b] });
-    }
-    return out.map((R) => R.list);
-  };
-  let bands = runs(big, "y0", "y1", gapPx);
-  for (let moved = true; moved && bands.length > 1;) {
-    moved = false;
-    const B = bands.map(box);
-    for (let i = 0; i < bands.length; i++) {
-      const near = [i - 1, i + 1]
-          .filter((j) => j >= 0 && j < bands.length)
-          .sort(
-            (p, q) =>
-              Math.min(Math.abs(B[p].y0 - B[i].y1), Math.abs(B[i].y0 - B[p].y1)) -
-              Math.min(Math.abs(B[q].y0 - B[i].y1), Math.abs(B[i].y0 - B[q].y1))
-          )[0],
-        wi = B[i].x1 - B[i].x0,
-        hi = B[i].y1 - B[i].y0;
-      if (near != null && wi < 0.1 * (B[near].x1 - B[near].x0) && hi < 0.35 * (B[near].y1 - B[near].y0)) {
-        bands[near] = bands[near].concat(bands[i]);
-        bands.splice(i, 1);
-        moved = true;
-        break;
-      }
-    }
-  }
-  // side by side: sideGapMM when given, else a gap wider than about a fifth of the band's height (the space between two
-  // words or a mark and a word, not between letters), at least 4 mm
-  const groupsL = bands.flatMap((L) => {
-    const B = box(L);
-    return runs(L, "x0", "x1", o.sideGapMM || !mmPerPx ? sidePx : Math.max(sidePx, 0.2 * (B.y1 - B.y0 + 1)));
+  const P = inkParts(ink, w, h, {
+    widthMM: +o.widthMM || (st.sel ? null : +$("outW").value) || null,
+    bandGapMM: o.bandGapMM,
+    sideGapMM: o.sideGapMM,
   });
-  const groups = groupsL.map((L) => ({
-    ...box(L),
-    area: L.reduce((s, C) => s + C.area, 0),
-    edge: L.reduce((s, C) => s + C.edge, 0),
-    shapes: L.length,
-  }));
+  if (!P) return { parts: [], note: "no ink found" };
+  const { mmPerPx, big, groups } = P,
+    widthMM = mmPerPx ? +((P.all.x1 - P.all.x0 + 1) * mmPerPx).toFixed(1) : null;
   const mm = (px) => (mmPerPx ? +(px * mmPerPx).toFixed(1) : null);
-  const parts = groups
-    .sort((a, b) => a.y0 - b.y0 || a.x0 - b.x0)
-    .map((G) => ({
-      box: [G.x0 / w, G.y0 / h, (G.x1 + 1) / w, (G.y1 + 1) / h].map((v) => +v.toFixed(4)), // fractions of the picture
-      widthMM: mm(G.x1 - G.x0 + 1),
-      heightMM: mm(G.y1 - G.y0 + 1),
-      strokeMM: mm((2 * G.area) / Math.max(1, G.edge)),
-      shapes: G.shapes,
-      share: +(G.area / big.reduce((s, C) => s + C.area, 0)).toFixed(3), // of all the ink
-    }));
+  const parts = groups.map((G) => ({
+    box: [G.x0 / w, G.y0 / h, (G.x1 + 1) / w, (G.y1 + 1) / h].map((v) => +v.toFixed(4)), // fractions of the picture
+    widthMM: mm(G.x1 - G.x0 + 1),
+    heightMM: mm(G.y1 - G.y0 + 1),
+    strokeMM: mm((2 * G.area) / Math.max(1, G.edge)),
+    shapes: G.shapes,
+    share: +(G.area / big.reduce((s, C) => s + C.area, 0)).toFixed(3), // of all the ink
+  }));
   return {
     widthMM,
     bandGapMM: mmPerPx ? +o.bandGapMM || 1 : null,
@@ -300,6 +197,7 @@ async function agentExport(kind = "gcode", o = {}) {
   }
   if (o.download === false) {
     const f = await buildFile(fmtName);
+    if (f.files) return { ok: true, name: f.name, info: f.info, files: f.files }; // a picture in pieces: a file each
     return {
       ok: true,
       name: f.text ? f.inner : f.name,
@@ -347,6 +245,15 @@ window.unbroken = {
         spacingMM: st.spacing,
         needle: $("needle").selectedOptions[0]?.textContent.trim() || null,
       },
+      pieces:
+        heard("piecesOn") && answer("piecesOn") && st.pieces
+          ? st.pieces.list.map((D) => ({
+              name: D.name,
+              widthMM: +(D.outW || 0).toFixed(1),
+              terms: D.N,
+              open: D.open,
+            }))
+          : null,
       ready: ready.map((r) => ({ level: r.lvl, text: r.text })),
       lastExport: ($("gcodeMsg").textContent || "").trim() || null,
     };
