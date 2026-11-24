@@ -1,4 +1,11 @@
-# Picture pieces · plan (23 November 2026, v155)
+# Picture pieces · plan (23 November 2026, v155) · built in v161
+
+**Built in v161:** the Plate card's **Picture** choice (One line / Pieces, a file each), parts found as bands and groups
+side by side (`js/parts.js`, shared with `unbroken.parts()`), **Split at gaps of** as the slider, every piece at the
+picture's scale, a G-code file per piece in one zip, copies per piece, the agent API (`set({ pieces, splitMM })`,
+`status().pieces`), test A70. **Not yet:** drawn pieces (Select area, Add as a piece), tapping tags to merge or split,
+each piece tinted with its own readout on the Line step, ready-list lines per piece. The switch sits on the Plate card,
+next to a text's Lines of text, rather than on the picture itself.
 
 A picture can be split into pieces, each traced as its own continuous line at the picture's own scale, and each
 exported as **its own G-code file**. Found in the agent trial (AGENT-TRIAL.md): the Polimeks logo's mark traced far

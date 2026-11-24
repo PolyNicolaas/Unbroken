@@ -17,6 +17,66 @@ let piecesJob = null, // { key, promise } while a set of pieces is being traced
   piecesTimer = null,
   pieceVer = 0;
 
+// A picture printed in pieces (Plate card, Picture: Pieces; docs/PICTURE-PIECES.md): its parts (parts.js inkParts:
+// bands one above the other, groups side by side within them, split at gaps of at least Split at gaps) each traced on
+// its own, all at the picture's one scale, and each exported as its own G-code file. Off by default: a picture stays
+// one
+// line unless pieces are picked.
+const picPiecesOn = () =>
+  !isModel() &&
+  !st.text &&
+  !!st.art &&
+  st.art.kind === "picture" &&
+  !!$("picPieces") &&
+  $("picPieces").value === "pieces";
+// the pieces each go to their own file (export.js asks): a picture's
+const piecesApart = () => picPiecesOn();
+// The picture's parts in the working image, as the regions their pieces are traced from: each part's own ink, grown by
+// a line spacing so the trace has room round it, but never onto another part's ink.
+function pictureRegions(W) {
+  const ppm = st.bw / st.outW,
+    ink = detect(W, settings().sens), // (pipeline.js: the line map, with the selection and erasing applied)
+    w = W.w,
+    h = W.h,
+    P = inkParts(ink, w, h, { mmPerPx: 1 / ppm, bandGapMM: +$("picSplit").value || 1 });
+  if (!P) return [];
+  const r = Math.max(2, Math.round(spacingMM() * ppm)),
+    owner = new Int32Array(w * h).fill(-1);
+  P.groups.forEach((G, gi) => {
+    const own = new Set(G.ids);
+    for (let i = 0; i < w * h; i++) if (P.lab[i] >= 0 && own.has(P.lab[i])) owner[i] = gi;
+  });
+  return P.groups.map((G, gi) => {
+    // grow the part's ink by r (a square, rows then columns), then take out every other part's ink
+    const a = new Uint8Array(w * h),
+      b = new Uint8Array(w * h);
+    for (let i = 0; i < w * h; i++) a[i] = owner[i] === gi ? 1 : 0;
+    for (let y = 0; y < h; y++)
+      for (let x = 0, run = -1e9; x < w; x++) {
+        if (a[y * w + x]) run = x;
+        b[y * w + x] = x - run <= r ? 1 : 0;
+      }
+    for (let y = 0; y < h; y++)
+      for (let x = w - 1, run = 1e9; x >= 0; x--) {
+        if (a[y * w + x]) run = x;
+        if (run - x <= r) b[y * w + x] = 1;
+      }
+    a.fill(0);
+    for (let x = 0; x < w; x++) {
+      for (let y = 0, run = -1e9; y < h; y++) {
+        if (b[y * w + x]) run = y;
+        if (y - run <= r) a[y * w + x] = 1;
+      }
+      for (let y = h - 1, run = 1e9; y >= 0; y--) {
+        if (b[y * w + x]) run = y;
+        if (run - y <= r) a[y * w + x] = 1;
+      }
+    }
+    for (let i = 0; i < w * h; i++) if (owner[i] >= 0 && owner[i] !== gi) a[i] = 0;
+    return { name: `piece ${gi + 1}`, mask: a };
+  });
+}
+
 // how many lines of the text have letters (an empty line is no piece)
 const textLines = () => (st.text && st.text.lines ? st.text.lines.length : 0);
 // the text prints as a piece per line: a text (not a model) with two or more lines, and the Plate card says so
@@ -24,7 +84,8 @@ function piecesOn() {
   return (
     !isModel() &&
     ((!!st.text && textLines() > 1 && $("textPieces").value !== "one") ||
-      (typeof moleculePiecesOn === "function" && moleculePiecesOn()))
+      (typeof moleculePiecesOn === "function" && moleculePiecesOn()) ||
+      picPiecesOn())
   ); // (molecule.js: loaded after this file)
 }
 const moleculePieces = () => !st.text && typeof moleculePiecesOn === "function" && moleculePiecesOn();
@@ -107,6 +168,10 @@ function piecesKeyNow() {
     st.text && st.text.ppm,
     // a molecule: the structure, how it prints, its size
     moleculePieces() ? [moleculeName(), st.art.molecule.mol.atoms.length, st.outW, st.bw] : null,
+    // a picture's pieces: where it splits, its size, how it's traced
+    picPiecesOn()
+      ? [$("picSplit").value, st.outW, st.bw, settings().sens, settings().blur, settings().mode, settings().minLen]
+      : null,
   ]);
 }
 // the pieces for the text on screen, if they're traced
@@ -121,12 +186,15 @@ async function tracePieces() {
     const W = await working(),
       s = settings(),
       T = st.text,
-      mol = !T, // a molecule's bonds and labels (molecule.js), else a text's lines
-      ppm = mol ? st.bw / st.outW : T.ppm, // px per mm of the working image
+      pic = picPiecesOn(), // a picture's parts (above)
+      mol = !T && !pic, // a molecule's bonds and labels (molecule.js), else a text's lines
+      ppm = mol || pic ? st.bw / st.outW : T.ppm, // px per mm of the working image
       d = spacingMM() * ppm, // px: every piece has the same scale
-      items = mol
-        ? moleculeRegions(W)
-        : T.lines.map((m, i) => ({ text: m, name: (T.lineNames && T.lineNames[i]) || `line ${i + 1}` })),
+      items = pic
+        ? pictureRegions(W)
+        : mol
+          ? moleculeRegions(W)
+          : T.lines.map((m, i) => ({ text: m, name: (T.lineNames && T.lineNames[i]) || `line ${i + 1}` })),
       list = [];
     if (!(ppm > 0 && Number.isFinite(ppm))) return { key, list }; // (no scale yet: nothing to trace pieces at)
     for (let i = 0; i < items.length; i++) {
@@ -284,12 +352,16 @@ function pieceMenuUI() {
       st.art.kind === "molecule" &&
       !!moleculeDrawn().r &&
       moleculeDrawn().r.labels > 0,
+    pic = !isModel() && !st.text && !!st.art && st.art.kind === "picture" && !!st.final,
     on = piecesOn();
-  $("piecesRow").hidden = !many && !molLabels;
+  $("piecesRow").hidden = !many && !molLabels && !pic;
   $("textPieces").closest(".field").hidden = !many;
+  $("picPiecesField").hidden = !pic;
+  $("picSplitRow").hidden = !pic || !picPiecesOn();
   if ($("molPiecesField")) $("molPiecesField").hidden = !molLabels; // (molecule.js's, when it's on)
   $("pieceShownField").hidden = !on || piecesTogether(); // (pieces kept together: One copy is every piece)
-  $("copiesLab").textContent = on && many && !piecesTogether() ? "Copies of each line" : "Copies";
+  $("copiesLab").textContent =
+    on && many && !piecesTogether() ? "Copies of each line" : picPiecesOn() ? "Copies of each piece" : "Copies";
   const P = piecesNow(),
     el = $("pieceShown");
   if (P) {
@@ -312,6 +384,15 @@ $("textPieces").addEventListener("change", () => {
   layersSoon(0);
   readyUI();
 });
+for (const id of ["picPieces", "picSplit"])
+  $(id).addEventListener(id === "picSplit" ? "input" : "change", () => {
+    $("picSplitVal").textContent = `${fmt(+$("picSplit").value, 1)} mm`;
+    pieceMenuUI();
+    drawPlate();
+    drawMini();
+    layersSoon(0);
+    readyUI();
+  });
 $("pieceShown").addEventListener("change", () => {
   drawPlate();
   layersSoon(0);
@@ -319,6 +400,7 @@ $("pieceShown").addEventListener("change", () => {
 
 // what the core asks about pieces
 on("piecesOn", piecesOn);
+on("piecesApart", piecesApart); // export.js: a G-code file for each piece
 on("piecePlate", (n, gap, straight) => (piecesOn() ? piecePlate(n, gap, straight) : null)); // the plate's layout
 on("pieceLayers", () => (piecesOn() ? buildPieceLayers() : null)); // the layers
 on("lineLifts", lineLifts); // where the needle lifts between the lines of a text
@@ -329,19 +411,24 @@ function piecePlateText(lay, pl, ok) {
     gap = fmt(+$("copyGap").value || 0, 1),
     // a molecule: a bonds piece unless it has no bonds (water, a salt's ions), and a piece for each label
     bonds = !st.text && !!st.pieces && st.pieces.list.some((D) => D.name === "bonds"),
+    pic = picPiecesOn(),
     lines = st.text
       ? "lines"
-      : `piece${k === 1 ? "" : "s"}: ${bonds ? (k > 1 ? "the bonds and the labels" : "the bonds") : k === 1 ? "the label" : "the labels"}`,
+      : pic
+        ? `part${k === 1 ? "" : "s"} of the picture`
+        : `piece${k === 1 ? "" : "s"}: ${bonds ? (k > 1 ? "the bonds and the labels" : "the bonds") : k === 1 ? "the label" : "the labels"}`,
     what = `${lay.copies} piece${lay.copies === 1 ? "" : "s"} (${lay.sets > 1 ? `${lay.sets} × ` : ""}${k} ${lines})`,
-    how = st.text
-      ? piecesTogether()
-        ? "Each line prints as its own piece, one after another, in its place: the layout as typed."
-        : "Each line prints as its own piece, one after another, packed to save room."
-      : bonds
-        ? "The bonds print as one line, then each label as its own piece, in their places."
-        : k === 1
-          ? "The label prints as one line."
-          : "Each label prints as its own piece, in its place.",
+    how = pic
+      ? `Each part of the picture is traced on its own, at the picture's scale, and gets its own G-code file (Export G-code saves them together).`
+      : st.text
+        ? piecesTogether()
+          ? "Each line prints as its own piece, one after another, in its place: the layout as typed."
+          : "Each line prints as its own piece, one after another, packed to save room."
+        : bonds
+          ? "The bonds print as one line, then each label as its own piece, in their places."
+          : k === 1
+            ? "The label prints as one line."
+            : "Each label prints as its own piece, in its place.",
     rot = lay.angle ? ` Turned ${fmt(lay.angle, 0)}° to fit more.` : "";
   $("gOx").disabled = $("gOy").disabled = $("plateCenter").disabled = true;
   $("plateInfo").textContent =

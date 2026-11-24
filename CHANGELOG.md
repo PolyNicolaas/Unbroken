@@ -3,6 +3,23 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v161 · 2026-11-24
+
+- **A picture in pieces** (Print step, Plate card: **Picture**: One line / Pieces, a file each; docs/PICTURE-PIECES.md).
+  Its parts, found the way a logo is laid out (bands one above the other, then groups side by side within them: a
+  mark, a word, a tagline; `js/parts.js`), are each traced on their own, all at the picture's one scale, and Export
+  G-code saves **a G-code file for each piece** in one zip (`logo-1_084_3x.gcode`, `logo-2_084_3x.gcode`), Copies
+  being copies of each piece. **Split at gaps of** (0.5–10 mm) sets the empty gap that separates parts one above the
+  other; side by side, a gap wider than a fifth of their height. Off by default: a picture stays one line unless
+  Pieces is picked (decided 23 November 2026).
+- Agent API: `set({ pieces: true, splitMM })`, `status().pieces`, and `export("gcode", { download: false })` answers
+  `files` for a picture in pieces.
+- Engine: `UNB.zip` takes a list of files too.
+- Not yet (in the plan): pieces drawn with Select area, tapping to merge or split, each piece's readout on the Line
+  step. Pieces are traced from the whole picture's working image, so a part with very thick strokes can come out
+  thinner than when it's selected and traced alone.
+- Tests: A70.
+
 ## v160 · 2026-11-24
 
 - `unbroken.parts()`: groups side by side split where the gap is wider than a fifth of their band's height (at least

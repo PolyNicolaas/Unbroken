@@ -35,10 +35,10 @@ Prefer them to clicking: they don't depend on the layout and don't break when a 
 | `await open(url)` | Opens a picture from a link. Answers `status()`. |
 | `parts({ widthMM, bandGapMM = 1, sideGapMM })` | The picture's parts, the way a logo is laid out: bands one above the other, then groups side by side within a band, split where the gap is wider than `sideGapMM` (default: a fifth of the band's height, at least 4 mm, so letters stay together and a mark beside a word doesn't); a dot over an i joins its line. Each: `box` (fractions of the picture, for `select`), `widthMM`, `heightMM`, `strokeMM` (typical stroke width), `shapes`, `share` of the ink. Sizes are for the whole picture's ink at `widthMM` (default: the width now, with no selection). |
 | `await select(box \| null)` | Traces only that part (`[x0, y0, x1, y1]`, fractions), or the whole picture again. A new selection starts at the app's size: set the width after. |
-| `await set({ … })` | Settings by name, applied in this order, each settled before the next: `madeFor` ("printer" / "plotter"), `input`, `text`, `font`, `needle`, `chocolate` (by value or part of the name: "0.84", "Dark"), `style` ("centerline" / "outline"), `threshold` (−60 … 60), `smoothing` (the slider, 0 … 30), `ignoreSpecks` (0 … 200), `dropFarAway` (0 … 40), `looseEnds`, `cornersMM`, `crossings`, `allowOverlaps`, `lineGapMM`, `widthMM`, `heightMM`, `letterHeightMM`, `fitInside` ([w, h]), `terms` (a number or "auto"), `copies`, `printHeightMM`, `name`. An unknown name is refused. Answers `status()`. |
+| `await set({ … })` | Settings by name, applied in this order, each settled before the next: `madeFor` ("printer" / "plotter"), `input`, `text`, `font`, `needle`, `chocolate` (by value or part of the name: "0.84", "Dark"), `style` ("centerline" / "outline"), `threshold` (−60 … 60), `smoothing` (the slider, 0 … 30), `ignoreSpecks` (0 … 200), `dropFarAway` (0 … 40), `looseEnds`, `cornersMM`, `crossings`, `allowOverlaps`, `lineGapMM`, `widthMM`, `pieces` (a picture: true for a G-code file a part), `splitMM`, `heightMM`, `letterHeightMM`, `fitInside` ([w, h]), `terms` (a number or "auto"), `copies`, `printHeightMM`, `name`. An unknown name is refused. Answers `status()`. |
 | `await optimize({ keep = true })` | Optimize tracing at the size now. Answers `{ ok, kept, changed: { sens: { from, to }, … }, message, status }`; `keep: false` shows what it would change and puts the settings back. Run it after the last size change. |
 | `snapshot({ pxPerMM = 8 })` | The printed line from above at a fixed scale, as `{ png (data URL), widthMM, heightMM }`. Snapshots at the same `pxPerMM` compare truly: use them for option sheets. |
-| `await export(kind, { download = true, anyway })` | `"gcode"`, `"dxf"` (for choc OS) or `"svg"` (the plotter's page). `download: false` answers the file's text instead. A red line in the ready list stops a G-code export unless `anyway: true`: answers `{ ok: false, notReady }`. |
+| `await export(kind, { download = true, anyway })` | `"gcode"`, `"dxf"` (for choc OS) or `"svg"` (the plotter's page). `download: false` answers the file's text instead (a picture in pieces: `files`, a `{ name, text }` each). A red line in the ready list stops a G-code export unless `anyway: true`: answers `{ ok: false, notReady }`. |
 | `await view(v)` | What the big view shows: `"line"`, `"plate"`, `"layers"`, `"page"`. |
 | `status()` | What's on screen (below). |
 | `await whenReady(ms)` | Waits for ready (or empty), answers `status()`. |
@@ -50,6 +50,7 @@ Prefer them to clicking: they don't depend on the layout and don't break when a 
 ```js
 {
   state, version, madeFor: "printer" | "pen plotter", input: "picture" | "text" | …, source, selection, name,
+  pieces: [{ name, widthMM, terms, open }] | null,   // a picture in pieces, a text's lines …
   trace: { style: "centerline" | "outline", terms, errorMM, connectors, threshold, smoothing, smoothingSlider },
   size: { widthMM, heightMM, pickedByApp: { mark: "medium detail", widthMM } | null },
   line: { widthMM, spacingMM, needle },

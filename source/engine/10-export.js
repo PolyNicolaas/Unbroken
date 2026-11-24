@@ -423,7 +423,8 @@
     return { seg: Float32Array.from(seg), kind: Uint8Array.from(kind) };
   };
 
-  // Minimal ZIP (one stored file) for formats the page cannot save directly: name inside, text content → bytes
+  // Minimal ZIP (stored, not compressed) for formats the page cannot save directly: a name and its text, or a list of
+  // { name, text } (a picture printed in pieces: a G-code file each) → bytes
   const CRC = (() => {
     const t = new Uint32Array(256);
     for (let n = 0; n < 256; n++) {
@@ -435,47 +436,49 @@
   })();
 
   UNB.zip = function (name, text) {
-    const enc = new TextEncoder(),
-      data = enc.encode(text),
-      fn = enc.encode(name);
-    let crc = 0xffffffff;
-    for (let i = 0; i < data.length; i++) crc = CRC[(crc ^ data[i]) & 0xff] ^ (crc >>> 8);
-    crc = (crc ^ 0xffffffff) >>> 0;
-    const lh = new DataView(new ArrayBuffer(30)),
-      ch = new DataView(new ArrayBuffer(46)),
+    // one file (name, text), or several: [{ name, text }]
+    const files = Array.isArray(name) ? name : [{ name, text }],
+      enc = new TextEncoder(),
+      parts = [],
+      central = [];
+    let off = 0;
+    for (const f of files) {
+      const data = enc.encode(f.text),
+        fn = enc.encode(f.name);
+      let crc = 0xffffffff;
+      for (let i = 0; i < data.length; i++) crc = CRC[(crc ^ data[i]) & 0xff] ^ (crc >>> 8);
+      crc = (crc ^ 0xffffffff) >>> 0;
+      const lh = new DataView(new ArrayBuffer(30)),
+        ch = new DataView(new ArrayBuffer(46));
+      lh.setUint32(0, 0x04034b50, true);
+      lh.setUint16(4, 20, true);
+      lh.setUint16(8, 0, true);
+      lh.setUint32(14, crc, true);
+      lh.setUint32(18, data.length, true);
+      lh.setUint32(22, data.length, true);
+      lh.setUint16(26, fn.length, true);
+      ch.setUint32(0, 0x02014b50, true);
+      ch.setUint16(4, 20, true);
+      ch.setUint16(6, 20, true);
+      ch.setUint32(16, crc, true);
+      ch.setUint32(20, data.length, true);
+      ch.setUint32(24, data.length, true);
+      ch.setUint16(28, fn.length, true);
+      ch.setUint32(42, off, true); // where this file's local header starts
+      parts.push(new Uint8Array(lh.buffer), fn, data);
+      central.push(new Uint8Array(ch.buffer), fn);
+      off += 30 + fn.length + data.length;
+    }
+    const cdLen = central.reduce((a, p) => a + p.length, 0),
       eo = new DataView(new ArrayBuffer(22));
-    lh.setUint32(0, 0x04034b50, true);
-    lh.setUint16(4, 20, true);
-    lh.setUint16(8, 0, true);
-    lh.setUint32(14, crc, true);
-    lh.setUint32(18, data.length, true);
-    lh.setUint32(22, data.length, true);
-    lh.setUint16(26, fn.length, true);
-    ch.setUint32(0, 0x02014b50, true);
-    ch.setUint16(4, 20, true);
-    ch.setUint16(6, 20, true);
-    ch.setUint32(16, crc, true);
-    ch.setUint32(20, data.length, true);
-    ch.setUint32(24, data.length, true);
-    ch.setUint16(28, fn.length, true);
-    ch.setUint32(42, 0, true);
-    const cdOff = 30 + fn.length + data.length,
-      cdLen = 46 + fn.length;
     eo.setUint32(0, 0x06054b50, true);
-    eo.setUint16(8, 1, true);
-    eo.setUint16(10, 1, true);
+    eo.setUint16(8, files.length, true);
+    eo.setUint16(10, files.length, true);
     eo.setUint32(12, cdLen, true);
-    eo.setUint32(16, cdOff, true);
-    const out = new Uint8Array(cdOff + cdLen + 22);
+    eo.setUint32(16, off, true);
+    const out = new Uint8Array(off + cdLen + 22);
     let o = 0;
-    for (const part of [
-      new Uint8Array(lh.buffer),
-      fn,
-      data,
-      new Uint8Array(ch.buffer),
-      fn,
-      new Uint8Array(eo.buffer),
-    ]) {
+    for (const part of [...parts, ...central, new Uint8Array(eo.buffer)]) {
       out.set(part, o);
       o += part.length;
     }

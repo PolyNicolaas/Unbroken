@@ -296,6 +296,26 @@ async function buildFile(fmtName) {
     ? `${pl.length} pieces (${lay.sets > 1 ? `${lay.sets} × ` : ""}${lay.pieces.length} lines, each its own piece)`
     : `${pl.length} cop${pl.length === 1 ? "y" : "ies"} of ${fmt(lay.w, 1)} × ${fmt(lay.h, 1)} mm`;
   const info = `${what}${lay.angle ? `, rotated ${fmt(lay.angle, 0)}°` : ""}, ${n} layer${n === 1 ? "" : "s"}${S.N ? ` (${S.N} filled)` : ""}, ${fmt(tall, 1)} mm tall, for the ${CFG.printer.name}${ok ? "" : ", NOT all on the plate"}${tooTall ? ", TALLER than the printer" : ""}`;
+  // a picture in pieces (pieces.js): a G-code file for each piece, its copies only, zipped together
+  if (lay.pieces && answer("piecesApart")) {
+    const k = lay.pieces.length,
+      per = Math.max(1, Math.round(pl.length / k)),
+      files = lay.pieces.map((_, i) => {
+        const idx = pl.map((p, j) => (p.piece === i ? j : -1)).filter((j) => j >= 0);
+        return {
+          name: `${designSlug()}-${i + 1}_${needleTag()}_${idx.length}x.gcode`,
+          text: UNB.exportGcode(
+            idx.map((j) => cpaths[j]),
+            g
+          ),
+        };
+      });
+    return {
+      name: `${designSlug()}_${needleTag()}_${k}pc_${per}x-gcode.zip`,
+      files,
+      info: `${k} pieces, a G-code file each (${per} cop${per === 1 ? "y" : "ies"} of each), ${n} layer${n === 1 ? "" : "s"}, ${fmt(tall, 1)} mm tall, for the ${CFG.printer.name}${ok ? "" : ", NOT all on the plate"}`,
+    };
+  }
   const base = `${designSlug()}_${needleTag()}_${pl.length}x`;
   return { name: base + "-gcode.zip", inner: base + ".gcode", text: UNB.exportGcode(cpaths, g), info };
 }
@@ -411,7 +431,9 @@ function readyItems() {
       // a text printed as a piece per line
       add(
         ok ? "ok" : "bad",
-        ok ? `${pl.length} pieces on the plate, one for each line` : `Only ${lay.fits} of ${lay.copies} pieces fit`,
+        ok
+          ? `${pl.length} pieces on the plate, ${answer("piecesApart") ? "a G-code file for each part of the picture" : st.text ? "one for each line" : "one for each part"}`
+          : `Only ${lay.fits} of ${lay.copies} pieces fit`,
         "h-plate"
       );
     else
@@ -468,7 +490,8 @@ function readyItems() {
   return out;
 }
 // How much of the picture the line reaches: the picture's dark parts read the neutral way Optimize tracing scores
-// against (its inkReference: threshold 0, light smoothing), and the share of them more than one line spacing from the line.
+// against (its inkReference: threshold 0, light smoothing), and the share of them more than one line spacing from the
+// line.
 // The error readout can't tell: it measures the line against the strokes that were traced, not against the picture,
 // so a light or thin part the threshold missed doesn't count there. Worked out once per trace, after it's on screen.
 const COVER_WARN = 0.08;
@@ -606,7 +629,7 @@ async function exportAs(fmtName, msg) {
     setStatus(msg, "bad", `Export failed: ${(e && e.message) || "unknown error"}`);
     return;
   }
-  const data = f.text ? UNB.zip(f.inner, f.text) : f.data;
+  const data = f.files ? UNB.zip(f.files) : f.text ? UNB.zip(f.inner, f.text) : f.data;
   try {
     await saveFile(f.name, data);
     setStatus(msg, "ok", `Exported ${f.name} · ${f.info}`);
