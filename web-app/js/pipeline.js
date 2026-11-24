@@ -13,17 +13,6 @@ async function working(res, engine = PIPE) {
   if (res === undefined) res = s.res;
   const lv =
     s.levels && !st.text ? { count: s.levels.count, smooth: s.levels.smooth, colour: !!s.levels.colour } : null;
-  const key = [
-    src.__id,
-    JSON.stringify(st.sel),
-    res,
-    JSON.stringify(s.prep),
-    s.invert,
-    s.blur,
-    JSON.stringify(lv),
-    ...ask("workingKey"), // (cutout.js: the cut-out in use)
-  ].join("|");
-  if (st.wk && st.wk.key === key) return st.wk;
   let sx = 0,
     sy = 0,
     sw = src.width,
@@ -43,6 +32,21 @@ async function working(res, engine = PIPE) {
       sh = y1 - y0;
     }
   }
+  // gaps too narrow for the needle, filled (an outline for a printer): their radius in working px, from the print's
+  // size as the last trace of this picture found it (fillGapPx)
+  const fill = fillGapPx(res, Math.max(sw, sh));
+  const key = [
+    src.__id,
+    JSON.stringify(st.sel),
+    res,
+    JSON.stringify(s.prep),
+    s.invert,
+    s.blur,
+    JSON.stringify(lv),
+    fill,
+    ...ask("workingKey"), // (cutout.js: the cut-out in use)
+  ].join("|");
+  if (st.wk && st.wk.key === key) return st.wk;
   const k = st.text ? 1 : Math.min(1, res / Math.max(sw, sh)); // text is rasterized at its own resolution
   const w = Math.max(8, Math.round(sw * k)),
     h = Math.max(8, Math.round(sh * k));
@@ -65,10 +69,41 @@ async function working(res, engine = PIPE) {
       invert: s.invert,
       blur: s.blur,
       levels: lv,
+      fillGap: fill,
     },
   ]);
   g.putImageData(new ImageData(r.preview, w, h), 0, 0); // the prepared image as the preview background
-  return (st.wk = { key, w, h, small: c, gray: r.gray, blurred: r.blurred, crop, levels: r.levels });
+  return (st.wk = { key, w, h, small: c, gray: r.gray, blurred: r.blurred, crop, levels: r.levels, fill });
+}
+// Fill gaps too narrow for the needle (the Tracing card, an outline for a printer): paper narrower than the line
+// spacing plus the line's width can't take two walls, so it's filled before tracing. The radius in working px, half a
+// px steps; 0 when off, or before the first trace of a picture (st.rr unknown). long: the picture's (or the
+// selection's) long side, source px.
+const fillWanted = () =>
+  $("fillNarrow").checked && $("modeOutline").checked && !st.text && !artForPlot() && st.art.kind !== "model";
+// the radius the picture's size calls for now (as working() would work it out)
+function fillNow() {
+  const src = st.source;
+  if (!src || st.text) return 0;
+  let long = Math.max(src.width, src.height);
+  if (st.sel) {
+    const xs = st.sel.map((p) => p[0] * src.width),
+      ys = st.sel.map((p) => p[1] * src.height);
+    long = Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys)) + 4;
+  }
+  return fillGapPx(workRes(), long);
+}
+// The size it works from is the one the working resolution was picked for (workRes: the base per 100 mm, in 10%
+// steps), not the size itself: so it changes only when the resolution does (a retrace then anyway), and the size marks,
+// worked out on this trace, still hold when the slider moves. A print under 100 mm is taken as 100 mm (filling a
+// little less than it might).
+// (Kept out of settings(): its fields key the size marks' cache.)
+const fillGapMM = () => (fillWanted() && st.rr > 0 ? (st.spacing || 0) + lineWidthMM() : 0);
+function fillGapPx(res, long) {
+  const mm = fillGapMM();
+  if (!(mm > 0)) return 0;
+  const longMM = Math.max(100, (res * 100) / baseRes());
+  return Math.round((((mm / 2) * Math.min(res, long)) / longMM) * 2) / 2;
 }
 
 // line map for one threshold: detection + selection mask + erasing.
@@ -219,6 +254,7 @@ async function extract(g, P = Object.create(st), again = false) {
     walk,
     bgCache: null,
     resUsed: st.text ? 0 : s.res,
+    fillUsed: st.text ? 0 : W.fill,
   });
   if (!walk) {
     // nothing to draw: every view of the old line is cleared too
@@ -240,7 +276,7 @@ async function extract(g, P = Object.create(st), again = false) {
     // resolution
     const old = st.rr;
     st.rr = P.rr = Math.max(w, h) / P.bw; // (workRes reads st.rr: set while the second trace is worked out)
-    if (!again && workRes() !== s.res) {
+    if (!again && (workRes() !== s.res || fillNow() !== W.fill)) {
       try {
         return await extract(g, P, true);
       } catch (e) {

@@ -45,6 +45,7 @@ addSaved(
   "far",
   "loose",
   "invert",
+  "fillNarrow",
   "bright",
   "contrast",
   "bgTol",
@@ -204,8 +205,8 @@ function applyDesign(d, src, imageSource, pics, picMore) {
       if (d.v.lineDrawn) d.v.lineStrokes = true;
     }
     // controls added after a design was saved come back as the app was before them (v131: lettering for a printer
-    // off; v136: no name), not as they happen to be now; an undo step always has them all
-    const BEFORE = { designName: "", txtJoin: false, txtSnap: false, txtNoDots: false, txtMeasured: false };
+    // off; v136: no name; v164: narrow gaps not filled), not as they happen to be now; an undo step always has them all
+    const BEFORE = { designName: "", txtJoin: false, txtSnap: false, txtNoDots: false, txtMeasured: false, fillNarrow: false };
     const saved = { ...BEFORE, ...(d.v || {}) };
     for (let [id, val] of Object.entries(saved)) {
       const el = $(id);

@@ -92,6 +92,10 @@ function labels() {
   const cr = +$("corner").value / 10;
   $("cornerVal").textContent = cr ? `${fmt(cr, 1)} mm radius` : "off";
   $("farVal").textContent = s.far ? s.far + "% of image" : "keep all";
+  // narrow gaps filled: an outline for a printer only; the width it fills under
+  $("fillNarrowRow").hidden = !(s.mode === "edges" && !st.text && !artForPlot());
+  const fg = fillGapMM();
+  $("fillNarrowVal").textContent = fg > 0 ? `under ${fmt(fg, 1)} mm` : "";
   const p = s.prep;
   $("brightVal").textContent = (p.brightness > 0 ? "+" : "") + p.brightness;
   $("contrastVal").textContent = (p.contrast > 0 ? "+" : "") + p.contrast;
@@ -150,6 +154,10 @@ $("uncross").addEventListener("change", () => schedule(fit));
 // Allow overlaps: the same // fit: lays out the line again and checks the size marks
 $("overlaps").addEventListener("change", () => schedule(fit));
 $("invert").addEventListener("change", () => schedule(extract));
+$("fillNarrow").addEventListener("change", () => {
+  labels();
+  schedule(extract);
+});
 document.querySelectorAll('input[name="mode"], input[name="loop"]').forEach((r) =>
   r.addEventListener("change", () => {
     labels();
@@ -285,7 +293,8 @@ function afterSize() {
   if (!st.text && st.source && st.walk && workRes() !== st.resUsed) {
     st.autoPending = true;
     schedule(extract);
-  } // a bigger (or smaller) print is traced at its own resolution (and gets its own term count)
+  } // a bigger (or smaller) print is traced at its own resolution (and gets its own term count, and its gaps too
+  // narrow for the needle filled for that resolution's size: pipeline.js fillGapPx)
   else if (st.spacing > 0) schedule(signal);
   else if (st.err) {
     if (st.final) st.mbox = UNB.minBox(st.final.re, st.final.im, (0.5 * lineWidthMM()) / scale());

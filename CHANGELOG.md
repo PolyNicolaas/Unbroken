@@ -3,6 +3,19 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v164 · 2026-11-24
+
+- **Fill gaps too narrow for the needle** (Line step, Tracing: an outline for a printer; on). Paper narrower than the
+  line spacing plus the line's width (2.2 mm for the 0.84 mm needle: a W's notch tips, the sliver between two serifs,
+  between a thin and a thick stroke) can't take the two walls an outline puts there: they were squeezed in, pushed
+  apart and wobbled. It's filled before tracing (a grey opening, a disc half that width), so the outline sweeps round
+  in one smooth line; wider gaps and thin dark strokes stay. The width comes from the size the working resolution was
+  picked for, so it changes only when the resolution does. Designs saved before keep it off. Found on the Gateway City
+  Big Band logo ("why are the W's lines wavy?").
+- Agent API: `set({ fillNarrowGaps })`.
+- Engine: `UNB.fillGaps` (`11-stages.js`), and `stagePrep`'s `fillGap` (px).
+- Tests: E64.
+
 ## v163 · 2026-11-24
 
 - **Ties, by hand** (Print: Ties). The card draws the line with its ties: blue for the ties, grey dashes for ones left

@@ -21,7 +21,7 @@ function workingImage(src, res) {
 function trace(src, options) {
   const o = Object.assign({}, DEFAULTS, options || {}), t0 = performance.now(), ms = {};
   const { w, h, k, gray } = workingImage(src, o.res);
-  const blurred = UNB.blur(gray, w, h, o.blur);
+  const blurred = UNB.blur(o.fillGapPx ? UNB.fillGaps(gray, w, h, o.fillGapPx) : gray, w, h, o.blur); // (the app's Fill gaps too narrow for the needle)
   let t = performance.now();
   const lines = o.lines || UNB.stageLines(blurred, w, h, { mode: o.mode, sens: o.sens, selMask: null, erase: null });
   const walk = UNB.stageWalk(lines, w, h, { minPix: o.minLen, maxJump: o.far ? o.far / 100 * Math.hypot(w, h) : 0, open: o.open, jumpCost: o.loose, doubleAll: o.doubleAll, doubleOpen: o.doubleOpen, lanes: o.lanes },
