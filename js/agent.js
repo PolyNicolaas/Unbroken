@@ -43,6 +43,7 @@ const AGENT_SETTINGS = [
   ["threshold", (v) => agentSet("sens", v)], // −60 … 60: higher takes in lighter parts
   ["smoothing", (v) => agentSet("blur", v)], // the Smoothing slider, 0 … 30 (tenths of a working pixel)
   ["ignoreSpecks", (v) => agentSet("minLen", v)], // 0 … 200
+  ["fillNarrowGaps", (v) => agentSet("fillNarrow", v)], // an outline for a printer: gaps too narrow for the needle filled
   ["dropFarAway", (v) => agentSet("far", v)], // 0 … 40 (% of the picture)
   ["looseEnds", (v) => agentPick("loose", v)],
   ["cornersMM", (v) => agentSet("corner", Math.round(+v * 10))], // Round corners, radius in mm (0 = off)

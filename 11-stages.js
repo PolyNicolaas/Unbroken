@@ -42,7 +42,53 @@
       } else preview[4 * i] = preview[4 * i + 1] = preview[4 * i + 2] = v;
       preview[4 * i + 3] = 255;
     }
-    return { gray, blurred: L ? gray : UNB.blur(gray, w, h, o.blur || 0), preview, levels: L };
+    const g2 = !L && o.fillGap >= 1 ? UNB.fillGaps(gray, w, h, o.fillGap) : gray;
+    return { gray, blurred: L ? gray : UNB.blur(g2, w, h, o.blur || 0), preview, levels: L };
+  };
+
+  // Gaps too narrow for the needle, filled: paper narrower than 2r px between ink (a W's notch tips, the sliver between
+  // two serifs, between a thin and a thick stroke) becomes ink, so an outline goes round them in one smooth sweep
+  // instead of squeezing two walls into a gap they can't fit (where they were pushed apart and wobbled). A grey opening
+  // with a disc of radius r (the darkest within r, then the lightest within r): light parts narrower than the disc go,
+  // dark parts and every edge's own grey ramp stay as they were. Run on the grey before smoothing.
+  function discFilter(g, w, h, r, takeMin) {
+    const R = Math.floor(r),
+      pick = takeMin ? Math.min : Math.max,
+      rows = new Map(), // half-width → each row's min (or max) over x ± half-width
+      out = new Float32Array(w * h);
+    const along = (hw) => {
+      if (rows.has(hw)) return rows.get(hw);
+      const o = new Float32Array(w * h),
+        L = 2 * hw + 1,
+        f = new Float32Array(w + L),
+        b = new Float32Array(w + L);
+      for (let y = 0; y < h; y++) {
+        const row = y * w,
+          at = (x) => g[row + Math.min(w - 1, Math.max(0, x - hw))];
+        // van Herk / Gil-Werman: blocks of L, running from the left and from the right
+        const n = w + 2 * hw;
+        for (let i = 0; i < n; i++) f[i] = i % L ? pick(f[i - 1], at(i)) : at(i);
+        for (let i = n - 1; i >= 0; i--) b[i] = i % L === L - 1 || i === n - 1 ? at(i) : pick(b[i + 1], at(i));
+        for (let x = 0; x < w; x++) o[row + x] = pick(b[x], f[x + L - 1]);
+      }
+      rows.set(hw, o);
+      return o;
+    };
+    out.fill(takeMin ? Infinity : -Infinity);
+    for (let dy = -R; dy <= R; dy++) {
+      const hw = Math.floor(Math.sqrt(Math.max(0, r * r - dy * dy))),
+        A = along(hw);
+      for (let y = 0; y < h; y++) {
+        const yy = Math.min(h - 1, Math.max(0, y + dy)) * w,
+          row = y * w;
+        for (let x = 0; x < w; x++) out[row + x] = pick(out[row + x], A[yy + x]);
+      }
+    }
+    return out;
+  }
+  UNB.fillGaps = function (gray, w, h, r) {
+    if (!(r >= 1)) return gray;
+    return discFilter(discFilter(gray, w, h, r, true), w, h, r, false);
   };
 
   // image → line map, as the app does it: centerline or edges, then the selection mask and erasing.
