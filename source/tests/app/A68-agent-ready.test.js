@@ -3,8 +3,8 @@ module.exports = {
   id: "A68", title: "Ready for an agent: a picture from a link, a done signal, status() as data, readouts that say what they are",
   guards: "an agent (or a person) unable to load a picture from a link, guessing when the app has finished, misreading a choice from a screenshot, or acting on an export message for a design that has since changed",
   why: "The first agent trial (23 November 2026, docs/AGENT-TRIAL.md) took the Polimeks logo from a link to G-code by pointing and clicking. It had to load the picture with a script (no link import; an SVG with only a viewBox came in at the wrong size), caught the page half-built, couldn't tell Centerline from Outline in a screenshot, wondered why the print shrank to 58 mm, and saw the last export's message after the design had changed.",
-  how: "Opens the app with ?src= pointing at a test logo (an SVG with only a viewBox: a bold P with a thin grey ring over a bold word), waits on window.unbroken.whenReady(), and reads body data-state, the picture's shape, status() and the ready list. Exports G-code, changes the width and reads the message again. Opens a second page and loads the same logo through the Picture card's link box. Checks the corner label is a live region, Optimize tracing is at the top of the Fit card, the preview box says what it measures, and From above turns the 3D view straight down.",
-  pass: "data-state goes to ready; the picture keeps the SVG's 340 : 146 shape and is 1600 px wide; status() gives the trace (terms, error, style centerline), the size the app picked and the ready list as data; the ready list says the size was picked for you until a width is typed; the export message clears when the width changes; the link box loads the same picture; the corner label has role status and aria-live; #optBtn sits at the top of the Fit card; From above sets the 3D view to look straight down; no page errors.",
+  how: "Opens the app with ?src= pointing at a test logo (an SVG with only a viewBox: a bold P with a thin grey ring over a bold word), waits on window.unbroken.whenReady(), and reads body data-state, the picture's shape, status() and the ready list. Exports G-code, changes the width and reads the message again. Opens a second page and loads the same logo through the Picture card's link box. Clicks Optimize tracing over a stale result and stops it. Checks the corner label is a live region, Optimize tracing is at the top of the Fit card, the preview box says what it measures, and From above turns the 3D view straight down.",
+  pass: "data-state goes to ready, and whenReady() waits for the linked picture; Optimize tracing is busy and shows no old result from the moment it's clicked; the picture keeps the SVG's 340 : 146 shape and is 1600 px wide; status() gives the trace (terms, error, style centerline), the size the app picked and the ready list as data; the ready list says the size was picked for you until a width is typed; the export message clears when the width changes; the link box loads the same picture; the corner label has role status and aria-live; #optBtn sits at the top of the Fit card; From above sets the 3D view to look straight down; no page errors.",
   async run(ctx) {
     const src = ctx.server.url + "/source/tests/lib/fixtures/mark-and-word.svg";
     const { page, errors, close } = await A.open(ctx, { url: ctx.url + "?src=" + encodeURIComponent(src), clean: true });
@@ -13,6 +13,15 @@ module.exports = {
     const picked = s.ready.some((r) => /Size picked for you: medium detail/.test(r.text));
     const live = await page.$eval("#chip", (c) => c.getAttribute("role") + " " + c.getAttribute("aria-live"));
     const optInTracing = await page.$eval("#optBtn", (b) => !!b.closest("section.card") && b.closest("section.card").querySelector("h2").id === "h-fit" && !(b.closest(".inline").previousElementSibling || { matches: () => false }).matches(".row, .readouts, canvas"));
+    // Optimize tracing: busy and showing no old result from the moment it's clicked, then stopped
+    const optStart = await page.evaluate(() => {
+      $("optMsg").textContent = "an old result";
+      $("optAccept").hidden = false;
+      $("optBtn").click();
+      return { busy: busyReasons.has("optimize"), accept: $("optAccept").hidden, msg: $("optMsg").textContent };
+    });
+    await page.evaluate(() => $("optCancel").click());
+    await page.evaluate(() => window.unbroken.whenReady());
     await page.click("label[for=viewChoc]");
     await page.evaluate(() => window.unbroken.whenReady());
     const [dl] = await Promise.all([page.waitForEvent("download"), page.click("#gcodeBtn")]);
@@ -31,6 +40,9 @@ module.exports = {
     const res = {
       checks: [
         check("body data-state after the trace", s.state, "==", "ready"),
+        check("whenReady waited for the linked picture", s.source, "==", "mark-and-word.svg"),
+        check("Optimize: busy as soon as it's clicked", +optStart.busy, "==", 1),
+        check("Optimize: the last result's Accept hidden at once", +(optStart.accept && !/old result/.test(optStart.msg)), "==", 1),
         check("picture width from the SVG (px)", shape[0], "==", 1600),
         check("picture shape kept (width ÷ height × 1000)", Math.round((1000 * shape[0]) / shape[1]), "==", Math.round((1000 * 340) / 146)),
         check("status(): terms", s.trace ? s.trace.terms : 0, ">", 10),

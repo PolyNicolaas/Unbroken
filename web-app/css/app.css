@@ -291,7 +291,8 @@ p.hint.help { border-left: 2px solid var(--rule); padding-left: 0.6em; }
 
 /* Export (3D): ready to print — one line per check; a click opens the card to fix it */
 .ready { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.15em; font-size: calc(12.5px * var(--text)); }
-.ready li::before { display: inline-block; width: 1.3em; font-weight: 700; }
+.ready li { display: flex; align-items: baseline; } /* a long line wraps beside its mark, not under it */
+.ready li::before { flex: none; display: inline-block; width: 1.3em; font-weight: 700; }
 .ready li.ok::before { content: "✓"; color: var(--good); }
 .ready li.warn::before { content: "⚠"; color: var(--warn); }
 .ready li.bad::before { content: "✗"; color: var(--warn); }

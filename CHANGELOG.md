@@ -3,6 +3,19 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v158 · 2026-11-24
+
+From the second agent trial (the +Jakarta logo):
+
+- **Fixed: "ready" before a linked picture arrived.** With `?src=`, the app said it was ready (empty) while the
+  picture was still on its way, so `whenReady()` returned too early. A picture loading from a link or a file is
+  working now.
+- **Fixed: Optimize tracing showed the last run's result while starting.** Until the picture was read, the previous
+  run's message and Accept stayed on screen and the app didn't count as busy, so a new run could be taken for done.
+  It's busy, with the old result cleared, from the click. Accept and Undo also hide their buttons.
+- **The ready list wraps a long line beside its mark**, not under it.
+- Tests: A68 checks both fixes.
+
 ## v157 · 2026-11-23
 
 - **Fixed: the preview's "as printed" label ran off the edge** when the box reached the right side of the view (the
