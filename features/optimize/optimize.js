@@ -272,5 +272,22 @@ $("optUndo").addEventListener("click", () => {
 
 // what the core announces
 on("sourceChanged", stopOptimize); // a run still going is for the old source
+// agent.js (unbroken.optimize): run it, wait, keep the result (or not, keep: false), and say what changed
+on("optimize", async (o = {}) => {
+  if (!st.source || !st.walk) return { ok: false, message: "Nothing traced to optimize." };
+  const before = optSnapshot();
+  optRun();
+  while (busyReasons.has("optimize")) await new Promise((r) => setTimeout(r, 200));
+  const after = optSnapshot(),
+    message = $("optMsg").textContent,
+    changed = Object.keys(after).filter((k) => String(after[k]) !== String(before[k]));
+  if (changed.length) $(o.keep === false ? "optUndo" : "optAccept").click();
+  return {
+    ok: true,
+    kept: changed.length > 0 && o.keep !== false,
+    changed: Object.fromEntries(changed.map((k) => [k, { from: before[k], to: after[k] }])),
+    message,
+  };
+});
 on("inkReference", optReference); // the picture's ink, the yardstick (export.js: how much of it the line reaches)
 on("preset", applyPreset); // a starting point asked for by name (settings.js startFrom, a model's drawing)
