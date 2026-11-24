@@ -191,7 +191,12 @@ function agentParts(o = {}) {
       }
     }
   }
-  const groupsL = bands.flatMap((L) => runs(L, "x0", "x1", sidePx));
+  // side by side: sideGapMM when given, else a gap wider than about a fifth of the band's height (the space between two
+  // words or a mark and a word, not between letters), at least 4 mm
+  const groupsL = bands.flatMap((L) => {
+    const B = box(L);
+    return runs(L, "x0", "x1", o.sideGapMM || !mmPerPx ? sidePx : Math.max(sidePx, 0.2 * (B.y1 - B.y0 + 1)));
+  });
   const groups = groupsL.map((L) => ({
     ...box(L),
     area: L.reduce((s, C) => s + C.area, 0),
@@ -209,7 +214,12 @@ function agentParts(o = {}) {
       shapes: G.shapes,
       share: +(G.area / big.reduce((s, C) => s + C.area, 0)).toFixed(3), // of all the ink
     }));
-  return { widthMM, bandGapMM: mmPerPx ? +o.bandGapMM || 1 : null, sideGapMM: mmPerPx ? +o.sideGapMM || 4 : null, parts };
+  return {
+    widthMM,
+    bandGapMM: mmPerPx ? +o.bandGapMM || 1 : null,
+    sideGapMM: mmPerPx ? +o.sideGapMM || "a fifth of each band's height, at least 4" : null,
+    parts,
+  };
 }
 
 // The printed line seen from above, drawn at a fixed scale (pxPerMM), as a PNG data URL: what a person would see if

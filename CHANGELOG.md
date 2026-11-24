@@ -3,6 +3,11 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v160 · 2026-11-24
+
+- `unbroken.parts()`: groups side by side split where the gap is wider than a fifth of their band's height (at least
+  4 mm), not a fixed 4 mm, so a big word's letters stay one part (+Jakarta at 140 mm came apart as "Ja" and "karta").
+
 ## v159 · 2026-11-24
 
 - **The agent API** (`js/agent.js`, `window.unbroken`): an agent or a script drives the app through the same controls
