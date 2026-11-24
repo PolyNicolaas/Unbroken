@@ -69,6 +69,10 @@ Steps: `label[for=viewArt]`, `label[for=viewDesign]` (Line), `label[for=viewChoc
 
 ## How to work with a person
 
+The full playbook, with what the trials taught (sizes for lettering, when to split into pieces, what made things
+worse): [`docs/AGENT-PLAYBOOK.md`](../docs/AGENT-PLAYBOOK.md).
+
+
 Make options first, then refine (decided 23 November 2026): people rarely know what they want before they see it.
 Ask up front only what a preview can't show: printer or plotter, and a rough size or box. Then show a few distinct
 options side by side with their numbers (whole picture at the app's size; larger after Optimize tracing; split into

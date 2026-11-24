@@ -26,7 +26,8 @@ Last sorted: 10 November 2026 (v143: the map of the steps and its next steps add
   picture's scale), then **variations side by side** (keep several versions of a design with their numbers and pick
   one). Later: the recipe format and the engine running in Node (a CLI), an MCP server on top of it, then hosted.
   Small ones left from the trial: the smallest letter feature against the needle in the ready list; size as something
-  Optimize tracing can change. How an agent drives the app: [`web-app/AGENT.md`](web-app/AGENT.md).
+  Optimize tracing can change. How an agent drives the app: [`web-app/AGENT.md`](web-app/AGENT.md); how it should work, and the app fixes the second
+  trial (24 November) found: [`docs/AGENT-PLAYBOOK.md`](docs/AGENT-PLAYBOOK.md).
 
 ## 1 · Bugs and quality
 
