@@ -35,7 +35,7 @@ Prefer them to clicking: they don't depend on the layout and don't break when a 
 | `await open(url)` | Opens a picture from a link. Answers `status()`. |
 | `parts({ widthMM, bandGapMM = 1, sideGapMM })` | The picture's parts, the way a logo is laid out: bands one above the other, then groups side by side within a band, split where the gap is wider than `sideGapMM` (default: a fifth of the band's height, at least 4 mm, so letters stay together and a mark beside a word doesn't); a dot over an i joins its line. Each: `box` (fractions of the picture, for `select`), `widthMM`, `heightMM`, `strokeMM` (typical stroke width), `shapes`, `share` of the ink. Sizes are for the whole picture's ink at `widthMM` (default: the width now, with no selection). |
 | `await select(box \| null)` | Traces only that part (`[x0, y0, x1, y1]`, fractions), or the whole picture again. A new selection starts at the app's size: set the width after. |
-| `await set({ … })` | Settings by name, applied in this order, each settled before the next: `madeFor` ("printer" / "plotter"), `input`, `text`, `font`, `needle`, `chocolate` (by value or part of the name: "0.84", "Dark"), `style` ("centerline" / "outline"), `threshold` (−60 … 60), `smoothing` (the slider, 0 … 30), `ignoreSpecks` (0 … 200), `dropFarAway` (0 … 40), `looseEnds`, `cornersMM`, `crossings`, `allowOverlaps`, `lineGapMM`, `widthMM`, `pieces` (a picture: true for a G-code file a part), `splitMM`, `heightMM`, `letterHeightMM`, `fitInside` ([w, h]), `terms` (a number or "auto"), `copies`, `printHeightMM`, a base (`baseLayers`, `baseDensity` %, `basePattern` "lines" / "rings", `baseCover` "outline" / "inside", `baseTurn`), ties (`ties` true / false, `tieMaxMM` 2 … 20, `tieEveryMM` 4 … 40, `tiesInsideLetters` true / false), `name`. An unknown name is refused. Answers `status()`. |
+| `await set({ … })` | Settings by name, applied in this order, each settled before the next: `madeFor` ("printer" / "plotter"), `input`, `text`, `font`, `needle`, `chocolate` (by value or part of the name: "0.84", "Dark"), `style` ("centerline" / "outline"), `threshold` (−60 … 60), `smoothing` (the slider, 0 … 30), `ignoreSpecks` (0 … 200), `dropFarAway` (0 … 40), `looseEnds`, `cornersMM`, `crossings`, `allowOverlaps`, `lineGapMM`, `widthMM`, `pieces` (a picture: true for a G-code file a part), `splitMM`, `heightMM`, `letterHeightMM`, `fitInside` ([w, h]), `terms` (a number or "auto"), `copies`, `printHeightMM`, a base (`baseLayers`, `baseDensity` %, `basePattern` "lines" / "rings", `baseCover` "outline" / "inside", `baseTurn`), ties (`ties` true / false, `tieMaxMM` 2 … 20, `tieEveryMM` 4 … 40, `tiesInsideLetters` true / false, `tiesStandUp` true / false: a cake topper, ties row to row first), `name`. An unknown name is refused. Answers `status()`. |
 | `await optimize({ keep = true })` | Optimize tracing at the size now. Answers `{ ok, kept, changed: { sens: { from, to }, … }, message, status }`; `keep: false` shows what it would change and puts the settings back. Run it after the last size change. |
 | `snapshot({ pxPerMM = 8 })` | The printed line from above at a fixed scale, as `{ png (data URL), widthMM, heightMM }`. Snapshots at the same `pxPerMM` compare truly: use them for option sheets. |
 | `await export(kind, { download = true, anyway })` | `"gcode"`, `"dxf"` (for choc OS) or `"svg"` (the plotter's page). `download: false` answers the file's text instead (a picture in pieces: `files`, a `{ name, text }` each). A red line in the ready list stops a G-code export unless `anyway: true`: answers `{ ok: false, notReady }`. |
@@ -54,6 +54,8 @@ Prefer them to clicking: they don't depend on the layout and don't break when a 
   trace: { style: "centerline" | "outline", terms, errorMM, connectors, threshold, smoothing, smoothingSlider },
   size: { widthMM, heightMM, pickedByApp: { mark: "medium detail", widthMM } | null },
   line: { widthMM, spacingMM, needle },
+  layers,                                            // the Print step's layers readout, or null
+  ties: { count, addedMMPerLayer, leftOut } | null,  // ties on: how many, line added, how many left out
   ready: [{ level: "ok" | "warn" | "bad", text }],   // the Print step's ready list
   lastExport,                                        // "Exported … · …" for the design on screen, else null
 }
@@ -82,7 +84,7 @@ For an agent that clicks instead (or to find a setting on screen):
 | Needle, chocolate | `#needle`, `#chocolate` (Material); the line is `#lineW` + `#lineGapMM` |
 | Copies | `#copies` |
 | Taller | `#printHeightMM` |
-| Hold a large print's parts together | `#ties` (Layers: Ties), `#tieMax`, `#tieEvery`; or a base: `#baseLayers` |
+| Hold a large print's parts together | `#ties` (Print: Ties), `#tieStand`, `#tieInside`, `#tieMax`, `#tieEvery`; tap ties on `#tieEdit` (the person's taps, kept in `#tieEdits`), `#tieReset`; or a base: `#baseLayers` |
 | Name the files | `#designName` |
 | Files | `#gcodeBtn` (G-code, zipped), `#dxfBtn` (DXF for choc OS), `#exportBtn` (plotter SVG) |
 | Check the print by eye | 3D layers view, `#pvAbove` (From above: straight down on the plate) |

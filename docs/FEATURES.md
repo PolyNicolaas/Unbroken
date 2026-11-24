@@ -21,7 +21,7 @@ work on one, its folder, its marked parts of the page and its tests are everythi
 | **optimize** | Optimize and the starting points | `optimize.js` | 294 | 2 | A08 |
 | **testprint** | the test print | `testprint.js` | 169 | 1 | A25, A48 |
 | **matrix** | the test matrix | `matrix.js` | 277 | 1 | E46, A49 |
-| **ties** | ties: more connectors across the gaps between parts, for a large print | `ties.js` | 92 | 1 | E63, A71 |
+| **ties** | ties: more connectors across the gaps between parts, for a large print | `ties.js` | 283 | 1 | E63, A71 |
 
 ## How each one joins the app
 
@@ -122,5 +122,5 @@ the test matrix
 ties: more connectors across the gaps between parts, for a large print
 
 - steps and chips of the map: ties
-- controls saved with a design: 3
+- controls saved with a design: 6
 - moments it answers: wallLine, layersKey, layersReady, designUI

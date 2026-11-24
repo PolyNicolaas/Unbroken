@@ -73,9 +73,12 @@
   //        bead: a tie stops half of it short of the far wall, so the bead meets it; default 0.84), withinParts (ties
   //        from a part to itself too: across a letter's own notch or opening; default not), leaveOut ([[x, y], …] px:
   //        places a tie was taken away, none within everyMM of one), only ([[x, y], …] px: just the ties with their
-  //        middle within 2.5 mm of one of these, a set chosen before) }
-  //   → { re, im (Float64Array), ties: [[x0, y0, x1, y1], …] (px, where each tie leaves and where it lands), count,
-  //       addedMM (line added, mm) }
+  //        middle within 2.5 mm of one of these, a set chosen before), addAt ([[x, y], …] px: a tie added at each, the
+  //        shortest across the gap there whatever the rules), stand (standing up, a cake topper: ties up and down go
+  //        first) }
+  //   → { re, im (Float64Array), ties: [[x0, y0, x1, y1], …] (px, where each tie leaves and where it lands), tapped
+  //       (which of them addAt put there), skipped: [{ t: [x0, y0, x1, y1], why: "inside a letter" | "taken away" }]
+  //       (ties left out, where they'd go), missed (addAt places with no tie possible), count, addedMM (line added, mm) }
   // A tie is the shortest way across a gap of open background between two stretches of the line that are far apart
   // along it (two parts, or two ends of one part that the trace reached separately). It's kept when it is at most
   // maxMM long, its middle is in the open background, neither strand crosses the line or another tie, and both its
@@ -95,7 +98,7 @@
       fused = 1.2 * sp,
       short = (o.lineMM || 0.84) / 2,
       n = re.length;
-    const none = { re: Float64Array.from(re), im: Float64Array.from(im), ties: [], count: 0, addedMM: 0 };
+    const none = { re: Float64Array.from(re), im: Float64Array.from(im), ties: [], tapped: [], skipped: [], missed: 0, count: 0, addedMM: 0 };
     if (n < 4 || !(k > 0)) return none;
     const open = openOutside(o.ink, w, h);
     // how far each open pixel is from anything that isn't open (px): the trace's own connectors run out in the open
@@ -245,23 +248,13 @@
     const near = (x, y, list, r) => list.some((q) => (q[0] - x) ** 2 + (q[1] - y) ** 2 < r * r);
     const ends = [],
       strands = [],
-      acc = [];
-    for (const [d, i, j] of cands) {
+      acc = [],
+      skipped = []; // ties the rules (or a tap) left out, where they'd go: [{ t: [x0, y0, x1, y1] px, why }]
+    // a tie's two strands, or null where one would cross the line or a tie already placed
+    const shape = (i, j, d) => {
       const p = [SX[i], SY[i]],
-        q = [SX[j], SY[j]];
-      if (!at(open, (p[0] + q[0]) / 2, (p[1] + q[1]) / 2)) continue; // across a gap, not through ink or a bowl
-      if (near(p[0], p[1], spots, every / 2) || near(q[0], q[1], spots, every / 2)) continue;
-      // between two parts: a tie from a part to itself only closes a letter's notch or opening (a W's V, an E's arms)
-      const a = partAt(...p),
-        b = partAt(...q),
-        mx = (p[0] + q[0]) / 2,
-        my = (p[1] + q[1]) / 2;
-      // (a tie from a part to itself, left out, still keeps its place: no tie moves in beside it)
-      const own = a === b && !o.withinParts;
-      if (near(mx, my, out, every)) continue;
-      if (only && !near(mx, my, only, 2.5)) continue;
-      if (near(p[0], p[1], ends, every) || near(q[0], q[1], ends, every)) continue;
-      const ux = (q[0] - p[0]) / d,
+        q = [SX[j], SY[j]],
+        ux = (q[0] - p[0]) / d,
         uy = (q[1] - p[1]) / d,
         nx = -uy,
         ny = ux;
@@ -271,13 +264,78 @@
         q[0] + g * nx * H - ux * 0.2,
         q[1] + g * ny * H - uy * 0.2,
       ]);
-      if (two.some((t) => crossesLine(...t))) continue;
-      if (two.some((t) => strands.some((u) => meets(...t, ...u)))) continue;
-      strands.push(...two);
-      ends.push(p, q);
-      if (own) continue;
-      acc.push({ s: ss[i], p, q, d, u: [ux, uy], nrm: [nx, ny] });
+      if (two.some((t) => crossesLine(...t))) return null;
+      if (two.some((t) => strands.some((u) => meets(...t, ...u)))) return null;
+      return { s: ss[i], p, q, d, u: [ux, uy], nrm: [nx, ny], two, mx: (p[0] + q[0]) / 2, my: (p[1] + q[1]) / 2 };
+    };
+    const place = (T, keep) => {
+      strands.push(...T.two);
+      ends.push(T.p, T.q);
+      if (keep) acc.push(T);
+    };
+    const px4 = (T) => [T.p[0] / k, T.p[1] / k, T.q[0] / k, T.q[1] / k];
+    // standing up (a cake topper: the picture's down is down): ties up and down, from one row to the next, go first; one
+    // across counts as three times its length
+    if (o.stand) {
+      const w_ = ([d, i, j]) => d * (1 + (2 * Math.abs(SX[j] - SX[i])) / d);
+      cands.sort((A, B) => w_(A) - w_(B));
     }
+    const takenShown = new Set();
+    for (const [d, i, j] of cands) {
+      const p = [SX[i], SY[i]],
+        q = [SX[j], SY[j]],
+        mx = (p[0] + q[0]) / 2,
+        my = (p[1] + q[1]) / 2;
+      if (!at(open, mx, my)) continue; // across a gap, not through ink or a bowl
+      if (near(p[0], p[1], spots, every / 2) || near(q[0], q[1], spots, every / 2)) continue;
+      if (only && !near(mx, my, only, 2.5)) continue;
+      // taken away by a tap: none there (the one nearest the tap is shown, faded, to bring back)
+      const o_ = out.findIndex((r) => (r[0] - mx) ** 2 + (r[1] - my) ** 2 < every * every);
+      if (o_ >= 0) {
+        if (!takenShown.has(o_) && (out[o_][0] - mx) ** 2 + (out[o_][1] - my) ** 2 < 9) {
+          const T = shape(i, j, d);
+          if (T) takenShown.add(o_), skipped.push({ t: px4(T), why: "taken away" });
+        }
+        continue;
+      }
+      if (near(p[0], p[1], ends, every) || near(q[0], q[1], ends, every)) continue;
+      const T = shape(i, j, d);
+      if (!T) continue;
+      // between two parts: a tie from a part to itself only closes a letter's notch or opening (a W's V, an E's arms);
+      // left out, it still keeps its place, so no tie moves in beside it
+      const own = partAt(...p) === partAt(...q) && !o.withinParts;
+      place(T, !own);
+      if (own) skipped.push({ t: px4(T), why: "inside a letter", T });
+    }
+    // ties added by a tap: the shortest across the gap nearest each tap (within 4 mm of its middle), whatever the
+    // rules; one that would cross the line or another tie can't be added
+    let missed = 0;
+    for (const [ax, ay] of (o.addAt || []).map(([x, y]) => [x * k, y * k])) {
+      // a tie the rules left out (inside a letter) at the tap: that one, its place already kept
+      const kept = skipped.find((S_) => S_.T && !S_.T.tapped && Math.hypot(S_.T.mx - ax, S_.T.my - ay) < 4);
+      if (kept) {
+        kept.T.tapped = true;
+        acc.push(kept.T);
+        continue;
+      }
+      let best = null;
+      for (const [d, i, j] of cands) {
+        const mx = (SX[i] + SX[j]) / 2,
+          my = (SY[i] + SY[j]) / 2,
+          r = Math.hypot(mx - ax, my - ay);
+        if (r > 4 || !at(open, mx, my) || (best && r + d / 4 >= best.r + best.d / 4)) continue;
+        if (near(SX[i], SY[i], ends, 2.5) || near(SX[j], SY[j], ends, 2.5)) continue; // not on top of another tie
+        const T = shape(i, j, d);
+        if (T) best = Object.assign(T, { r });
+      }
+      if (best) place(best, true), (best.tapped = true);
+      else missed++;
+    }
+    // (one a tap brought back isn't shown as left out too)
+    for (let x = skipped.length - 1; x >= 0; x--) if (skipped[x].T && skipped[x].T.tapped) skipped.splice(x, 1);
+    for (const S_ of skipped) delete S_.T;
+    none.skipped = skipped;
+    none.missed = missed;
     if (!acc.length) return none;
     // splice: the line is cut a spacing wide where the tie leaves (c0 to c1), out from c0 along one strand, a short
     // step beside the far wall (half a bead off it, so the bead meets it), back along the other to c1, and on
@@ -322,7 +380,10 @@
     return {
       re: Float64Array.from(ox),
       im: Float64Array.from(oy),
-      ties: acc.map((T) => [T.p[0] / k, T.p[1] / k, T.q[0] / k, T.q[1] / k]),
+      ties: acc.map(px4),
+      tapped: acc.map((T) => !!T.tapped),
+      skipped,
+      missed,
       count: acc.length,
       addedMM: added,
     };

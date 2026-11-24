@@ -21,7 +21,9 @@ uses are in `web-app/AGENT.md`; the first trial is in `AGENT-TRIAL.md`.
   - **Ask what it's for.** A large piece is often a **cake topper**: printed flat, then stood on edge with its legs
     in the cake. Then the print's height is the topper's thickness (6–10 mm is plenty), and the weight runs down
     through it to the legs: the ties that matter join each row to the one below and the legs to the letters. Ties
-    across a letter's own notch (a W's V, an E's arms) don't; Nicolaas took those away on the Gateway logo.
+    across a letter's own notch (a W's V, an E's arms) don't; Nicolaas took those away on the Gateway logo, and the
+    app leaves them out now. Set `tiesStandUp: true`; then show the ties (the card's drawing, or a snapshot) and let
+    the person tap away or add the rest: no rule matched all of his picks.
   When the person hasn't said, the options in step 3 show both.
 - Everything else is shown as options, not asked (decided 23 November 2026: people don't know what they want until
   they see it).

@@ -39,8 +39,8 @@ module.exports = {
   id: "E63", title: "Ties: more connectors across the gaps between a drawing's parts, still one line",
   guards: "ties that cross the line or each other, cut across a letter's closed bowl, reach further than asked, bunch up, or break the line into pieces",
   why: "Nicolaas (24 November 2026), after a large logo (Gateway City Big Band, 150 × 210 mm, Outline): its letters, rows and arch were held together only by the trace's few single-strand connectors, which won't hold a tall print. A base was one answer; he chose connectors with no base: short struts across the gaps between parts, the full height of the walls, and asked for them in the app (Ties, in Layers).",
-  how: "Draws three blocks 4 mm apart, a bar 4 mm under them and a ring with its hole, traces the outlines at 120 mm (0.84 mm line, 1.34 mm spacing), and adds ties with UNB.ties, the ink from the working image. Then again with the longest tie 3 mm (shorter than every gap). Then a U with a block beside it (60 mm), with and without withinParts.",
-  pass: "At least 4 ties; none longer than 7 mm; every tie's middle is in the open background outside the ink (none across the ring's hole); no two ties' ends closer than 10 mm; the line with ties doesn't cross itself where the traced line didn't; it is longer by the length the ties report (within 2%), and by 0.75–1.25 × twice the ties' lengths (out and back); with the longest tie 3 mm, no ties and the line as it was; the U gets a tie to the block but none across its own notch, unless withinParts (then at least one). Nicolaas took away ties that closed a letter's own notch on the Gateway logo (W, Y, E, G).",
+  how: "Draws three blocks 4 mm apart, a bar 4 mm under them and a ring with its hole, traces the outlines at 120 mm (0.84 mm line, 1.34 mm spacing), and adds ties with UNB.ties, the ink from the working image. Then again with the longest tie 3 mm (shorter than every gap). Then a U with a block beside it (60 mm), with and without withinParts, and its notch tie added by a tap (addAt); the first tie taken away (leaveOut); and standing up (stand).",
+  pass: "At least 4 ties; none longer than 7 mm; every tie's middle is in the open background outside the ink (none across the ring's hole); no two ties' ends closer than 10 mm; the line with ties doesn't cross itself where the traced line didn't; it is longer by the length the ties report (within 2%), and by 0.75–1.25 × twice the ties' lengths (out and back); with the longest tie 3 mm, no ties and the line as it was; the U gets a tie to the block but none across its own notch, unless withinParts (then at least one); the notch tie is listed as left out, and a tap there adds it (marked tapped); a tie taken away leaves one fewer, none within 10 mm, and is listed as taken away; standing up has at least as many ties up and down. Nicolaas took away ties that closed a letter's own notch on the Gateway logo (W, Y, E, G).",
   run() {
     const c = drawing(), t = trace(c, { mode: "edges", spacingMM: 1.34, lineMM: 0.84, outW: 120, minLen: 0 });
     const { w, h, gray } = workingImage(c, 500), ink = new Uint8Array(w * h);
@@ -63,6 +63,13 @@ module.exports = {
     const ou = { ink: inkU, w: wu.w, h: wu.h, mmPerPx: tu.scale, closed: !tu.open, maxMM: 7, everyMM: 10, spacingMM: 1.34, lineMM: 0.84 };
     const su = wu.w / 600, inNotch = ([x0, y0, x1, y1]) => { const x = (x0 + x1) / 2 / su, y = (y0 + y1) / 2 / su; return x > 140 && x < 180 && y > 60 && y < 300; };
     const U0 = UNB.ties(tu.fin.final.re, tu.fin.final.im, ou), U1 = UNB.ties(tu.fin.final.re, tu.fin.final.im, { ...ou, withinParts: true });
+    // taps: the U's notch tie (left out by the rules, shown as such) added; the first tie taken away (shown, none in its place)
+    const notch = U0.skipped.find((k_) => k_.why === "inside a letter"), mid = (q) => [(q[0] + q[2]) / 2, (q[1] + q[3]) / 2];
+    const U2 = notch ? UNB.ties(tu.fin.final.re, tu.fin.final.im, { ...ou, addAt: [mid(notch.t)] }) : null;
+    const T3 = UNB.ties(re, im, { ...o, leaveOut: [mid(T.ties[0])] });
+    const gone = T3.ties.filter((q) => Math.hypot(mid(q)[0] - mid(T.ties[0])[0], mid(q)[1] - mid(T.ties[0])[1]) * k < 10).length;
+    // standing up: ties up and down first
+    const S = UNB.ties(re, im, { ...o, stand: true }), upDown = (L) => L.filter(([x0, y0, x1, y1]) => Math.abs(y1 - y0) > Math.abs(x1 - x0)).length;
     const grew = (lengthOf(T.re, T.im) - lengthOf(re, im)) * k;
     return { checks: [
       check("ties added", T.count, ">=", 4),
@@ -78,6 +85,13 @@ module.exports = {
       check("the U: ties across its own notch", U0.ties.filter(inNotch).length, "==", 0),
       check("the U: ties to the block beside it", U0.count, ">=", 1),
       check("the U, inside a letter too: ties across its notch", U1.ties.filter(inNotch).length, ">=", 1),
+      check("the U: its notch tie shown as left out (inside a letter)", +!!notch, "==", 1),
+      check("the U: that tie added by a tap: across the notch", U2 ? U2.ties.filter(inNotch).length : 0, "==", 1),
+      check("the U: the tapped tie marked", U2 ? U2.tapped.filter(Boolean).length : 0, "==", 1),
+      check("a tie taken away: one fewer", T.count - T3.count, "==", 1),
+      check("a tie taken away: none within 10 mm of it", gone, "==", 0),
+      check("a tie taken away: shown as taken away", T3.skipped.filter((k_) => k_.why === "taken away").length, "==", 1),
+      check("standing up: ties up and down, at least as many", upDown(S.ties), ">=", upDown(T.ties)),
       check("longest tie 3 mm: the line as it was (points)", none.re.length, "==", re.length),
     ], notes: [`${T.count} ties, ${lens.map((l) => l.toFixed(1)).join(", ")} mm; +${T.addedMM.toFixed(0)} mm of line (${grew.toFixed(0)} measured); crossings ${before} → ${after}`] };
   },

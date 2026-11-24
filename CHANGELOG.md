@@ -3,6 +3,21 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v163 · 2026-11-24
+
+- **Ties, by hand** (Print: Ties). The card draws the line with its ties: blue for the ties, grey dashes for ones left
+  out inside a letter, orange dashes for ones you took away. **Tap a tie** to take it away (no other tie moves in
+  beside it), **a faded one** to bring it back or add it, **a gap** to add the shortest tie across it, whatever the
+  rules. Green: ties your taps added. **Reset ties** goes back to the rules. The taps are kept with the design and
+  undo; when the line itself changes they're set aside (the card says so). For the Gateway City Big Band logo the
+  taps reproduce Nicolaas's pick of 22 ties exactly.
+- **Stands up (cake topper): row to row first.** For a piece printed flat and stood on its edge: ties up and down
+  (one row to the next, the legs to the letters) carry the weight, so they're placed first; one across counts as
+  three times its length.
+- Agent API: `set({ tiesStandUp })`; `status().ties.leftOut`.
+- Engine: `UNB.ties` options `addAt` and `stand`; it answers `skipped` (with why), `tapped` and `missed`.
+- Tests: E63 and A71 cover the taps and standing up.
+
 ## v162 · 2026-11-24
 
 - **Ties** (Print step, Layers: **Ties**, a chip under Print): more connectors for a large print. The trace holds a

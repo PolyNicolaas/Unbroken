@@ -369,6 +369,7 @@
     <section class="card choc-only" data-feature="ties" aria-labelledby="h-ties">
       <h2 id="h-ties">Ties <span id="tiesVal">off</span></h2>
       <label class="check" title="Short struts across the open gaps between the parts of the drawing (letters, rows, an arch over them), the full height of the walls, so each part is held from several sides"><input type="checkbox" id="ties"> Tie the parts together</label>
+      <label class="check" id="tieStandRow" title="For a piece that stands up, like a cake topper: printed flat, stood on its edge, the picture's down is down. Ties up and down (from one row to the next, the legs to the letters) carry its weight, so they go first; one across counts as three times its length"><input type="checkbox" id="tieStand"> Stands up (cake topper): row to row first</label>
       <label class="check" id="tieInsideRow" title="Ties across a letter's own notch or opening too (a W's V, an E's arms, a G's mouth): off, ties only join one part to another"><input type="checkbox" id="tieInside"> Inside a letter too</label>
       <div class="row" id="tieMaxRow">
         <div class="lab"><label for="tieMax">Longest tie</label><span class="val" id="tieMaxVal">7 mm</span></div>
@@ -378,7 +379,13 @@
         <div class="lab"><label for="tieEvery">Ties at least … apart</label><span class="val" id="tieEveryVal">10 mm</span></div>
         <input type="range" id="tieEvery" min="4" max="40" step="1" value="10">
       </div>
-      <p class="hint help" id="tiesHint">For a large print with no base. The trace holds the separate parts of a drawing together with as few connectors as it can, a single strand here and there, and a tall wall held on by one strand flexes and snaps. Ties add more: each is two strands side by side, from one part across an open gap to the next, the full height of the walls, still part of the one line. They only cross gaps that open to the outside (not the inside of a letter's bowl), never cross the line, and leave the trace's own connectors be. Longer ties reach across wider gaps; closer together, more of them. A base (above) is the other way to tie a print together, from underneath.</p>
+      <div id="tieEditBox" hidden style="padding:0 12px 12px">
+        <canvas id="tieEdit" style="display:block;width:100%;height:auto;margin:8px 0 4px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);touch-action:manipulation;cursor:pointer" aria-label="The ties on the drawing: tap a tie to take it away, a faded one to bring it back, or a gap to add one"></canvas>
+        <p class="hint" id="tieEditInfo">Tap a tie to take it away, a faded one to bring it back, or a gap to add one.</p>
+        <button type="button" class="btn" id="tieReset" disabled>Reset ties</button>
+        <input type="hidden" id="tieEdits" value="">
+      </div>
+      <p class="hint help" id="tiesHint">For a large print with no base. The trace holds the separate parts of a drawing together with as few connectors as it can, a single strand here and there, and a tall wall held on by one strand flexes and snaps. Ties add more: each is two strands side by side, from one part across an open gap to the next, the full height of the walls, still part of the one line. They only cross gaps that open to the outside (not the inside of a letter's bowl), never cross the line, and leave the trace's own connectors be. Longer ties reach across wider gaps; closer together, more of them. A base (above) is the other way to tie a print together, from underneath. The drawing shows every tie (blue), the ones left out inside a letter (grey) and the ones you took away (red): tap to change them; your changes are kept with the design until the line itself changes.</p>
     </section>
     <section class="card choc-only" aria-labelledby="h-infill">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>

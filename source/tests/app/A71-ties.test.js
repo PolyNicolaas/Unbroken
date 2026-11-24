@@ -3,8 +3,8 @@ module.exports = {
   id: "A71", title: "Ties: Layers adds struts across the gaps between a drawing's parts, to the print only",
   guards: "ties that don't reach the G-code or the layers' readout, that change the trace itself, that stay after they're switched off, or that are added for a pen plotter",
   why: "Nicolaas (24 November 2026): a large logo held together only by the trace's few connectors needs more to print tall without a base; he asked for it in the app (E63 has the why).",
-  how: "Opens blocks-and-ring.svg (three blocks, a bar and a ring, 4 mm gaps at 120 mm) with unbroken.open(), traces the outlines at 120 mm, 10 mm tall, and reads the layers and an exported G-code. Then set({ ties: true }), the same again, and status().ties; then the longest tie at 2 mm; then ties off; then made for a pen plotter with ties on.",
-  pass: "With ties: at least 3 ties, the layers' line longer and the G-code longer, the trace (its points) unchanged, the Ties card says how many and the map has a Ties chip; the longest tie at 2 mm: no ties; off: the layers' line as at first; for a pen plotter the card says not for this print; no page errors.",
+  how: "Opens blocks-and-ring.svg (three blocks, a bar and a ring, 4 mm gaps at 120 mm) with unbroken.open(), traces the outlines at 120 mm, 10 mm tall, and reads the layers and an exported G-code. Then set({ ties: true }), the same again, and status().ties; then taps on the card's drawing: a tie taken away, brought back, taken away again, and Reset ties; then the longest tie at 2 mm; then ties off; then made for a pen plotter with ties on.",
+  pass: "With ties: at least 3 ties, the layers' line longer and the G-code longer, the trace (its points) unchanged, the Ties card says how many and the map has a Ties chip; a tapped tie goes (one fewer, shown as taken away, the card says so, Reset on), tapped again comes back, and Reset ties leaves the rules' ties and no changes; the longest tie at 2 mm: no ties; off: the layers' line as at first; for a pen plotter the card says not for this print; no page errors.",
   async run(ctx) {
     const src = ctx.server.url + "/source/tests/lib/fixtures/blocks-and-ring.svg";
     const { page, errors, close } = await A.open(ctx, { clean: true, art: true });
@@ -21,6 +21,23 @@ module.exports = {
       o.m1 = metres(s); o.ties = s.ties; o.card = $("tiesVal").textContent; o.n1 = st.final.re.length;
       o.g1 = ((await U.export("gcode", { download: false })).text || "").length;
       o.chip = !!MAP_NODES.ties;
+      // taps on the card's drawing: a tie taken away, then brought back; Undo; Reset
+      await window.unbroken.view("layers");
+      mapOpen("ties"); await new Promise((r) => setTimeout(r, 400));
+      const tap = async (q) => {
+        const v = tieView, r = $("tieEdit").getBoundingClientRect();
+        $("tieEdit").dispatchEvent(new MouseEvent("click", { bubbles: true, clientX: r.left + v.ox + ((q[0] + q[2]) / 2) * v.s, clientY: r.top + v.oy + ((q[1] + q[3]) / 2) * v.s }));
+        return U.whenReady();
+      };
+      o.drawn = !!tieView && $("tieEdit").width > 0;
+      s = await tap(st.layers.wallChange.ties[0]);
+      o.afterTake = s.ties && s.ties.count; o.taken = (st.layers.wallChange.skipped || []).filter((k) => k.why === "taken away").length;
+      o.info = $("tieEditInfo").textContent; o.reset = !$("tieReset").disabled;
+      s = await tap(st.layers.wallChange.skipped.find((k) => k.why === "taken away").t);
+      o.afterBack = s.ties && s.ties.count;
+      s = await tap(st.layers.wallChange.ties[0]);
+      $("tieReset").click(); s = await U.whenReady();
+      o.afterReset = s.ties && s.ties.count; o.editsAfterReset = $("tieEdits").value;
       s = await U.set({ tieMaxMM: 2 });
       o.short = s.ties ? s.ties.count : 0;
       s = await U.set({ tieMaxMM: 7, ties: false });
@@ -37,6 +54,14 @@ module.exports = {
         check("the trace's points, unchanged by ties", r.n1, "==", r.n0),
         check("the Ties card says how many", +/^\d+ ties? · \+/.test(r.card), "==", 1),
         check("a Ties chip on the map", +r.chip, "==", 1),
+        check("the card draws the ties", +r.drawn, "==", 1),
+        check("a tie tapped: one fewer", r.ties.count - r.afterTake, "==", 1),
+        check("a tie tapped: shown as taken away", r.taken, "==", 1),
+        check("a tie tapped: the card says so", +/1 taken away/.test(r.info), "==", 1),
+        check("a tie tapped: Reset ties on", +r.reset, "==", 1),
+        check("the taken-away tie tapped: back again", r.afterBack, "==", r.ties.count),
+        check("Reset ties: as the rules have it", r.afterReset, "==", r.ties.count),
+        check("Reset ties: no changes kept", r.editsAfterReset, "==", ""),
         check("longest tie 2 mm: ties", r.short, "==", 0),
         check("off: the layers' line as at first (m)", r.m2, "==", r.m0),
         check("off: no ties", r.off, "==", null),
