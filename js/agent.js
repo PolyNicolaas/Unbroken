@@ -76,6 +76,7 @@ const AGENT_SETTINGS = [
   ["tieMaxMM", (v) => agentSet("tieMax", v)], // the longest tie, 2 … 20
   ["tieEveryMM", (v) => agentSet("tieEvery", v)], // ties at least … apart, 4 … 40
   ["tiesInsideLetters", (v) => agentSet("tieInside", v)], // ties across a letter's own notch or opening too
+  ["tiesStandUp", (v) => agentSet("tieStand", v)], // a piece that stands up (a cake topper): ties row to row first
   ["name", (v) => agentSet("designName", v)],
 ];
 // the Complexity slider's position for a term count (controls.js maps it back the same way)
@@ -269,7 +270,11 @@ window.unbroken = {
       layers: st.layers && !artForPlot() ? $("layerInfo").textContent.trim() || null : null,
       ties:
         st.layers && st.layers.wallChange
-          ? { count: st.layers.wallChange.count, addedMMPerLayer: Math.round(st.layers.wallChange.addedMM) }
+          ? {
+              count: st.layers.wallChange.count,
+              addedMMPerLayer: Math.round(st.layers.wallChange.addedMM),
+              leftOut: (st.layers.wallChange.skipped || []).length,
+            }
           : null,
       ready: ready.map((r) => ({ level: r.lvl, text: r.text })),
       lastExport: ($("gcodeMsg").textContent || "").trim() || null,

@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v162">
-<link rel="stylesheet" href="css/app.css?v=v162">
+<link rel="stylesheet" href="css/theme.css?v=v163">
+<link rel="stylesheet" href="css/app.css?v=v163">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v162</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v163</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -369,6 +369,7 @@
     <section class="card choc-only" data-feature="ties" aria-labelledby="h-ties">
       <h2 id="h-ties">Ties <span id="tiesVal">off</span></h2>
       <label class="check" title="Short struts across the open gaps between the parts of the drawing (letters, rows, an arch over them), the full height of the walls, so each part is held from several sides"><input type="checkbox" id="ties"> Tie the parts together</label>
+      <label class="check" id="tieStandRow" title="For a piece that stands up, like a cake topper: printed flat, stood on its edge, the picture's down is down. Ties up and down (from one row to the next, the legs to the letters) carry its weight, so they go first; one across counts as three times its length"><input type="checkbox" id="tieStand"> Stands up (cake topper): row to row first</label>
       <label class="check" id="tieInsideRow" title="Ties across a letter's own notch or opening too (a W's V, an E's arms, a G's mouth): off, ties only join one part to another"><input type="checkbox" id="tieInside"> Inside a letter too</label>
       <div class="row" id="tieMaxRow">
         <div class="lab"><label for="tieMax">Longest tie</label><span class="val" id="tieMaxVal">7 mm</span></div>
@@ -378,7 +379,13 @@
         <div class="lab"><label for="tieEvery">Ties at least … apart</label><span class="val" id="tieEveryVal">10 mm</span></div>
         <input type="range" id="tieEvery" min="4" max="40" step="1" value="10">
       </div>
-      <p class="hint help" id="tiesHint">For a large print with no base. The trace holds the separate parts of a drawing together with as few connectors as it can, a single strand here and there, and a tall wall held on by one strand flexes and snaps. Ties add more: each is two strands side by side, from one part across an open gap to the next, the full height of the walls, still part of the one line. They only cross gaps that open to the outside (not the inside of a letter's bowl), never cross the line, and leave the trace's own connectors be. Longer ties reach across wider gaps; closer together, more of them. A base (above) is the other way to tie a print together, from underneath.</p>
+      <div id="tieEditBox" hidden style="padding:0 12px 12px">
+        <canvas id="tieEdit" style="display:block;width:100%;height:auto;margin:8px 0 4px;border:1px solid var(--rule);border-radius:8px;background:var(--paper);touch-action:manipulation;cursor:pointer" aria-label="The ties on the drawing: tap a tie to take it away, a faded one to bring it back, or a gap to add one"></canvas>
+        <p class="hint" id="tieEditInfo">Tap a tie to take it away, a faded one to bring it back, or a gap to add one.</p>
+        <button type="button" class="btn" id="tieReset" disabled>Reset ties</button>
+        <input type="hidden" id="tieEdits" value="">
+      </div>
+      <p class="hint help" id="tiesHint">For a large print with no base. The trace holds the separate parts of a drawing together with as few connectors as it can, a single strand here and there, and a tall wall held on by one strand flexes and snaps. Ties add more: each is two strands side by side, from one part across an open gap to the next, the full height of the walls, still part of the one line. They only cross gaps that open to the outside (not the inside of a letter's bowl), never cross the line, and leave the trace's own connectors be. Longer ties reach across wider gaps; closer together, more of them. A base (above) is the other way to tie a print together, from underneath. The drawing shows every tie (blue), the ones left out inside a letter (grey) and the ones you took away (red): tap to change them; your changes are kept with the design until the line itself changes.</p>
     </section>
     <section class="card choc-only" aria-labelledby="h-infill">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>
@@ -989,67 +996,67 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v162"></script>
-<script src="01-image.js?v=v162"></script>
-<script src="02-lines.js?v=v162"></script>
-<script src="03-text.js?v=v162"></script>
-<script src="04-walk.js?v=v162"></script>
-<script src="05-fill.js?v=v162"></script>
-<script src="06-fourier.js?v=v162"></script>
-<script src="07-measure.js?v=v162"></script>
-<script src="08-shape.js?v=v162"></script>
-<script src="09-plate.js?v=v162"></script>
-<script src="10-export.js?v=v162"></script>
-<script src="11-stages.js?v=v162"></script>
-<script src="12-models.js?v=v162"></script>
-<script src="13-patterns.js?v=v162"></script>
-<script src="14-photo.js?v=v162"></script>
-<script src="15-cutout.js?v=v162"></script>
-<script src="16-molecule.js?v=v162"></script>
-<script src="17-vase.js?v=v162"></script>
-<script src="18-ties.js?v=v162"></script>
-<script src="core.js?v=v162"></script>
-<script src="fonts.js?v=v162"></script>
-<script src="settings.js?v=v162"></script>
-<script src="js/state.js?v=v162"></script>
-<script src="js/ui.js?v=v162"></script>
-<script src="js/config.js?v=v162"></script>
-<script src="js/engine-bridge.js?v=v162"></script>
-<script src="js/source.js?v=v162"></script>
-<script src="js/pipeline.js?v=v162"></script>
-<script src="js/preview.js?v=v162"></script>
-<script src="js/tools.js?v=v162"></script>
-<script src="js/art.js?v=v162"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v162");</script>
-<script src="js/readouts.js?v=v162"></script>
-<script src="js/controls.js?v=v162"></script>
-<script>feature("levels", "features/levels/levels.js?v=v162");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v162");</script>
-<script src="js/export.js?v=v162"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v162");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v162");</script>
-<script>feature("ties", "features/ties/ties.js?v=v162");</script>
-<script src="js/views.js?v=v162"></script>
-<script src="js/zoom.js?v=v162"></script>
-<script src="js/layers.js?v=v162"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v162");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v162");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v162");</script>
-<script src="js/workflow.js?v=v162"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v162");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v162");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v162");</script>
-<script>feature("camera", "features/camera/camera.js?v=v162");</script>
-<script src="js/steppers.js?v=v162"></script>
-<script src="js/scroll.js?v=v162"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v162");</script>
-<script>feature("model", "features/model/model.js?v=v162");</script>
-<script>feature("vase", "features/vase/vase.js?v=v162");</script>
-<script src="js/history.js?v=v162"></script>
-<script src="js/map.js?v=v162"></script>
-<script src="js/main.js?v=v162"></script>
-<script src="js/parts.js?v=v162"></script>
-<script src="js/agent.js?v=v162"></script>
+<script src="00-util.js?v=v163"></script>
+<script src="01-image.js?v=v163"></script>
+<script src="02-lines.js?v=v163"></script>
+<script src="03-text.js?v=v163"></script>
+<script src="04-walk.js?v=v163"></script>
+<script src="05-fill.js?v=v163"></script>
+<script src="06-fourier.js?v=v163"></script>
+<script src="07-measure.js?v=v163"></script>
+<script src="08-shape.js?v=v163"></script>
+<script src="09-plate.js?v=v163"></script>
+<script src="10-export.js?v=v163"></script>
+<script src="11-stages.js?v=v163"></script>
+<script src="12-models.js?v=v163"></script>
+<script src="13-patterns.js?v=v163"></script>
+<script src="14-photo.js?v=v163"></script>
+<script src="15-cutout.js?v=v163"></script>
+<script src="16-molecule.js?v=v163"></script>
+<script src="17-vase.js?v=v163"></script>
+<script src="18-ties.js?v=v163"></script>
+<script src="core.js?v=v163"></script>
+<script src="fonts.js?v=v163"></script>
+<script src="settings.js?v=v163"></script>
+<script src="js/state.js?v=v163"></script>
+<script src="js/ui.js?v=v163"></script>
+<script src="js/config.js?v=v163"></script>
+<script src="js/engine-bridge.js?v=v163"></script>
+<script src="js/source.js?v=v163"></script>
+<script src="js/pipeline.js?v=v163"></script>
+<script src="js/preview.js?v=v163"></script>
+<script src="js/tools.js?v=v163"></script>
+<script src="js/art.js?v=v163"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v163");</script>
+<script src="js/readouts.js?v=v163"></script>
+<script src="js/controls.js?v=v163"></script>
+<script>feature("levels", "features/levels/levels.js?v=v163");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v163");</script>
+<script src="js/export.js?v=v163"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v163");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v163");</script>
+<script>feature("ties", "features/ties/ties.js?v=v163");</script>
+<script src="js/views.js?v=v163"></script>
+<script src="js/zoom.js?v=v163"></script>
+<script src="js/layers.js?v=v163"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v163");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v163");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v163");</script>
+<script src="js/workflow.js?v=v163"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v163");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v163");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v163");</script>
+<script>feature("camera", "features/camera/camera.js?v=v163");</script>
+<script src="js/steppers.js?v=v163"></script>
+<script src="js/scroll.js?v=v163"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v163");</script>
+<script>feature("model", "features/model/model.js?v=v163");</script>
+<script>feature("vase", "features/vase/vase.js?v=v163");</script>
+<script src="js/history.js?v=v163"></script>
+<script src="js/map.js?v=v163"></script>
+<script src="js/main.js?v=v163"></script>
+<script src="js/parts.js?v=v163"></script>
+<script src="js/agent.js?v=v163"></script>
 
 </body>
 </html>
