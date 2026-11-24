@@ -18,7 +18,7 @@ the page's title (it shows "dev" when the page runs from the source folder). Add
   - `export("gcode" | "dxf" | "svg", { download })`: save the file, or get its text;
   - `view()`, `status()`, `whenReady()` as before.
   web-app/AGENT.md lists them; docs/AGENT-PLAYBOOK.md says how an agent works with them, now with the difference
-  between several small pieces (best at about 10 mm) and one large decorative piece.
+  between several small pieces (best at about 10 mm tall each) and one large decorative piece.
 - Tests: A69 drives the test logo through every call.
 
 ## v158 · 2026-11-24

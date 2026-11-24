@@ -9,8 +9,8 @@ uses are in `web-app/AGENT.md`; the first trial is in `AGENT-TRIAL.md`.
 ### 1 · Ask only what a preview can't show
 - **Printer or pen plotter**, and **a rough size or box** if there is one (and copies, if it matters).
 - **Several pieces, or one large decorative piece?** The two are made differently (Nicolaas, 24 November 2026):
-  - **Several pieces** (a set in a box, a logo's parts, names): each piece small. Single pieces print best at about
-    **10 mm** for the smaller pieces. Split the picture into parts (`parts()`), every piece at the same scale, each
+  - **Several pieces** (a set in a box, a logo's parts, names): each piece small. The smaller pieces print best at
+    about **10 mm tall** (each piece's height). Split the picture into parts (`parts()`), every piece at the same scale, each
     its own G-code.
   - **One large decorative piece**: one continuous line, as big as the detail needs (strokes wide enough for the
     needle, step 2), with small text dropped or folded in.
