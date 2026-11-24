@@ -3,6 +3,27 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v162 · 2026-11-24
+
+- **Ties** (Print step, Layers: **Ties**, a chip under Print): more connectors for a large print. The trace holds a
+  drawing's separate parts (letters, rows, an arch over them) together with as few connectors as it can, a single
+  strand each, and a tall wall held on by one strand flexes and snaps. **Tie the parts together** adds short struts
+  across the open gaps between the parts, the full height of the walls: two strands side by side, out from one part
+  and back, spliced into the walls' line so it stays one continuous line that never crosses itself. They only cross
+  gaps that open to the outside (not a letter's closed bowl), join one part to another (not across a letter's own
+  notch or opening: a W's V, an E's arms; **Inside a letter too** allows those) and leave the trace's own connectors
+  be. **Longest tie** (2–20 mm, 7) and **Ties at least … apart** (4–40 mm, 10). The trace and a base are left as they are; the card says
+  how many ties and how much line they add. Off by default; for a printer's whole design (not a text's pieces, a 3D
+  model or a pen plotter). Made for the Gateway City Big Band logo (150 × 210 mm, Outline), to stand up as a cake
+  topper: Nicolaas went through the first 32 ties and took 10 away, 7 of them across a letter's own notch, so those
+  are left out now, each still keeping its place so no other tie moves in beside it: 22 ties, 19 of them his, +0.20 m a
+  layer, 98 → 103 min at 10 mm.
+- Agent API: `set({ ties, tieMaxMM, tieEveryMM, tiesInsideLetters })`, and a base: `baseLayers`, `baseDensity`, `basePattern`,
+  `baseCover`, `baseTurn`; `status().layers` (the layers' readout) and `status().ties` (`{ count, addedMMPerLayer }`).
+- Engine: `UNB.ties` (`18-ties.js`; `leaveOut` and `only` choose ties by place). The layers ask a feature for the walls' line (`wallLine`) and a key
+  (`layersKey`).
+- Tests: E63, A71.
+
 ## v161 · 2026-11-24
 
 - **A picture in pieces** (Print step, Plate card: **Picture**: One line / Pieces, a file each; docs/PICTURE-PIECES.md).

@@ -80,6 +80,9 @@
                       pattern along the path (wave, zigzag, loops), written straight to one lap per layer; the checks.
                       UNB.VASE_SHAPES, UNB.vaseDefaults, VASE_MIN_R, UNB.vaseRadius, UNB.vaseProfile, vaseWiggle,
                       vaseRing, vaseLap, vaseCrosses, vaseLapPoints, vaseStacking, vaseTightest, UNB.vaseStack, UNB.vaseMesh
+    18-ties.js    17. Ties — more connectors for a large print: short struts of two strands across the open gaps between
+                      parts, spliced into the one line.
+                      openOutside, UNB.ties
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
@@ -108,6 +111,7 @@
     "15-cutout.js",
     "16-molecule.js",
     "17-vase.js",
+    "18-ties.js",
   ];
   if (typeof module !== "undefined" && module.exports) {
     // Node

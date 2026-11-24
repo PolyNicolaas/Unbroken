@@ -190,6 +190,7 @@ window.UNB_SETTINGS = {
     optimize: true,                   // Optimize and the starting points
     testprint: true,                  // the test print
     matrix: true,                     // the test matrix
+    ties: true,                       // ties: more connectors across the gaps between parts, for a large print
   },
 
   // ---------- Starting defaults ----------

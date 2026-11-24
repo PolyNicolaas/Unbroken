@@ -65,6 +65,17 @@ const AGENT_SETTINGS = [
   ["terms", (v) => (v === "auto" ? $("auto").click() : agentSet("terms", agentTermsSlider(+v)))],
   ["copies", (v) => agentSet("copies", v)],
   ["printHeightMM", (v) => agentSet("printHeightMM", v)],
+  // a base under the walls (Layers: Base)
+  ["baseLayers", (v) => agentSet("baseLayers", v)], // 0: none
+  ["baseDensity", (v) => agentSet("baseDensity", v)], // %, 0 … 125
+  ["basePattern", (v) => agentPick("basePattern", v)], // "lines" or "rings"
+  ["baseCover", (v) => agentPick("baseCover", v)], // "outline" (the whole outline) or "inside"
+  ["baseTurn", (v) => agentSet("baseTurn", v)], // rows turn 90° every … layers
+  // ties: struts across the gaps between parts, for a large print (Layers: Ties)
+  ["ties", (v) => agentSet("ties", v)],
+  ["tieMaxMM", (v) => agentSet("tieMax", v)], // the longest tie, 2 … 20
+  ["tieEveryMM", (v) => agentSet("tieEvery", v)], // ties at least … apart, 4 … 40
+  ["tiesInsideLetters", (v) => agentSet("tieInside", v)], // ties across a letter's own notch or opening too
   ["name", (v) => agentSet("designName", v)],
 ];
 // the Complexity slider's position for a term count (controls.js maps it back the same way)
@@ -253,6 +264,12 @@ window.unbroken = {
               terms: D.N,
               open: D.open,
             }))
+          : null,
+      // the print's layers, as last built (the Print step), and what changed the walls' line (ties)
+      layers: st.layers && !artForPlot() ? $("layerInfo").textContent.trim() || null : null,
+      ties:
+        st.layers && st.layers.wallChange
+          ? { count: st.layers.wallChange.count, addedMMPerLayer: Math.round(st.layers.wallChange.addedMM) }
           : null,
       ready: ready.map((r) => ({ level: r.lvl, text: r.text })),
       lastExport: ($("gcodeMsg").textContent || "").trim() || null,

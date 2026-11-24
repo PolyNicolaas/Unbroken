@@ -9,18 +9,19 @@ work on one, its folder, its marked parts of the page and its tests are everythi
 
 | Feature | What it is | Scripts | Lines | Parts of the page | Tests |
 |---|---|---|---|---|---|
-| **plotter** | made for a pen plotter: the Plot step, pens, fills, SVG | `plot.js` | 1062 | 6 | E22, A15, A16, A32 |
+| **plotter** | made for a pen plotter: the Plot step, pens, fills, SVG | `plot.js` | 1063 | 6 | E22, A15, A16, A32 |
 | **model** | a 3D model (STL) sliced into layers | `model.js`, `sample-skull.js` | 823 | 9 | E23, E30, E50, A17, A28 |
-| **vase** | Make a vase (needs model) | `vase.js` | 847 | 1 | E57, E59, A59, A62 |
+| **vase** | Make a vase (needs model) | `vase.js` | 873 | 2 | E57, E59, E62, A59, A62, A66 |
 | **patterns** | the pattern styles (labyrinth, spirograph, wave portrait …) | `pathpad.js`, `patterns.js` | 570 | 4 | E33, A31 |
 | **molecule** | a molecule drawn from its name | `molecule.js`, `moleditor.js` | 939 | 5 | E39, E40, E44, A40, A45, A50 |
-| **pieces** | a text printed as a piece per line | `pieces.js` | 357 | 1 | E31, A29 |
-| **camera** | a photo of a drawing, straightened | `camera.js` | 508 | 5 | E37, E43, A36, A44 |
-| **cutout** | cut the subject out of a picture | `cutout.js` | 311 | 2 | E38, E43, A39 |
+| **pieces** | a text printed as a piece per line | `pieces.js` | 444 | 1 | E31, A29, A70 |
+| **camera** | a photo of a drawing, straightened | `camera.js` | 509 | 5 | E37, E43, A36, A44 |
+| **cutout** | cut the subject out of a picture | `cutout.js` | 312 | 2 | E38, E43, A39 |
 | **levels** | Grey levels | `levels.js` | 279 | 2 | E34, E36, E41, E45, A32, A42, A43, A46 |
-| **optimize** | Optimize and the starting points | `optimize.js` | 266 | 2 | A08 |
+| **optimize** | Optimize and the starting points | `optimize.js` | 294 | 2 | A08 |
 | **testprint** | the test print | `testprint.js` | 169 | 1 | A25, A48 |
 | **matrix** | the test matrix | `matrix.js` | 277 | 1 | E46, A49 |
+| **ties** | ties: more connectors across the gaps between parts, for a large print | `ties.js` | 92 | 1 | E63, A71 |
 
 ## How each one joins the app
 
@@ -74,19 +75,19 @@ a molecule drawn from its name
 
 a text printed as a piece per line
 
-- moments it answers: piecesOn, piecePlate, pieceLayers, lineLifts, plateUI, piecePlateText, pieceShown
+- moments it answers: piecesOn, piecesApart, piecePlate, pieceLayers, lineLifts, plateUI, piecePlateText, pieceShown
 
 ### camera
 
 a photo of a drawing, straightened
 
-- moments it answers: artUI
+- moments it answers: artUI, engines
 
 ### cutout
 
 cut the subject out of a picture
 
-- moments it answers: pictureCut, workingKey, workingPicture, toolRender, toolDown:cut, toolMove:cut, toolUp:cut, handEditsReset, keepCut, save, restoredSource
+- moments it answers: engines, pictureCut, workingKey, workingPicture, toolRender, toolDown:cut, toolMove:cut, toolUp:cut, handEditsReset, keepCut, save, restoredSource
 
 ### levels
 
@@ -99,7 +100,7 @@ Grey levels
 
 Optimize and the starting points
 
-- moments it answers: sourceChanged, preset
+- moments it answers: sourceChanged, optimize, inkReference, preset
 
 ### testprint
 
@@ -115,3 +116,11 @@ the test matrix
 - controls saved with a design: 11
 - moments it answers: designUI, layersReady
 - moments it announces: piecesOn, modelLayers
+
+### ties
+
+ties: more connectors across the gaps between parts, for a large print
+
+- steps and chips of the map: ties
+- controls saved with a design: 3
+- moments it answers: wallLine, layersKey, layersReady, designUI

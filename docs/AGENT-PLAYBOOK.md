@@ -13,7 +13,15 @@ uses are in `web-app/AGENT.md`; the first trial is in `AGENT-TRIAL.md`.
     about **10 mm tall** (each piece's height). Split the picture into parts (`parts()`), every piece at the same scale, each
     its own G-code.
   - **One large decorative piece**: one continuous line, as big as the detail needs (strokes wide enough for the
-    needle, step 2), with small text dropped or folded in.
+    needle, step 2), with small text dropped or folded in. Its separate parts (letters, rows, an arch) are held
+    together only by the trace's few single-strand connectors, too weak for a tall print: offer **ties**
+    (`set({ ties: true })`, struts across the gaps, the full wall height, no base; Nicolaas's pick for the Gateway
+    City Big Band logo, 24 November 2026) or a base under it, and show them side by side. A single cartridge (50 ml)
+    still sets the height: about 10–15 mm for a 150 × 210 mm logo in Outline.
+  - **Ask what it's for.** A large piece is often a **cake topper**: printed flat, then stood on edge with its legs
+    in the cake. Then the print's height is the topper's thickness (6–10 mm is plenty), and the weight runs down
+    through it to the legs: the ties that matter join each row to the one below and the legs to the letters. Ties
+    across a letter's own notch (a W's V, an E's arms) don't; Nicolaas took those away on the Gateway logo.
   When the person hasn't said, the options in step 3 show both.
 - Everything else is shown as options, not asked (decided 23 November 2026: people don't know what they want until
   they see it).

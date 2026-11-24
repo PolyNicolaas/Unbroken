@@ -5,7 +5,7 @@ const APP = path.join(__dirname, "../../../web-app"), ALL = require("../lib/scri
 //   0 the app breaks (no trace) · 1 it runs, with errors · 2 it runs clean (opens, traces, exports) · 3 clean, and
 //   nothing of the feature is left on the page
 // The record only goes up: when a feature does better than its record the test says so, and the record is raised here.
-const RECORD = { plotter: 3, model: 3, vase: 3, patterns: 3, molecule: 3, pieces: 3, camera: 3, cutout: 3, levels: 3, optimize: 3, testprint: 3, matrix: 3 };
+const RECORD = { plotter: 3, model: 3, vase: 3, patterns: 3, molecule: 3, pieces: 3, camera: 3, cutout: 3, levels: 3, optimize: 3, testprint: 3, matrix: 3, ties: 3 };
 // parts of the core's own cards that only one feature's scripts happen to read (it hides a row, renames a label):
 // they stay when the feature is off, and aren't the feature's
 const CORE_PARTS = ["loopClosed", "copiesLab", "modeRow", "sensRow", "modeOutline"];

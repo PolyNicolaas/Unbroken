@@ -27,12 +27,12 @@ module.exports = {
     const overlaps = () => page.$$eval("#mapNodes .map-node", (els) => { const r = els.map((e) => e.getBoundingClientRect()); let n = 0; for (let i = 0; i < r.length; i++) for (let j = i + 1; j < r.length; j++) if (r[i].left < r[j].right - 1 && r[j].left < r[i].right - 1 && r[i].top < r[j].bottom - 1 && r[j].top < r[i].bottom - 1) n++; return n; });
     checks.push(check("leaf: no step on another", await overlaps(), "==", 0));
     checks.push(check("leaf: the spine", await spine(), "==", "material,art,line,size,print"));
-    checks.push(check("leaf: every node", await nodes(), "==", "art,examples,layers,levels,line,machine,material,math,plate,print,size,tests,tracing,watch"));
+    checks.push(check("leaf: every node", await nodes(), "==", "art,examples,layers,levels,line,machine,material,math,plate,print,size,tests,ties,tracing,watch"));
     // the palette: the design's rail at the left, in groups; Print… at its foot
     checks.push(check("leaf: the design's rail, top to bottom", await rail(), "==", "examples,art,levels,tracing,line,size,watch,math,material,mapGo"),
       check("… at the left of the preview", await page.evaluate(() => Math.round($("map").getBoundingClientRect().right - document.querySelector(".left").getBoundingClientRect().left)), "<", 0));
     await page.click("#mapGo"); await A.idle(page, 800);
-    checks.push(check("Print…: the output's screen, its rail on the right", await rail(), "==", "mapBack,print,plate,machine,layers,tests,material"),
+    checks.push(check("Print…: the output's screen, its rail on the right", await rail(), "==", "mapBack,print,plate,machine,layers,tests,ties,material"),
       check("… right of the preview, Print open", await page.evaluate(() => [document.body.dataset.screen, $("map").getBoundingClientRect().left > document.querySelector(".left").getBoundingClientRect().right, mapOpenId].join(",")), "==", "out,true,print"));
     await page.click("#mapBack"); await A.idle(page, 600);
     checks.push(check("Design: back to the design's screen, at Line", await page.evaluate(() => [document.body.dataset.screen, mapOpenId].join(",")), "==", "design,line"));

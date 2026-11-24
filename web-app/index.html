@@ -366,6 +366,20 @@
       </div>
       <p class="hint help" id="infillHint">Fills the whole outline of the drawing (or only the areas the line encloses) with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); up to 125% overlaps them a little (rows 0.8 of a line width apart), for a base that's surely solid with no gaps between rows; 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
     </section>
+    <section class="card choc-only" data-feature="ties" aria-labelledby="h-ties">
+      <h2 id="h-ties">Ties <span id="tiesVal">off</span></h2>
+      <label class="check" title="Short struts across the open gaps between the parts of the drawing (letters, rows, an arch over them), the full height of the walls, so each part is held from several sides"><input type="checkbox" id="ties"> Tie the parts together</label>
+      <label class="check" id="tieInsideRow" title="Ties across a letter's own notch or opening too (a W's V, an E's arms, a G's mouth): off, ties only join one part to another"><input type="checkbox" id="tieInside"> Inside a letter too</label>
+      <div class="row" id="tieMaxRow">
+        <div class="lab"><label for="tieMax">Longest tie</label><span class="val" id="tieMaxVal">7 mm</span></div>
+        <input type="range" id="tieMax" min="2" max="20" step="0.5" value="7">
+      </div>
+      <div class="row" id="tieEveryRow">
+        <div class="lab"><label for="tieEvery">Ties at least … apart</label><span class="val" id="tieEveryVal">10 mm</span></div>
+        <input type="range" id="tieEvery" min="4" max="40" step="1" value="10">
+      </div>
+      <p class="hint help" id="tiesHint">For a large print with no base. The trace holds the separate parts of a drawing together with as few connectors as it can, a single strand here and there, and a tall wall held on by one strand flexes and snaps. Ties add more: each is two strands side by side, from one part across an open gap to the next, the full height of the walls, still part of the one line. They only cross gaps that open to the outside (not the inside of a letter's bowl), never cross the line, and leave the trace's own connectors be. Longer ties reach across wider gaps; closer together, more of them. A base (above) is the other way to tie a print together, from underneath.</p>
+    </section>
     <section class="card choc-only" aria-labelledby="h-infill">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>
       <div class="row">
@@ -993,6 +1007,7 @@
 <script src="../source/engine/15-cutout.js"></script>
 <script src="../source/engine/16-molecule.js"></script>
 <script src="../source/engine/17-vase.js"></script>
+<script src="../source/engine/18-ties.js"></script>
 <script src="../source/engine/core.js"></script>
 <script src="../source/engine/fonts.js"></script>
 <script src="settings.js"></script>
@@ -1013,6 +1028,7 @@
 <script src="js/export.js"></script>
 <script>feature("optimize", "features/optimize/optimize.js");</script>
 <script>feature("pieces", "features/pieces/pieces.js");</script>
+<script>feature("ties", "features/ties/ties.js");</script>
 <script src="js/views.js"></script>
 <script src="js/zoom.js"></script>
 <script src="js/layers.js"></script>

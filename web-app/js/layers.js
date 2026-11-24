@@ -260,7 +260,8 @@ const designLayersCache = new Map();
 // (h: another layer height than the Print step's, for the Test matrix)
 async function designLayers(D, xf, h) {
   const S = h ? { ...layerSettings(), h } : layerSettings();
-  const key = JSON.stringify([S, D.finalVer, st.simplify, xf, D.open, D.fb && [D.fb.x0, D.fb.y1]]);
+  // (ask("layersKey"): a feature that changes the walls' line, ties.js, adds its settings)
+  const key = JSON.stringify([S, D.finalVer, st.simplify, xf, D.open, D.fb && [D.fb.x0, D.fb.y1], ...ask("layersKey")]);
   if (designLayersCache.has(key)) return designLayersCache.get(key);
   // each layer's line: the base's and the infill's fill plan per layer; the same plan is worked out (and turned to mm)
   // once
@@ -268,10 +269,12 @@ async function designLayers(D, xf, h) {
     plans = new Map();
   const lineFor = async (isBase, j) => {
     const P = UNB.fillPlan(Fo, isBase, j),
-      k = JSON.stringify(P);
+      k = JSON.stringify([P, isBase]);
     if (!plans.has(k)) {
       const r = await layerLine(P, D);
-      plans.set(k, { r, line: lineToPlate(r.final, xf, D) });
+      // the walls' line, changed by a feature (ties.js: struts across the gaps between parts), or as it is
+      const t = isBase ? null : await answer("wallLine", r, D);
+      plans.set(k, { r, t, line: lineToPlate(t ? t.final : r.final, xf, D) });
     }
     return plans.get(k);
   };
@@ -294,6 +297,7 @@ async function designLayers(D, xf, h) {
     baseFinal: S.pat && baseL.length ? baseL[0].r.final : null,
     fillInfo: firstFilled(baseL),
     infillInfo: firstFilled(wallL),
+    wallChange: (wallL.find((q) => q.t) || {}).t || null, // (what wallLine made of the walls, for its readout)
   };
   designLayersCache.set(key, L);
   if (designLayersCache.size > 16) designLayersCache.delete(designLayersCache.keys().next().value);

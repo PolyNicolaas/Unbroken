@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 500">
+  <!-- three blocks 40 apart, a bar 40 under them, a ring: separate parts with gaps between (A71, ties) -->
+  <rect width="1200" height="500" fill="#fff"/>
+  <rect x="60" y="60" width="220" height="260"/>
+  <rect x="320" y="60" width="220" height="260"/>
+  <rect x="580" y="60" width="220" height="260"/>
+  <rect x="60" y="360" width="740" height="80"/>
+  <path fill-rule="evenodd" d="M820 250a170 170 0 1 0 340 0a170 170 0 1 0-340 0zM900 250a90 90 0 1 0 180 0a90 90 0 1 0-180 0z"/>
+</svg>
