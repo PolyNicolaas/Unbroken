@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v161">
-<link rel="stylesheet" href="css/app.css?v=v161">
+<link rel="stylesheet" href="css/theme.css?v=v162">
+<link rel="stylesheet" href="css/app.css?v=v162">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v161</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v162</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -365,6 +365,20 @@
         <input type="range" id="infillMin" min="0" max="100" value="0">
       </div>
       <p class="hint help" id="infillHint">Fills the whole outline of the drawing (or only the areas the line encloses) with more of the same line, still one continuous line. Density 100% puts the rows a line width apart, touching (solid chocolate); up to 125% overlaps them a little (rows 0.8 of a line width apart), for a base that's surely solid with no gaps between rows; 50% two line widths apart; 0% leaves the inside open. <span class="slow">Working out a fill can take a few seconds on a big drawing.</span></p>
+    </section>
+    <section class="card choc-only" data-feature="ties" aria-labelledby="h-ties">
+      <h2 id="h-ties">Ties <span id="tiesVal">off</span></h2>
+      <label class="check" title="Short struts across the open gaps between the parts of the drawing (letters, rows, an arch over them), the full height of the walls, so each part is held from several sides"><input type="checkbox" id="ties"> Tie the parts together</label>
+      <label class="check" id="tieInsideRow" title="Ties across a letter's own notch or opening too (a W's V, an E's arms, a G's mouth): off, ties only join one part to another"><input type="checkbox" id="tieInside"> Inside a letter too</label>
+      <div class="row" id="tieMaxRow">
+        <div class="lab"><label for="tieMax">Longest tie</label><span class="val" id="tieMaxVal">7 mm</span></div>
+        <input type="range" id="tieMax" min="2" max="20" step="0.5" value="7">
+      </div>
+      <div class="row" id="tieEveryRow">
+        <div class="lab"><label for="tieEvery">Ties at least … apart</label><span class="val" id="tieEveryVal">10 mm</span></div>
+        <input type="range" id="tieEvery" min="4" max="40" step="1" value="10">
+      </div>
+      <p class="hint help" id="tiesHint">For a large print with no base. The trace holds the separate parts of a drawing together with as few connectors as it can, a single strand here and there, and a tall wall held on by one strand flexes and snaps. Ties add more: each is two strands side by side, from one part across an open gap to the next, the full height of the walls, still part of the one line. They only cross gaps that open to the outside (not the inside of a letter's bowl), never cross the line, and leave the trace's own connectors be. Longer ties reach across wider gaps; closer together, more of them. A base (above) is the other way to tie a print together, from underneath.</p>
     </section>
     <section class="card choc-only" aria-labelledby="h-infill">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>
@@ -975,65 +989,67 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v161"></script>
-<script src="01-image.js?v=v161"></script>
-<script src="02-lines.js?v=v161"></script>
-<script src="03-text.js?v=v161"></script>
-<script src="04-walk.js?v=v161"></script>
-<script src="05-fill.js?v=v161"></script>
-<script src="06-fourier.js?v=v161"></script>
-<script src="07-measure.js?v=v161"></script>
-<script src="08-shape.js?v=v161"></script>
-<script src="09-plate.js?v=v161"></script>
-<script src="10-export.js?v=v161"></script>
-<script src="11-stages.js?v=v161"></script>
-<script src="12-models.js?v=v161"></script>
-<script src="13-patterns.js?v=v161"></script>
-<script src="14-photo.js?v=v161"></script>
-<script src="15-cutout.js?v=v161"></script>
-<script src="16-molecule.js?v=v161"></script>
-<script src="17-vase.js?v=v161"></script>
-<script src="core.js?v=v161"></script>
-<script src="fonts.js?v=v161"></script>
-<script src="settings.js?v=v161"></script>
-<script src="js/state.js?v=v161"></script>
-<script src="js/ui.js?v=v161"></script>
-<script src="js/config.js?v=v161"></script>
-<script src="js/engine-bridge.js?v=v161"></script>
-<script src="js/source.js?v=v161"></script>
-<script src="js/pipeline.js?v=v161"></script>
-<script src="js/preview.js?v=v161"></script>
-<script src="js/tools.js?v=v161"></script>
-<script src="js/art.js?v=v161"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v161");</script>
-<script src="js/readouts.js?v=v161"></script>
-<script src="js/controls.js?v=v161"></script>
-<script>feature("levels", "features/levels/levels.js?v=v161");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v161");</script>
-<script src="js/export.js?v=v161"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v161");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v161");</script>
-<script src="js/views.js?v=v161"></script>
-<script src="js/zoom.js?v=v161"></script>
-<script src="js/layers.js?v=v161"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v161");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v161");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v161");</script>
-<script src="js/workflow.js?v=v161"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v161");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v161");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v161");</script>
-<script>feature("camera", "features/camera/camera.js?v=v161");</script>
-<script src="js/steppers.js?v=v161"></script>
-<script src="js/scroll.js?v=v161"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v161");</script>
-<script>feature("model", "features/model/model.js?v=v161");</script>
-<script>feature("vase", "features/vase/vase.js?v=v161");</script>
-<script src="js/history.js?v=v161"></script>
-<script src="js/map.js?v=v161"></script>
-<script src="js/main.js?v=v161"></script>
-<script src="js/parts.js?v=v161"></script>
-<script src="js/agent.js?v=v161"></script>
+<script src="00-util.js?v=v162"></script>
+<script src="01-image.js?v=v162"></script>
+<script src="02-lines.js?v=v162"></script>
+<script src="03-text.js?v=v162"></script>
+<script src="04-walk.js?v=v162"></script>
+<script src="05-fill.js?v=v162"></script>
+<script src="06-fourier.js?v=v162"></script>
+<script src="07-measure.js?v=v162"></script>
+<script src="08-shape.js?v=v162"></script>
+<script src="09-plate.js?v=v162"></script>
+<script src="10-export.js?v=v162"></script>
+<script src="11-stages.js?v=v162"></script>
+<script src="12-models.js?v=v162"></script>
+<script src="13-patterns.js?v=v162"></script>
+<script src="14-photo.js?v=v162"></script>
+<script src="15-cutout.js?v=v162"></script>
+<script src="16-molecule.js?v=v162"></script>
+<script src="17-vase.js?v=v162"></script>
+<script src="18-ties.js?v=v162"></script>
+<script src="core.js?v=v162"></script>
+<script src="fonts.js?v=v162"></script>
+<script src="settings.js?v=v162"></script>
+<script src="js/state.js?v=v162"></script>
+<script src="js/ui.js?v=v162"></script>
+<script src="js/config.js?v=v162"></script>
+<script src="js/engine-bridge.js?v=v162"></script>
+<script src="js/source.js?v=v162"></script>
+<script src="js/pipeline.js?v=v162"></script>
+<script src="js/preview.js?v=v162"></script>
+<script src="js/tools.js?v=v162"></script>
+<script src="js/art.js?v=v162"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v162");</script>
+<script src="js/readouts.js?v=v162"></script>
+<script src="js/controls.js?v=v162"></script>
+<script>feature("levels", "features/levels/levels.js?v=v162");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v162");</script>
+<script src="js/export.js?v=v162"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v162");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v162");</script>
+<script>feature("ties", "features/ties/ties.js?v=v162");</script>
+<script src="js/views.js?v=v162"></script>
+<script src="js/zoom.js?v=v162"></script>
+<script src="js/layers.js?v=v162"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v162");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v162");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v162");</script>
+<script src="js/workflow.js?v=v162"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v162");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v162");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v162");</script>
+<script>feature("camera", "features/camera/camera.js?v=v162");</script>
+<script src="js/steppers.js?v=v162"></script>
+<script src="js/scroll.js?v=v162"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v162");</script>
+<script>feature("model", "features/model/model.js?v=v162");</script>
+<script>feature("vase", "features/vase/vase.js?v=v162");</script>
+<script src="js/history.js?v=v162"></script>
+<script src="js/map.js?v=v162"></script>
+<script src="js/main.js?v=v162"></script>
+<script src="js/parts.js?v=v162"></script>
+<script src="js/agent.js?v=v162"></script>
 
 </body>
 </html>
