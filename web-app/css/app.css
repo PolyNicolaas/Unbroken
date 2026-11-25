@@ -124,10 +124,13 @@ table.profile { font-family: var(--font-body); font-size: calc(13px * var(--text
 table.profile td { text-align: left; white-space: normal; }
 table.profile td:first-child { color: var(--muted); width: 40%; }
 ul.plan { margin: 0; padding-left: calc(18px * var(--space)); display: grid; gap: calc(4px * var(--space)); font-size: calc(13px * var(--text)); color: var(--ink); }
-body[data-src="text"] .img-only, body:not([data-src="text"]) .text-only { display: none !important; }
-body:not([data-src="model"]) .model-only { display: none !important; }
+/* settings for another kind of art are hidden; with All settings on (View menu, showall.js) the ones in the settings
+   panel stay, greyed with when they apply (.na), and everything outside the panel still hides */
+body[data-src="text"] .img-only:is(body:not(.show-all) *, :not(.panel *)), body:not([data-src="text"]) .text-only:is(body:not(.show-all) *, :not(.panel *)) { display: none !important; }
+body:not([data-src="model"]) .model-only:is(body:not(.show-all) *, :not(.panel *)) { display: none !important; }
 body[data-src="model"][data-stage="line"] :is(#play, #speed) { display: none !important; }
-body[data-src="model"] :is(.img-only, #pathRow, #looseRow, #cornerRow, .card[aria-labelledby="h-size"], .card[aria-labelledby="h-fit"], .toolbar.tools, #minimap, #math) { display: none !important; }
+body[data-src="model"] :is(.img-only, #pathRow, #looseRow, #cornerRow, .card[aria-labelledby="h-size"], .card[aria-labelledby="h-fit"]):is(body:not(.show-all) *, :not(.panel *)),
+body[data-src="model"] :is(.toolbar.tools, #minimap, #math) { display: none !important; }
 #textIn { width: 100%; font: calc(15px * var(--text))/1.4 var(--font-body); color: var(--ink); background: var(--surface); border: 1px solid var(--rule); border-radius: calc(7px * var(--corner)); padding: calc(8px * var(--space)); resize: vertical; }
 #textIn:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
 .panel-tools { display: flex; justify-content: flex-end; align-items: center; gap: calc(6px * var(--space)); margin-bottom: -4px; }
@@ -506,7 +509,13 @@ body[data-view="art"] .toolbar.tools { display: none; }
 body[data-out="print"]:not([data-line="drawn"]):not([data-line="none"]) #card-h-src { display: none; }
 
 /* Make a vase (vase.js): the vase's own controls, or the STL's */
-body:not([data-vase="1"]) .vase-only, body[data-vase="1"] .stl-only { display: none !important; }
+body:not([data-vase="1"]) .vase-only:is(body:not(.show-all) *, :not(.panel *)), body[data-vase="1"] .stl-only:is(body:not(.show-all) *, :not(.panel *)) { display: none !important; }
+/* All settings: one that doesn't apply here, greyed, can't be changed, and says when it applies */
+body.show-all .panel .na > :not(.na-why) { opacity: .42; pointer-events: none; }
+body.show-all .panel .na { cursor: not-allowed; }
+.na-why { grid-column: 1 / -1; flex-basis: 100%; margin: 2px 0 0; font-size: calc(12px * var(--text)); color: var(--muted); font-style: italic; }
+body.show-all .panel label.check.na { flex-wrap: wrap; }
+body:not(.show-all) .na-why { display: none; }
 #vaseBox:is([data-tex="none"], [data-tex="rings"], [data-tex="picture"]) :is(.vt-ribs, .vt-twist), #vaseBox:is([data-tex="none"], [data-tex="ribs"], [data-tex="diamond"], [data-tex="picture"]) .vt-rings, #vaseBox[data-tex="none"] .vt-on, #vaseBox[data-move="none"] .vm-on { display: none; }
 #vaseBox:not([data-tex="picture"]) .vt-pic, #vaseBox:is([data-plan="plaque"], [data-plan="polygon"]) :is(.vt-span, .vt-turn), #vaseBox[data-plan="polygon"] .vt-sidesrow, #vaseBox:not([data-plan="polygon"]) .vt-face, #vaseBox:not([data-plan="plaque"]) .vp-plaque, #vaseBox[data-plan="plaque"] .vp-round { display: none; }
 #vaseBox:not([data-plan="polygon"], [data-plan="star"], [data-plan="flower"]) .vp-sides, #vaseBox:not([data-plan="star"], [data-plan="flower"]) .vp-depth, #vaseBox[data-plan="circle"] .vp-round, #vaseBox:not([data-plan="drawing"]) .vp-drawing { display: none; }

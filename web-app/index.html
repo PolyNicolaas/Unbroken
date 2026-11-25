@@ -173,6 +173,8 @@
             <label class="check" title="Show the smallest box around the printed line, at any angle, with its size"><input type="checkbox" id="dims" checked> <span>Size box</span></label>
             <label class="check" title="Mark where the line crosses itself or breaks the minimum spacing"><input type="checkbox" id="showProb"> <span>Problems</span><span class="swatch dot"></span><span class="val" id="probInfo"></span></label>
             <label class="check" title="Small plate in the corner of the preview"><input type="checkbox" id="showMini" checked> <span>Plate mini-map</span></label>
+            <hr>
+            <label class="check" title="Also show the settings that don't apply to what you're making (greyed, with when they apply), so nothing is hidden"><input type="checkbox" id="showAll"> <span>All settings</span></label>
           </div>
         </details>
       </div>
@@ -1080,6 +1082,7 @@
 <script>feature("vase", "features/vase/vase.js");</script>
 <script src="js/history.js"></script>
 <script src="js/map.js"></script>
+<script src="js/showall.js"></script>
 <script src="js/main.js"></script>
 <script src="js/parts.js"></script>
 <script src="js/agent.js"></script>

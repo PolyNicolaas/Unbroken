@@ -3,6 +3,17 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v169 · 2026-11-25
+
+- **All settings (View menu).** Settings for another kind of art (a picture's, text's, a 3D model's, a vase's, an STL
+  model's) no longer have to disappear: with **All settings** ticked they stay in the settings panel, greyed and
+  unchangeable, each saying when it applies ("Only for STL models: a vase or relief is built from its profile, not
+  sliced" under Support, Walls and Cut off for a relief; "Only for 3D models" for text). Off by default; the browser
+  remembers it. The steps on the rail still follow what you're making (Nicolaas, 25 November 2026: Support and
+  Overhang couldn't be found for a relief).
+- `web-app/js/showall.js`; the hiding rules in app.css apply outside the settings panel as before.
+- Tests: A73.
+
 ## v168 · 2026-11-25
 
 - **Reliefs go in as well as out: Direction.** Texture, Picture, **Direction**: **Out** (as before: the dark parts
