@@ -295,7 +295,7 @@ function artSizeUI() {
     return;
   }
   if (!st.outW) return;
-  if (document.activeElement !== $("artWidth")) $("artWidth").value = +st.outW.toFixed(1);
+  if (document.activeElement !== $("artWidth")) $("artWidth").value = +printedW(st.outW).toFixed(1); // as printed
   // a new style picked: once its size settles, if it's much bigger or smaller than before, say so and why
   if (styleSizeFrom) {
     clearTimeout(styleSizeTimer);
@@ -307,7 +307,7 @@ function artSizeUI() {
       if (st.art.kind !== "pattern" || st.art.width || Math.abs(st.outW / from - 1) <= 0.25) return;
       styleSizeFrom = 0;
       toast(
-        `${patternName(st.art.pattern)}: ${fmt(st.outW, 0)} mm wide (was ${fmt(from, 0)}), so its closest lines keep the needle's spacing. Change it in Width.`,
+        `${patternName(st.art.pattern)}: ${fmt(printedW(st.outW), 0)} mm wide (was ${fmt(printedW(from), 0)}), so its closest lines keep the needle's spacing. Change it in Width.`,
         false,
         4500
       );
@@ -333,7 +333,7 @@ function artSizeUI() {
 $("artWidth").addEventListener("change", () => {
   const v = +$("artWidth").value;
   if (!(v > 0)) return artSizeUI();
-  setSize(v, true); // pipeline.js (it calls artSized, which keeps the width)
+  setSize(widthForPrinted(v), true); // pipeline.js (it calls artSized, which keeps the width); the box is as printed
 });
 $("artFit").addEventListener("click", () => {
   const W = patternFitWidth();

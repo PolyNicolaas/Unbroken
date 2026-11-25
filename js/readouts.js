@@ -63,13 +63,15 @@ function renderMath() {
     const t = st.codes.map((c) => UNB.termOf(c, ax)).find((m) => m.axis === a && m.k === 0);
     return ((t ? t.amp * Math.cos(t.phase) : 0) - (a === "x" ? b.x0 : b.y0)) * sc;
   }; // mm from the drawing's top-left
-  const line = (v, list, a, ph) => {
-    let m = `<mrow><mi>${v}</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo>${mrow(off(v), 2)}`;
+  // each axis's series a term to a row (narrow enough for the Math panel): x(t) = offset, then + a cos(2π·k t + φ), …
+  const row = (l, r) => `<mtr><mtd columnalign="right">${l}</mtd><mtd columnalign="left">${r}</mtd></mtr>`;
+  const line = (v, list) => {
+    let m = row(`<mrow><mi>${v}</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo></mrow>`, mrow(off(v), 2));
     for (const e of list.slice(0, 3))
-      m += `<mo>+</mo>${mrow(e.amp * sc, 2)}<mo>cos</mo><mo stretchy="false">(</mo><mn>2</mn><mi>π</mi><mo>·</mo><mn>${e.k}</mn><mi>t</mi><mo>${e.phase < 0 ? "−" : "+"}</mo>${mrow(e.phase, 2)}<mo stretchy="false">)</mo>`;
-    return m + (list.length > 3 ? `<mo>+</mo><mi>⋯</mi>` : "") + `</mrow>`;
+      m += row("", `<mrow><mo>+</mo>${mrow(e.amp * sc, 2)}<mo>cos</mo><mo stretchy="false">(</mo><mn>2</mn><mi>π</mi><mo>·</mo><mn>${e.k}</mn><mi>t</mi><mo>${e.phase < 0 ? "−" : "+"}</mo>${mrow(e.phase, 2)}<mo stretchy="false">)</mo></mrow>`);
+    return m + (list.length > 3 ? row("", `<mrow><mo>+</mo><mi>⋯</mi></mrow>`) : "");
   };
-  const m = `<math display="block"><mtable columnalign="left"><mtr><mtd>${line("x", E.xs)}</mtd></mtr><mtr><mtd>${line("y", E.ys)}</mtd></mtr><mtr><mtd><mrow><mi>z</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo><mn>0</mn></mrow></mtd></mtr></mtable></math>`;
+  const m = `<math display="block"><mtable columnalign="right left">${line("x", E.xs)}${line("y", E.ys)}${row(`<mrow><mi>z</mi><mo stretchy="false">(</mo><mi>t</mi><mo stretchy="false">)</mo><mo>=</mo></mrow>`, "<mn>0</mn>")}</mtable></math>`;
   $("series").innerHTML =
     `${m}<div>${st.N} terms in total: ${E.xs.length} for x, ${E.ys.length} for y, plus the two offsets. In mm at your output size, from the drawing's top-left corner (y down).</div>`;
   const both = E.xs
@@ -100,6 +102,6 @@ function renderMath() {
 
 function setChip(t, model) {
   if (!model && isModel()) return;
-  if (!model && document.body.dataset.empty === "1") t = "Nothing yet: start on the Art step"; // (art.js emptyUI)
+  if (!model && document.body.dataset.empty === "1") t = "Nothing yet: pick a picture, text, a pattern or a 3D model (the rail on the left)"; // (art.js emptyUI)
   $("chip").textContent = t;
 } // a model's readout is model.js's

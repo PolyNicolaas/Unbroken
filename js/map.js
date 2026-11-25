@@ -544,7 +544,13 @@ function mapOpen(id) {
     .querySelectorAll(".panel [data-part]")
     .forEach((el) => el.classList.toggle("part-off", !!N.part && el.dataset.part !== N.part));
   // a node's extra parts (the math, for the Line step) move into the panel after its cards
-  for (const ref of N.extra || []) if (mapFieldOf(ref)) mapMove(mapFieldOf(ref), $("mapExtra"));
+  for (const ref of N.extra || []) {
+    const el = mapFieldOf(ref);
+    if (!el) continue;
+    mapMove(el, $("mapExtra"));
+    // a fold-out (the math) is shown open: in the panel its own header, the way to open it, is hidden
+    if (el.tagName === "DETAILS") el.open = true;
+  }
   mapRender();
   const part = N.at && $(N.at) && ($(N.at).closest(".seg") || $(N.at));
   if (part) part.scrollIntoView({ block: "center" });

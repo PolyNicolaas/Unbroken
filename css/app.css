@@ -57,7 +57,7 @@ input[type="number"] { width: 100%; font-family: var(--font-mono); font-variant-
 input[readonly] { background: transparent; }
 .panel { display: grid; gap: calc(12px * var(--space)); min-width: 0; }
 section.card { background: var(--surface); border: 1px solid var(--rule); border-radius: calc(10px * var(--corner)); padding: calc(14px * var(--space)); display: grid; gap: calc(12px * var(--space)); min-width: 0; }
-section.card h2 { margin: 0; font: 600 calc(11px * var(--text))/1 var(--font-body); letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }
+section.card h2 { margin: 0; font: 600 calc(12.5px * var(--text))/1 var(--font-body); letter-spacing: 0.09em; text-transform: uppercase; color: var(--muted); display: flex; justify-content: space-between; }
 section.card h2 span { letter-spacing: 0; text-transform: none; font: 500 calc(12px * var(--text))/1 var(--font-mono); color: var(--ink); }
 .card-head { all: unset; box-sizing: border-box; display: flex; align-items: baseline; justify-content: space-between; gap: calc(8px * var(--space)); width: 100%;
   font: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; margin: -6px -6px; padding: calc(6px * var(--space)); border-radius: calc(6px * var(--corner)); width: calc(100% + 12px); }
@@ -92,7 +92,10 @@ canvas.plate { display: block; border-radius: calc(6px * var(--corner)); }
 body[data-stage="page"] #panePage, body[data-stage="plate"] #panePlate, body[data-stage="layers"] #paneLayers { display: grid; }
 .stage-pane :is(canvas.page, canvas.plate) { --ar: 1.414; width: min(100cqw, 100cqh * var(--ar)); height: auto; aspect-ratio: var(--ar); }   /* --ar: width ÷ height, set by the code (paper, plate) */
 .pane-tip { position: absolute; right: 12px; bottom: 10px; font: 500 calc(10.5px * var(--text))/1 var(--font-mono); color: var(--muted); pointer-events: none; }
-body:not([data-stage="line"]) :is(#minimap, .toolbar.tools, #chip) { display: none !important; }
+body:not([data-stage="line"]) :is(#minimap, #chip) { display: none !important; }
+/* the Tools bar keeps its place under the preview (so the preview doesn't change size), greyed where its tools don't
+   apply: another stage, nothing traced yet, or a line shown as drawn */
+body:is(:not([data-stage="line"]), [data-empty="1"], [data-line="drawn"], [data-line="none"]) .toolbar.tools { opacity: .35; pointer-events: none; }
 /* zoom (every view) and One copy / Whole plate (Plate and 3D layers), top right of the big view */
 .zoombar { position: absolute; right: 10px; top: 10px; z-index: 2; display: flex; gap: calc(6px * var(--space)); align-items: center; }
 .zoom-btns { display: flex; align-items: center; gap: calc(3px * var(--space)); background: var(--surface); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); padding: calc(2px * var(--space)); }
@@ -324,7 +327,7 @@ body[data-out="print"] .line-modes label[for="lineStrokes"], body[data-out="prin
 .line-modes input:disabled + label { opacity: 0.45; cursor: not-allowed; }
 /* cards the line in use doesn't need: As drawn traces nothing; separate strokes have no spacing, size or series */
 body:is([data-line="drawn"], [data-line="none"]) :is(#card-h-trace, #card-h-line, #card-h-size, #card-h-fit) { display: none; }
-body:is([data-line="drawn"], [data-line="none"]) .toolbar.tools { display: none; }
+
 body:is([data-line="drawn"], [data-line="none"]) .line-modes { opacity: .45; pointer-events: none; }
 body[data-line="none"] :is(#math, #play, #speed, #minimap) { display: none !important; }
 body[data-line="strokes"] #card-h-line, body[data-line="strokes"] #card-h-size, body[data-line="strokes"] #card-h-fit { display: none; }
@@ -349,6 +352,14 @@ body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; 
 @media (pointer: coarse) {
   .num-btn { width: 40px; min-height: 44px; font-size: calc(18px * var(--text)); }
   .num input[type="number"] { min-height: 44px; }
+  /* a fingertip (an iPad): every control at least about 40 px to tap, sliders with a tall hit area */
+  .btn { min-height: 44px; }
+  .btn.mini { min-height: 40px; padding: calc(4px * var(--space)) calc(12px * var(--space)); font-size: calc(13px * var(--text)); }
+  select, input[type="number"], input[type="text"], input[type="url"] { min-height: 40px; }
+  .seg label { min-height: 40px; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+  label.check { min-height: 40px; }
+  label.check input[type="checkbox"] { width: 22px; height: 22px; }
+  input[type="range"] { height: 36px; }
 }
 
 /* The preview stays in view while the settings scroll (views.js pvSize). Wide screens: the preview column sticks to the
@@ -395,7 +406,7 @@ body[data-line="strokes"] #math, body[data-line="drawn"] #math { display: none; 
 .empty-state .es-sub { margin: 0; color: var(--muted); max-width: 46ch; }
 .empty-state .chips { justify-content: center; max-width: 560px; }
 .linkish { border: 0; background: none; padding: 0; color: var(--accent); font: inherit; text-decoration: underline; cursor: pointer; }
-body[data-empty="1"] :is(#minimap, .toolbar.tools) { display: none !important; }
+body[data-empty="1"] #minimap { display: none !important; }
 body[data-empty="1"] .pv-size { display: none; }
 
 /* ---------- the camera (camera.js): a live view with the page outlined, then the photo with its corners ---------- */
@@ -468,8 +479,8 @@ body:not([data-empty="1"]) .panel .examples .chips { flex-wrap: wrap; overflow: 
 
 /* ---------- v115: a slim top to the settings, the tools on the Line step, notices that go, a bigger preview ---------- */
 .viewpanel .vhead { font-size: calc(11.5px * var(--text)); text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
-/* the trace's tools (select area, erase, set start…) belong to the Line step */
-body[data-view="art"] .toolbar.tools { display: none; }
+/* the trace's tools (select area, erase, set start…) belong to the Line step: elsewhere they keep their place, greyed */
+body[data-view="art"] .toolbar.tools { opacity: .35; pointer-events: none; }
 /* a notice that can be put away (views.js) */
 .construction { position: relative; padding-right: calc(34px * var(--space)); }
 .notice-x { position: absolute; top: 4px; right: 4px; width: 28px; height: 28px; border: 0; border-radius: 50%; background: transparent; color: var(--muted); font-size: 18px; line-height: 1; cursor: pointer; }
@@ -528,7 +539,7 @@ body:not(.show-all) .na-why { display: none; }
 
 /* ---------- the tool palette (map.js): the layout ---------- */
 /* The picture fills the window under a slim top bar. The design's tools are a rail at the left; a tool's settings
-   open as a panel floating beside it. The output's screen (Print…, Plot…) has its rail on the right. The preview takes
+   open as a panel floating beside it. The output's screen (Print…, Plot…) is laid out the same way. The preview takes
    the room the rail and the panel leave. Made for an iPad or a computer (a phone isn't how this is used). */
 body { --row-line: 1px solid color-mix(in srgb, var(--rule) 60%, transparent); --rail: 76px; --pane: 384px; --edge: 12px; }
 .map-head, .map-rows { display: none; }
@@ -545,11 +556,7 @@ header.top p { white-space: nowrap; overflow: hidden; text-overflow: ellipsis; m
 body[data-panel="off"] .panel { display: none; }
 .left { position: absolute; top: var(--edge); bottom: var(--edge); left: calc(var(--edge) * 2 + var(--rail)); right: var(--edge); max-height: none !important; overflow: hidden !important; display: block; }
 body[data-panel="on"] .left { left: calc(var(--edge) * 3 + var(--rail) + var(--pane)); }
-/* the output's screen: the rail and its panel on the right */
-body[data-screen="out"] .map { left: auto; right: var(--edge); }
-body[data-screen="out"] .panel { left: auto; right: calc(var(--edge) * 2 + var(--rail)); }
-body[data-screen="out"] .left { left: var(--edge); right: calc(var(--edge) * 2 + var(--rail)); }
-body[data-screen="out"][data-panel="on"] .left { left: var(--edge); right: calc(var(--edge) * 3 + var(--rail) + var(--pane)); }
+/* the output's screen (Print…, Plot…) is laid out the same: rail and panel at the left, so nothing moves sides */
 /* each screen's own tools */
 body[data-screen="design"] .map-node[data-rail="out"], body[data-screen="design"] .map-back { display: none; }
 body[data-screen="out"] .map-node[data-rail="design"], body[data-screen="out"] :is(.map-go, .map-sep) { display: none; }
@@ -566,7 +573,7 @@ body[data-screen="out"] .map-node[data-rail="design"], body[data-screen="out"] :
 .map-ico { display: flex; line-height: 0; }
 .map-cap { font: 500 calc(10.5px * var(--text))/1.15 var(--font-body); letter-spacing: 0; text-transform: none; color: inherit; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .map-node .map-val { display: none; }
-.map-node.quiet { opacity: .55; }
+.map-node.quiet { opacity: .8; } /* rarely needed, not off: only a little lighter */
 .map-node.quiet:hover, .map-node.quiet:focus-visible { opacity: 1; }
 .map-node .map-dot { position: absolute; right: 8px; top: 7px; }
 .map-sep { flex: none; height: 1px; margin: 3px 8px; background: var(--rule); }
@@ -616,7 +623,7 @@ body[data-screen="out"] .map-node[data-rail="design"], body[data-screen="out"] :
 .map-recipe-t { display: flex; flex-direction: column; gap: 2px; min-width: 0; margin-right: auto; }
 /* one row per setting: its name on the left, its value on the right. The same row whether the setting was moved into
    a group (.map-group: Material, Machine and Layers; map.js) or sits in one of the step's cards */
-.map-group h3 { margin: 0; font: 600 11px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.map-group h3 { margin: 0; font: 600 12.5px/1 var(--font-body); letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
 :is(.map-group h3, .panel section.card[data-map] > h2) { padding: 9px 12px 3px; }
 /* (a list, not :is(): each keeps its own weight, so the group rows' third column below still applies) */
 .map-group > label.field,
@@ -676,3 +683,24 @@ label.field.changed > .map-reset { display: block; }
 .map-extra .math { display: block; }
 body:not([data-art="model"]) #dropZone, body[data-empty="1"] #dropZone { display: none; }
 
+
+/* ---------- v171: from a walkthrough on an iPad-sized screen ---------- */
+/* Play speed is set in the Drawing tool; the View menu keeps what the preview shows */
+.viewpanel label.vrow:has(#speed) { display: none; }
+/* the Tests matrix: its button on one line */
+#mxAround { white-space: nowrap; }
+/* a fingertip (an iPad), in the settings panel too: its compact rows keep the steppers, the ready list's links, the
+   notices' close and the ↺ buttons big enough to tap */
+@media (pointer: coarse) {
+  .panel .num-btn { min-height: 40px; width: 36px; }
+  .panel .num input[type="number"] { min-height: 40px; }
+  :is(.map-group, .panel section.card[data-map] .card-body) .num { max-width: 168px; }
+  .map-group > div.two > label.field .num { width: 168px; }
+  .ready li button { min-height: 36px; display: inline-flex; align-items: center; }
+  .notice-x { width: 40px; height: 40px; }
+  .map-reset { width: 36px; height: 36px; }
+}
+/* the Print and Plot screens have no trace tools at all (the greyed bar is for the design's screens only) */
+body[data-screen="out"] .toolbar.tools { display: none; }
+/* the series written out (Math): wider than the panel, it scrolls sideways inside it instead of running over the preview */
+#series { max-width: 100%; overflow-x: auto; overflow-y: hidden; }

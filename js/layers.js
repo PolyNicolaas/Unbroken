@@ -545,6 +545,7 @@ function layerSliderUI() {
   el.max = Math.max(1, n);
   if (all || +el.value > n) el.value = n;
   el.disabled = n < 2;
+  el.closest(".layerbar").hidden = n < 2; // one layer: nothing to step through
   const m = L ? L.S.N + L.S.M : 0; // layers; a closed line's walls end with one more, level lap
   $("layerUpToVal").textContent =
     n < 2 || +el.value >= n ? `all ${m}` : +el.value > m ? `last lap` : `${el.value} of ${m}`;

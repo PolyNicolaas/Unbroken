@@ -175,7 +175,7 @@ function syncDesignUI() {
   textSizeUI(t);
   if (!t) syncSizeUI();
   lineUI();
-  $("outW").value = +st.outW.toFixed(1);
+  showSize();
   infillUI();
   baseUI();
   applyPrinter(false);

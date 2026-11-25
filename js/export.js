@@ -388,7 +388,7 @@ function readyItems() {
     if (sizePicked && Math.abs(sizePicked.widthMM - st.outW) < 0.2)
       add(
         "ok",
-        `Size picked for you: ${sizePicked.mark}, ${fmt(sizePicked.widthMM, 1)} mm wide (change it under Size)`,
+        `Size picked for you: ${sizePicked.mark}, ${fmt(printedW(sizePicked.widthMM), 1)} mm wide (change it under Size)`,
         "h-size"
       );
     // what the trace left out of the picture

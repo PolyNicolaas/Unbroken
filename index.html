@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v170">
-<link rel="stylesheet" href="css/app.css?v=v170">
+<link rel="stylesheet" href="css/theme.css?v=v171">
+<link rel="stylesheet" href="css/app.css?v=v171">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v170</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v171</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -30,7 +30,7 @@
       <div class="seg small stage-tabs" role="radiogroup" aria-label="What the big view shows">
         <input type="radio" name="stage" id="stLine" value="line" checked><label for="stLine">Line</label>
         <input data-feature="plotter" type="radio" name="stage" id="stPage" value="page"><label data-feature="plotter" for="stPage">2D page</label>
-        <input type="radio" name="stage" id="stPlate" value="plate"><label for="stPlate">Plate</label>
+        <input type="radio" name="stage" id="stPlate" value="plate"><label for="stPlate" title="The plate from above, with every copy on it">Top view</label>
         <input type="radio" name="stage" id="stLayers" value="layers"><label for="stLayers">3D layers</label>
       </div>
       <div class="canvas-box" id="box">
@@ -170,7 +170,7 @@
             <label class="check" title="Show the rotating circles while the drawing plays"><input type="checkbox" id="circles" checked> Circles</label>
             <label class="check" title="Highlight the connectors: the straight strands the line prints to reach a part it doesn't touch (it never stops)"><input type="checkbox" id="showConn" checked> <span>Connectors</span><span class="swatch"></span></label>
             <label class="check" title="Shade in orange where making room for the spacing pushed the line more than the medium-detail tolerance away from the drawing. Make the print bigger to bring it back"><input type="checkbox" id="showDrift" checked> <span>Moved lines</span><span class="swatch drift"></span></label>
-            <label class="check" title="Show the smallest box around the printed line, at any angle, with its size"><input type="checkbox" id="dims" checked> <span>Size box</span></label>
+            <label class="check" title="Show the box around the printed line, square to the plate, with its size as printed"><input type="checkbox" id="dims" checked> <span>Size box</span></label>
             <label class="check" title="Mark where the line crosses itself or breaks the minimum spacing"><input type="checkbox" id="showProb"> <span>Problems</span><span class="swatch dot"></span><span class="val" id="probInfo"></span></label>
             <label class="check" title="Small plate in the corner of the preview"><input type="checkbox" id="showMini" checked> <span>Plate mini-map</span></label>
             <hr>
@@ -763,6 +763,7 @@
       <div class="row" id="levelsRow">
         <div class="lab"><label for="levels">Blocks</label><span class="val" id="levelsVal">off</span></div>
         <input type="range" id="levels" min="1" max="6" value="1" aria-describedby="levelsHint">
+        <p class="hint" id="levelsShort">Off: the picture's lines are traced. 2 to 6: it becomes that many flat greys, and the edges between them are traced (each grey can also be filled).</p>
         <div id="levelsBox" hidden>
           <div class="seg small" role="radiogroup" aria-label="Greys or colours">
             <input type="radio" name="levelKind" id="levelGreys" value="grey" checked><label for="levelGreys" title="Blocks by brightness: colours equally bright fall together">Greys</label>
@@ -900,7 +901,7 @@
     <section class="card design-only" aria-labelledby="h-size">
       <h2 id="h-size">Size</h2>
       <div class="row" id="sizeRow">
-        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo" title="Width and Height are the drawing's box; the line itself can sit just inside or over it. The preview's dashed box is the smallest box round the printed line at any angle, the needle's width included."></span></div>
+        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo" title="Width and Height are the print as it comes out: the chocolate's outside edge, square to the plate (the dashed box on the preview, and the Plate card). The line centre is the size of the line itself, without its width; tilted is the smallest box round the print at any angle; ×N is how far above the smallest size."></span></div>
         <div class="size-track">
           <input type="range" id="sizeSlider" min="0" max="1000" value="500" aria-describedby="sizeHint">
           <div class="size-marks" id="sizeMarks" aria-hidden="true"></div>
@@ -1028,68 +1029,68 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v170"></script>
-<script src="01-image.js?v=v170"></script>
-<script src="02-lines.js?v=v170"></script>
-<script src="03-text.js?v=v170"></script>
-<script src="04-walk.js?v=v170"></script>
-<script src="05-fill.js?v=v170"></script>
-<script src="06-fourier.js?v=v170"></script>
-<script src="07-measure.js?v=v170"></script>
-<script src="08-shape.js?v=v170"></script>
-<script src="09-plate.js?v=v170"></script>
-<script src="10-export.js?v=v170"></script>
-<script src="11-stages.js?v=v170"></script>
-<script src="12-models.js?v=v170"></script>
-<script src="13-patterns.js?v=v170"></script>
-<script src="14-photo.js?v=v170"></script>
-<script src="15-cutout.js?v=v170"></script>
-<script src="16-molecule.js?v=v170"></script>
-<script src="17-vase.js?v=v170"></script>
-<script src="18-ties.js?v=v170"></script>
-<script src="core.js?v=v170"></script>
-<script src="fonts.js?v=v170"></script>
-<script src="settings.js?v=v170"></script>
-<script src="js/state.js?v=v170"></script>
-<script src="js/ui.js?v=v170"></script>
-<script src="js/config.js?v=v170"></script>
-<script src="js/engine-bridge.js?v=v170"></script>
-<script src="js/source.js?v=v170"></script>
-<script src="js/pipeline.js?v=v170"></script>
-<script src="js/preview.js?v=v170"></script>
-<script src="js/tools.js?v=v170"></script>
-<script src="js/art.js?v=v170"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v170");</script>
-<script src="js/readouts.js?v=v170"></script>
-<script src="js/controls.js?v=v170"></script>
-<script>feature("levels", "features/levels/levels.js?v=v170");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v170");</script>
-<script src="js/export.js?v=v170"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v170");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v170");</script>
-<script>feature("ties", "features/ties/ties.js?v=v170");</script>
-<script src="js/views.js?v=v170"></script>
-<script src="js/zoom.js?v=v170"></script>
-<script src="js/layers.js?v=v170"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v170");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v170");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v170");</script>
-<script src="js/workflow.js?v=v170"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v170");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v170");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v170");</script>
-<script>feature("camera", "features/camera/camera.js?v=v170");</script>
-<script src="js/steppers.js?v=v170"></script>
-<script src="js/scroll.js?v=v170"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v170");</script>
-<script>feature("model", "features/model/model.js?v=v170");</script>
-<script>feature("vase", "features/vase/vase.js?v=v170");</script>
-<script src="js/history.js?v=v170"></script>
-<script src="js/map.js?v=v170"></script>
-<script src="js/showall.js?v=v170"></script>
-<script src="js/main.js?v=v170"></script>
-<script src="js/parts.js?v=v170"></script>
-<script src="js/agent.js?v=v170"></script>
+<script src="00-util.js?v=v171"></script>
+<script src="01-image.js?v=v171"></script>
+<script src="02-lines.js?v=v171"></script>
+<script src="03-text.js?v=v171"></script>
+<script src="04-walk.js?v=v171"></script>
+<script src="05-fill.js?v=v171"></script>
+<script src="06-fourier.js?v=v171"></script>
+<script src="07-measure.js?v=v171"></script>
+<script src="08-shape.js?v=v171"></script>
+<script src="09-plate.js?v=v171"></script>
+<script src="10-export.js?v=v171"></script>
+<script src="11-stages.js?v=v171"></script>
+<script src="12-models.js?v=v171"></script>
+<script src="13-patterns.js?v=v171"></script>
+<script src="14-photo.js?v=v171"></script>
+<script src="15-cutout.js?v=v171"></script>
+<script src="16-molecule.js?v=v171"></script>
+<script src="17-vase.js?v=v171"></script>
+<script src="18-ties.js?v=v171"></script>
+<script src="core.js?v=v171"></script>
+<script src="fonts.js?v=v171"></script>
+<script src="settings.js?v=v171"></script>
+<script src="js/state.js?v=v171"></script>
+<script src="js/ui.js?v=v171"></script>
+<script src="js/config.js?v=v171"></script>
+<script src="js/engine-bridge.js?v=v171"></script>
+<script src="js/source.js?v=v171"></script>
+<script src="js/pipeline.js?v=v171"></script>
+<script src="js/preview.js?v=v171"></script>
+<script src="js/tools.js?v=v171"></script>
+<script src="js/art.js?v=v171"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v171");</script>
+<script src="js/readouts.js?v=v171"></script>
+<script src="js/controls.js?v=v171"></script>
+<script>feature("levels", "features/levels/levels.js?v=v171");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v171");</script>
+<script src="js/export.js?v=v171"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v171");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v171");</script>
+<script>feature("ties", "features/ties/ties.js?v=v171");</script>
+<script src="js/views.js?v=v171"></script>
+<script src="js/zoom.js?v=v171"></script>
+<script src="js/layers.js?v=v171"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v171");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v171");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v171");</script>
+<script src="js/workflow.js?v=v171"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v171");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v171");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v171");</script>
+<script>feature("camera", "features/camera/camera.js?v=v171");</script>
+<script src="js/steppers.js?v=v171"></script>
+<script src="js/scroll.js?v=v171"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v171");</script>
+<script>feature("model", "features/model/model.js?v=v171");</script>
+<script>feature("vase", "features/vase/vase.js?v=v171");</script>
+<script src="js/history.js?v=v171"></script>
+<script src="js/map.js?v=v171"></script>
+<script src="js/showall.js?v=v171"></script>
+<script src="js/main.js?v=v171"></script>
+<script src="js/parts.js?v=v171"></script>
+<script src="js/agent.js?v=v171"></script>
 
 </body>
 </html>
