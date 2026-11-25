@@ -78,7 +78,7 @@
                       UNB.molBlock
     17-vase.js    16. Vases — a profile curve turned round the middle, a surface texture (ribs, rings) and a movement
                       pattern along the path (wave, zigzag, loops), written straight to one lap per layer; the checks.
-                      UNB.VASE_SHAPES, UNB.vaseDefaults, VASE_MIN_R, UNB.vaseRadius, UNB.vaseProfile, vaseWiggle,
+                      UNB.VASE_SHAPES, UNB.vaseDefaults, VASE_MIN_R, UNB.vaseRadius, UNB.vaseProfile, UNB.vaseReliefInMax, vaseWiggle,
                       vaseRing, vaseLap, vaseCrosses, vaseLapPoints, vaseStacking, vaseTightest, UNB.vaseStack, UNB.vaseMesh
     18-ties.js    17. Ties — more connectors for a large print: short struts of two strands across the open gaps between
                       parts, spliced into the one line.

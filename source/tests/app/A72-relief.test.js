@@ -20,6 +20,14 @@ module.exports = {
       o.face0 = face();
       $("vtSideBoth").click(); await wait(300); await U.whenReady();
       o.both = V().texture.sides;
+      // Direction: pressed in, then Both (mid-grey on the wall); the labels follow, the wall still prints
+      o.dir0 = V().texture.dir || "out";
+      $("vtDirIn").click(); await wait(300); await U.whenReady();
+      o.dirIn = V().texture.dir; o.dirInWords = $("vaseTexVal").textContent;
+      $("vtDirBoth").click(); await wait(300); await U.whenReady();
+      o.dirBoth = V().texture.dir; o.dirBothWords = $("vtDirVal").textContent; o.halfDepth = V().texture.depth / 2;
+      undo(); await wait(500); await U.whenReady();
+      o.dirUndone = V().texture.dir; o.dirUndoneShown = $("vtDirIn").checked;
       $("vpCircle").click(); await wait(300); await U.whenReady();
       o.round = V().plan.kind; o.face1 = face();
       undo(); await wait(500); await U.whenReady();
@@ -65,6 +73,12 @@ module.exports = {
         check("its face about 80 mm wide, off by (mm)", Math.abs(r.face0 - 80), "<=", 1),
         check("10 mm front to back, off by (mm)", Math.abs(r.thickMM - 10), "<=", 0.1),
         check("Both: front and back", r.both, "==", "both"),
+        check("Direction: Out to start", r.dir0, "==", "out"),
+        check("Direction: In reaches the texture", r.dirIn, "==", "in"),
+        check("Direction In: the texture says pressed in", +/ mm in,/.test(r.dirInWords), "==", 1),
+        check("Direction: Both reaches the texture", r.dirBoth, "==", "both"),
+        check("Direction Both: says half the depth each way", +(new RegExp(`mid-grey on the wall, ${r.halfDepth}(\\.0)? mm each way`).test(r.dirBothWords)), "==", 1),
+        check("Undo: back to In, and the switch shows it", r.dirUndone === "in" && r.dirUndoneShown ? 1 : 0, "==", 1),
         check("Circle: round", r.round, "==", "circle"),
         check("Circle: the picture's width kept, off by (mm)", Math.abs(r.face1 - r.face0), "<=", 1),
         check("Undo: the plaque again", r.undone, "==", "plaque"),

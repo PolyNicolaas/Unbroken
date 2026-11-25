@@ -3,6 +3,18 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v168 · 2026-11-25
+
+- **Reliefs go in as well as out: Direction.** Texture, Picture, **Direction**: **Out** (as before: the dark parts
+  stand out), **In** (pressed into the wall, like an engraving) or **Both** (mid-grey stays on the wall, the dark parts
+  come out and the light parts go in, for photos and shaded pictures). **Depth** is always black to white, so Both goes
+  half the depth each way and its edges turn no tighter than Out (at the full depth each way a 2 mm relief turned at
+  0.29 mm, tighter than the bead). Pressed in on a plaque, the front and back stay at least 1.5 mm apart (with the
+  picture on both, each face gets half the room); round a wall, no deeper than half its reach (Nicolaas,
+  25 November 2026).
+- Engine: texture `dir` ("out" | "in" | "both"), `UNB.vaseReliefInMax`.
+- Tests: E66; A72 sets the Direction.
+
 ## v167 · 2026-11-25
 
 - **"Something went wrong" says where.** The message now always names where the error came from: a file and line in

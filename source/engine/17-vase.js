@@ -496,7 +496,9 @@
   // picture moves round, anticlockwise from above), faces: "one" | "every" and face (a polygon: the picture on one
   // flat face, 1 the one facing the front, or a copy on every face; place "around" wraps it round by angle instead,
   // corners and all), invert (light parts out
-  // instead), slope (mm out per mm up: how far a layer may lean over the one below, both ways; 0.8 by default: 0.24 mm
+  // instead), dir: "out" (the default: the picture stands out, `depth` at its darkest) | "in" (pressed into the wall,
+  // `depth` at its darkest) | "both" (mid-grey on the wall, black depth/2 out and white depth/2 in, so black to white
+  // is still `depth` and the line turns no tighter than Out; for pictures with greys), slope (mm out per mm up: how far a layer may lean over the one below, both ways; 0.8 by default: 0.24 mm
   // a 0.3 mm layer, inside what a bead holds), soft (mm: along each layer the picture is softened this much, so the
   // line curves in and out; 1.3 by default: so it turns no tighter than the bead is wide, down to a 60 mm wide picture), margin (share of the face left plain round the picture) }.
   // The front faces −y (seen from there, x runs left to right); the back faces +y, seen from behind, so it reads the
@@ -510,7 +512,7 @@
       H = Math.max(0.5, V.height),
       slope = Math.max(0.05, +T.slope || 0.8),
       margin = Math.min(0.4, Math.max(0, T.margin === undefined ? 0.04 : +T.margin)),
-      key = [P.id || P.w + "x" + P.h, T.depth, slope, margin, T.soft, T.invert ? 1 : 0, H, face.toFixed(2)].join("|");
+      key = [P.id || P.w + "x" + P.h, T.depth, slope, margin, T.soft, T.invert ? 1 : 0, T.dir || "out", H, face.toFixed(2)].join("|");
     let G = reliefCache.get(key);
     if (G) return G;
     const dz = 0.1,
@@ -550,6 +552,8 @@
         if (px >= 0 && px <= P.w && py >= 0 && py <= P.h) {
           const g = grey(px - 0.5, py - 0.5) / 255;
           v = T.invert ? g : 1 - g;
+          if (T.dir === "in") v = -v;
+          else if (T.dir === "both") v = v - 0.5;
         }
         d[r * cols + c] = v * (T.depth || 0);
       }
@@ -660,6 +664,19 @@
     if (reliefFaces(V)) return 2 * R * faceOf(V, 0, -1).half;
     return 2 * Math.PI * R * Math.min(1, Math.max(0.1, +V.texture.span || 0.5));
   }
+  // how far (mm) a picture may press into the wall at reach R: on a plaque the front and back stay at least
+  // RELIEF_GAP apart (each side gets half when the picture is on both); round a cup, no more than half the reach
+  const RELIEF_GAP = 1.5;
+  function reliefInMax(V, R) {
+    const T = V.texture;
+    if (!T || T.dir === "out" || !T.dir) return Infinity;
+    if (V.plan && V.plan.kind === "plaque") {
+      const room = Math.max(0, (+V.plan.thick || 0.06) * R - RELIEF_GAP);
+      return T.sides === "both" ? room / 2 : room;
+    }
+    return Math.max(0, R / 2);
+  }
+  UNB.vaseReliefInMax = reliefInMax;
   const reliefOn = (V) => !!(V.texture && V.texture.kind === "picture" && V.texture.picture && V.texture.picture.data);
 
   // The wall at height z (mm): the plan (blended towards the rim's) at the profile's reach, turned by the twist, the
@@ -706,14 +723,15 @@
       onLine = !!(V.plan && V.plan.kind === "drawing"),
       // a picture: its depth out from the wall at each point (fitted to the face at the reach halfway up)
       G = reliefOn(V) && D > 0 ? reliefGrid(V, reliefFace(V, UNB.vaseRadius(V.profile, 0.5))) : null,
-      pic = G ? new Float64Array(n) : null;
+      pic = G ? new Float64Array(n) : null,
+      inMax = G ? reliefInMax(V, reach) : 0;
     for (let i = 0; i < n; i++) {
       const [ux, uy] = planPoint(A, B, i / n, t);
       px[i] = reach * (ux * cr - uy * sr);
       py[i] = reach * (ux * sr + uy * cr);
       if (G) {
         const u = reliefUV(V, ux, uy);
-        pic[i] = u === null ? 0 : reliefAt(G, z, u) * k;
+        pic[i] = u === null ? 0 : Math.max(-inMax, reliefAt(G, z, u) * k);
       }
     }
     for (let i = 0; i < n; i++) {
