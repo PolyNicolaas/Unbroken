@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v164">
-<link rel="stylesheet" href="css/app.css?v=v164">
+<link rel="stylesheet" href="css/theme.css?v=v165">
+<link rel="stylesheet" href="css/app.css?v=v165">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v164</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v165</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -619,11 +619,13 @@
             <input type="radio" name="vasePlan" id="vpPolygon" value="polygon"><label for="vpPolygon">Polygon</label>
             <input type="radio" name="vasePlan" id="vpStar" value="star"><label for="vpStar">Star</label>
             <input type="radio" name="vasePlan" id="vpFlower" value="flower"><label for="vpFlower">Flower</label>
+            <input type="radio" name="vasePlan" id="vpPlaque" value="plaque"><label for="vpPlaque" title="A flat wall: a front and a back a few millimetres apart, joined by round ends, one closed line round (a plaque that stands up). The profile is half its width">Flat</label>
             <input type="radio" name="vasePlan" id="vpDrawing" value="drawing"><label for="vpDrawing" id="vpDrawingLab" title="The traced line this vase was made from (Make a vase from this line, on the Line tool)">Drawing</label>
           </div>
           <div data-part="vshape" class="row vp-sides"><div class="lab"><label for="vpSides" id="vpSidesLab">Corners</label><span class="val" id="vpSidesVal"></span></div><input type="range" id="vpSides" min="2" max="24" step="1" value="6"></div>
           <div data-part="vshape" class="row vp-depth" title="How far in between the points or petals, as a share of the reach"><div class="lab"><label for="vpDepth" id="vpDepthLab">Depth</label><span class="val" id="vpDepthVal"></span></div><input type="range" id="vpDepth" min="0" max="90" step="1" value="30"></div>
           <div data-part="vshape" class="row vp-round" title="Corners and dips rounded off"><div class="lab"><label for="vpRound" id="vpRoundLab">Rounded</label><span class="val" id="vpRoundVal"></span></div><input type="range" id="vpRound" min="0" max="100" step="1" value="20"></div>
+          <div data-part="vshape" class="row vp-plaque" title="How far apart the front and the back are (middle of the bead to middle of the bead), at least 10 mm: a closed loop, so it stands stiff"><div class="lab"><label for="vpThick">Front to back</label><span class="val" id="vpThickVal"></span></div><input type="range" id="vpThick" min="10" max="40" step="0.5" value="10"></div>
           <div data-part="vshape" class="row vp-drawing"><p class="hint" id="vpDrawMsg" role="status"></p></div>
           <div data-part="vshape" class="lab"><span class="name">At the rim</span><span class="val" id="vaseTopVal"></span></div>
           <div data-part="vshape" class="seg small" role="radiogroup" aria-label="The shape at the rim">
@@ -655,10 +657,22 @@
             <input type="radio" name="vaseTex" id="vtGrid" value="grid"><label for="vtGrid">Grid</label>
             <input type="radio" name="vaseTex" id="vtWeave" value="weave"><label for="vtWeave">Weave</label>
             <input type="radio" name="vaseTex" id="vtDiamond" value="diamond"><label for="vtDiamond">Diamond</label>
+            <input type="radio" name="vaseTex" id="vtPicture" value="picture"><label for="vtPicture" id="vtPictureLab" title="The picture this relief was made from (Make a relief from this picture, on the Line tool), standing out from the wall">Picture</label>
           </div>
           <div data-part="vtexture" class="row vt-ribs"><div class="lab"><label for="vtCount" id="vtCountLab">Ribs round</label><span class="val" id="vtCountVal"></span></div><input type="range" id="vtCount" min="2" max="60" step="1" value="12"></div>
           <div data-part="vtexture" class="row vt-twist"><div class="lab"><label for="vtTwist" id="vtTwistLab">Twist, bottom to rim</label><span class="val" id="vtTwistVal"></span></div><input type="range" id="vtTwist" min="-360" max="360" step="5" value="0"></div>
           <div data-part="vtexture" class="row vt-rings"><div class="lab"><label for="vtSpacing" id="vtSpacingLab">Rings apart</label><span class="val" id="vtSpacingVal"></span></div><input type="range" id="vtSpacing" min="1" max="20" step="0.5" value="4"></div>
+          <div data-part="vtexture" class="row vt-pic"><div class="lab"><span class="name">On</span><span class="val" id="vtSidesVal"></span></div>
+            <div class="seg small" role="radiogroup" aria-label="Which side the picture is on">
+              <input type="radio" name="vtSides" id="vtSideFront" value="front" checked><label for="vtSideFront">Front</label>
+              <input type="radio" name="vtSides" id="vtSideBack" value="back"><label for="vtSideBack">Back</label>
+              <input type="radio" name="vtSides" id="vtSideBoth" value="both"><label for="vtSideBoth">Both</label>
+            </div>
+          </div>
+          <div data-part="vtexture" class="row vt-pic vt-span" title="A round wall: how far round one copy of the picture goes"><div class="lab"><label for="vtSpan">Round the wall</label><span class="val" id="vtSpanVal"></span></div><input type="range" id="vtSpan" min="15" max="100" step="5" value="50"></div>
+          <div data-part="vtexture" class="row vt-pic" title="Along each layer the picture is softened about this much, so the line curves in and out of a raised part instead of turning sharper than the bead is wide"><div class="lab"><label for="vtSoft">Soften edges</label><span class="val" id="vtSoftVal"></span></div><input type="range" id="vtSoft" min="0" max="3" step="0.1" value="1"></div>
+          <label data-part="vtexture" class="check vt-pic" title="Light parts stand out instead of dark ones"><input type="checkbox" id="vtInvert"> Light parts stand out</label>
+          <p data-part="vtexture" class="hint vt-pic" id="vtPicMsg" role="status"></p>
           <div data-part="vtexture" class="row vt-on"><div class="lab"><label for="vtDepth" id="vtDepthLab">Depth</label><span class="val" id="vtDepthVal"></span></div><input type="range" id="vtDepth" min="0.2" max="6" step="0.1" value="1.5"></div>
           <div data-part="vtexture" class="row vt-on vase-curve"><div class="lab"><span class="name">Strength up the wall</span><span class="val" id="vtCurveVal"></span></div>
             <canvas id="vtCurve" class="vase-curve-cv" tabindex="0" aria-label="How much of the texture at each height: drag a point left (less) or right (all of it); tap beside the line to add one, tap a point to remove it"></canvas>
@@ -862,7 +876,7 @@
       </div>
       <div data-feature="vase" class="row" id="vaseFromRow">
         <div class="lab"><span class="name">Make a vase</span></div>
-        <div class="inline"><button class="btn mini" type="button" id="vaseFromLine" title="This traced line, exactly as it is, becomes the vase's shape seen from above: every wall of the vase follows it, at its own size">Make a vase from this line</button></div>
+        <div class="inline"><button class="btn mini" type="button" id="vaseFromLine" title="This traced line, exactly as it is, becomes the vase's shape seen from above: every wall of the vase follows it, at its own size">Make a vase from this line</button><button class="btn mini" type="button" id="reliefFromPic" title="The picture stands out from a wall printed upright, layer by layer: a flat plaque (a closed loop, the picture on the front, the back or both) or a round one">Make a relief from this picture</button></div>
         <p class="hint" id="vaseFromMsg" role="status"></p>
       </div>
 
@@ -999,67 +1013,67 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v164"></script>
-<script src="01-image.js?v=v164"></script>
-<script src="02-lines.js?v=v164"></script>
-<script src="03-text.js?v=v164"></script>
-<script src="04-walk.js?v=v164"></script>
-<script src="05-fill.js?v=v164"></script>
-<script src="06-fourier.js?v=v164"></script>
-<script src="07-measure.js?v=v164"></script>
-<script src="08-shape.js?v=v164"></script>
-<script src="09-plate.js?v=v164"></script>
-<script src="10-export.js?v=v164"></script>
-<script src="11-stages.js?v=v164"></script>
-<script src="12-models.js?v=v164"></script>
-<script src="13-patterns.js?v=v164"></script>
-<script src="14-photo.js?v=v164"></script>
-<script src="15-cutout.js?v=v164"></script>
-<script src="16-molecule.js?v=v164"></script>
-<script src="17-vase.js?v=v164"></script>
-<script src="18-ties.js?v=v164"></script>
-<script src="core.js?v=v164"></script>
-<script src="fonts.js?v=v164"></script>
-<script src="settings.js?v=v164"></script>
-<script src="js/state.js?v=v164"></script>
-<script src="js/ui.js?v=v164"></script>
-<script src="js/config.js?v=v164"></script>
-<script src="js/engine-bridge.js?v=v164"></script>
-<script src="js/source.js?v=v164"></script>
-<script src="js/pipeline.js?v=v164"></script>
-<script src="js/preview.js?v=v164"></script>
-<script src="js/tools.js?v=v164"></script>
-<script src="js/art.js?v=v164"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v164");</script>
-<script src="js/readouts.js?v=v164"></script>
-<script src="js/controls.js?v=v164"></script>
-<script>feature("levels", "features/levels/levels.js?v=v164");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v164");</script>
-<script src="js/export.js?v=v164"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v164");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v164");</script>
-<script>feature("ties", "features/ties/ties.js?v=v164");</script>
-<script src="js/views.js?v=v164"></script>
-<script src="js/zoom.js?v=v164"></script>
-<script src="js/layers.js?v=v164"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v164");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v164");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v164");</script>
-<script src="js/workflow.js?v=v164"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v164");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v164");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v164");</script>
-<script>feature("camera", "features/camera/camera.js?v=v164");</script>
-<script src="js/steppers.js?v=v164"></script>
-<script src="js/scroll.js?v=v164"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v164");</script>
-<script>feature("model", "features/model/model.js?v=v164");</script>
-<script>feature("vase", "features/vase/vase.js?v=v164");</script>
-<script src="js/history.js?v=v164"></script>
-<script src="js/map.js?v=v164"></script>
-<script src="js/main.js?v=v164"></script>
-<script src="js/parts.js?v=v164"></script>
-<script src="js/agent.js?v=v164"></script>
+<script src="00-util.js?v=v165"></script>
+<script src="01-image.js?v=v165"></script>
+<script src="02-lines.js?v=v165"></script>
+<script src="03-text.js?v=v165"></script>
+<script src="04-walk.js?v=v165"></script>
+<script src="05-fill.js?v=v165"></script>
+<script src="06-fourier.js?v=v165"></script>
+<script src="07-measure.js?v=v165"></script>
+<script src="08-shape.js?v=v165"></script>
+<script src="09-plate.js?v=v165"></script>
+<script src="10-export.js?v=v165"></script>
+<script src="11-stages.js?v=v165"></script>
+<script src="12-models.js?v=v165"></script>
+<script src="13-patterns.js?v=v165"></script>
+<script src="14-photo.js?v=v165"></script>
+<script src="15-cutout.js?v=v165"></script>
+<script src="16-molecule.js?v=v165"></script>
+<script src="17-vase.js?v=v165"></script>
+<script src="18-ties.js?v=v165"></script>
+<script src="core.js?v=v165"></script>
+<script src="fonts.js?v=v165"></script>
+<script src="settings.js?v=v165"></script>
+<script src="js/state.js?v=v165"></script>
+<script src="js/ui.js?v=v165"></script>
+<script src="js/config.js?v=v165"></script>
+<script src="js/engine-bridge.js?v=v165"></script>
+<script src="js/source.js?v=v165"></script>
+<script src="js/pipeline.js?v=v165"></script>
+<script src="js/preview.js?v=v165"></script>
+<script src="js/tools.js?v=v165"></script>
+<script src="js/art.js?v=v165"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v165");</script>
+<script src="js/readouts.js?v=v165"></script>
+<script src="js/controls.js?v=v165"></script>
+<script>feature("levels", "features/levels/levels.js?v=v165");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v165");</script>
+<script src="js/export.js?v=v165"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v165");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v165");</script>
+<script>feature("ties", "features/ties/ties.js?v=v165");</script>
+<script src="js/views.js?v=v165"></script>
+<script src="js/zoom.js?v=v165"></script>
+<script src="js/layers.js?v=v165"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v165");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v165");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v165");</script>
+<script src="js/workflow.js?v=v165"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v165");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v165");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v165");</script>
+<script>feature("camera", "features/camera/camera.js?v=v165");</script>
+<script src="js/steppers.js?v=v165"></script>
+<script src="js/scroll.js?v=v165"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v165");</script>
+<script>feature("model", "features/model/model.js?v=v165");</script>
+<script>feature("vase", "features/vase/vase.js?v=v165");</script>
+<script src="js/history.js?v=v165"></script>
+<script src="js/map.js?v=v165"></script>
+<script src="js/main.js?v=v165"></script>
+<script src="js/parts.js?v=v165"></script>
+<script src="js/agent.js?v=v165"></script>
 
 </body>
 </html>
