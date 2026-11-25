@@ -30,11 +30,21 @@ function setBusy(on) {
 // Where an error came from, for the chip: the file of the first place on its stack (" · in pipeline.js:212"). One
 // from outside the app (a browser extension's script, shown by Safari as webkit-masked-url) says so.
 function errorWhere(e) {
-  const m = String((e && e.stack) || "").match(/([a-z][\w+.-]*):\/\/([^\s()]+):(\d+):\d+/i);
-  if (!m) return "";
-  if (/extension|masked/i.test(m[1])) return " · in a browser extension (try with extensions off)";
-  const file = m[2].split("?")[0].split("/").pop();
-  return file ? ` · in ${file}:${m[3]}` : "";
+  const stack = String((e && e.stack) || "").trim();
+  if (!stack) return " · no file named (the browser gave no trace)";
+  const m = stack.match(/([a-z][\w+.-]*):\/\/([^\s()]+):(\d+):\d+/i);
+  if (m) {
+    if (/extension|masked/i.test(m[1])) return " · in a browser extension (try with extensions off)";
+    const file = m[2].split("?")[0].split("/").pop();
+    if (file) return ` · in ${file}:${m[3]}`;
+  }
+  // No web address in the trace: code the browser added to the page (Edge, an app's in-app browser) or the browser
+  // itself. Name its first frame as given, e.g. "user-script:4:1201" or "isForSelection@[native code]".
+  const top = stack
+    .split("\n")
+    .map((l) => l.trim().replace(/^at\s+/, ""))
+    .find((l) => l && !/^\w*Error\b/.test(l));
+  return ` · not in Unbroken's files${top ? ` (${top.slice(0, 80)})` : ""}: try another browser`;
 }
 // Start a run now: cancels whatever is still being worked out, keeps the last result on screen until the new one is
 // ready.

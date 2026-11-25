@@ -3,6 +3,14 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v167 · 2026-11-25
+
+- **"Something went wrong" says where.** The message now always names where the error came from: a file and line in
+  Unbroken (`pipeline.js:240`), a browser extension, or, when the trace has no web address, **not in Unbroken's files**
+  with the first frame as the browser gives it (e.g. `user-script:4:1201`) and "try another browser". Before, an error
+  from code a browser adds to the page (Edge on an iPad: `undefined is not an object (evaluating
+  'n.isForSelection')`, after taking a picture or tracing a drawing) showed no place at all (Nicolaas, 25 November 2026).
+
 ## v166 · 2026-11-24
 
 - **Reliefs on a polygon: the picture on a face.** On a polygon (a triangle, a hexagon…) the picture now sits on one
