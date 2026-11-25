@@ -10,15 +10,16 @@ the page's title (it shows "dev" when the page runs from the source folder). Add
   layer, each layer's line pushed out where the picture is dark, so the picture shows in light and shadow on the wall.
   It's a vase underneath (the 3D model input, Make a vase), so every vase tool works on it:
   - **Shape: Flat** (new): a plaque, a front and a back a few millimetres apart joined by round ends, one closed line
-    round, so it stands stiff (**Front to back**, 2–20 mm, 4). Or any round shape: a cup with the picture wrapped
+    round, so it stands stiff (**Front to back**, 10–40 mm, 10: at least 10, Nicolaas). Or any round shape: a cup with the picture wrapped
     round it (**Round the wall**: how far round one copy goes, 50%).
   - **Texture: Picture** (new): **On** the front, the back (it reads the right way from behind) or both; **Depth**
     (2 mm); **Soften edges** (1 mm: the line curves in and out of a raised part no tighter than the bead); **Light
     parts stand out**.
-  - Each layer leans no more than a bead holds over the one below (0.24 mm a 0.3 mm layer), so a raised part's top and
-    bottom are short ramps; its sides are sharp. Going between flat and round keeps the picture's width.
-  - Starts as a plaque as wide as the drawing, tall enough for the picture, the picture 2 mm out on the front. The
-    model, the files and the label say relief. The Gateway City Big Band logo at 84 × 109 mm: 64 m, 17 ml, ~2 h.
+  - Each layer leans out or back no more than 90% of the overhang a bead holds (Fine-tuning's **Overhang per layer**,
+    a third of the bead when empty: 0.25 mm a layer with the 0.84 mm needle), and follows it and the layer height when
+    they change; so a raised part's top and bottom are short ramps, its sides sharp. Going between flat and round keeps the picture's width.
+  - Starts as a plaque its face as wide as the drawing, 10 mm front to back, tall enough for the picture, the picture
+    2 mm out on the front. The model, the files and the label say relief.
 - Engine: vase plan `plaque` (`thick`), texture `picture` (`picture`, `sides`, `span`, `invert`, `slope`, `soft`,
   `margin`).
 - Tests: E65, A72.

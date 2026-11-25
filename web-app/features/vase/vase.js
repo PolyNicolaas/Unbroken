@@ -17,7 +17,12 @@ let vaseCur = UNB.vaseDefaults(),
 
 // ---------- sending a change ----------
 // (record: an undo step; while dragging, one at the end)
+// A relief's lean: each layer may stand out (or step back) over the one below no more than the overhang a bead holds
+// (export.js overhangMM: Fine-tuning's Overhang, or a third of the bead), less a tenth to spare, at the layer height in
+// use (mm out per mm up)
+const reliefSlope = () => +((0.9 * overhangMM()) / layerHmm()).toFixed(3);
 function vaseSend(record) {
+  if (vaseCur.texture && vaseCur.texture.kind === "picture") vaseCur.texture.slope = reliefSlope();
   vaseCur.profile = UNB.vaseProfile(vaseCur.profile);
   vaseHint();
   vaseDraw();
@@ -490,11 +495,12 @@ for (const id of Object.values(VASE_RADIO.plan))
       const was = UNB.vaseRadius(vaseCur.profile, 0.5),
         now =
           vaseCur.plan.kind === "plaque"
-            ? face / 2 / (1 - Math.min(0.5, thickMM / (face / 2)) / 2)
+            ? (face + Math.max(10, thickMM)) / 2
             : face / (2 * Math.PI * (vaseCur.texture.span || 0.5)),
         f = now / was;
       vaseCur.profile = vaseCur.profile.map(([t, r]) => [t, +(r * f).toFixed(2)]);
-      if (vaseCur.plan.kind === "plaque") vaseCur.plan.thick = +(thickMM / UNB.vaseRadius(vaseCur.profile, 0.5)).toFixed(4);
+      if (vaseCur.plan.kind === "plaque")
+        vaseCur.plan.thick = +(Math.max(10, thickMM) / UNB.vaseRadius(vaseCur.profile, 0.5)).toFixed(4);
     }
     if (vaseCur.plan.kind === "flower" && vaseCur.plan.sides > 12) vaseCur.plan.sides = 8;
     vaseLabels();
@@ -576,8 +582,8 @@ $("vaseFromLine").addEventListener("click", vaseFromLine);
 
 // ---------- a relief: the picture standing out from a wall ----------
 // Make a relief from this picture (the Line card): the picture (as Image prep makes it, cropped to its dark parts)
-// becomes the wall's texture: a flat plaque, as wide as the drawing is now, tall enough for the picture, 4 mm front to
-// back, the picture 2 mm out on the front. On the vase's tools: Shape (flat or round), Texture (which side, how deep).
+// becomes the wall's texture: a flat plaque, its face as wide as the drawing is now, tall enough for the picture, 10 mm
+// front to back (at least 10: Nicolaas, 24 November 2026), the picture 2 mm out on the front. On the vase's tools: Shape (flat or round), Texture (which side, how deep).
 async function reliefFromPicture() {
   const msg = $("vaseFromMsg");
   if (!st.source || st.text || st.art.kind !== "picture") {
@@ -637,9 +643,10 @@ async function reliefFromPicture() {
       data[y * w + x] = v;
       hash = (hash * 31 + v) % 2147483647;
     }
+  // (the flat face is the width less the round ends: 2R − front to back)
   const widthMM = Math.min(180, Math.max(30, st.outW > 0 ? st.outW : 80)),
-    R = +(widthMM / 2 / (1 - 0.05)).toFixed(1),
-    thick = 4;
+    thick = 10,
+    R = +((widthMM + thick) / 2).toFixed(1);
   vaseCur = UNB.vaseDefaults();
   vaseCur.profile = [
     [0, R],
@@ -657,17 +664,25 @@ async function reliefFromPicture() {
     invert: false,
     picture: { w, h, data, id: `${w}x${h}:${hash}`, from: $("designName").value.trim() || "" },
   });
+  vaseCur.texture.slope = reliefSlope();
   vasePick = -1;
   artUse("model"); // art.js: the 3D model input
   $("mfVase").checked = true;
   useVase(vaseCur, true);
   vaseUI();
   msg.textContent = "";
-  $("vtPicMsg").textContent = `Made from your picture (${w} × ${h} px, its dark parts standing out). Each layer leans no more than a bead holds over the one below, so a raised part's top and bottom are short ramps; its sides are sharp.`;
+  $("vtPicMsg").textContent = `Made from your picture (${w} × ${h} px, its dark parts standing out). Each layer leans out or back at most ${fmt(0.9 * overhangMM(), 2)} mm over the one below (90% of the overhang a bead holds, ${fmt(overhangMM(), 2)} mm: Fine-tuning), so a raised part's top and bottom are short ramps; its sides are sharp.`;
   if (!$("viewArt").checked) $("viewArt").click();
   if (typeof mapOpen === "function") mapOpen("vtexture");
 }
 $("reliefFromPic").addEventListener("click", reliefFromPicture);
+// the overhang or the layer height changed (Fine-tuning, Layers): a relief's lean follows
+for (const id of ["gOver", "layerH"])
+  $(id).addEventListener("change", () => {
+    if (!(st.model && st.model.vase && vaseCur.texture.kind === "picture")) return;
+    vaseCur = structuredClone(st.model.vase);
+    if (Math.abs((vaseCur.texture.slope || 0) - reliefSlope()) > 1e-3) vaseSend(true);
+  });
 // (only for a picture)
 const reliefButton = () => ($("reliefFromPic").hidden = !(st.art && st.art.kind === "picture" && !st.text));
 on("artUI", reliefButton);
