@@ -662,15 +662,17 @@
           <div data-part="vtexture" class="row vt-ribs"><div class="lab"><label for="vtCount" id="vtCountLab">Ribs round</label><span class="val" id="vtCountVal"></span></div><input type="range" id="vtCount" min="2" max="60" step="1" value="12"></div>
           <div data-part="vtexture" class="row vt-twist"><div class="lab"><label for="vtTwist" id="vtTwistLab">Twist, bottom to rim</label><span class="val" id="vtTwistVal"></span></div><input type="range" id="vtTwist" min="-360" max="360" step="5" value="0"></div>
           <div data-part="vtexture" class="row vt-rings"><div class="lab"><label for="vtSpacing" id="vtSpacingLab">Rings apart</label><span class="val" id="vtSpacingVal"></span></div><input type="range" id="vtSpacing" min="1" max="20" step="0.5" value="4"></div>
-          <div data-part="vtexture" class="row vt-pic"><div class="lab"><span class="name">On</span><span class="val" id="vtSidesVal"></span></div>
+          <div data-part="vtexture" class="row vt-pic vt-face" title="A polygon: the picture on one flat face (1 is the face toward the front, the rest anticlockwise seen from above), or a copy on every face; never round a corner"><div class="lab"><label for="vtFace">On</label><span class="val" id="vtFaceVal"></span></div><select id="vtFace"><option value="1">Face 1 (the front)</option></select></div>
+          <div data-part="vtexture" class="row vt-pic vt-sidesrow"><div class="lab"><span class="name">On</span><span class="val" id="vtSidesVal"></span></div>
             <div class="seg small" role="radiogroup" aria-label="Which side the picture is on">
               <input type="radio" name="vtSides" id="vtSideFront" value="front" checked><label for="vtSideFront">Front</label>
               <input type="radio" name="vtSides" id="vtSideBack" value="back"><label for="vtSideBack">Back</label>
               <input type="radio" name="vtSides" id="vtSideBoth" value="both"><label for="vtSideBoth">Both</label>
             </div>
           </div>
+          <div data-part="vtexture" class="row vt-pic vt-turn" title="A round wall: where the picture starts, moved round the wall (anticlockwise seen from above)"><div class="lab"><label for="vtTurn">Turn the picture</label><span class="val" id="vtTurnVal"></span></div><input type="range" id="vtTurn" min="-180" max="180" step="5" value="0"></div>
           <div data-part="vtexture" class="row vt-pic vt-span" title="A round wall: how far round one copy of the picture goes"><div class="lab"><label for="vtSpan">Round the wall</label><span class="val" id="vtSpanVal"></span></div><input type="range" id="vtSpan" min="15" max="100" step="5" value="50"></div>
-          <div data-part="vtexture" class="row vt-pic" title="Along each layer the picture is softened about this much, so the line curves in and out of a raised part instead of turning sharper than the bead is wide"><div class="lab"><label for="vtSoft">Soften edges</label><span class="val" id="vtSoftVal"></span></div><input type="range" id="vtSoft" min="0" max="3" step="0.1" value="1"></div>
+          <div data-part="vtexture" class="row vt-pic" title="Along each layer the picture is softened about this much, so the line curves in and out of a raised part instead of turning sharper than the bead is wide"><div class="lab"><label for="vtSoft">Soften edges</label><span class="val" id="vtSoftVal"></span></div><input type="range" id="vtSoft" min="0" max="3" step="0.1" value="1.3"></div>
           <label data-part="vtexture" class="check vt-pic" title="Light parts stand out instead of dark ones"><input type="checkbox" id="vtInvert"> Light parts stand out</label>
           <p data-part="vtexture" class="hint vt-pic" id="vtPicMsg" role="status"></p>
           <div data-part="vtexture" class="row vt-on"><div class="lab"><label for="vtDepth" id="vtDepthLab">Depth</label><span class="val" id="vtDepthVal"></span></div><input type="range" id="vtDepth" min="0.2" max="6" step="0.1" value="1.5"></div>

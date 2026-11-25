@@ -3,6 +3,18 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v166 · 2026-11-24
+
+- **Reliefs on a polygon: the picture on a face.** On a polygon (a triangle, a hexagon…) the picture now sits on one
+  flat face, centred, never round a corner: Texture, **On**: Face 1 (the one toward the front), Face 2, … (anticlockwise
+  seen from above), or **Every face** (a copy on each wall). Before, it was placed by angle like a round wall, so on a
+  triangle it sat 30° off the front face and bent round a corner (Nicolaas, 24 November 2026).
+- **Turn the picture** (round walls): where the picture starts, moved round the wall in degrees.
+- Changing the shape, or a polygon's sides or rounding, keeps the picture's width on its face (the profile scales).
+- **Soften edges** starts at 1.3 mm (was 1): at 1 mm a picture 60 mm wide turned tighter than the 0.84 mm bead.
+- Engine: texture `faces` ("one" | "every"), `face`, `turn`, `place` ("around": a polygon wrapped by angle as before).
+- Tests: E65, A72.
+
 ## v165 · 2026-11-24
 
 - **Reliefs: a picture standing out from a wall printed upright.** On the Line tool, **Make a relief from this

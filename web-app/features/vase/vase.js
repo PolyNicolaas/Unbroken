@@ -67,7 +67,8 @@ function vaseUI() {
   $("vpThick").value = +vaseThickMM(V).toFixed(1);
   $(({ front: "vtSideFront", back: "vtSideBack", both: "vtSideBoth" })[T.sides || "front"]).checked = true;
   $("vtSpan").value = Math.round((T.span || 0.5) * 100);
-  $("vtSoft").value = T.soft === undefined ? 1 : T.soft;
+  $("vtTurn").value = Math.round(+T.turn || 0);
+  $("vtSoft").value = T.soft === undefined ? 1.3 : T.soft;
   $("vtInvert").checked = !!T.invert;
   $(VASE_RADIO.top[Q ? Q.kind : "same"] || "vrSame").checked = true;
   $(VASE_RADIO.lean[V.lean.curve] || "vlStraight").checked = true;
@@ -193,12 +194,29 @@ function vaseLabels() {
       grid: `a grid: ${T.count} ribs, rings ${fmt(T.spacing, 1)} mm apart`,
       weave: `${T.count} ribs weaving ${T.twist}° every ${fmt(T.spacing, 1)} mm`,
       diamond: `diamonds: ${T.count} round, ${T.twist}° twist`,
-      picture: `the picture, ${fmt(T.depth, 1)} mm out, on the ${{ front: "front", back: "back", both: "front and back" }[T.sides || "front"]}`,
+      picture: `the picture, ${fmt(T.depth, 1)} mm out, ${
+        P.kind === "polygon"
+          ? T.faces === "every"
+            ? "on every face"
+            : `on face ${Math.round(+T.face || 1)}`
+          : `on the ${{ front: "front", back: "back", both: "front and back" }[T.sides || "front"]}`
+      }`,
     }[T.kind] || "smooth";
   $("vpThickVal").textContent = `${fmt(vaseThickMM(V), 1)} mm`;
   $("vtSidesVal").textContent = { front: "the front", back: "the back (it reads the right way from behind)", both: "both: front and back" }[T.sides || "front"];
   $("vtSpanVal").textContent = `${Math.round((T.span || 0.5) * 100)}% of the way round`;
-  $("vtSoftVal").textContent = `${fmt(T.soft === undefined ? 1 : T.soft, 1)} mm`;
+  // a polygon's faces: one option a face, and every face
+  const nf = Math.max(3, Math.min(24, Math.round(+P.sides || 6))),
+    want = [...Array(nf)].map((_, i) => String(i + 1)).concat("every");
+  if ([...$("vtFace").options].map((o) => o.value).join() !== want.join())
+    $("vtFace").innerHTML = want
+      .map((v) => `<option value="${v}">${v === "every" ? "Every face" : v === "1" ? "Face 1 (the front)" : `Face ${v}`}</option>`)
+      .join("");
+  $("vtFace").value = T.faces === "every" ? "every" : String(Math.min(nf, Math.max(1, Math.round(+T.face || 1))));
+  $("vtTurnVal").textContent = T.turn ? `${Math.round(T.turn)}°` : "centred on the front";
+  $("vtFaceVal").textContent =
+    T.faces === "every" ? `every face (${P.sides})` : `face ${Math.round(+T.face || 1)} of ${P.sides}${(+T.face || 1) === 1 ? ", the front" : ""}`;
+  $("vtSoftVal").textContent = `${fmt(T.soft === undefined ? 1.3 : T.soft, 1)} mm`;
   $("vaseMoveVal").textContent =
     M.kind === "none"
       ? "straight along the wall"
@@ -479,29 +497,34 @@ for (const id of Object.values(VASE_RADIO.tex))
   });
 // the shape from above, and at the rim
 // the width a relief's picture is fitted to (mm): a plaque's flat face, or its share of the way round a round wall
-const reliefFaceMM = (V) =>
+// (per mm of reach: a plaque's flat face; a polygon's face, its corners rounded; a round wall's share of the way round)
+const reliefFacePerR = (V) =>
   V.plan.kind === "plaque"
-    ? 2 * UNB.vaseRadius(V.profile, 0.5) * (1 - (+V.plan.thick || 0.1) / 2)
-    : 2 * Math.PI * UNB.vaseRadius(V.profile, 0.5) * (V.texture.span || 0.5);
+    ? 2 * (1 - (+V.plan.thick || 0.1) / 2)
+    : V.plan.kind === "polygon"
+      ? 2 * Math.sin(Math.PI / Math.max(3, Math.round(+V.plan.sides || 6))) * (1 - 0.4 * (+V.plan.round || 0))
+      : 2 * Math.PI * (V.texture.span || 0.5);
+const reliefFaceMM = (V) => UNB.vaseRadius(V.profile, 0.5) * reliefFacePerR(V);
+// a relief whose shape changed: the profile scaled so the picture's face is as wide as it was (a plaque keeps its
+// front to back in mm)
+function reliefKeepFace(face, thickMM) {
+  if (!(vaseCur.texture.kind === "picture" && vaseCur.texture.picture && face > 0)) return;
+  const was = UNB.vaseRadius(vaseCur.profile, 0.5),
+    now =
+      vaseCur.plan.kind === "plaque" ? (face + Math.max(10, thickMM)) / 2 : face / reliefFacePerR(vaseCur),
+    f = now / was;
+  if (Math.abs(f - 1) < 1e-3) return;
+  vaseCur.profile = vaseCur.profile.map(([t, r]) => [t, +(r * f).toFixed(2)]);
+  if (vaseCur.plan.kind === "plaque")
+    vaseCur.plan.thick = +(Math.max(10, thickMM) / UNB.vaseRadius(vaseCur.profile, 0.5)).toFixed(4);
+}
 for (const id of Object.values(VASE_RADIO.plan))
   $(id).addEventListener("change", () => {
-    // a relief going between flat and round keeps its picture the same width (the profile scaled to fit)
-    const pic = vaseCur.texture.kind === "picture" && vaseCur.texture.picture,
-      face = pic ? reliefFaceMM(vaseCur) : 0,
-      thickMM = vaseThickMM(vaseCur),
-      wasFlat = vaseCur.plan.kind === "plaque";
+    // a relief changing shape keeps its picture the same width (the profile scaled to fit)
+    const face = reliefFaceMM(vaseCur),
+      thickMM = vaseCur.plan.kind === "plaque" ? vaseThickMM(vaseCur) : 10;
     vaseCur.plan.kind = $(id).value;
-    if (pic && wasFlat !== (vaseCur.plan.kind === "plaque")) {
-      const was = UNB.vaseRadius(vaseCur.profile, 0.5),
-        now =
-          vaseCur.plan.kind === "plaque"
-            ? (face + Math.max(10, thickMM)) / 2
-            : face / (2 * Math.PI * (vaseCur.texture.span || 0.5)),
-        f = now / was;
-      vaseCur.profile = vaseCur.profile.map(([t, r]) => [t, +(r * f).toFixed(2)]);
-      if (vaseCur.plan.kind === "plaque")
-        vaseCur.plan.thick = +(Math.max(10, thickMM) / UNB.vaseRadius(vaseCur.profile, 0.5)).toFixed(4);
-    }
+    reliefKeepFace(face, thickMM);
     if (vaseCur.plan.kind === "flower" && vaseCur.plan.sides > 12) vaseCur.plan.sides = 8;
     vaseLabels();
     vaseSend(true);
@@ -698,6 +721,13 @@ for (const [id, v] of [
     vaseLabels();
     vaseSend(true);
   });
+$("vtFace").addEventListener("change", () => {
+  const v = $("vtFace").value;
+  vaseCur.texture.faces = v === "every" ? "every" : "one";
+  if (v !== "every") vaseCur.texture.face = +v;
+  vaseLabels();
+  vaseSend(true);
+});
 $("vtInvert").addEventListener("change", () => {
   vaseCur.texture.invert = $("vtInvert").checked;
   vaseLabels();
@@ -705,6 +735,7 @@ $("vtInvert").addEventListener("change", () => {
 });
 for (const [id, set] of [
   ["vtSpan", (v) => (vaseCur.texture.span = v / 100)],
+  ["vtTurn", (v) => (vaseCur.texture.turn = v)],
   ["vtSoft", (v) => (vaseCur.texture.soft = v)],
   ["vpThick", (v) => (vaseCur.plan.thick = +(v / UNB.vaseRadius(vaseCur.profile, 0.5)).toFixed(4))],
 ]) {
@@ -749,7 +780,10 @@ for (const [id, part, key, k] of [
   $(id).addEventListener("input", () => {
     const into = part ? vaseCur[part] : vaseCur;
     if (!into) return; // (the rim's shape while it's the same as the bottom's)
+    // (a relief on a polygon: more or fewer sides keep the picture's face as wide)
+    const face = id === "vpSides" || id === "vpRound" ? reliefFaceMM(vaseCur) : 0;
     into[key] = +$(id).value * k;
+    if (face) reliefKeepFace(face, 10);
     vaseLabels();
     vaseSend(false);
   });
