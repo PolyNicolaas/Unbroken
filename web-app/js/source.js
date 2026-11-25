@@ -317,6 +317,7 @@ function letteringHint(lay) {
   if (lay.dots) bits.push(`${lay.dots} dot${lay.dots > 1 ? "s" : ""} left out`);
   el.textContent = bits.length ? bits.join(" · ") : "";
 }
+let textRaisedTo = 0; // the letter height last raised to (one note per new size)
 function buildText() {
   const font = UNB_FONTS[$("font").value],
     lw = spacingMM() || 1,
@@ -356,7 +357,12 @@ function buildText() {
         : `as small as letters go: ${CFG.rules.minLetterStrokes} stroke widths`
       : `${ratio} stroke widths`;
   if (cap < minCap + 0.005) {
-    // at (or pushed up to) the smallest: the boxes say so, and what the print really is
+    // at (or pushed up to) the smallest: the boxes say so, and what the print really is. Pushed up by a font or text
+    // change (not just sitting at the smallest), a note says so, once per new size
+    if (cap < minCap - 0.5 && Math.abs(minCap - textRaisedTo) > 0.05) {
+      textRaisedTo = minCap;
+      toast(`Letters made bigger, ${fmt(cap, 1)} → ${fmt(minCap, 1)} mm tall: the smallest readable size ${L.measured ? "for these letters" : "in this font"} with this needle`, false, 4500);
+    }
     cap = minCap;
     $("capH").value = +minCap.toFixed(2);
     hint.className = "hint warn";
@@ -508,7 +514,20 @@ $("textIn").addEventListener("input", limitLines);
 for (const id of ["textIn", "capH", "letterGap", "wordGap", "lineGap"]) $(id).addEventListener("input", textChanged);
 for (const id of ["font", "txtSpacing"]) $(id).addEventListener("change", textChanged);
 // config.js
-document.querySelectorAll('input[name="fontStyle"]').forEach((r) => r.addEventListener("change", fontMenu));
+// a style tab tapped: the list narrows to it, and if the font in use isn't one, the first that is (and can write the
+// text) takes its place
+document.querySelectorAll('input[name="fontStyle"]').forEach((r) =>
+  r.addEventListener("change", () => {
+    fontMenu();
+    const want = r.value,
+      sel = $("font");
+    if (want === "all" || !UNB_FONTS[sel.value] || UNB_FONTS[sel.value].style === want) return;
+    const first = [...sel.options].find((o) => !o.disabled && UNB_FONTS[o.value] && UNB_FONTS[o.value].style === want);
+    if (!first) return;
+    sel.value = first.value;
+    sel.dispatchEvent(new Event("change", { bubbles: true }));
+  })
+);
 for (const id of ["txtJoin", "txtSnap", "txtMeasured", "txtNoDots"]) $(id).addEventListener("change", textChanged);
 // the lettering toggles are for a printer: hidden (and not applied) when making it for a pen plotter
 // (artForPlot is defined later, in patterns.js)

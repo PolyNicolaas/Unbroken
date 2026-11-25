@@ -516,6 +516,10 @@
         <div class="inline"><button class="btn mini" type="button" id="picLeft" title="Turn the picture a quarter turn to the left">Turn left</button><button class="btn mini" type="button" id="picRight" title="Turn the picture a quarter turn to the right">Turn right</button><button class="btn mini" type="button" id="picUnturn">As loaded</button></div>
         <p class="hint help">Turns the picture before anything else: a quarter turn at a time, or a few degrees to straighten a photo (the corners that come in are white, the paper). To crop, use Select area on the Line step: the trace keeps to the selection and gets the full resolution there.</p>
       </div>
+      <div data-feature="vase" class="row" id="picReliefRow">
+        <div class="lab"><span class="name">Make it 3D</span></div>
+        <div class="inline"><button class="btn mini" type="button" id="picRelief" title="The picture stands out from a wall printed upright, layer by layer (the same as Make a relief from this picture on the Line step)">Make a relief from this picture</button></div>
+      </div>
       <p class="hint help">A photo taken with the camera, a sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. A photo of a page is straightened and cleaned up for the line (Photo, below); Clean up as a photo does the same to an image you chose. To edit a traced line by hand, export it as SVG from the Plot step, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
     </section>
 
@@ -886,7 +890,7 @@
         <p class="hint help" data-anchor="overlaps">Still one unbroken line, but it may cross itself where the drawing does (a spirograph, a Lissajous figure, a rose): the needle prints straight over the line already there. Round each crossing the strands are let come closer than the spacing, as far as two lines crossing at that angle need; everywhere else the spacing is kept as usual. Off, every crossing is undone as set above. Painted crossing areas work either way.</p>
       </div>
       <div data-feature="vase" class="row" id="vaseFromRow">
-        <div class="lab"><span class="name">Make a vase</span></div>
+        <div class="lab"><span class="name">Make it 3D</span></div>
         <div class="inline"><button class="btn mini" type="button" id="vaseFromLine" title="This traced line, exactly as it is, becomes the vase's shape seen from above: every wall of the vase follows it, at its own size">Make a vase from this line</button><button class="btn mini" type="button" id="reliefFromPic" title="The picture stands out from a wall printed upright, layer by layer: a flat plaque (a closed loop, the picture on the front, the back or both) or a round one">Make a relief from this picture</button></div>
         <p class="hint" id="vaseFromMsg" role="status"></p>
       </div>

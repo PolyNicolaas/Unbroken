@@ -3,6 +3,24 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v170 · 2026-11-25
+
+Fixes from a walkthrough on an iPad-sized screen (Nicolaas, 25 November 2026: a relief, a vase, a pattern and text):
+
+- **A relief's note follows its Direction.** Under the picture it said "its dark parts standing out" whatever was
+  picked; now standing out, pressed in, or mid-grey on the wall (dark out, light in), and the other way round with
+  Light parts stand out.
+- **Make a relief from the Picture card.** The Picture card has **Make it 3D: Make a relief from this picture**; it
+  was only at the bottom of the Line step, under a heading called Make a vase (now **Make it 3D** there too).
+- **A relief is called a relief.** The 3D model card's switch says **A relief** instead of Make a vase, and the
+  Input card names the relief (it kept the model before it, e.g. sample skull cup).
+- **The font style tabs pick a font.** Tapping Script (or Plain, Rounded, Display) when the font in use isn't one
+  switches to the first that is and can write the text; before, it only reordered the list and kept the font.
+- **The size says when it jumps.** Letters raised to the smallest readable size by a font or text change bring a
+  note ("Letters made bigger, 20.0 → 35.1 mm tall…"); a new pattern style whose size is much bigger or smaller
+  than before says so once it settles ("Spirograph: 107 mm wide (was 35)…"). Toasts can stay up longer.
+- Tests: A74.
+
 ## v169 · 2026-11-25
 
 - **All settings (View menu).** Settings for another kind of art (a picture's, text's, a 3D model's, a vase's, an STL
