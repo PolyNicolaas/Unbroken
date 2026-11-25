@@ -70,6 +70,7 @@ function vaseUI() {
   $("vtTurn").value = Math.round(+T.turn || 0);
   $("vtSoft").value = T.soft === undefined ? 1.3 : T.soft;
   $("vtInvert").checked = !!T.invert;
+  $(({ out: "vtDirOut", in: "vtDirIn", both: "vtDirBoth" })[T.dir || "out"]).checked = true;
   $(VASE_RADIO.top[Q ? Q.kind : "same"] || "vrSame").checked = true;
   $(VASE_RADIO.lean[V.lean.curve] || "vlStraight").checked = true;
   $(VASE_RADIO.rim[V.rim.kind] || "vrimNone").checked = true;
@@ -194,7 +195,7 @@ function vaseLabels() {
       grid: `a grid: ${T.count} ribs, rings ${fmt(T.spacing, 1)} mm apart`,
       weave: `${T.count} ribs weaving ${T.twist}° every ${fmt(T.spacing, 1)} mm`,
       diamond: `diamonds: ${T.count} round, ${T.twist}° twist`,
-      picture: `the picture, ${fmt(T.depth, 1)} mm out, ${
+      picture: `the picture, ${T.dir === "both" ? `${fmt(T.depth / 2, 1)} mm in and out` : `${fmt(T.depth, 1)} mm ${T.dir === "in" ? "in" : "out"}`}, ${
         P.kind === "polygon"
           ? T.faces === "every"
             ? "on every face"
@@ -203,6 +204,12 @@ function vaseLabels() {
       }`,
     }[T.kind] || "smooth";
   $("vpThickVal").textContent = `${fmt(vaseThickMM(V), 1)} mm`;
+  $("vtDirVal").textContent = {
+    out: "standing out",
+    in: "pressed in",
+    both: `mid-grey on the wall, ${fmt(T.depth / 2, 1)} mm each way`,
+  }[T.dir || "out"];
+  $("vtInvert").parentElement.lastChild.textContent = ` Light parts ${T.dir === "in" ? "pressed in" : T.dir === "both" ? "out, dark in" : "stand out"}`;
   $("vtSidesVal").textContent = { front: "the front", back: "the back (it reads the right way from behind)", both: "both: front and back" }[T.sides || "front"];
   $("vtSpanVal").textContent = `${Math.round((T.span || 0.5) * 100)}% of the way round`;
   // a polygon's faces: one option a face, and every face
@@ -685,6 +692,7 @@ async function reliefFromPicture() {
     sides: "front",
     span: 0.5,
     invert: false,
+    dir: "out",
     picture: { w, h, data, id: `${w}x${h}:${hash}`, from: $("designName").value.trim() || "" },
   });
   vaseCur.texture.slope = reliefSlope();
@@ -728,6 +736,16 @@ $("vtFace").addEventListener("change", () => {
   vaseLabels();
   vaseSend(true);
 });
+for (const [id, v] of [
+  ["vtDirOut", "out"],
+  ["vtDirIn", "in"],
+  ["vtDirBoth", "both"],
+])
+  $(id).addEventListener("change", () => {
+    vaseCur.texture.dir = v;
+    vaseLabels();
+    vaseSend(true);
+  });
 $("vtInvert").addEventListener("change", () => {
   vaseCur.texture.invert = $("vtInvert").checked;
   vaseLabels();
