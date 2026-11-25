@@ -37,6 +37,7 @@ async function open(ctx, opts = {}) {
   const context = await ctx.browser.newContext({
     viewport: opts.viewport || { width: 1300, height: 1000 },
     acceptDownloads: true,
+    ...(opts.touch ? { hasTouch: true, isMobile: true, deviceScaleFactor: 2 } : {}), // an iPad: a fingertip pointer
   });
   const page = await context.newPage(),
     errors = [];

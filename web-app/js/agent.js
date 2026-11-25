@@ -50,10 +50,15 @@ const AGENT_SETTINGS = [
   ["crossings", (v) => agentPick("uncross", v)],
   ["allowOverlaps", (v) => agentSet("overlaps", v)],
   ["lineGapMM", (v) => agentSet("lineGapMM", v)], // between lines, on top of the line width
-  ["widthMM", (v) => agentSet("outW", v)],
+  // (the drawing's width, as it always was; the Width box shows the size as printed since v171)
+  ["widthMM", (v) => (st.text ? scaleText(+v / st.outW) : setSize(+v, true))],
   ["pieces", (v) => agentSet("picPieces", v === true || /piece/i.test(v) ? "pieces" : "one")], // a picture: a file a piece
   ["splitMM", (v) => agentSet("picSplit", v)], // a picture in pieces: split at gaps of (mm)
-  ["heightMM", (v) => agentSet("outH", v)],
+  ["heightMM", (v) => {
+    const W = st.bh ? (+v * st.bw) / st.bh : +v;
+    if (st.text) scaleText(W / st.outW);
+    else setSize(W, true);
+  }],
   ["letterHeightMM", (v) => agentSet("capH", v)],
   [
     "fitInside",
@@ -108,7 +113,7 @@ function agentParts(o = {}) {
     ink[i] = light ? v > 160 : v < 160;
   }
   const P = inkParts(ink, w, h, {
-    widthMM: +o.widthMM || (st.sel ? null : +$("outW").value) || null,
+    widthMM: +o.widthMM || (st.sel ? null : st.outW) || null,
     bandGapMM: o.bandGapMM,
     sideGapMM: o.sideGapMM,
   });
@@ -251,7 +256,12 @@ window.unbroken = {
           }
         : null,
       size: st.final
-        ? { widthMM: +(+$("outW").value).toFixed(1), heightMM: +(+$("outH").value).toFixed(1), pickedByApp: sizePicked }
+        ? {
+            widthMM: +st.outW.toFixed(1),
+            heightMM: +(st.bw ? (st.outW * st.bh) / st.bw : 0).toFixed(1),
+            asPrintedMM: [+printedW(st.outW).toFixed(1), +printedH(st.outW).toFixed(1)],
+            pickedByApp: sizePicked,
+          }
         : null,
       line: {
         widthMM: lineWidthMM(),

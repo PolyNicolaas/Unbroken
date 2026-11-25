@@ -562,7 +562,8 @@ function syncSizeUI() {
     const el = document.createElement("span"),
       p = sliderFromW(W);
     el.style.left = `${100 * p}%`;
-    el.textContent = `${label}\n${fmt(W, W < 100 ? 1 : 0)}`;
+    const P = printedW(W);
+    el.textContent = `${label}\n${fmt(P, P < 100 ? 1 : 0)}`;
     el.title = tip;
     el.dataset.w = W;
     if (p < 0.02) el.className = "first";
@@ -576,7 +577,7 @@ function syncSizeUI() {
   if (m && m.fits)
     for (const [k, name] of SIZE_MARKS)
       if (a.some(([w]) => w === m[k]))
-        list.push([m[k], k, `${name[0].toUpperCase() + name.slice(1)}: ${fmt(m[k], 1)} mm wide`]);
+        list.push([m[k], k, `${name[0].toUpperCase() + name.slice(1)}: ${fmt(printedW(m[k]), 1)} mm wide, as printed`]);
   list.push([plateW(), "plate", `Widest that fits on the ${BED.w} × ${BED.h} mm plate`]);
   const merged = [];
   for (const it of list) {
@@ -602,11 +603,45 @@ function syncSizeUI() {
   } else {
     const more = SIZE_MARKS.slice(1)
       .filter(([k]) => Number.isFinite(m[k]))
-      .map(([k, name]) => `${name} from ${fmt(m[k], 1)} ${u}`)
+      .map(([k, name]) => `${name} from ${fmt(printedW(m[k]), 1)} ${u}`)
       .join(", ");
     h.className = "hint";
-    h.textContent = `Smallest that keeps every line ${fmt(st.spacing, 2)} ${u} apart: ${fmt(m.smallest, 1)} ${u}${more ? `; ${more}` : ""}.`;
+    h.textContent = `Smallest that keeps every line ${fmt(st.spacing, 2)} ${u} apart: ${fmt(printedW(m.smallest), 1)} ${u} wide${more ? `; ${more}` : ""}.`;
   }
+}
+// ---------- the size as printed ----------
+// Everywhere a size is shown (the Width and Height boxes, the slider's marks, the Size and Plate readouts, the box on
+// the preview) it is the print's outside: the line's extent plus a line width, square to the plate. Inside, sizes stay
+// the drawing's width (st.outW, the box the picture was traced in), which the line can sit inside or just over; these
+// turn one into the other, from the last line laid out (before there is one, the two are taken as the same).
+function printedFactor() {
+  if (!st.fb || !(st.bw > 0) || !(st.outW > 0)) return null;
+  const sc = scale(),
+    kx = ((st.fb.x1 - st.fb.x0) * sc) / st.outW,
+    ky = ((st.fb.y1 - st.fb.y0) * sc) / st.outW;
+  return kx > 0 && ky > 0 ? { kx, ky, lw: lineWidthMM() } : null;
+}
+const printedW = (W) => {
+  const f = printedFactor();
+  return f ? W * f.kx + f.lw : W;
+};
+const printedH = (W) => {
+  const f = printedFactor();
+  return f ? W * f.ky + f.lw : st.bw ? (W * st.bh) / st.bw : W;
+};
+// a printed width or height typed in → the drawing width that prints it
+const widthForPrinted = (P) => {
+  const f = printedFactor();
+  return f ? Math.max(1e-3, (P - f.lw) / f.kx) : P;
+};
+const widthForPrintedH = (P) => {
+  const f = printedFactor();
+  return f ? Math.max(1e-3, (P - f.lw) / f.ky) : st.bh ? (P * st.bw) / st.bh : P;
+};
+// the Width and Height boxes show the size as printed
+function showSize() {
+  $("outW").value = +printedW(st.outW).toFixed(1);
+  $("outH").value = +printedH(st.outW).toFixed(1);
 }
 // A new picture that knows its own best width (geometric art: where its gaps between neighbouring lines are the line
 // spacing, so nothing needs pushing apart) starts there instead of on the starting mark. Call it right after setSource,
@@ -615,7 +650,7 @@ function startSize(W, aspect) {
   if (!(W > 0)) return;
   st.outW = limitToPlate() ? Math.min(W, BED.w, BED.h * (aspect || 1)) : W;
   st.sizeUser = true;
-  $("outW").value = +st.outW.toFixed(1);
+  showSize();
 }
 // a new width (slider, a mark, the boxes, or the marks moving): trace again finer if the print got bigger, else lay out
 // the strands again
@@ -632,8 +667,7 @@ function setSize(W, byUser) {
     recordSoon();
     artSized(W); // art.js: a pattern keeps the width set by hand
   } // an undo step even when nothing needs tracing again
-  $("outW").value = +W.toFixed(1);
-  syncHeight();
+  showSize();
   syncSizeUI();
   if (!byUser) {
     amendHistory();
@@ -776,7 +810,7 @@ function placeSize() {
   const grow = !first && m.fits && m.smallest > st.outW * 1.003;
   if (grow)
     toast(
-      `Made bigger, ${fmt(st.outW, 1)} → ${fmt(m.smallest, 1)} mm: lines ${fmt(st.spacing, 2)} mm apart don't fit any smaller`,
+      `Made bigger, ${fmt(printedW(st.outW), 1)} → ${fmt(printedW(m.smallest), 1)} mm wide: lines ${fmt(st.spacing, 2)} mm apart don't fit any smaller`,
       true
     );
   if (Math.abs(Math.max(target, m.fits ? m.smallest : 0) - st.outW) / st.outW > 0.003) setSize(target, false);
@@ -830,8 +864,7 @@ async function finalize(g, P = Object.create(st), newSignal = false) {
   P.finalVer = (st.finalVer || 0) + 1; // a new final line: caches built from it (plate, layers, pen line) key on this
   Object.assign(st, P);
   if (fitinfo) $("fitinfo").textContent = fitinfo;
-  if (st.text) $("outW").value = +st.outW.toFixed(1);
-  syncHeight();
+  showSize();
   if (newSignal) setSliderFromN();
   buildEpicycles();
   labels(); // labels: image-side sliders show mm at this size
@@ -867,14 +900,17 @@ function finalizeReadout() {
     m = st.marks;
   // (the line as it prints; the Width and Height below are the drawing's box, which the line can sit inside or
   // just over)
+  // (the boxes show the size as printed; this says what else could be meant, and how far above the smallest)
+  const mb = st.mbox,
+    tilted = mb && Math.abs(mb.angle) >= 0.5 ? ` · tilted ${fmt(mb.w * sc, 1)} × ${fmt(mb.h * sc, 1)} at ${fmt(Math.abs(mb.angle), 0)}°` : "";
   $("sizeInfo").textContent =
-    `the line itself ${fmt((b.x1 - b.x0) * sc, 1)} × ${fmt((b.y1 - b.y0) * sc, 1)} mm` +
+    `line centre ${fmt((b.x1 - b.x0) * sc, 1)} × ${fmt((b.y1 - b.y0) * sc, 1)}${tilted}` +
     (m && m.fits ? ` · ×${fmt(st.outW / m.smallest, 1)} smallest` : "");
   const share = (st.problems && st.problems.driftShare) || 0,
     dh = $("driftHint"); // the line pushed off the drawing (shaded in the preview)
   dh.hidden = share < 0.025; // the marks allow 2%: say so only past that
   if (!dh.hidden)
-    dh.textContent = `At this size ${fmt(100 * share, 0)}% of the line is pushed more than ${fmt(CFG.engine.sizeDetail.medium * st.outW, 1)} mm off the drawing to keep the spacing${$("showDrift").checked ? " (shaded orange)" : ""}.${m && m.fits && Number.isFinite(m.medium) && st.outW < m.medium ? ` Medium detail from ${fmt(m.medium, 1)} mm.` : " Make it bigger to bring it back."}`;
+    dh.textContent = `At this size ${fmt(100 * share, 0)}% of the line is pushed more than ${fmt(CFG.engine.sizeDetail.medium * st.outW, 1)} mm off the drawing to keep the spacing${$("showDrift").checked ? " (shaded orange)" : ""}.${m && m.fits && Number.isFinite(m.medium) && st.outW < m.medium ? ` Medium detail from ${fmt(printedW(m.medium), 1)} mm wide.` : " Make it bigger to bring it back."}`;
   syncSizeUI();
   ask("sized"); // (patterns.js: the Pattern card's width and gap)
 }

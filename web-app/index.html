@@ -30,7 +30,7 @@
       <div class="seg small stage-tabs" role="radiogroup" aria-label="What the big view shows">
         <input type="radio" name="stage" id="stLine" value="line" checked><label for="stLine">Line</label>
         <input data-feature="plotter" type="radio" name="stage" id="stPage" value="page"><label data-feature="plotter" for="stPage">2D page</label>
-        <input type="radio" name="stage" id="stPlate" value="plate"><label for="stPlate">Plate</label>
+        <input type="radio" name="stage" id="stPlate" value="plate"><label for="stPlate" title="The plate from above, with every copy on it">Top view</label>
         <input type="radio" name="stage" id="stLayers" value="layers"><label for="stLayers">3D layers</label>
       </div>
       <div class="canvas-box" id="box">
@@ -170,7 +170,7 @@
             <label class="check" title="Show the rotating circles while the drawing plays"><input type="checkbox" id="circles" checked> Circles</label>
             <label class="check" title="Highlight the connectors: the straight strands the line prints to reach a part it doesn't touch (it never stops)"><input type="checkbox" id="showConn" checked> <span>Connectors</span><span class="swatch"></span></label>
             <label class="check" title="Shade in orange where making room for the spacing pushed the line more than the medium-detail tolerance away from the drawing. Make the print bigger to bring it back"><input type="checkbox" id="showDrift" checked> <span>Moved lines</span><span class="swatch drift"></span></label>
-            <label class="check" title="Show the smallest box around the printed line, at any angle, with its size"><input type="checkbox" id="dims" checked> <span>Size box</span></label>
+            <label class="check" title="Show the box around the printed line, square to the plate, with its size as printed"><input type="checkbox" id="dims" checked> <span>Size box</span></label>
             <label class="check" title="Mark where the line crosses itself or breaks the minimum spacing"><input type="checkbox" id="showProb"> <span>Problems</span><span class="swatch dot"></span><span class="val" id="probInfo"></span></label>
             <label class="check" title="Small plate in the corner of the preview"><input type="checkbox" id="showMini" checked> <span>Plate mini-map</span></label>
             <hr>
@@ -763,6 +763,7 @@
       <div class="row" id="levelsRow">
         <div class="lab"><label for="levels">Blocks</label><span class="val" id="levelsVal">off</span></div>
         <input type="range" id="levels" min="1" max="6" value="1" aria-describedby="levelsHint">
+        <p class="hint" id="levelsShort">Off: the picture's lines are traced. 2 to 6: it becomes that many flat greys, and the edges between them are traced (each grey can also be filled).</p>
         <div id="levelsBox" hidden>
           <div class="seg small" role="radiogroup" aria-label="Greys or colours">
             <input type="radio" name="levelKind" id="levelGreys" value="grey" checked><label for="levelGreys" title="Blocks by brightness: colours equally bright fall together">Greys</label>
@@ -900,7 +901,7 @@
     <section class="card design-only" aria-labelledby="h-size">
       <h2 id="h-size">Size</h2>
       <div class="row" id="sizeRow">
-        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo" title="Width and Height are the drawing's box; the line itself can sit just inside or over it. The preview's dashed box is the smallest box round the printed line at any angle, the needle's width included."></span></div>
+        <div class="lab"><label for="sizeSlider" title="Drag to scale the print, type a width or height, or fit it inside a box. It cannot go below the smallest size that keeps every line the spacing apart; bigger prints keep finer detail from the image. The aspect ratio stays locked.">Width</label><span class="val" id="sizeInfo" title="Width and Height are the print as it comes out: the chocolate's outside edge, square to the plate (the dashed box on the preview, and the Plate card). The line centre is the size of the line itself, without its width; tilted is the smallest box round the print at any angle; ×N is how far above the smallest size."></span></div>
         <div class="size-track">
           <input type="range" id="sizeSlider" min="0" max="1000" value="500" aria-describedby="sizeHint">
           <div class="size-marks" id="sizeMarks" aria-hidden="true"></div>

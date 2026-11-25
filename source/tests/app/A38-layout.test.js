@@ -14,11 +14,12 @@ module.exports = {
       await page.click('[data-node="levels"]'); await A.idle(page, 400);
       const prep = await shownCards(page);
       checks.push(check(`${W}: Art has Input, Picture and Image prep (brightness and contrast with the picture, 10 November 2026)`, +["card-h-input", "card-h-pic", "card-h-prep"].every((c) => art.includes(c)), "==", 1), check(`${W}: Grey levels has its own chip`, prep.join(","), "==", "card-h-levels"));
-      const toolsArt = await page.isVisible("#selectBtn");
+      // (on Art the Tools bar keeps its place, greyed and not tappable, v171)
+      const toolsArt = await page.evaluate(() => { const t = document.querySelector(".toolbar.tools"); return t.getClientRects().length > 0 && getComputedStyle(t).pointerEvents !== "none"; });
       await page.click("label[for=viewDesign]"); await A.idle(page, 800);
       const line = await shownCards(page), toolsLine = await page.isVisible("#selectBtn");
       checks.push(check(`${W}: Line has no Image prep or Grey levels`, +!line.some((c) => c === "card-h-prep" || c === "card-h-levels"), "==", 1));
-      checks.push(check(`${W}: the tools on Line, not on Art`, +(!toolsArt && toolsLine), "==", 1));
+      checks.push(check(`${W}: the tools work on Line, not on Art`, +(!toolsArt && toolsLine), "==", 1));
       checks.push(check(`${W}: the Photo box inside the Picture card`, +(await page.evaluate(() => !!$("photoBox").closest("#card-h-pic"))), "==", 1));
       checks.push(check(`${W}: page errors`, errors.length, "==", 0));
       await close();

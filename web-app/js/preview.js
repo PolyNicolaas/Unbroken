@@ -110,13 +110,15 @@ function view() {
     x1 = Math.max(x1, b[2]);
     y1 = Math.max(y1, b[3]);
   } // room for both circle chains
-  if (st.mbox && $("dims").checked && st.tool !== "erase" && st.tool !== "cross" && st.tool !== "lane")
-    for (const [x, y] of st.mbox.corners) {
-      x0 = Math.min(x0, x);
-      y0 = Math.min(y0, y);
-      x1 = Math.max(x1, x);
-      y1 = Math.max(y1, y);
-    }
+  if (st.fb && st.bw && $("dims").checked && st.tool !== "erase" && st.tool !== "cross" && st.tool !== "lane") {
+    // room for the size box (the line's box and half a line width round it)
+    const f = st.fb,
+      p = (0.5 * lineWidthMM()) / scale();
+    x0 = Math.min(x0, f.x0 - p);
+    y0 = Math.min(y0, f.y0 - p);
+    x1 = Math.max(x1, f.x1 + p);
+    y1 = Math.max(y1, f.y1 + p);
+  }
   const pad = 26 * dpr,
     k = Math.min((cv.width - 2 * pad) / (x1 - x0), (cv.height - 2 * pad) / (y1 - y0));
   const t = zoomT("line", cv); // zoom.js: the line view's zoom and pan, folded in so the tools follow it
@@ -283,7 +285,7 @@ function renderUnder({ g, k, ox, oy, dpr, accent }) {
 function renderLine({ g, k, ox, oy, dpr, ink, accent }) {
   const T = (x, y) => [ox + x * k, oy + y * k];
   const animating = st.playing || (st.t > 0 && st.t < 1);
-  if (!animating && $("dims").checked && st.mbox && st.bw) drawBox(g, T, dpr);
+  if (!animating && $("dims").checked && st.fb && st.bw) drawBox(g, T, dpr);
   const tSeries = st.t * (st.open ? 0.5 : 1); // open paths use the outbound half of the cycle
   // on the Print step with a filled base, the first base layer as it prints (the fill is only in the layers)
   const L3 = st.layers,
@@ -507,10 +509,23 @@ function renderCircles({ g, k, dpr, accent }, { T, tSeries }) {
   }
 }
 
-// smallest box at any angle around the printed line, with its side lengths and tilt
+// the box round the printed line (needle width included), square to the plate, with its side lengths: the size as
+// printed, the same as the Size boxes and the Plate card (the smallest box at an angle is a note in the Size card)
 function drawBox(g, T, dpr) {
-  const b = st.mbox,
+  const f = st.fb,
     sc = scale(),
+    p = (0.5 * lineWidthMM()) / sc,
+    b = {
+      corners: [
+        [f.x0 - p, f.y0 - p],
+        [f.x1 + p, f.y0 - p],
+        [f.x1 + p, f.y1 + p],
+        [f.x0 - p, f.y1 + p],
+      ],
+      w: f.x1 - f.x0 + 2 * p,
+      h: f.y1 - f.y0 + 2 * p,
+      angle: 0,
+    },
     u = "mm",
     dec = 1,
     c = b.corners.map(([x, y]) => T(x, y));
@@ -574,13 +589,16 @@ function drawBox(g, T, dpr) {
     const top = c.slice().sort((a, z) => a[1] - z[1])[0];
     g.fillStyle = css("--accent");
     g.textAlign = "left";
-    const t = Math.abs(b.angle) >= 0.5 ? `as printed · smallest box at ${fmt(Math.abs(b.angle), 0)}°` : "as printed",
+    const t = "as printed",
       // over the box's left side, kept on the canvas (a box near the right edge would push it off)
       x = Math.max(
         4 * dpr,
         Math.min(Math.min(...c.map((p) => p[0])), g.canvas.width - g.measureText(t).width - 4 * dpr)
       );
-    g.fillText(t, x, Math.max(10 * dpr, top[1] - 10 * dpr));
+    // above the box, unless that's under the status label in the preview's top left corner: then below it
+    const bottom = c.slice().sort((a, z) => z[1] - a[1])[0],
+      above = top[1] - 10 * dpr;
+    g.fillText(t, x, above < 40 * dpr ? Math.min(g.canvas.height - 8 * dpr, bottom[1] + 30 * dpr) : above);
   }
   g.restore();
 }

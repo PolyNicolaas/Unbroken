@@ -264,6 +264,7 @@ function artUI() {
   const K = artKind();
   $(kindRadio(A.kind)).checked = true;
   $("inputVal").textContent = K ? K.name() || "" : A.kind === "picture" ? (A.picture && A.picture.label) || "" : "";
+  if ($("picReliefRow")) $("picReliefRow").hidden = !(A.kind === "picture" && A.picture); // Make it 3D: a picture to make it from
   if (A.picture) {
     $("picVal").textContent = A.picture.label;
     const t = A.picture.turn || 0,

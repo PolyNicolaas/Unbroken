@@ -19,7 +19,7 @@ module.exports = {
     await A.setValue(page, "#lineGapMM", "0.5"); await A.idle(page, 1500); await A.idle(page, 800);
     checks.push(check("gap back to 0.5 mm: the size stays (mm off)", Math.abs((await size()).w - grown.w), "<=", 0.05));
     await page.fill("#fitW", "50"); await page.fill("#fitH", "50"); await page.click("#fitBtn"); await A.idle(page, 800);
-    s = await size();
+    s = await page.evaluate(() => ({ w: printedW(st.outW), h: printedH(st.outW) })); // the box is the size as printed (v171)
     checks.push(check("fit inside 50 × 50: larger side off 50 mm by", Math.abs(Math.max(s.w, s.h) - 50), "<=", 0.2), check("fit inside 50 × 50: neither side over (mm over)", Math.max(s.w, s.h) - 50, "<=", 0.2));
     await A.print(page); await page.check("#limitPlate"); await page.click("label[for=viewDesign]");
     s = await size();

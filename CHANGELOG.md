@@ -3,6 +3,30 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v171 · 2026-11-25
+
+The interface on an iPad, from a second walkthrough (Nicolaas, 25 November 2026; he picked one size and one layout):
+
+- **One size: the print as it comes out.** The Width and Height boxes, the Size header, the slider's marks, the
+  smallest-size hint, the size notes and the Pattern card's Width are all the chocolate's outside edge, square to
+  the plate, the same as the Plate card. The preview's dashed box is that box, upright ("as printed"). The line's
+  centre size and the tilted smallest box are a note in the Size card. (Inside, sizes are still the drawing's width;
+  the agent API's widthMM keeps its meaning and its snapshot adds asPrintedMM.)
+- **The rail stays at the left.** Print and Plot are laid out like the design: rail and panel at the left, preview at
+  the right. The Tools bar under the preview keeps its place on the design's screens, greyed where its tools don't
+  apply (Picture, Grey levels, nothing traced), so the preview no longer changes size.
+- **Big enough to tap.** On a touch screen every button, dropdown, number box, switch and checkbox is about 40 px or
+  more, steppers 40 px, sliders with a tall hit area, the ready list's links and the notices' close too. Card
+  headings are bigger everywhere.
+- **Math shows its working** in its panel (it was empty: its fold-out stayed shut with its header hidden), the series
+  a term to a row so it fits the panel.
+- Make it 3D shows only with a picture; Grey levels says what it does under its slider; quiet rail buttons (Tracing)
+  no longer look switched off; the preview's Plate tab is **Top view** (the Plate panel keeps its name); the empty
+  start says what to pick; Height shows one decimal like Width; Play speed only in the Drawing tool; a one-layer print
+  has no layer slider; the Tests matrix's button stays on one line.
+- Tests: A75 (an iPad-sized window with a touch pointer; screenshots in results/ipad-*.png); A13, A21, A31 read the
+  size as printed where it is shown, A38 and A60 follow the greyed Tools bar and the rail at the left.
+
 ## v170 · 2026-11-25
 
 Fixes from a walkthrough on an iPad-sized screen (Nicolaas, 25 November 2026: a relief, a vase, a pattern and text):

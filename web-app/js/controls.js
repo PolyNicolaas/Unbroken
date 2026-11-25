@@ -260,7 +260,7 @@ async function loadURL(url) {
 
 // size + units
 function syncHeight() {
-  if (st.bw) $("outH").value = +((st.outW * st.bh) / st.bw).toFixed(2);
+  if (st.bw) showSize(); // pipeline.js: both boxes, as printed
 }
 function syncSpacingUI() {
   $("simplify").value = Math.round((st.simplify / 0.5) * 100);
@@ -268,22 +268,24 @@ function syncSpacingUI() {
 }
 // typed sizes apply when the box is left (or Enter), so typing "25" doesn't pass through 2 mm; never below the smallest
 // that fits
+// (the boxes are the size as printed: the drawing width that prints it is worked out from the line laid out now)
 $("outW").addEventListener("change", () => {
   const v = +$("outW").value;
   if (!(v > 0)) {
-    $("outW").value = +st.outW.toFixed(1);
+    showSize();
     return;
   }
-  if (st.text) scaleText(v / st.outW);
-  else setSize(v, true);
+  const W = widthForPrinted(v);
+  if (st.text) scaleText(W / st.outW);
+  else setSize(W, true);
 });
 $("outH").addEventListener("change", () => {
   const v = +$("outH").value;
   if (!(v > 0 && st.bh)) {
-    syncHeight();
+    showSize();
     return;
   }
-  const W = (v * st.bw) / st.bh;
+  const W = widthForPrintedH(v);
   if (st.text) scaleText(W / st.outW);
   else setSize(W, true);
 });
@@ -295,7 +297,7 @@ $("fitBtn").addEventListener("click", () => {
     toast("Type the box's width, height or both");
     return;
   }
-  const W = Math.min(bw > 0 ? bw : Infinity, bh > 0 ? (bh * st.bw) / st.bh : Infinity);
+  const W = Math.min(bw > 0 ? widthForPrinted(bw) : Infinity, bh > 0 ? widthForPrintedH(bh) : Infinity);
   if (st.text) scaleText(W / st.outW);
   else setSize(W, true);
 });

@@ -8,7 +8,8 @@ module.exports = {
   async run(ctx) {
     const checks = [];
     const marks = (page) => page.$$eval("#sizeMarks span", (els) => els.map((e) => { const r = e.getBoundingClientRect(); return { label: e.textContent.split("\n")[0], w: +e.dataset.w, x0: r.left, x1: r.right, mid: (r.left + r.right) / 2, up: e.classList.contains("up"), y0: r.top, y1: r.bottom }; }));
-    const width = async (page) => +(await page.inputValue("#outW"));
+    // (the drawing's width, as the marks hold it; the boxes show the size as printed, v171)
+    const width = async (page) => page.evaluate(() => st.outW);
     const idle = async (page) => { for (let i = 0; i < 6; i++) { await A.idle(page, 300); if (!/finding/.test(await page.textContent("#sizeInfo"))) break; } };
     for (const vp of [{ width: 1300, height: 1000 }, { width: 390, height: 844 }]) {
       const { page, errors, close } = await A.open(ctx, { viewport: vp }), tag = `${vp.width} px`;
@@ -38,7 +39,8 @@ module.exports = {
         checks.push(check("at the smallest: crossings and tight spots", await page.textContent("#probInfo"), "==", "none"));
         await page.click("#sizeMarks span:nth-child(3)"); await idle(page);
         checks.push(check("clicked the high mark: width is the high width (mm difference)", Math.abs((await width(page)) - high), "<=", 0.1));
-        checks.push(check("hint names the smallest size", +(await page.textContent("#sizeHint")).includes(`${smallest.toFixed(1)} mm`), "==", 1));
+        const smallestPrinted = await page.evaluate((w) => printedW(w).toFixed(1), smallest);
+        checks.push(check("hint names the smallest size, as printed", +(await page.textContent("#sizeHint")).includes(`${smallestPrinted} mm`), "==", 1));
       }
       checks.push(check(`${tag}: page errors`, errors.length, "==", 0));
       await close();
