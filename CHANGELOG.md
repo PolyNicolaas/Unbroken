@@ -3,6 +3,26 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v165 · 2026-11-24
+
+- **Reliefs: a picture standing out from a wall printed upright.** On the Line tool, **Make a relief from this
+  picture** turns the picture (as Image prep makes it, cropped to its dark parts) into a wall the needle builds layer by
+  layer, each layer's line pushed out where the picture is dark, so the picture shows in light and shadow on the wall.
+  It's a vase underneath (the 3D model input, Make a vase), so every vase tool works on it:
+  - **Shape: Flat** (new): a plaque, a front and a back a few millimetres apart joined by round ends, one closed line
+    round, so it stands stiff (**Front to back**, 2–20 mm, 4). Or any round shape: a cup with the picture wrapped
+    round it (**Round the wall**: how far round one copy goes, 50%).
+  - **Texture: Picture** (new): **On** the front, the back (it reads the right way from behind) or both; **Depth**
+    (2 mm); **Soften edges** (1 mm: the line curves in and out of a raised part no tighter than the bead); **Light
+    parts stand out**.
+  - Each layer leans no more than a bead holds over the one below (0.24 mm a 0.3 mm layer), so a raised part's top and
+    bottom are short ramps; its sides are sharp. Going between flat and round keeps the picture's width.
+  - Starts as a plaque as wide as the drawing, tall enough for the picture, the picture 2 mm out on the front. The
+    model, the files and the label say relief. The Gateway City Big Band logo at 84 × 109 mm: 64 m, 17 ml, ~2 h.
+- Engine: vase plan `plaque` (`thick`), texture `picture` (`picture`, `sides`, `span`, `invert`, `slope`, `soft`,
+  `margin`).
+- Tests: E65, A72.
+
 ## v164 · 2026-11-24
 
 - **Fill gaps too narrow for the needle** (Line step, Tracing: an outline for a printer; on). Paper narrower than the

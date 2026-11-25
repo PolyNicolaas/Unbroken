@@ -57,6 +57,13 @@ function vaseUI() {
   $(VASE_RADIO.plan[P.kind] || "vpCircle").checked = true;
   // Drawing: only for a vase made from a traced line (Make a vase from this line, the Line tool), to go back to it
   $("vpDrawing").hidden = $("vpDrawingLab").hidden = !(P.loop && P.loop.length >= 16);
+  // Picture: only for a relief made from a picture (Make a relief from this picture, the Line tool)
+  $("vtPicture").hidden = $("vtPictureLab").hidden = !(T.picture && T.picture.data);
+  $("vpThick").value = +vaseThickMM(V).toFixed(1);
+  $(({ front: "vtSideFront", back: "vtSideBack", both: "vtSideBoth" })[T.sides || "front"]).checked = true;
+  $("vtSpan").value = Math.round((T.span || 0.5) * 100);
+  $("vtSoft").value = T.soft === undefined ? 1 : T.soft;
+  $("vtInvert").checked = !!T.invert;
   $(VASE_RADIO.top[Q ? Q.kind : "same"] || "vrSame").checked = true;
   $(VASE_RADIO.lean[V.lean.curve] || "vlStraight").checked = true;
   $(VASE_RADIO.rim[V.rim.kind] || "vrimNone").checked = true;
@@ -87,16 +94,34 @@ function vaseUI() {
   vaseDraw();
 }
 const VASE_RADIO = {
-  tex: { none: "vtNone", ribs: "vtRibs", rings: "vtRings", grid: "vtGrid", weave: "vtWeave", diamond: "vtDiamond" },
+  tex: {
+    none: "vtNone",
+    ribs: "vtRibs",
+    rings: "vtRings",
+    grid: "vtGrid",
+    weave: "vtWeave",
+    diamond: "vtDiamond",
+    picture: "vtPicture",
+  },
   move: { none: "vmNone", wave: "vmWave", zigzag: "vmZigzag", loops: "vmLoops" },
-  plan: { circle: "vpCircle", polygon: "vpPolygon", star: "vpStar", flower: "vpFlower", drawing: "vpDrawing" },
+  plan: {
+    circle: "vpCircle",
+    polygon: "vpPolygon",
+    star: "vpStar",
+    flower: "vpFlower",
+    plaque: "vpPlaque",
+    drawing: "vpDrawing",
+  },
   top: { same: "vrSame", circle: "vrCircle", polygon: "vrPolygon", star: "vrStar", flower: "vrFlower" },
   lean: { straight: "vlStraight", curve: "vlCurve", bow: "vlBow" },
   rim: { none: "vrimNone", flare: "vrimFlare", rolled: "vrimRolled", scallop: "vrimScallop" },
 };
 // a shape's words: "6-sided, rounded 20%", "5 points, 30% deep"
-function vasePlanWords(P) {
+// a plaque's front-to-back distance (mm): its share of the reach, at the reach halfway up
+const vaseThickMM = (V) => (+V.plan.thick || 0.1) * UNB.vaseRadius(V.profile, 0.5);
+function vasePlanWords(P, V = vaseCur) {
   if (!P || P.kind === "circle") return "circle";
+  if (P.kind === "plaque") return `flat, ${fmt(2 * UNB.vaseRadius(V.profile, 0.5), 0)} mm wide, ${fmt(vaseThickMM(V), 1)} mm front to back`;
   if (P.kind === "drawing")
     return P.loop
       ? `${P.exact ? `the traced line${P.from ? ` (${P.from})` : ""}, as traced` : "a drawing's outline"}${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`
@@ -163,7 +188,12 @@ function vaseLabels() {
       grid: `a grid: ${T.count} ribs, rings ${fmt(T.spacing, 1)} mm apart`,
       weave: `${T.count} ribs weaving ${T.twist}° every ${fmt(T.spacing, 1)} mm`,
       diamond: `diamonds: ${T.count} round, ${T.twist}° twist`,
+      picture: `the picture, ${fmt(T.depth, 1)} mm out, on the ${{ front: "front", back: "back", both: "front and back" }[T.sides || "front"]}`,
     }[T.kind] || "smooth";
+  $("vpThickVal").textContent = `${fmt(vaseThickMM(V), 1)} mm`;
+  $("vtSidesVal").textContent = { front: "the front", back: "the back (it reads the right way from behind)", both: "both: front and back" }[T.sides || "front"];
+  $("vtSpanVal").textContent = `${Math.round((T.span || 0.5) * 100)}% of the way round`;
+  $("vtSoftVal").textContent = `${fmt(T.soft === undefined ? 1 : T.soft, 1)} mm`;
   $("vaseMoveVal").textContent =
     M.kind === "none"
       ? "straight along the wall"
@@ -443,9 +473,29 @@ for (const id of Object.values(VASE_RADIO.tex))
     vaseSend(true);
   });
 // the shape from above, and at the rim
+// the width a relief's picture is fitted to (mm): a plaque's flat face, or its share of the way round a round wall
+const reliefFaceMM = (V) =>
+  V.plan.kind === "plaque"
+    ? 2 * UNB.vaseRadius(V.profile, 0.5) * (1 - (+V.plan.thick || 0.1) / 2)
+    : 2 * Math.PI * UNB.vaseRadius(V.profile, 0.5) * (V.texture.span || 0.5);
 for (const id of Object.values(VASE_RADIO.plan))
   $(id).addEventListener("change", () => {
+    // a relief going between flat and round keeps its picture the same width (the profile scaled to fit)
+    const pic = vaseCur.texture.kind === "picture" && vaseCur.texture.picture,
+      face = pic ? reliefFaceMM(vaseCur) : 0,
+      thickMM = vaseThickMM(vaseCur),
+      wasFlat = vaseCur.plan.kind === "plaque";
     vaseCur.plan.kind = $(id).value;
+    if (pic && wasFlat !== (vaseCur.plan.kind === "plaque")) {
+      const was = UNB.vaseRadius(vaseCur.profile, 0.5),
+        now =
+          vaseCur.plan.kind === "plaque"
+            ? face / 2 / (1 - Math.min(0.5, thickMM / (face / 2)) / 2)
+            : face / (2 * Math.PI * (vaseCur.texture.span || 0.5)),
+        f = now / was;
+      vaseCur.profile = vaseCur.profile.map(([t, r]) => [t, +(r * f).toFixed(2)]);
+      if (vaseCur.plan.kind === "plaque") vaseCur.plan.thick = +(thickMM / UNB.vaseRadius(vaseCur.profile, 0.5)).toFixed(4);
+    }
     if (vaseCur.plan.kind === "flower" && vaseCur.plan.sides > 12) vaseCur.plan.sides = 8;
     vaseLabels();
     vaseSend(true);
@@ -523,6 +573,133 @@ function vaseFromLine() {
   if (typeof mapOpen === "function") mapOpen("vshape");
 }
 $("vaseFromLine").addEventListener("click", vaseFromLine);
+
+// ---------- a relief: the picture standing out from a wall ----------
+// Make a relief from this picture (the Line card): the picture (as Image prep makes it, cropped to its dark parts)
+// becomes the wall's texture: a flat plaque, as wide as the drawing is now, tall enough for the picture, 4 mm front to
+// back, the picture 2 mm out on the front. On the vase's tools: Shape (flat or round), Texture (which side, how deep).
+async function reliefFromPicture() {
+  const msg = $("vaseFromMsg");
+  if (!st.source || st.text || st.art.kind !== "picture") {
+    msg.textContent = "Open a picture first: a relief is made from a picture.";
+    msg.className = "hint warn";
+    return;
+  }
+  const W = await working(), // pipeline.js: the picture as Image prep makes it (grey, dark = ink)
+    gw = W.w,
+    gh = W.h;
+  // its dark parts' box, a little round them
+  let x0 = gw,
+    y0 = gh,
+    x1 = -1,
+    y1 = -1;
+  for (let y = 0; y < gh; y++)
+    for (let x = 0; x < gw; x++)
+      if (W.gray[y * gw + x] < 200) {
+        x0 = Math.min(x0, x);
+        x1 = Math.max(x1, x);
+        y0 = Math.min(y0, y);
+        y1 = Math.max(y1, y);
+      }
+  if (x1 < 0) {
+    msg.textContent = "The picture has nothing dark to stand out.";
+    msg.className = "hint warn";
+    return;
+  }
+  const pad = Math.round(0.02 * Math.max(x1 - x0, y1 - y0));
+  x0 = Math.max(0, x0 - pad);
+  y0 = Math.max(0, y0 - pad);
+  x1 = Math.min(gw - 1, x1 + pad);
+  y1 = Math.min(gh - 1, y1 + pad);
+  // at most 320 px on its long side (kept with the design)
+  const cw = x1 - x0 + 1,
+    ch = y1 - y0 + 1,
+    k = Math.min(1, 320 / Math.max(cw, ch)),
+    w = Math.max(8, Math.round(cw * k)),
+    h = Math.max(8, Math.round(ch * k)),
+    data = new Array(w * h);
+  let hash = 0;
+  for (let y = 0; y < h; y++)
+    for (let x = 0; x < w; x++) {
+      // the mean of the working pixels this one covers
+      const ax = x0 + Math.floor(x / k),
+        bx = Math.min(x1, x0 + Math.floor((x + 1) / k) - 1),
+        ay = y0 + Math.floor(y / k),
+        by = Math.min(y1, y0 + Math.floor((y + 1) / k) - 1);
+      let s = 0,
+        c = 0;
+      for (let yy = ay; yy <= Math.max(ay, by); yy++)
+        for (let xx = ax; xx <= Math.max(ax, bx); xx++) {
+          s += W.gray[yy * gw + xx];
+          c++;
+        }
+      const v = Math.round(Math.min(255, Math.max(0, s / Math.max(1, c))));
+      data[y * w + x] = v;
+      hash = (hash * 31 + v) % 2147483647;
+    }
+  const widthMM = Math.min(180, Math.max(30, st.outW > 0 ? st.outW : 80)),
+    R = +(widthMM / 2 / (1 - 0.05)).toFixed(1),
+    thick = 4;
+  vaseCur = UNB.vaseDefaults();
+  vaseCur.profile = [
+    [0, R],
+    [0.5, R],
+    [1, R],
+  ];
+  vaseCur.height = Math.round(Math.min(200, Math.max(10, (widthMM * h) / w / 0.92)));
+  vaseCur.move = Object.assign(vaseCur.move, { kind: "none" });
+  vaseCur.plan = { kind: "plaque", thick: +(thick / R).toFixed(4), sides: 6, depth: 0.3, round: 0.2 };
+  vaseCur.texture = Object.assign(vaseCur.texture, {
+    kind: "picture",
+    depth: 2,
+    sides: "front",
+    span: 0.5,
+    invert: false,
+    picture: { w, h, data, id: `${w}x${h}:${hash}`, from: $("designName").value.trim() || "" },
+  });
+  vasePick = -1;
+  artUse("model"); // art.js: the 3D model input
+  $("mfVase").checked = true;
+  useVase(vaseCur, true);
+  vaseUI();
+  msg.textContent = "";
+  $("vtPicMsg").textContent = `Made from your picture (${w} × ${h} px, its dark parts standing out). Each layer leans no more than a bead holds over the one below, so a raised part's top and bottom are short ramps; its sides are sharp.`;
+  if (!$("viewArt").checked) $("viewArt").click();
+  if (typeof mapOpen === "function") mapOpen("vtexture");
+}
+$("reliefFromPic").addEventListener("click", reliefFromPicture);
+// (only for a picture)
+const reliefButton = () => ($("reliefFromPic").hidden = !(st.art && st.art.kind === "picture" && !st.text));
+on("artUI", reliefButton);
+on("sourceChanged", reliefButton);
+reliefButton();
+for (const [id, v] of [
+  ["vtSideFront", "front"],
+  ["vtSideBack", "back"],
+  ["vtSideBoth", "both"],
+])
+  $(id).addEventListener("change", () => {
+    vaseCur.texture.sides = v;
+    vaseLabels();
+    vaseSend(true);
+  });
+$("vtInvert").addEventListener("change", () => {
+  vaseCur.texture.invert = $("vtInvert").checked;
+  vaseLabels();
+  vaseSend(true);
+});
+for (const [id, set] of [
+  ["vtSpan", (v) => (vaseCur.texture.span = v / 100)],
+  ["vtSoft", (v) => (vaseCur.texture.soft = v)],
+  ["vpThick", (v) => (vaseCur.plan.thick = +(v / UNB.vaseRadius(vaseCur.profile, 0.5)).toFixed(4))],
+]) {
+  $(id).addEventListener("input", () => {
+    set(+$(id).value);
+    vaseLabels();
+    vaseSend(false);
+  });
+  $(id).addEventListener("change", () => vaseSend(true));
+}
 for (const id of ["vmNone", "vmWave", "vmZigzag", "vmLoops"])
   $(id).addEventListener("change", () => {
     vaseCur.move.kind = $(id).value;

@@ -619,11 +619,13 @@
             <input type="radio" name="vasePlan" id="vpPolygon" value="polygon"><label for="vpPolygon">Polygon</label>
             <input type="radio" name="vasePlan" id="vpStar" value="star"><label for="vpStar">Star</label>
             <input type="radio" name="vasePlan" id="vpFlower" value="flower"><label for="vpFlower">Flower</label>
+            <input type="radio" name="vasePlan" id="vpPlaque" value="plaque"><label for="vpPlaque" title="A flat wall: a front and a back a few millimetres apart, joined by round ends, one closed line round (a plaque that stands up). The profile is half its width">Flat</label>
             <input type="radio" name="vasePlan" id="vpDrawing" value="drawing"><label for="vpDrawing" id="vpDrawingLab" title="The traced line this vase was made from (Make a vase from this line, on the Line tool)">Drawing</label>
           </div>
           <div data-part="vshape" class="row vp-sides"><div class="lab"><label for="vpSides" id="vpSidesLab">Corners</label><span class="val" id="vpSidesVal"></span></div><input type="range" id="vpSides" min="2" max="24" step="1" value="6"></div>
           <div data-part="vshape" class="row vp-depth" title="How far in between the points or petals, as a share of the reach"><div class="lab"><label for="vpDepth" id="vpDepthLab">Depth</label><span class="val" id="vpDepthVal"></span></div><input type="range" id="vpDepth" min="0" max="90" step="1" value="30"></div>
           <div data-part="vshape" class="row vp-round" title="Corners and dips rounded off"><div class="lab"><label for="vpRound" id="vpRoundLab">Rounded</label><span class="val" id="vpRoundVal"></span></div><input type="range" id="vpRound" min="0" max="100" step="1" value="20"></div>
+          <div data-part="vshape" class="row vp-plaque" title="How far apart the front and the back are (middle of the bead to middle of the bead): a closed loop, so it stands stiff"><div class="lab"><label for="vpThick">Front to back</label><span class="val" id="vpThickVal"></span></div><input type="range" id="vpThick" min="2" max="20" step="0.5" value="4"></div>
           <div data-part="vshape" class="row vp-drawing"><p class="hint" id="vpDrawMsg" role="status"></p></div>
           <div data-part="vshape" class="lab"><span class="name">At the rim</span><span class="val" id="vaseTopVal"></span></div>
           <div data-part="vshape" class="seg small" role="radiogroup" aria-label="The shape at the rim">
@@ -655,10 +657,22 @@
             <input type="radio" name="vaseTex" id="vtGrid" value="grid"><label for="vtGrid">Grid</label>
             <input type="radio" name="vaseTex" id="vtWeave" value="weave"><label for="vtWeave">Weave</label>
             <input type="radio" name="vaseTex" id="vtDiamond" value="diamond"><label for="vtDiamond">Diamond</label>
+            <input type="radio" name="vaseTex" id="vtPicture" value="picture"><label for="vtPicture" id="vtPictureLab" title="The picture this relief was made from (Make a relief from this picture, on the Line tool), standing out from the wall">Picture</label>
           </div>
           <div data-part="vtexture" class="row vt-ribs"><div class="lab"><label for="vtCount" id="vtCountLab">Ribs round</label><span class="val" id="vtCountVal"></span></div><input type="range" id="vtCount" min="2" max="60" step="1" value="12"></div>
           <div data-part="vtexture" class="row vt-twist"><div class="lab"><label for="vtTwist" id="vtTwistLab">Twist, bottom to rim</label><span class="val" id="vtTwistVal"></span></div><input type="range" id="vtTwist" min="-360" max="360" step="5" value="0"></div>
           <div data-part="vtexture" class="row vt-rings"><div class="lab"><label for="vtSpacing" id="vtSpacingLab">Rings apart</label><span class="val" id="vtSpacingVal"></span></div><input type="range" id="vtSpacing" min="1" max="20" step="0.5" value="4"></div>
+          <div data-part="vtexture" class="row vt-pic"><div class="lab"><span class="name">On</span><span class="val" id="vtSidesVal"></span></div>
+            <div class="seg small" role="radiogroup" aria-label="Which side the picture is on">
+              <input type="radio" name="vtSides" id="vtSideFront" value="front" checked><label for="vtSideFront">Front</label>
+              <input type="radio" name="vtSides" id="vtSideBack" value="back"><label for="vtSideBack">Back</label>
+              <input type="radio" name="vtSides" id="vtSideBoth" value="both"><label for="vtSideBoth">Both</label>
+            </div>
+          </div>
+          <div data-part="vtexture" class="row vt-pic vt-span" title="A round wall: how far round one copy of the picture goes"><div class="lab"><label for="vtSpan">Round the wall</label><span class="val" id="vtSpanVal"></span></div><input type="range" id="vtSpan" min="15" max="100" step="5" value="50"></div>
+          <div data-part="vtexture" class="row vt-pic" title="Along each layer the picture is softened about this much, so the line curves in and out of a raised part instead of turning sharper than the bead is wide"><div class="lab"><label for="vtSoft">Soften edges</label><span class="val" id="vtSoftVal"></span></div><input type="range" id="vtSoft" min="0" max="3" step="0.1" value="1"></div>
+          <label data-part="vtexture" class="check vt-pic" title="Light parts stand out instead of dark ones"><input type="checkbox" id="vtInvert"> Light parts stand out</label>
+          <p data-part="vtexture" class="hint vt-pic" id="vtPicMsg" role="status"></p>
           <div data-part="vtexture" class="row vt-on"><div class="lab"><label for="vtDepth" id="vtDepthLab">Depth</label><span class="val" id="vtDepthVal"></span></div><input type="range" id="vtDepth" min="0.2" max="6" step="0.1" value="1.5"></div>
           <div data-part="vtexture" class="row vt-on vase-curve"><div class="lab"><span class="name">Strength up the wall</span><span class="val" id="vtCurveVal"></span></div>
             <canvas id="vtCurve" class="vase-curve-cv" tabindex="0" aria-label="How much of the texture at each height: drag a point left (less) or right (all of it); tap beside the line to add one, tap a point to remove it"></canvas>
@@ -862,7 +876,7 @@
       </div>
       <div data-feature="vase" class="row" id="vaseFromRow">
         <div class="lab"><span class="name">Make a vase</span></div>
-        <div class="inline"><button class="btn mini" type="button" id="vaseFromLine" title="This traced line, exactly as it is, becomes the vase's shape seen from above: every wall of the vase follows it, at its own size">Make a vase from this line</button></div>
+        <div class="inline"><button class="btn mini" type="button" id="vaseFromLine" title="This traced line, exactly as it is, becomes the vase's shape seen from above: every wall of the vase follows it, at its own size">Make a vase from this line</button><button class="btn mini" type="button" id="reliefFromPic" title="The picture stands out from a wall printed upright, layer by layer: a flat plaque (a closed loop, the picture on the front, the back or both) or a round one">Make a relief from this picture</button></div>
         <p class="hint" id="vaseFromMsg" role="status"></p>
       </div>
 

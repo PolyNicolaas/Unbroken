@@ -11,15 +11,16 @@
 
   // ---------- the vase's settings ----------
   // V = { height (mm), profile: [[t, r], …] (t: share of the height, 0 at the plate to 1 at the rim, rising; r: mm
-  // from the middle to the middle of the bead), texture: { kind: "none" | "ribs" | "rings", count (ribs round),
+  // from the middle to the middle of the bead), texture: { kind: "none" | "ribs" | "rings" | … | "picture" (a picture in
+  // relief: see reliefGrid), count (ribs round),
   // depth (mm, crest to trough), twist (degrees the ribs turn from bottom to top), spacing (mm between rings) },
   // move: { kind: "none" | "wave" | "zigzag" | "loops", size (mm: how far the needle moves off the wall, or a loop's
   // radius), count (how many round each lap), shift (share of one movement each layer moves on: 0 stacks them in
   // columns, 0.5 alternates them), flip (a lattice: layers each way before the movement flips to the other side, 0:
   // none) }, and these, each optional (left out: as before them):
-  //   plan: the shape seen from above, { kind: "circle" | "polygon" | "star" | "flower" | "drawing", sides (corners,
+  //   plan: the shape seen from above, { kind: "circle" | "polygon" | "star" | "flower" | "plaque" | "drawing", sides (corners,
   //     points or petals), depth (star, flower: how far in between them, share of the reach, 0–0.9), round (polygon,
-  //     star: corners rounded off, 0–1), loop (drawing: the traced line, [x0, y0, x1, y1, …], from UNB.vaseLineLoop, or an open line's outline from UNB.vaseOutline) }. The
+  //     star: corners rounded off, 0–1), thick (plaque: front to back, share of the reach), loop (drawing: the traced line, [x0, y0, x1, y1, …], from UNB.vaseLineLoop, or an open line's outline from UNB.vaseOutline) }. The
   //     profile is the reach of its furthest point (a polygon's corners, a star's points).
   //   planTop: the shape at the rim (as plan): the wall blends from plan at the bottom to this at the rim; null: plan
   //   twist: degrees the whole shape turns from the bottom to the rim (the texture's twist turns the ribs on it as well)
@@ -99,6 +100,7 @@
     star: { name: "Star", sides: [3, 24] },
     flower: { name: "Flower", sides: [2, 24] },
     drawing: { name: "A drawing" },
+    plaque: { name: "Flat (a plaque)" },
   };
   // the smallest radius anything is made at (mm): a vase narrower than this has no inside to print round
   const VASE_MIN_R = 1;
@@ -168,7 +170,9 @@
     const sides = Math.max(kind === "flower" ? 2 : 3, Math.min(24, Math.round(+P.sides || 6))),
       depth = Math.min(0.9, Math.max(0, +P.depth || 0)),
       round = Math.min(1, Math.max(0, +P.round || 0));
-    let key = `${kind}|${sides}|${depth}|${round}`;
+    // a plaque: a flat front and back, `thick` (share of the reach) apart, joined by round ends
+    const thick = Math.min(0.9, Math.max(0.01, +P.thick || 0.06));
+    let key = kind === "plaque" ? `plaque|${thick}` : `${kind}|${sides}|${depth}|${round}`;
     if (kind === "drawing") {
       let h = 0;
       for (let i = 0; i < P.loop.length; i++) h = (h * 31 + Math.round(P.loop[i] * 1e4)) % 2147483647;
@@ -177,7 +181,22 @@
     let T = planCache.get(key);
     if (T) return T;
     let pts;
-    if (kind === "drawing") {
+    if (kind === "plaque") {
+      // anticlockwise from +x: up the right end, along the back (y > 0) to the left, down the left end, along the front
+      const r = thick / 2,
+        a = 1 - r;
+      pts = [];
+      for (let i = 0; i <= 90; i++) {
+        const th = -Math.PI / 2 + (Math.PI * i) / 90;
+        pts.push([a + r * Math.cos(th), r * Math.sin(th)]);
+      }
+      for (let i = 1; i < 200; i++) pts.push([a - (2 * a * i) / 200, r]);
+      for (let i = 0; i <= 90; i++) {
+        const th = Math.PI / 2 + (Math.PI * i) / 90;
+        pts.push([-a + r * Math.cos(th), r * Math.sin(th)]);
+      }
+      for (let i = 1; i < 200; i++) pts.push([-a + (2 * a * i) / 200, -r]);
+    } else if (kind === "drawing") {
       pts = [];
       for (let i = 0; i + 1 < P.loop.length; i += 2) pts.push([P.loop[i], P.loop[i + 1]]);
       // rounded: smoothed along the outline (its dips and corners eased), its furthest point put back at 1
@@ -470,6 +489,152 @@
       a = ((+L.dir || 0) * Math.PI) / 180;
     return [L.size * g * Math.cos(a), L.size * g * Math.sin(a)];
   };
+  // ---------- a picture in relief on the wall ----------
+  // texture { kind: "picture", depth (mm: how far the darkest part stands out), picture: { w, h, data: [grey 0–255, …
+  // row by row, top first], id (what it is, for the cache) }, sides: "front" | "back" | "both", span (round walls: the
+  // share of the way round one copy covers, 0.1–1; on a plaque each face is one copy), invert (light parts out
+  // instead), slope (mm out per mm up: how far a layer may lean over the one below, both ways; 0.8 by default: 0.24 mm
+  // a 0.3 mm layer, inside what a bead holds), soft (mm: along each layer the picture is softened this much, so the
+  // line curves in and out; 1 by default: about a bead, so it turns no tighter than the bead is wide), margin (share of the face left plain round the picture) }.
+  // The front faces −y (seen from there, x runs left to right); the back faces +y, seen from behind, so it reads the
+  // right way round too. The picture fits inside the face (its shape kept), the rest of the face plain. Up the wall
+  // each row may stand out or step back no more than `slope` over the row below (worked out from the bottom up), so a
+  // raised part's top and bottom edges are ramps a few layers high; its sides, along each layer, are sharp.
+  const reliefCache = new Map();
+  function reliefGrid(V, face) {
+    const T = V.texture,
+      P = T.picture,
+      H = Math.max(0.5, V.height),
+      slope = Math.max(0.05, +T.slope || 0.8),
+      margin = Math.min(0.4, Math.max(0, T.margin === undefined ? 0.04 : +T.margin)),
+      key = [P.id || P.w + "x" + P.h, T.depth, slope, margin, T.soft, T.invert ? 1 : 0, H, face.toFixed(2)].join("|");
+    let G = reliefCache.get(key);
+    if (G) return G;
+    const dz = 0.1,
+      rows = Math.max(2, Math.ceil(H / dz) + 1),
+      cols = Math.max(16, Math.min(2000, Math.ceil(face / 0.1))),
+      d = new Float32Array(rows * cols),
+      // the picture inside the face, its shape kept
+      fw = face * (1 - 2 * margin),
+      fh = H * (1 - 2 * margin),
+      sc = Math.min(fw / P.w, fh / P.h),
+      iw = P.w * sc,
+      ih = P.h * sc,
+      x0 = (face - iw) / 2,
+      y0 = (H - ih) / 2,
+      grey = (gx, gy) => {
+        const X = Math.min(P.w - 1, Math.max(0, gx)),
+          Y = Math.min(P.h - 1, Math.max(0, gy)),
+          xa = Math.floor(X),
+          ya = Math.floor(Y),
+          xb = Math.min(P.w - 1, xa + 1),
+          yb = Math.min(P.h - 1, ya + 1),
+          fx = X - xa,
+          fy = Y - ya,
+          D = P.data;
+        return (
+          (D[ya * P.w + xa] * (1 - fx) + D[ya * P.w + xb] * fx) * (1 - fy) +
+          (D[yb * P.w + xa] * (1 - fx) + D[yb * P.w + xb] * fx) * fy
+        );
+      };
+    for (let r = 0; r < rows; r++) {
+      const zz = r * dz, // mm up the wall
+        py = (y0 + ih - zz) / sc; // picture row (top first)
+      for (let c = 0; c < cols; c++) {
+        const xx = ((c + 0.5) / cols) * face,
+          px = (xx - x0) / sc;
+        let v = 0;
+        if (px >= 0 && px <= P.w && py >= 0 && py <= P.h) {
+          const g = grey(px - 0.5, py - 0.5) / 255;
+          v = T.invert ? g : 1 - g;
+        }
+        d[r * cols + c] = v * (T.depth || 0);
+      }
+    }
+    // along each row, softened over about a bead's width, so the line turns in and
+    // out of a raised part in curves the needle can follow rather than right angles (sigma `soft` mm)
+    const soft = Math.max(0, T.soft === undefined ? 1 : +T.soft),
+      sig = soft / (face / cols);
+    if (sig > 0.3) {
+      const K = Math.ceil(3 * sig),
+        wts = [];
+      let ws = 0;
+      for (let q = -K; q <= K; q++) ws += wts[q + K] = Math.exp((-q * q) / (2 * sig * sig));
+      const row = new Float32Array(cols);
+      for (let r = 0; r < rows; r++) {
+        for (let c = 0; c < cols; c++) {
+          let v = 0;
+          for (let q = -K; q <= K; q++) v += wts[q + K] * d[r * cols + Math.min(cols - 1, Math.max(0, c + q))];
+          row[c] = v / ws;
+        }
+        d.set(row, r * cols);
+      }
+    }
+    // each row no more than slope × dz out from (or back from) the row below
+    const step = slope * dz;
+    for (let r = 1; r < rows; r++)
+      for (let c = 0; c < cols; c++) {
+        const lo = d[(r - 1) * cols + c] - step,
+          hi = d[(r - 1) * cols + c] + step,
+          i = r * cols + c;
+        d[i] = Math.min(hi, Math.max(lo, d[i]));
+      }
+    G = { d, rows, cols, dz, face };
+    if (reliefCache.size > 12) reliefCache.clear();
+    reliefCache.set(key, G);
+    return G;
+  }
+  // how far out (mm) the picture puts the wall at height z, u across the face (0 left … 1 right, as seen)
+  function reliefAt(G, z, u) {
+    if (!(u >= 0 && u <= 1)) return 0;
+    const r = Math.min(G.rows - 1.001, Math.max(0, z / G.dz)),
+      c = Math.min(G.cols - 1.001, Math.max(0, u * G.cols - 0.5)),
+      ra = Math.floor(r),
+      ca = Math.floor(c),
+      fr = r - ra,
+      fc = c - ca,
+      D = G.d,
+      W = G.cols;
+    return (
+      (D[ra * W + ca] * (1 - fc) + D[ra * W + ca + 1] * fc) * (1 - fr) +
+      (D[(ra + 1) * W + ca] * (1 - fc) + D[(ra + 1) * W + ca + 1] * fc) * fr
+    );
+  }
+  // where a point of the plan (unit size, before turning) falls on the picture's faces: [u, …] for each copy it's on
+  // (front, back), or null. A plaque: its flat front and back; any other shape: round the middle, a copy centred on
+  // the front (−y) and one on the back (+y), each over `span` of the way round.
+  function reliefUV(V, ux, uy) {
+    const T = V.texture,
+      sides = T.sides || "front",
+      front = sides !== "back",
+      back = sides !== "front";
+    if (V.plan && V.plan.kind === "plaque") {
+      const th = Math.min(0.9, Math.max(0.01, +V.plan.thick || 0.06)),
+        a = 1 - th / 2; // half the flat faces' length (share of the reach)
+      if (Math.abs(ux) > a) return null;
+      if (uy < 0) return front ? (ux + a) / (2 * a) : null;
+      return back ? (a - ux) / (2 * a) : null;
+    }
+    const span = Math.min(1, Math.max(0.1, +T.span || 0.5)),
+      th = Math.atan2(uy, ux),
+      wrap = (x) => ((((x + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) - Math.PI;
+    if (front) {
+      const u = wrap(th + Math.PI / 2) / (2 * Math.PI * span) + 0.5;
+      if (u >= 0 && u <= 1) return u;
+    }
+    if (back) {
+      const u = wrap(th - Math.PI / 2) / (2 * Math.PI * span) + 0.5;
+      if (u >= 0 && u <= 1) return u;
+    }
+    return null;
+  }
+  // the face's width (mm) the picture is fitted to, at reach R
+  function reliefFace(V, R) {
+    if (V.plan && V.plan.kind === "plaque") return 2 * R * (1 - Math.min(0.9, Math.max(0.01, +V.plan.thick || 0.06)) / 2);
+    return 2 * Math.PI * R * Math.min(1, Math.max(0.1, +V.texture.span || 0.5));
+  }
+  const reliefOn = (V) => !!(V.texture && V.texture.kind === "picture" && V.texture.picture && V.texture.picture.data);
+
   // The wall at height z (mm): the plan (blended towards the rim's) at the profile's reach, turned by the twist, the
   // surface texture out along the wall's normal, moved by the lean; n points evenly round the plan, anticlockwise
   // from +x. Returns { x, y } (mm).
@@ -511,23 +676,30 @@
                   : null;
     const px = new Float64Array(n),
       py = new Float64Array(n),
-      onLine = !!(V.plan && V.plan.kind === "drawing");
+      onLine = !!(V.plan && V.plan.kind === "drawing"),
+      // a picture: its depth out from the wall at each point (fitted to the face at the reach halfway up)
+      G = reliefOn(V) && D > 0 ? reliefGrid(V, reliefFace(V, UNB.vaseRadius(V.profile, 0.5))) : null,
+      pic = G ? new Float64Array(n) : null;
     for (let i = 0; i < n; i++) {
       const [ux, uy] = planPoint(A, B, i / n, t);
       px[i] = reach * (ux * cr - uy * sr);
       py[i] = reach * (ux * sr + uy * cr);
+      if (G) {
+        const u = reliefUV(V, ux, uy);
+        pic[i] = u === null ? 0 : reliefAt(G, z, u) * k;
+      }
     }
     for (let i = 0; i < n; i++) {
       let X = px[i],
         Y = py[i];
-      if (tex) {
+      if (tex || pic) {
         // out: right of the direction of travel (anticlockwise round)
         const a = (i - 1 + n) % n,
           b = (i + 1) % n,
           tx = px[b] - px[a],
           ty = py[b] - py[a],
           l = Math.hypot(tx, ty) || 1,
-          d = tex(i / n);
+          d = pic ? pic[i] : tex(i / n);
         X += (ty / l) * d;
         Y -= (tx / l) * d;
       }
@@ -640,14 +812,15 @@
     for (let i = 0; i <= 64; i++) rmax = Math.max(rmax, UNB.vaseRadius(V.profile, i / 64));
     const T = V.texture || {},
       M = V.move || {};
-    if (T.kind !== "none") rmax += (T.depth || 0) / 2;
+    if (T.kind !== "none") rmax += (T.depth || 0) / (T.kind === "picture" ? 1 : 2);
     if (V.rim && V.rim.kind === "flare") rmax += Math.max(0, +V.rim.size || 0);
     const L =
         2 *
         Math.PI *
         rmax *
         Math.max(planLength(V.plan), V.planTop ? planLength(V.planTop) : 0) *
-        (T.kind && T.kind !== "none" && T.kind !== "rings" ? 1.3 : 1),
+        (T.kind && T.kind !== "none" && T.kind !== "rings" ? 1.3 : 1) *
+        (T.kind === "picture" ? 1.6 : 1),
       m = M.kind && M.kind !== "none" ? Math.max(1, Math.round(M.count || 1)) : 0;
     return Math.min(24000, Math.max(256, Math.ceil(L / 0.25), m * (M.kind === "loops" ? 32 : 24)));
   }
