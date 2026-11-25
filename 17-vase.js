@@ -492,10 +492,13 @@
   // ---------- a picture in relief on the wall ----------
   // texture { kind: "picture", depth (mm: how far the darkest part stands out), picture: { w, h, data: [grey 0–255, …
   // row by row, top first], id (what it is, for the cache) }, sides: "front" | "back" | "both", span (round walls: the
-  // share of the way round one copy covers, 0.1–1; on a plaque each face is one copy), invert (light parts out
+  // share of the way round one copy covers, 0.1–1; on a plaque each face is one copy), turn (round walls: degrees the
+  // picture moves round, anticlockwise from above), faces: "one" | "every" and face (a polygon: the picture on one
+  // flat face, 1 the one facing the front, or a copy on every face; place "around" wraps it round by angle instead,
+  // corners and all), invert (light parts out
   // instead), slope (mm out per mm up: how far a layer may lean over the one below, both ways; 0.8 by default: 0.24 mm
   // a 0.3 mm layer, inside what a bead holds), soft (mm: along each layer the picture is softened this much, so the
-  // line curves in and out; 1 by default: about a bead, so it turns no tighter than the bead is wide), margin (share of the face left plain round the picture) }.
+  // line curves in and out; 1.3 by default: so it turns no tighter than the bead is wide, down to a 60 mm wide picture), margin (share of the face left plain round the picture) }.
   // The front faces −y (seen from there, x runs left to right); the back faces +y, seen from behind, so it reads the
   // right way round too. The picture fits inside the face (its shape kept), the rest of the face plain. Up the wall
   // each row may stand out or step back no more than `slope` over the row below (worked out from the bottom up), so a
@@ -553,7 +556,7 @@
     }
     // along each row, softened over about a bead's width, so the line turns in and
     // out of a raised part in curves the needle can follow rather than right angles (sigma `soft` mm)
-    const soft = Math.max(0, T.soft === undefined ? 1 : +T.soft),
+    const soft = Math.max(0, T.soft === undefined ? 1.3 : +T.soft),
       sig = soft / (face / cols);
     if (sig > 0.3) {
       const K = Math.ceil(3 * sig),
@@ -603,11 +606,33 @@
   // where a point of the plan (unit size, before turning) falls on the picture's faces: [u, …] for each copy it's on
   // (front, back), or null. A plaque: its flat front and back; any other shape: round the middle, a copy centred on
   // the front (−y) and one on the back (+y), each over `span` of the way round.
+  // A polygon: its flat faces, each a copy's place (T.faces "one": face T.face, 1 the one facing the front (−y) and on
+  // anticlockwise; "every": a copy on each), the picture on a face never round a corner. Faces are centred halfway
+  // between the corners (a polygon's corners are at 0°, 360°/sides, …).
+  const reliefFaces = (V) => V.plan && V.plan.kind === "polygon" && V.texture.place !== "around";
+  function faceOf(V, ux, uy) {
+    const n = Math.max(3, Math.min(24, Math.round(+V.plan.sides || 6))),
+      da = (2 * Math.PI) / n,
+      th = Math.atan2(uy, ux),
+      k = Math.floor((((th % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) / da), // the face this point is on (from +x)
+      c = (k + 0.5) * da, // its centre
+      // the face facing the front: the one whose centre is nearest −y
+      front = ((Math.round((1.5 * Math.PI) / da - 0.5) % n) + n) % n,
+      half = Math.sin(da / 2) * (1 - 0.4 * Math.min(1, Math.max(0, +V.plan.round || 0))); // its flat half-length
+    // across the face, left to right as seen from outside (anticlockwise)
+    const along = -ux * Math.sin(c) + uy * Math.cos(c);
+    return { k, number: ((k - front + n) % n) + 1, u: along / (2 * half) + 0.5, half, n };
+  }
   function reliefUV(V, ux, uy) {
     const T = V.texture,
       sides = T.sides || "front",
       front = sides !== "back",
       back = sides !== "front";
+    if (reliefFaces(V)) {
+      const F = faceOf(V, ux, uy);
+      if (T.faces !== "every" && F.number !== Math.max(1, Math.round(+T.face || 1))) return null;
+      return F.u >= 0 && F.u <= 1 ? F.u : null;
+    }
     if (V.plan && V.plan.kind === "plaque") {
       const th = Math.min(0.9, Math.max(0.01, +V.plan.thick || 0.06)),
         a = 1 - th / 2; // half the flat faces' length (share of the reach)
@@ -616,7 +641,8 @@
       return back ? (a - ux) / (2 * a) : null;
     }
     const span = Math.min(1, Math.max(0.1, +T.span || 0.5)),
-      th = Math.atan2(uy, ux),
+      // (turn: degrees the picture moves round, anticlockwise seen from above: where it starts)
+      th = Math.atan2(uy, ux) - ((+T.turn || 0) * Math.PI) / 180,
       wrap = (x) => ((((x + Math.PI) % (2 * Math.PI)) + 2 * Math.PI) % (2 * Math.PI)) - Math.PI;
     if (front) {
       const u = wrap(th + Math.PI / 2) / (2 * Math.PI * span) + 0.5;
@@ -631,6 +657,7 @@
   // the face's width (mm) the picture is fitted to, at reach R
   function reliefFace(V, R) {
     if (V.plan && V.plan.kind === "plaque") return 2 * R * (1 - Math.min(0.9, Math.max(0.01, +V.plan.thick || 0.06)) / 2);
+    if (reliefFaces(V)) return 2 * R * faceOf(V, 0, -1).half;
     return 2 * Math.PI * R * Math.min(1, Math.max(0.1, +V.texture.span || 0.5));
   }
   const reliefOn = (V) => !!(V.texture && V.texture.kind === "picture" && V.texture.picture && V.texture.picture.data);
