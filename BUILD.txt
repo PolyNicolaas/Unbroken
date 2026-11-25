@@ -1,6 +1,6 @@
-Unbroken · web app build v168
-Built:  2026-11-25T15:24:16.665Z
-Tests:  135 of 135 tests passed
+Unbroken · web app build v169
+Built:  2026-11-25T18:48:33.319Z
+Tests:  136 of 136 tests passed
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -23,8 +23,8 @@ Files (sha1, first 12):
   755c4b83e7df  16-molecule.js
   c1c59235ee4a  17-vase.js
   0e52c6f85462  18-ties.js
-  3324bd7e293d  core.js
-  e161fac5e33a  css/app.css
+  99453ce2fa09  core.js
+  fc8befa6a8ca  css/app.css
   2e7b02cdb930  css/theme.css
   ec1e23e79c1a  features/camera/camera.js
   91b174b409e5  features/cutout/cutout.js
@@ -43,12 +43,12 @@ Files (sha1, first 12):
   cfc9661161d0  features/ties/ties.js
   89ed95133227  features/vase/vase.js
   84cc740df42b  fonts.js
-  4e2a5aaa9649  index.html
+  caea6c5df812  index.html
   3f7b0e882ba7  js/agent.js
   17bf8de01c1d  js/art.js
   5a825c30dfdd  js/config.js
   f6f0c2258345  js/controls.js
-  967f6401ec78  js/engine-bridge.js
+  1a068fd71435  js/engine-bridge.js
   b65a05146fc7  js/export.js
   63499658c5d6  js/history.js
   96d91be135ff  js/layers.js
@@ -59,6 +59,7 @@ Files (sha1, first 12):
   3bb22f87322f  js/preview.js
   d3e0b9ad48e5  js/readouts.js
   01f3cf4a980c  js/scroll.js
+  d6016ac55cd8  js/showall.js
   2b3b7c1cd26f  js/source.js
   e89b5032f50f  js/state.js
   49125f92bd01  js/steppers.js
@@ -68,4 +69,4 @@ Files (sha1, first 12):
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
   b19827e10a40  settings.js
-  8b0a9cad48ea  worker.js
+  d7c99c35480e  worker.js
