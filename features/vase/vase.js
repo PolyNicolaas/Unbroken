@@ -204,6 +204,19 @@ function vaseLabels() {
       }`,
     }[T.kind] || "smooth";
   $("vpThickVal").textContent = `${fmt(vaseThickMM(V), 1)} mm`;
+  if (T.kind === "picture" && T.picture) {
+    const dark = T.invert ? "light" : "dark",
+      light = T.invert ? "dark" : "light",
+      how = {
+        out: `its ${dark} parts standing out`,
+        in: `its ${dark} parts pressed in`,
+        both: `mid-grey on the wall, its ${dark} parts out and its ${light} parts in`,
+      }[T.dir || "out"];
+    $("vtPicMsg").textContent = `Made from your picture (${T.picture.w} × ${T.picture.h} px, ${how}). Each layer leans out or back at most ${fmt(0.9 * overhangMM(), 2)} mm over the one below (90% of the overhang a bead holds, ${fmt(overhangMM(), 2)} mm: Fine-tuning), so a raised or pressed part's top and bottom are short ramps; its sides are sharp.`;
+  }
+  // a relief says so: the 3D model card's switch and the Input card's name
+  $("mfVase").nextElementSibling.textContent = T.kind === "picture" ? "A relief" : "Make a vase";
+  if ($("mfVase").checked && st.model && st.model.vase) $("inputVal").textContent = st.model.name || "";
   $("vtDirVal").textContent = {
     out: "standing out",
     in: "pressed in",
@@ -702,11 +715,17 @@ async function reliefFromPicture() {
   useVase(vaseCur, true);
   vaseUI();
   msg.textContent = "";
-  $("vtPicMsg").textContent = `Made from your picture (${w} × ${h} px, its dark parts standing out). Each layer leans out or back at most ${fmt(0.9 * overhangMM(), 2)} mm over the one below (90% of the overhang a bead holds, ${fmt(overhangMM(), 2)} mm: Fine-tuning), so a raised part's top and bottom are short ramps; its sides are sharp.`;
+  vaseLabels();
   if (!$("viewArt").checked) $("viewArt").click();
   if (typeof mapOpen === "function") mapOpen("vtexture");
 }
 $("reliefFromPic").addEventListener("click", reliefFromPicture);
+// the same from the Picture card (Make it 3D): a problem shows as a toast, as the Line panel's note isn't in view
+$("picRelief").addEventListener("click", async () => {
+  await reliefFromPicture();
+  const msg = $("vaseFromMsg");
+  if (/warn/.test(msg.className) && msg.textContent) toast(msg.textContent, true);
+});
 // the overhang or the layer height changed (Fine-tuning, Layers): a relief's lean follows
 for (const id of ["gOver", "layerH"])
   $(id).addEventListener("change", () => {

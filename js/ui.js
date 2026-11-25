@@ -18,13 +18,13 @@ const hexRGB = (h) => [1, 3, 5].map((i) => parseInt(h.slice(i, i + 2), 16));
 
 // the toast at the bottom of the page (bad: red, shown longer)
 let toastTimer = null;
-function toast(t, bad) {
+function toast(t, bad, ms) {
   const el = $("toast");
   el.textContent = t;
   el.className = "toast" + (bad ? " bad" : "");
   el.hidden = false;
   clearTimeout(toastTimer);
-  toastTimer = setTimeout(() => (el.hidden = true), bad ? 5000 : 1600);
+  toastTimer = setTimeout(() => (el.hidden = true), ms || (bad ? 5000 : 1600));
 }
 // a message is about what was on screen: it goes with a click on it, or when another tab is opened
 function hideToast() {

@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v169">
-<link rel="stylesheet" href="css/app.css?v=v169">
+<link rel="stylesheet" href="css/theme.css?v=v170">
+<link rel="stylesheet" href="css/app.css?v=v170">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v169</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v170</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -516,6 +516,10 @@
         <div class="inline"><button class="btn mini" type="button" id="picLeft" title="Turn the picture a quarter turn to the left">Turn left</button><button class="btn mini" type="button" id="picRight" title="Turn the picture a quarter turn to the right">Turn right</button><button class="btn mini" type="button" id="picUnturn">As loaded</button></div>
         <p class="hint help">Turns the picture before anything else: a quarter turn at a time, or a few degrees to straighten a photo (the corners that come in are white, the paper). To crop, use Select area on the Line step: the trace keeps to the selection and gets the full resolution there.</p>
       </div>
+      <div data-feature="vase" class="row" id="picReliefRow">
+        <div class="lab"><span class="name">Make it 3D</span></div>
+        <div class="inline"><button class="btn mini" type="button" id="picRelief" title="The picture stands out from a wall printed upright, layer by layer (the same as Make a relief from this picture on the Line step)">Make a relief from this picture</button></div>
+      </div>
       <p class="hint help">A photo taken with the camera, a sample, an image of yours (or drop one anywhere on the page) or a sketch drawn on the preview. A photo of a page is straightened and cleaned up for the line (Photo, below); Clean up as a photo does the same to an image you chose. To edit a traced line by hand, export it as SVG from the Plot step, fix it in a drawing app (Illustrator, Affinity, Inkscape) and drop it back in here.</p>
     </section>
 
@@ -886,7 +890,7 @@
         <p class="hint help" data-anchor="overlaps">Still one unbroken line, but it may cross itself where the drawing does (a spirograph, a Lissajous figure, a rose): the needle prints straight over the line already there. Round each crossing the strands are let come closer than the spacing, as far as two lines crossing at that angle need; everywhere else the spacing is kept as usual. Off, every crossing is undone as set above. Painted crossing areas work either way.</p>
       </div>
       <div data-feature="vase" class="row" id="vaseFromRow">
-        <div class="lab"><span class="name">Make a vase</span></div>
+        <div class="lab"><span class="name">Make it 3D</span></div>
         <div class="inline"><button class="btn mini" type="button" id="vaseFromLine" title="This traced line, exactly as it is, becomes the vase's shape seen from above: every wall of the vase follows it, at its own size">Make a vase from this line</button><button class="btn mini" type="button" id="reliefFromPic" title="The picture stands out from a wall printed upright, layer by layer: a flat plaque (a closed loop, the picture on the front, the back or both) or a round one">Make a relief from this picture</button></div>
         <p class="hint" id="vaseFromMsg" role="status"></p>
       </div>
@@ -1024,68 +1028,68 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v169"></script>
-<script src="01-image.js?v=v169"></script>
-<script src="02-lines.js?v=v169"></script>
-<script src="03-text.js?v=v169"></script>
-<script src="04-walk.js?v=v169"></script>
-<script src="05-fill.js?v=v169"></script>
-<script src="06-fourier.js?v=v169"></script>
-<script src="07-measure.js?v=v169"></script>
-<script src="08-shape.js?v=v169"></script>
-<script src="09-plate.js?v=v169"></script>
-<script src="10-export.js?v=v169"></script>
-<script src="11-stages.js?v=v169"></script>
-<script src="12-models.js?v=v169"></script>
-<script src="13-patterns.js?v=v169"></script>
-<script src="14-photo.js?v=v169"></script>
-<script src="15-cutout.js?v=v169"></script>
-<script src="16-molecule.js?v=v169"></script>
-<script src="17-vase.js?v=v169"></script>
-<script src="18-ties.js?v=v169"></script>
-<script src="core.js?v=v169"></script>
-<script src="fonts.js?v=v169"></script>
-<script src="settings.js?v=v169"></script>
-<script src="js/state.js?v=v169"></script>
-<script src="js/ui.js?v=v169"></script>
-<script src="js/config.js?v=v169"></script>
-<script src="js/engine-bridge.js?v=v169"></script>
-<script src="js/source.js?v=v169"></script>
-<script src="js/pipeline.js?v=v169"></script>
-<script src="js/preview.js?v=v169"></script>
-<script src="js/tools.js?v=v169"></script>
-<script src="js/art.js?v=v169"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v169");</script>
-<script src="js/readouts.js?v=v169"></script>
-<script src="js/controls.js?v=v169"></script>
-<script>feature("levels", "features/levels/levels.js?v=v169");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v169");</script>
-<script src="js/export.js?v=v169"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v169");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v169");</script>
-<script>feature("ties", "features/ties/ties.js?v=v169");</script>
-<script src="js/views.js?v=v169"></script>
-<script src="js/zoom.js?v=v169"></script>
-<script src="js/layers.js?v=v169"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v169");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v169");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v169");</script>
-<script src="js/workflow.js?v=v169"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v169");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v169");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v169");</script>
-<script>feature("camera", "features/camera/camera.js?v=v169");</script>
-<script src="js/steppers.js?v=v169"></script>
-<script src="js/scroll.js?v=v169"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v169");</script>
-<script>feature("model", "features/model/model.js?v=v169");</script>
-<script>feature("vase", "features/vase/vase.js?v=v169");</script>
-<script src="js/history.js?v=v169"></script>
-<script src="js/map.js?v=v169"></script>
-<script src="js/showall.js?v=v169"></script>
-<script src="js/main.js?v=v169"></script>
-<script src="js/parts.js?v=v169"></script>
-<script src="js/agent.js?v=v169"></script>
+<script src="00-util.js?v=v170"></script>
+<script src="01-image.js?v=v170"></script>
+<script src="02-lines.js?v=v170"></script>
+<script src="03-text.js?v=v170"></script>
+<script src="04-walk.js?v=v170"></script>
+<script src="05-fill.js?v=v170"></script>
+<script src="06-fourier.js?v=v170"></script>
+<script src="07-measure.js?v=v170"></script>
+<script src="08-shape.js?v=v170"></script>
+<script src="09-plate.js?v=v170"></script>
+<script src="10-export.js?v=v170"></script>
+<script src="11-stages.js?v=v170"></script>
+<script src="12-models.js?v=v170"></script>
+<script src="13-patterns.js?v=v170"></script>
+<script src="14-photo.js?v=v170"></script>
+<script src="15-cutout.js?v=v170"></script>
+<script src="16-molecule.js?v=v170"></script>
+<script src="17-vase.js?v=v170"></script>
+<script src="18-ties.js?v=v170"></script>
+<script src="core.js?v=v170"></script>
+<script src="fonts.js?v=v170"></script>
+<script src="settings.js?v=v170"></script>
+<script src="js/state.js?v=v170"></script>
+<script src="js/ui.js?v=v170"></script>
+<script src="js/config.js?v=v170"></script>
+<script src="js/engine-bridge.js?v=v170"></script>
+<script src="js/source.js?v=v170"></script>
+<script src="js/pipeline.js?v=v170"></script>
+<script src="js/preview.js?v=v170"></script>
+<script src="js/tools.js?v=v170"></script>
+<script src="js/art.js?v=v170"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v170");</script>
+<script src="js/readouts.js?v=v170"></script>
+<script src="js/controls.js?v=v170"></script>
+<script>feature("levels", "features/levels/levels.js?v=v170");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v170");</script>
+<script src="js/export.js?v=v170"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v170");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v170");</script>
+<script>feature("ties", "features/ties/ties.js?v=v170");</script>
+<script src="js/views.js?v=v170"></script>
+<script src="js/zoom.js?v=v170"></script>
+<script src="js/layers.js?v=v170"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v170");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v170");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v170");</script>
+<script src="js/workflow.js?v=v170"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v170");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v170");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v170");</script>
+<script>feature("camera", "features/camera/camera.js?v=v170");</script>
+<script src="js/steppers.js?v=v170"></script>
+<script src="js/scroll.js?v=v170"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v170");</script>
+<script>feature("model", "features/model/model.js?v=v170");</script>
+<script>feature("vase", "features/vase/vase.js?v=v170");</script>
+<script src="js/history.js?v=v170"></script>
+<script src="js/map.js?v=v170"></script>
+<script src="js/showall.js?v=v170"></script>
+<script src="js/main.js?v=v170"></script>
+<script src="js/parts.js?v=v170"></script>
+<script src="js/agent.js?v=v170"></script>
 
 </body>
 </html>

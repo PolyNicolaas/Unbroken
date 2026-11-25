@@ -189,8 +189,13 @@ function readRaw() {
   return o;
 }
 // a new style starts from its last settings this session, or its own defaults
+let styleSizeFrom = 0, // a new style picked: the width before it (its new width is said once it's laid out)
+  styleSizeTimer = null,
+  styleSizeAt = 0;
 $("artStyle").addEventListener("change", () => {
   const style = $("artStyle").value;
+  styleSizeFrom = st.outW || 0;
+  styleSizeAt = Date.now();
   patternControls(patternMemory[style] || UNB.patternDefaults(style, { seed: +$("artSeed").value || 1 }));
   patternEdited(patternNow());
 });
@@ -291,6 +296,23 @@ function artSizeUI() {
   }
   if (!st.outW) return;
   if (document.activeElement !== $("artWidth")) $("artWidth").value = +st.outW.toFixed(1);
+  // a new style picked: once its size settles, if it's much bigger or smaller than before, say so and why
+  if (styleSizeFrom) {
+    clearTimeout(styleSizeTimer);
+    styleSizeTimer = setTimeout(() => {
+      const from = styleSizeFrom;
+      if (!from) return;
+      // (the size can take a few traces to settle: keep watching for a while)
+      if (Date.now() - styleSizeAt > 8000 || st.art.kind !== "pattern" || st.art.width) styleSizeFrom = 0;
+      if (st.art.kind !== "pattern" || st.art.width || Math.abs(st.outW / from - 1) <= 0.25) return;
+      styleSizeFrom = 0;
+      toast(
+        `${patternName(st.art.pattern)}: ${fmt(st.outW, 0)} mm wide (was ${fmt(from, 0)}), so its closest lines keep the needle's spacing. Change it in Width.`,
+        false,
+        4500
+      );
+    }, 700);
+  }
   const gapNow = (st.outW * r.gap) / r.box[0],
     sp = st.spacing,
     P = UNB.PATTERNS[st.art.pattern.style],
