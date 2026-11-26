@@ -11,8 +11,9 @@ work on one, its folder, its marked parts of the page and its tests are everythi
 |---|---|---|---|---|---|
 | **plotter** | made for a pen plotter: the Plot step, pens, fills, SVG | `plot.js` | 1063 | 6 | E22, A15, A16, A32 |
 | **model** | a 3D model (STL) sliced into layers | `model.js`, `sample-skull.js` | 823 | 9 | E23, E30, E50, A17, A28 |
-| **vase** | Make a vase (needs model) | `vase.js` | 1050 | 2 | E57, E59, E62, A59, A62, A66 |
-| **patterns** | the pattern styles (labyrinth, spirograph, wave portrait …) | `pathpad.js`, `patterns.js` | 570 | 4 | E33, A31 |
+| **vase** | Make a vase (needs model) | `vase.js` | 912 | 2 | E57, E59, E62, A59, A62, A66 |
+| **relief** | a picture, text or pattern standing out from a wall (needs vase) | `relief.js` | 569 | 14 | E65, E66, E67, A72, A77 |
+| **patterns** | the pattern styles (labyrinth, spirograph, wave portrait …) | `pathpad.js`, `patterns.js` | 592 | 4 | E33, A31 |
 | **molecule** | a molecule drawn from its name | `molecule.js`, `moleditor.js` | 939 | 5 | E39, E40, E44, A40, A45, A50 |
 | **pieces** | a text printed as a piece per line | `pieces.js` | 444 | 1 | E31, A29, A70 |
 | **camera** | a photo of a drawing, straightened | `camera.js` | 509 | 5 | E37, E43, A36, A44 |
@@ -21,7 +22,7 @@ work on one, its folder, its marked parts of the page and its tests are everythi
 | **optimize** | Optimize and the starting points | `optimize.js` | 294 | 2 | A08 |
 | **testprint** | the test print | `testprint.js` | 169 | 1 | A25, A48 |
 | **matrix** | the test matrix | `matrix.js` | 277 | 1 | E46, A49 |
-| **ties** | ties: more connectors across the gaps between parts, for a large print | `ties.js` | 283 | 1 | E63, A71 |
+| **ties** | ties: more connectors across the gaps between parts, for a large print | `ties.js` | 273 | 1 | E63, A71 |
 
 ## How each one joins the app
 
@@ -50,7 +51,15 @@ Make a vase (needs model) Needs: model.
 
 - examples: wavyvase
 - steps and chips of the map: vprofile, vshape, vtexture, vmove, vrim
-- moments it answers: artUI, sourceChanged, ready, modelSave, modelRestoring, modelSized
+- moments it answers: ready, modelSave, modelRestoring, modelSized
+- moments it announces: vaseSending, vaseShown, vaseLabelled, vaseReshape
+
+### relief
+
+a picture, text or pattern standing out from a wall (needs vase) Needs: vase, model.
+
+- moments it answers: vaseSending, vaseReshape, artUI, sourceChanged, vaseShown, vaseLabelled
+- moments it announces: vaseSending
 
 ### patterns
 

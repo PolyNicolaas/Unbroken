@@ -23,7 +23,7 @@ module.exports = {
       const U = window.unbroken, wait = (ms) => new Promise((r) => setTimeout(r, ms));
       await U.open(src);
       await U.set({ widthMM: 80 });
-      $("reliefFromPic").click();
+      $("reliefMake").click();
       await wait(800); await U.whenReady();
       mapOpen("layers"); await wait(300);
     }, src);

@@ -41,10 +41,10 @@ module.exports = {
   pass: "Out: black 2 mm out, white flat. In: black 2 mm in, nothing out. Both: black 1 mm out, white 1 mm in (2 mm black to white), mid-grey within 0.15 mm of the face. In on both faces: each face in no more than 1.5 mm, the front and back at least 1.5 mm apart. Round, In: pressed in 2 mm, nothing out. Every lap within 0.28 mm of the one below, no turn tighter than 0.42 mm.",
   run() {
     const base = () => { const V = UNB.vaseDefaults(); V.height = 40; V.move = { kind: "none", size: 0, count: 1, shift: 0, flip: 0 }; return V; };
-    const plaque = (tex) => { const V = base(); V.profile = [[0, 30], [1, 30]]; V.plan = { kind: "plaque", thick: 0.15 }; V.texture = Object.assign({ kind: "picture", depth: 2, picture: picture(), sides: "front" }, tex); return stack(V); };
+    const plaque = (tex) => { const V = base(); V.profile = [[0, 30], [1, 30]]; V.plan = { kind: "plaque", thick: 0.15 }; V.texture = Object.assign({ kind: "relief", depth: 2, source: picture(), sides: "front" }, tex); return stack(V); };
     const half = (30 * 0.15) / 2, mid = [14, 26], black = [-12, -10], grey = [10, 12], white = [-24, -22];
     const O = plaque({ dir: "out" }), I = plaque({ dir: "in" }), B = plaque({ dir: "both" }), I2 = plaque({ dir: "in", sides: "both" });
-    const R = base(); R.profile = [[0, 20], [1, 20]]; R.plan = { kind: "circle" }; R.texture = { kind: "picture", depth: 2, picture: picture(), sides: "front", span: 0.5, dir: "in" };
+    const R = base(); R.profile = [[0, 20], [1, 20]]; R.plan = { kind: "circle" }; R.texture = { kind: "relief", depth: 2, source: picture(), sides: "front", span: 0.5, dir: "in" };
     const C = stack(R);
     let rIn = Infinity, rOut = -Infinity;
     C.walls.forEach((L, k) => { const z = 0.3 * (k + 1); if (z < mid[0] || z > mid[1]) return; for (let i = 0; i < L.x.length; i++) { const d = Math.hypot(L.x[i], L.y[i]) - 20; rIn = Math.min(rIn, d); rOut = Math.max(rOut, d); } });

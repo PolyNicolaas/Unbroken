@@ -527,8 +527,13 @@ body.show-all .panel .na { cursor: not-allowed; }
 .na-why { grid-column: 1 / -1; flex-basis: 100%; margin: 2px 0 0; font-size: calc(12px * var(--text)); color: var(--muted); font-style: italic; }
 body.show-all .panel label.check.na { flex-wrap: wrap; }
 body:not(.show-all) .na-why { display: none; }
-#vaseBox:is([data-tex="none"], [data-tex="rings"], [data-tex="picture"]) :is(.vt-ribs, .vt-twist), #vaseBox:is([data-tex="none"], [data-tex="ribs"], [data-tex="diamond"], [data-tex="picture"]) .vt-rings, #vaseBox[data-tex="none"] .vt-on, #vaseBox[data-move="none"] .vm-on { display: none; }
-#vaseBox:not([data-tex="picture"]) .vt-pic, #vaseBox:is([data-plan="plaque"], [data-plan="polygon"]) :is(.vt-span, .vt-turn), #vaseBox[data-plan="polygon"] .vt-sidesrow, #vaseBox:not([data-plan="polygon"]) .vt-face, #vaseBox:not([data-plan="plaque"]) .vp-plaque, #vaseBox[data-plan="plaque"] .vp-round { display: none; }
+#vaseBox:is([data-tex="none"], [data-tex="rings"], [data-tex="relief"]) :is(.vt-ribs, .vt-twist), #vaseBox:is([data-tex="none"], [data-tex="ribs"], [data-tex="diamond"], [data-tex="relief"]) .vt-rings, #vaseBox[data-tex="none"] .vt-on, #vaseBox[data-move="none"] .vm-on { display: none; }
+#vaseBox:not([data-tex="relief"]) .vt-relief, #vaseBox:is([data-plan="plaque"], [data-plan="polygon"]) :is(.vt-span, .vt-turn), #vaseBox[data-plan="polygon"] .vt-sidesrow, #vaseBox:not([data-plan="polygon"]) .vt-face, #vaseBox:not([data-plan="plaque"]) .vp-plaque, #vaseBox[data-plan="plaque"] .vp-round { display: none; }
+/* a relief (relief.js): the slider for its style, the line width for a text's or pattern's strokes, the inset; the
+   strength up the wall is a vase's, not a relief's */
+#vaseBox:not([data-rlstyle="smooth"]) .rl-smooth, #vaseBox:not([data-rlstyle="steps"]) .rl-steps, #vaseBox:not([data-rlstyle="shapes"]) .rl-shapes, #vaseBox:not([data-rlstrokes="1"]) .rl-strokes, #vaseBox[data-tex="relief"] .vase-curve { display: none; }
+.rl-inset { display: block; width: 100%; height: auto; margin: 6px 0 4px; border: 1px solid var(--rule); border-radius: 8px; background: var(--surface); touch-action: manipulation; cursor: pointer; }
+#rlSwap.on { background: var(--accent-soft); border-color: var(--accent); }
 #vaseBox:not([data-plan="polygon"], [data-plan="star"], [data-plan="flower"]) .vp-sides, #vaseBox:not([data-plan="star"], [data-plan="flower"]) .vp-depth, #vaseBox[data-plan="circle"] .vp-round, #vaseBox:not([data-plan="drawing"]) .vp-drawing { display: none; }
 #vaseBox:not([data-top="polygon"], [data-top="star"], [data-top="flower"]) .vr-sides, #vaseBox:not([data-top="star"], [data-top="flower"]) .vr-depth, #vaseBox:is([data-top="same"], [data-top="circle"]) .vr-round { display: none; }
 #vaseBox[data-lean="off"] .vl-on, #vaseBox:not([data-rim="flare"], [data-rim="scallop"]) .vrim-size, #vaseBox:not([data-rim="scallop"]) .vrim-scallop, #vaseBox[data-rim="none"] .vrim-on { display: none; }

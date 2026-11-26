@@ -30,7 +30,7 @@ In practice:
 
 ### Already in the middle (keep doing this)
 
-- **The engine is pure and split by stage** (`source/engine/00-util.js` … `17-vase.js`, 18 parts): data in, data
+- **The engine is pure and split by stage** (`source/engine/00-util.js` … `19-relief.js`, 20 parts): data in, data
   out, no page. It runs the same in the page, a background worker and Node, which is why it can be tested properly.
   Shared helpers live in `00-util.js` only (test E25): the spatial grid (`cellGrid`), contours, labelling, heaps, and
   since v139 the distance to a line segment (`segParam`, `segDist2`, used by the fill, the measuring, the overhang
@@ -38,8 +38,8 @@ In practice:
   helper is defined in two parts (checked 9 November).
 - **Background workers with cancellation** keep the page responsive. That is real complexity, but it's justified:
   tracing and slicing take seconds.
-- **The tests describe intent.** Each one says why it exists, how it checks and what counts as passing (58 engine
-  tests, 61 app tests on 10 November). App tests wait on the app's own "settled" signal, not the clock.
+- **The tests describe intent.** Each one says why it exists, how it checks and what counts as passing (66 engine
+  tests, 75 app tests on 26 November). App tests wait on the app's own "settled" signal, not the clock.
 - **Challenges** (`source/challenges/`): practical prints taken through the app with every version, their renders
   reviewed. `compare.js` checks two runs file by file, so a change that shouldn't change the output (a refactor, a
   rename) is proved byte for byte: the v91 clean-up left all 35 files of 30 jobs, and the screenshots, identical.

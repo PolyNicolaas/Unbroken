@@ -41,7 +41,7 @@ function printSettingsChanged() {
 // if it had never been built. What's off: settings.js (features: { vase: false }), and the page's address for trying
 // things (?off=vase,plotter turns some off, ?on=vase turns one on that settings.js has off). A feature that needs
 // another goes with it.
-const FEATURE_NEEDS = { vase: ["model"] };
+const FEATURE_NEEDS = { vase: ["model"], relief: ["vase", "model"] };
 const FEATURES_OFF = (() => {
   const off = new Set(),
     set = (window.UNB_SETTINGS && window.UNB_SETTINGS.features) || {},

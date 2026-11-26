@@ -92,7 +92,7 @@ report.
 | [E22](#e22) | Pen fills: the areas the pen line closes off, hatched one pen per layer | gaps that don't close (or close too far), slivers that don't merge, fills that spill over a line into the next area, stop short or overlap the outline's ink, miss spots, or end up in the wrong layer | – |
 | [E23](#e23) | Models: STL slices become one fitted line per layer, stacked into a spiral | STL files read wrongly, slices that miss or break a loop, walls on the wrong side of the surface, separate parts or holes left out, layers that don't add up to the model's height, and seams between layers | – |
 | [E24](#e24) | 3D → 2D: a model drawn as lines, hidden lines removed | hidden edges drawn through the model, outlines lost on curved surfaces, the flat-face diagonals of a mesh drawn as lines, and a fold angle that doesn't thin the drawing | – |
-| [E25](#e25) | The engine's parts load in the same order everywhere, and share helpers only through 00-util.js | a part missing from the page or the worker, parts loaded in a different order in different places, and a part quietly using another part's private helper (which would break as soon as the files are reordered) | – |
+| [E25](#e25) | The engine's parts load in the same order everywhere, and share helpers only through 00-util.js | a part missing from the page or the worker, parts loaded in a different order in different places, and a part quietly using another part's private helper (which would break as soon as the files are reordered) | 0.2 s |
 | [E26](#e26) | Edge cases found in the October 2026 bug hunt stay fixed | NaN lines from a one-pixel drawing, straight lines measured as a dot, closed walks offset differently at their seam, open slices split in two, line ends that don't join across a grid boundary, padded STL files rejected, and small mm drawings or many small shapes that take seconds | – |
 | [E27](#e27) | Each field of the app's shared state is set by its owner | a file quietly changing state another file is responsible for, which is how stale views and "who changed this?" bugs start | – |
 | [E28](#e28) | G-code starts, stops and moves between copies the way choc OS does | a blob or a string of chocolate at the end of each copy, an empty needle at the start of the next, no purge line, and a plunger speed that ignores the needle | – |
@@ -123,12 +123,17 @@ report.
 | [E54](#e54) | Lettering for a printer: letters joined along the baseline, near-misses closed, i and j dots, the measured smallest height | lettering full of connectors, stroke ends that blob into their letter, dots that run into their stems, letters printed too small to read | – |
 | [E55](#e55) | Chocolate font: Cyrillic in choc OS's style (Russian, Ukrainian, Belarusian Ў) and its missing punctuation | Cyrillic lettering in the Chocolate font printing as “?”, or new letters that don't sit with choc OS's own | – |
 | [E56](#e56) | Lettering: every open stroke drawn out and back, a letter's loops once round (doubleOpen) | letters printed with some strokes as a single strand, so two neighbouring strokes read as one (ll as one l) | – |
-| [E57](#e57) | Vases: a profile turned round, ribs and rings on the wall, a wave, zigzag or loops along the path, and the stacking check | a profile that misses its own points, a vase whose path doesn't follow its settings (radius, how many waves, twist), a jump between laps, loops that don't loop, and a shift that moves a lap off the one below without the check saying so | – |
+| [E57](#e57) | Vases: a profile turned round, ribs and rings on the wall, a wave, zigzag or loops along the path, and the stacking check | a profile that misses its own points, a vase whose path doesn't follow its settings (radius, how many waves, twist), a jump between laps, loops that don't loop, and a shift that moves a lap off the one below without the check saying so | 3.4 s |
 | [E58](#e58) | The core doesn't name a feature, and features keep to themselves | a core script calling a feature's function by name (the app would break with that feature off), and one feature leaning on another without saying so | – |
-| [E59](#e59) | Vase shapes: polygons, stars, flowers and a drawing's outline seen from above, twisting, blending to the rim, leaning; strength curves, grid, weave and diamond textures, a lattice, flared, rolled and scalloped rims, a footed shape | UNB.vaseStack and UNB.vaseOutline (17-vase.js): the vase's plan, twist, planTop, lean, strength, texture kinds, move.flip and rim | – |
+| [E59](#e59) | Vase shapes: polygons, stars, flowers and a drawing's outline seen from above, twisting, blending to the rim, leaning; strength curves, grid, weave and diamond textures, a lattice, flared, rolled and scalloped rims, a footed shape | UNB.vaseStack and UNB.vaseOutline (17-vase.js): the vase's plan, twist, planTop, lean, strength, texture kinds, move.flip and rim | 1.0 s |
 | [E60](#e60) | A printer's own G-code lines: at each layer, and before and after each copy | a printer that needs a line at each layer (a fan, a display, a pause) or around each copy getting no way to say so, and placeholders left unfilled in the file | – |
 | [E61](#e61) | A base fills the drawing's whole outline, not only what the line encloses | a base that leaves the gaps opening to the outside empty (between a labyrinth's branches, round letters), so it isn't a solid layer under the walls | – |
-| [E62](#e62) | A vase from a traced line: the line itself as the shape from above, followed exactly | a long traced line (a labyrinth's) cut short by the plan's 1440-point table or the lap's point limit, so the vase's walls lose its corners and gaps | – |
+| [E62](#e62) | A vase from a traced line: the line itself as the shape from above, followed exactly | a long traced line (a labyrinth's) cut short by the plan's 1440-point table or the lap's point limit, so the vase's walls lose its corners and gaps | 0.9 s |
+| [E63](#e63) | Ties: more connectors across the gaps between a drawing's parts, still one line | ties that cross the line or each other, cut across a letter's closed bowl, reach further than asked, bunch up, or break the line into pieces | – |
+| [E64](#e64) | Gaps too narrow for the needle are filled before an outline is traced | an outline squeezing two walls into paper narrower than the needle can draw (where they're pushed apart and wobble), and the fill eating gaps wide enough to draw or thin dark strokes | – |
+| [E65](#e65) | A picture in relief on a wall: flat (a closed loop) or round, on the front, back or both | the picture on the wrong face, mirrored, raised where it's light, leaning further a layer than a bead holds, or turning tighter than the bead | 3.8 s |
+| [E66](#e66) | A relief's direction: standing out, pressed in, or both (mid-grey on the wall) | a picture pressed the wrong way, Both not centred on mid-grey, or a plaque's front and back pressed into each other | 2.0 s |
+| [E67](#e67) | A relief's height from its source: Smooth, Steps or Shapes, a text's strokes, specks, taps, and what can't be printed | a style that doesn't do what it says (a slope that isn't one, steps that aren't flat or the wrong number of them, shapes that keep their greys or lose their rounded edge), a text's stroke not thickened to its line width, a speck smaller than the bead left in, a tap that presses in or flattens the wrong part, and a thin band across the wall not flagged as short | 0.2 s |
 
 ### App tests
 
@@ -190,7 +195,7 @@ report.
 | [A56](#a56) | The print's name: typed at the top, it names every file saved or exported, and is saved with the design | files named after the wrong thing, or all called "design" (a Cyrillic text's name used to come out empty) | – |
 | [A57](#a57) | Opening a design: settings it was saved without come back as they were then, and the Text card follows it | an older design opening changed (new options switched on, the last print's name kept), and a Text card left showing the design before | – |
 | [A58](#a58) | Lettering for a printer reads: every letter stroke a pair of strands, connectors along the baseline | two letters printed as one (ll as a single l), connectors across the tops and middles of letters, and a design in a removed font opening blank | – |
-| [A59](#a59) | Make a vase: the profile editor, texture and movement, the Print step's checks, the G-code, undo and design files | a profile point that can't be dragged or added, a change that doesn't reach the print, the STL's controls (turns, cuts, walls, support) showing for a vase, a shift past what a bead holds not flagged, G-code that isn't the vase's height, and a vase lost on undo or from a saved design | – |
+| [A59](#a59) | Make a vase: the profile editor, texture and movement, the Print step's checks, the G-code, undo and design files | a profile point that can't be dragged or added, a change that doesn't reach the print, the STL's controls (turns, cuts, walls, support) showing for a vase, a shift past what a bead holds not flagged, G-code that isn't the vase's height, and a vase lost on undo or from a saved design | 28.6 s |
 | [A60](#a60) | The tool palette: the design's rail, the output's screen, a panel per tool, settings as rows, examples in their own tray | a map whose line doesn't follow the design (a model sent through the Line step, a plotter ending in Print), a node that opens the wrong settings, a row moved out of its card and not put back (the step tabs would lose it), a warning from the ready list that doesn't reach its node, and the examples tray opening by itself | – |
 | [A61](#a61) | Features switched off: how well the app does without each one (the modules' scoreboard) | a feature growing new ties to the rest of the app (the app breaking, or throwing errors, without a feature it used to do without), and the record of how modular the app is going stale | – |
 | [A62](#a62) | Vase shapes in the app: the shape from above (a traced drawing's too), the rim's shape, twist, strength, lattice and rim, undo, and a vase from before them | features/vase/vase.js: the Shape, Texture, Movement and Rim controls and their map chips, the strength curve editors, Make a vase from this line; model.js passing the lattice to the ready list | – |
@@ -199,7 +204,16 @@ report.
 | [A65](#a65) | Draw your own from the empty start: the pad takes the strokes, and Trace drawing traces them | the empty start's message (Start with a picture …) staying over the drawing pad, hiding it and catching every stroke, so nothing could be drawn | – |
 | [A66](#a66) | Make a vase from this line: the traced line itself, pushed from the Line tool, becomes the vase | a vase made from a trace that doesn't say which line it used, a pattern's line turned into a coarse, notched outline, and a vase from a line that takes the example vase's bulb and waves | – |
 | [A67](#a67) | Start over in the File menu: two taps clear the design and every setting | a full reset that's hard to find (it was only on the Examples tray), one that clears on a single slip of the finger, or one that keeps the design or a setting | – |
-| [A68](#a68) | Ready for an agent: a picture from a link, a done signal, status() as data, readouts that say what they are | an agent (or a person) unable to load a picture from a link, guessing when the app has finished, misreading a choice from a screenshot, or acting on an export message for a design that has since changed | 12.7 s |
+| [A68](#a68) | Ready for an agent: a picture from a link, a done signal, status() as data, readouts that say what they are | an agent (or a person) unable to load a picture from a link, guessing when the app has finished, misreading a choice from a screenshot, or acting on an export message for a design that has since changed | – |
+| [A69](#a69) | The agent API: open, parts, select, set, snapshot, optimize and export through window.unbroken | an agent having to reach into the app's own functions (applySel, artUse, firing input events by hand) to do what a person does with clicks, or a call that answers before the app has finished | – |
+| [A70](#a70) | A picture in pieces: its parts traced on their own at one scale, a G-code file for each | a picture's parts printed at different scales (they wouldn't fit together in a box), pieces sharing one G-code file when each should be its own, or the picture split when it should stay one line | – |
+| [A71](#a71) | Ties: Layers adds struts across the gaps between a drawing's parts, to the print only | ties that don't reach the G-code or the layers' readout, that change the trace itself, that stay after they're switched off, or that are added for a pen plotter | – |
+| [A72](#a72) | A relief: a picture standing out from a wall, flat (a closed loop) or round, printed upright | Make a relief not making one from the picture, the sides or the shape not reaching the wall, the picture changing width between flat and round, and a relief that doesn't export | 33.4 s |
+| [A73](#a73) | All settings (View menu): the settings for another kind of art stay in the panel, greyed, saying when they apply | a setting still hidden with All settings on, a greyed setting that can still be changed or says nothing, the note left behind when it's off or the setting applies again, the switch not remembered, and the hiding leaking outside the settings panel | 13.2 s |
+| [A74](#a74) | Fixes from making a relief, a vase, a pattern and text on an iPad-sized screen | a relief's note saying dark parts stand out whatever the Direction, Make a relief only on the Line step, a relief called a vase (the 3D model switch, the Input card), a font style tab that leaves the font as it was, and the size jumping with no word when a font or a pattern style needs it | 38.8 s |
+| [A75](#a75) | The interface on an iPad: one size as printed, the rail always at the left, controls big enough to tap | sizes that disagree (the Width box, the Size readout, the Plate card), the rail jumping to the right on Print, the preview resizing as the Tools bar comes and goes, controls too small for a fingertip, the Math panel empty, Make it 3D with nothing to make it from, a one-layer print's layer slider, and the old start message | 11.1 s |
+| [A76](#a76) | The rail keeps its shared tools in place; Design comes back where you were; small things from a third walkthrough | Size, Material or Print moving on the rail with the kind of art, Design opening Line instead of the tool you left, the files' name stuck on the art before, text checked tilted on the Print screen, and the empty start's faint corner label and live buttons | 13.3 s |
+| [A77](#a77) | A relief from a logo, text, a pattern or a photo: one button, the height style, the inset's taps, made again keeping its shape | Make a relief offered for one kind of source only, a logo starting as a slope instead of flat shapes, a tap on the inset that misses its part or doesn't go through Undo, making the relief again from something else resetting its shape, a text's baseline joins standing out, a pattern's lines run together into one block, and the relief not kept in a design file | 32.6 s |
 
 #### E01
 
@@ -688,6 +702,46 @@ report.
 - **Why:** Nicolaas (12 November 2026): a labyrinth made into a vase came out messy. Make a vase from this line uses the line itself (UNB.vaseLineLoop) instead of its outside edge on a coarse grid; the plan's table and the lap's points now grow with the plan's length.
 - **How:** Takes a 12-cell, 60 mm labyrinth's line, makes its plan with UNB.vaseLineLoop and a straight 10 mm vase at its reach with no texture or movement; then narrows it to 0.45 at the rim and compares the rim lap's closest point to the middle with the line's; measures how far a wall lap's points are from the line, and the closest approach of parts of the lap more than 3 gaps apart along it.
 - **Pass when:** Narrowed to 0.45 at the rim, the rim lap comes as close to the middle as the line does (the smallest-radius push cut a round hole there); the plan is exact, over 4000 points; every lap point within 0.1 mm of the line; parts of the lap keep at least 0.9 of the labyrinth's gap apart.
+
+#### E63
+
+**Ties: more connectors across the gaps between a drawing's parts, still one line** · `engine/E63-ties.test.js`
+
+- **Why:** Nicolaas (24 November 2026), after a large logo (Gateway City Big Band, 150 × 210 mm, Outline): its letters, rows and arch were held together only by the trace's few single-strand connectors, which won't hold a tall print. A base was one answer; he chose connectors with no base: short struts across the gaps between parts, the full height of the walls, and asked for them in the app (Ties, in Layers).
+- **How:** Draws three blocks 4 mm apart, a bar 4 mm under them and a ring with its hole, traces the outlines at 120 mm (0.84 mm line, 1.34 mm spacing), and adds ties with UNB.ties, the ink from the working image. Then again with the longest tie 3 mm (shorter than every gap). Then a U with a block beside it (60 mm), with and without withinParts, and its notch tie added by a tap (addAt); the first tie taken away (leaveOut); and standing up (stand).
+- **Pass when:** At least 4 ties; none longer than 7 mm; every tie's middle is in the open background outside the ink (none across the ring's hole); no two ties' ends closer than 10 mm; the line with ties doesn't cross itself where the traced line didn't; it is longer by the length the ties report (within 2%), and by 0.75–1.25 × twice the ties' lengths (out and back); with the longest tie 3 mm, no ties and the line as it was; the U gets a tie to the block but none across its own notch, unless withinParts (then at least one); the notch tie is listed as left out, and a tap there adds it (marked tapped); a tie taken away leaves one fewer, none within 10 mm, and is listed as taken away; standing up has at least as many ties up and down. Nicolaas took away ties that closed a letter's own notch on the Gateway logo (W, Y, E, G).
+
+#### E64
+
+**Gaps too narrow for the needle are filled before an outline is traced** · `engine/E64-fill-gaps.test.js`
+
+- **Why:** Nicolaas (24 November 2026), on the Gateway City Big Band logo at 150 × 210 mm: why are the W's lines wavy? The W's notch tips, the slivers between serifs and between the A's thin and thick strokes are narrower than two walls a spacing apart; the outline was squeezed in and pushed out again. Filled first (a grey opening a disc the gap's half width), the outline sweeps round them.
+- **How:** Draws the blocks, gaps, hairline and notch, traces the outlines at 120 mm (0.84 mm line, 1.34 mm spacing) as the app does, without the fill and with it (UNB.fillGaps on the grey, a disc of half 1.34 + 0.84 mm), and counts the line's points inside the narrow gap, the wide gap, beside the hairline and in the notch where it's narrower than 1.6 mm. Also UNB.fillGaps against a direct grey opening on random data.
+- **Pass when:** Without the fill the line goes into the narrow gap and deep into the notch; with it, no point in the narrow gap or where the notch is under 1.6 mm wide; the wide gap and the hairline are still traced (points in the gap, and along the hairline); the fast filter matches the direct one everywhere.
+
+#### E65
+
+**A picture in relief on a wall: flat (a closed loop) or round, on the front, back or both** · `engine/E65-relief.test.js`
+
+- **Why:** Nicolaas (24 November 2026): a picture turned into a relief wall, the image on the vertical surface; flat or round, a closed loop so it stands, and the logo on each wall if wanted.
+- **How:** A picture with a dark square on its left half, as a plaque (60 mm wide, 4.5 mm front to back, 40 mm tall, 2 mm deep) on the front, on both faces, and inverted; and on a round wall 40 mm across (half the way round, front; and turned 90°); and a triangle (corners at 0°, 120°, 240°) with the picture on face 1, face 2 and every face. Each through UNB.vaseStack (0.3 mm layers, 0.84 mm bead); measures how far the line stands out on each face, left and right as seen from that face.
+- **Pass when:** Front only: the front stands out about 2 mm on its left and not on its right, the back stays flat; both: the back stands out on its left too, as seen from behind (it reads the right way round); inverted: the right of the front stands out, the left doesn't; round: the front's left stands out, the back doesn't; the triangle's face 1 stands out toward the front, face 2 anticlockwise from it, every face on all three, the corners plain; turned 90°, the round wall's picture moves round off the front; every lap within 0.28 mm of the one below (outwards and in) and no turn tighter than half the bead (0.42 mm).
+
+#### E66
+
+**A relief's direction: standing out, pressed in, or both (mid-grey on the wall)** · `engine/E66-relief-direction.test.js`
+
+- **Why:** Nicolaas (25 November 2026): reliefs going in and out of the chocolate's surface, not only out.
+- **How:** A picture with a black square on its left and a mid-grey square on its right, as a plaque (60 mm wide, 4.5 mm front to back, 40 mm tall, 2 mm deep): Out, In, Both; In on both faces (room 4.5 − 1.5 = 3 mm, 1.5 a face); and In round a wall 40 mm across. Through UNB.vaseStack (0.3 mm layers, 0.84 mm bead), measuring how far the line goes out and in on each part of the face.
+- **Pass when:** Out: black 2 mm out, white flat. In: black 2 mm in, nothing out. Both: black 1 mm out, white 1 mm in (2 mm black to white), mid-grey within 0.15 mm of the face. In on both faces: each face in no more than 1.5 mm, the front and back at least 1.5 mm apart. Round, In: pressed in 2 mm, nothing out. Every lap within 0.28 mm of the one below, no turn tighter than 0.42 mm.
+
+#### E67
+
+**A relief's height from its source: Smooth, Steps or Shapes, a text's strokes, specks, taps, and what can't be printed** · `engine/E67-relief-height.test.js`
+
+- **Why:** Nicolaas (26 November 2026): image manipulation for reliefs, simple: one style with one slider, and the parts tapped on an inset like the Ties card's (docs/RELIEF-PLAN.md).
+- **How:** UNB.reliefHeight on a left-to-right gradient (with a 2 px speck), at 0.5 mm a pixel, in each style; on a one-pixel stroke drawing as a text at 0.2 mm a pixel and a 3 mm line width. Then a plaque with two squares through UNB.reliefGrid: no taps, the right square tapped in, then flat. Then a thin band across the wall (1 mm tall) and a tall one (10 mm) through UNB.reliefShort.
+- **Pass when:** Smooth falls steadily from 1 at black to 0 at white, Contrast 100 lifting the greys; Steps 4 has exactly 4 heights (1, ⅔, ⅓, 0) and the speck gone; Shapes is 1 on the dark half and 0 on the light (the speck merged away and reported), rising in a curve over its Rounded edge (2 mm: under 1 a pixel from the edge, 1 four pixels in); the stroke stands 3 mm wide (13–17 rows at 0.2 mm), both strokes one part each; the right square stands out 2 mm untapped, −2 mm tapped in and 0 tapped flat while the left stays at 2; the thin band is short and the tall one isn't.
 
 #### A01
 
@@ -1214,8 +1268,80 @@ report.
 **Ready for an agent: a picture from a link, a done signal, status() as data, readouts that say what they are** · `app/A68-agent-ready.test.js`
 
 - **Why:** The first agent trial (23 November 2026, docs/AGENT-TRIAL.md) took the Polimeks logo from a link to G-code by pointing and clicking. It had to load the picture with a script (no link import; an SVG with only a viewBox came in at the wrong size), caught the page half-built, couldn't tell Centerline from Outline in a screenshot, wondered why the print shrank to 58 mm, and saw the last export's message after the design had changed.
-- **How:** Opens the app with ?src= pointing at a test logo (an SVG with only a viewBox: a bold P with a thin grey ring over a bold word), waits on window.unbroken.whenReady(), and reads body data-state, the picture's shape, status() and the ready list. Exports G-code, changes the width and reads the message again. Opens a second page and loads the same logo through the Picture card's link box. Checks the corner label is a live region, Optimize tracing is at the top of the Fit card, the preview box says what it measures, and From above turns the 3D view straight down.
-- **Pass when:** data-state goes to ready; the picture keeps the SVG's 340 : 146 shape and is 1600 px wide; status() gives the trace (terms, error, style centerline), the size the app picked and the ready list as data; the ready list says the size was picked for you until a width is typed; the export message clears when the width changes; the link box loads the same picture; the corner label has role status and aria-live; #optBtn sits at the top of the Fit card; From above sets the 3D view to look straight down; no page errors.
+- **How:** Opens the app with ?src= pointing at a test logo (an SVG with only a viewBox: a bold P with a thin grey ring over a bold word), waits on window.unbroken.whenReady(), and reads body data-state, the picture's shape, status() and the ready list. Exports G-code, changes the width and reads the message again. Opens a second page and loads the same logo through the Picture card's link box. Clicks Optimize tracing over a stale result and stops it. Checks the corner label is a live region, Optimize tracing is at the top of the Fit card, the preview box says what it measures, and From above turns the 3D view straight down.
+- **Pass when:** data-state goes to ready, and whenReady() waits for the linked picture; Optimize tracing is busy and shows no old result from the moment it's clicked; the picture keeps the SVG's 340 : 146 shape and is 1600 px wide; status() gives the trace (terms, error, style centerline), the size the app picked and the ready list as data; the ready list says the size was picked for you until a width is typed; the export message clears when the width changes; the link box loads the same picture; the corner label has role status and aria-live; #optBtn sits at the top of the Fit card; From above sets the 3D view to look straight down; no page errors.
+
+#### A69
+
+**The agent API: open, parts, select, set, snapshot, optimize and export through window.unbroken** · `app/A69-agent-api.test.js`
+
+- **Why:** The two logo trials (24 November 2026, docs/AGENT-PLAYBOOK.md) drove the app by calling its internals: picking a part with applySel and measured boxes, firing input events on sliders, screenshotting the Plate view for option sheets at different zooms. window.unbroken (agent.js) gives those as calls that work through the same controls a person uses and answer with plain data.
+- **How:** Opens the app empty and calls unbroken.open() with the test logo (a mark over a word). Reads unbroken.parts() at 90 mm; selects the first part with unbroken.select(), sets its width with unbroken.set(), takes unbroken.snapshot() at 8 px per mm; runs unbroken.optimize({ keep: false }); exports G-code with unbroken.export('gcode', { download: false }); goes back to the whole picture with unbroken.select(null); and tries an unknown setting.
+- **Pass when:** open() answers ready with a trace; parts() finds 2 parts (the mark, and the word with its dot), the word 90 mm wide with strokes 1.5–4 mm; select() traces the mark alone (fewer connectors than the whole); set() makes it the width asked; the snapshot is as wide as the printed line (the line plus the needle) at 8 px per mm; optimize() says what it would change and puts the settings back; export() gives G-code text with a G1 move and the file name; select(null) traces the whole picture again; an unknown setting is refused by name; no page errors.
+
+#### A70
+
+**A picture in pieces: its parts traced on their own at one scale, a G-code file for each** · `app/A70-picture-pieces.test.js`
+
+- **Why:** The logo trials (docs/AGENT-TRIAL.md) found a logo's mark traces far better on its own, and the plan (docs/PICTURE-PIECES.md, decided 23 November 2026) is: pieces are an option, never automatic; split where there's an empty gap (a slider); every piece at the picture's scale; each piece its own G-code. Tracing two selections by hand gave two scales.
+- **How:** Opens the test logo (a mark over a word) at 90 mm wide with unbroken.open() and set(). Reads the Picture choice on the Plate card (One line), then sets Pieces; reads status().pieces and the Plate card. Exports G-code with unbroken.export('gcode', { download: false }) at 1 copy and at 3 copies, then saves it with Export G-code and reads the zip. Moves Split at gaps to 10 mm, then back to One line.
+- **Pass when:** A picture starts as One line; with Pieces there are 2 pieces, the word about 90 mm wide and the mark as wide as parts() says at that size (within 10%: one scale); 2 G-code files named …-1_… and …-2_…, each with printing moves, one print each at 1 copy and three copy markers each at 3 copies; the saved zip holds 2 files; Split at gaps of 10 mm still gives at most 2 pieces; One line again gives one G-code text; no page errors.
+
+#### A71
+
+**Ties: Layers adds struts across the gaps between a drawing's parts, to the print only** · `app/A71-ties.test.js`
+
+- **Why:** Nicolaas (24 November 2026): a large logo held together only by the trace's few connectors needs more to print tall without a base; he asked for it in the app (E63 has the why).
+- **How:** Opens blocks-and-ring.svg (three blocks, a bar and a ring, 4 mm gaps at 120 mm) with unbroken.open(), traces the outlines at 120 mm, 10 mm tall, and reads the layers and an exported G-code. Then set({ ties: true }), the same again, and status().ties; then taps on the card's drawing: a tie taken away, brought back, taken away again, and Reset ties; then the longest tie at 2 mm; then ties off; then made for a pen plotter with ties on.
+- **Pass when:** With ties: at least 3 ties, the layers' line longer and the G-code longer, the trace (its points) unchanged, the Ties card says how many and the map has a Ties chip; a tapped tie goes (one fewer, shown as taken away, the card says so, Reset on), tapped again comes back, and Reset ties leaves the rules' ties and no changes; the longest tie at 2 mm: no ties; off: the layers' line as at first; for a pen plotter the card says not for this print; no page errors.
+
+#### A72
+
+**A relief: a picture standing out from a wall, flat (a closed loop) or round, printed upright** · `app/A72-relief.test.js`
+
+- **Why:** Nicolaas (24 November 2026): a picture turned into a relief wall, flat or round, a closed loop, the logo on each wall if wanted (E65 has the engine's side).
+- **How:** Opens mark-and-word.svg with unbroken.open() at 80 mm wide, taps Make a relief on the Input card; reads the vase; picks Both; switches the shape to Circle and back (Undo); goes to Print, exports G-code; sets Material's Overhang to 0.15 mm; then a polygon of 3 sides with the picture on every face, and round with the picture turned 90°. Then Text as the input, to see the button stay (text makes a relief too: A77).
+- **Pass when:** A relief is made (the model named relief, a plaque with the picture texture, on the front, its face about 80 mm wide, 10 mm front to back); Both reaches the texture; Circle keeps the picture's width (within 1 mm) and Undo goes back to the plaque; the Print step's ready list says every lap sits on the one below and the G-code exports; the lean is 90% of the overhang a bead holds per layer (0.84 mm/mm at 0.28 mm and 0.3 mm layers), and follows Overhang 0.15 mm (0.45) with every lap still on the one below; a triangle keeps the picture's width on a face, offers faces 1–3 and every face (instead of Front/Back/Both), and takes every face; round shows Turn the picture and takes 90°; with Text the button is still offered; no page errors.
+
+#### A73
+
+**All settings (View menu): the settings for another kind of art stay in the panel, greyed, saying when they apply** · `app/A73-all-settings.test.js`
+
+- **Why:** Nicolaas (25 November 2026): Support and Overhang couldn't be found for a relief; he doesn't like settings that aren't always there.
+- **How:** Opens mark-and-word.svg at 80 mm wide and makes a relief (a vase). Opens Layers: Support with All settings off, then on (the View menu's box). Opens Material (Overhang per layer). Switches to Text and opens Layers again. Turns All settings off. Reloads with it on.
+- **Pass when:** Off: Support hidden. On: Support shown, greyed (inert), its note says it's only for STL models; the Walls and support group shows. Overhang per layer shows either way, not greyed. Text, on: Support says it's only for 3D models. Off again: Support hidden, no notes left. Reloaded: the box still ticked and Support shown. The preview's edit tools stay hidden for a relief with it on. No page errors.
+
+#### A74
+
+**Fixes from making a relief, a vase, a pattern and text on an iPad-sized screen** · `app/A74-walkthrough-fixes.test.js`
+
+- **Why:** Nicolaas (25 November 2026), after a walkthrough of the app in its own browser.
+- **How:** Opens mark-and-word.svg; taps Make a relief on the Input card; reads the Direction's words, the 3D model switch and the Input card's name; picks In, then Both. Then Text: types Chocolate at 12 mm, taps the Script tab. Then Pattern: Labyrinth, then Spirograph.
+- **Pass when:** Make a relief makes one; the Direction says standing out, then pressed in, then mid-grey on the wall; the switch says A relief and the Input card says relief. The Script tab picks a script font; the letters raised to their smallest size bring a note saying so. Spirograph's new width brings a note with both widths. No page errors.
+
+#### A75
+
+**The interface on an iPad: one size as printed, the rail always at the left, controls big enough to tap** · `app/A75-ipad-interface.test.js`
+
+- **Why:** Nicolaas (25 November 2026): a walkthrough on an iPad-sized screen; he picked one size (the outside as printed) and the rail always at the left.
+- **How:** An iPad-sized window (1180 × 820) with a touch pointer. Empty: the chip and Make it 3D. The leaf: Size (the boxes, the readout, typing a width as printed), the Plate card, the Tools bar's place on Line and Grey levels, Math, the rail's side on Print and its controls' heights. Screenshots go to results/ipad-*.png.
+- **Pass when:** Empty: the chip says what to pick; no Make it 3D. The Width and Height boxes equal the Plate card's footprint (within 0.15 mm) and the Size header; 60 typed as the width prints 60 (within 1.5 mm). The Tools bar keeps its height on Grey levels (greyed). Math shows its working. Print: the rail at the left, the layer bar hidden for one layer. Tap targets: every visible button, select, number box and segment at least 36 px tall. No page errors.
+
+#### A76
+
+**The rail keeps its shared tools in place; Design comes back where you were; small things from a third walkthrough** · `app/A76-rail-and-way-back.test.js`
+
+- **Why:** Nicolaas (25 November 2026), after a walkthrough of v171 on an iPad-sized screen; he picked the shared tools pinned to the rail's foot.
+- **How:** An iPad-sized window (screenshots of the three rails in results/rail-*.png). Empty: the corner label, Trace and Play drawing. The leaf, then Text, then a vase: where Size, Material and Print… sit on the rail. Text: Size open, Print…, Design. The skull cup: the name box's hint. Text on the Print screen: From above.
+- **Pass when:** Empty: no corner label, Trace and Play drawing greyed. Size at the same height for the leaf and text; Material and Print… at the same height for all three (within 2 px), and Print… at the rail's foot. Design comes back to Size. The skull cup's hint names it. Text starts From above on the Print screen. No page errors.
+
+#### A77
+
+**A relief from a logo, text, a pattern or a photo: one button, the height style, the inset's taps, made again keeping its shape** · `app/A77-relief-sources.test.js` · slow
+
+- **Why:** Nicolaas (26 November 2026): image manipulation for reliefs, kept simple: text, logos, patterns and pictures all make one, one style with one slider, and the parts tapped on an inset like the Ties card's (docs/RELIEF-PLAN.md).
+- **How:** Opens mark-and-word.svg at 80 mm; taps Make a relief on the Input card; reads the style, the inset and its readout; taps the middle of the largest part on the inset twice (in, then flat), then Undo and Redo; picks Circle. Then Text (Nicolaas), Make a relief; then Pattern, Make a relief; then the Face example, Make a relief. Saves the design's state and opens it again. Screenshots in results/relief-*.png.
+- **Pass when:** The button shows for the logo, the text, the pattern and the face; the logo starts on Shapes, the face on Smooth, the text and pattern on Shapes with a line width (the pattern's under its gaps: at most 2.4 mm); the inset is drawn and its readout counts parts; a tap presses the part in, the next leaves it flat, Undo brings it back in and Redo flat again; made again from the text, the relief stays round (Circle) and as wide, its source the text with no taps, and the text's joins along the baseline aren't in its source; the design file brings the relief back with its source and taps; no page errors.
 
 <!-- catalogue:end -->
 

@@ -61,8 +61,10 @@ Tests:
   short). Loops cross themselves: watch how chocolate takes the crossings on the first prints.
 - **Ideas from clay printing tools** (looked at 9 November, after Make a vase; each with its use):
   - *Image relief on the wall* (Potterware's texture tab, Eazao's texture mapping): a picture's light and dark push
-    the vase's wall in and out, so a name, a logo or a face becomes part of the wall. Plays to what Unbroken already
-    does with pictures. **Next.**
+    the vase's wall in and out, so a name, a logo or a face becomes part of the wall. Done: a picture (v165), and
+    text, patterns, height styles and the tap inset (v173, docs/RELIEF-PLAN.md). Maybe later: a height brush, if
+    tapping parts isn't enough for photos after a test print; Shapes filling closed letters (an outline font as solid
+    letters).
   - *Movement that changes up the vase* (CoilCAM's shaping functions): the size, count or shift of the movement follow
     a small curve from bottom to rim, edited like the profile, so a texture can grow, fade or tighten towards the neck.
     **Next.**

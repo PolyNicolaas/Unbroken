@@ -156,6 +156,24 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   you like, or rings) and a movement along the path (a wave, a zigzag or loops, shifted from layer to layer: columns,
   spirals or alternating). The Print step writes its path straight from those settings (`UNB.vaseStack`, no slicing)
   and checks that every lap sits on the one below and that the bead can follow its turns. Tests E57, A59. **Make a vase from this line** (the Line tool) starts one from the traced line itself: the line exactly (`UNB.vaseLineLoop`), at its own size, straight up, no texture or movement, so a pattern such as a labyrinth is what the walls follow (tests E62, A66); the Shape tool offers Drawing only for a vase made this way (an open line uses its outside edge). This replaced the Shape tool's Use the last traced line (v153).
+- **A relief** (`web-app/features/relief/relief.js`, engine `19-relief.js`; plan and reasons in `docs/RELIEF-PLAN.md`):
+  **Make a relief** (the Input card's Make it 3D) stands a picture, a text or a pattern out from a wall printed
+  upright, as a vase whose texture is the relief: a flat plaque 10 mm front to back the first time; made again (from
+  the same source or another) it keeps its shape and settings and takes only the new source (a plaque's height follows
+  the source's proportions). A text is drawn again from its layout without the joins along the baseline; a text's or
+  pattern's strokes are thickened to **Line width** (starting under the narrow gaps between them, at most 2.4 mm).
+  **Height from the source**, one choice with one slider: *Smooth* (greys as a slope, *Contrast* bends them; photos),
+  *Steps* (2–6 flat *Levels*), *Shapes* (each dark shape one height with a *Rounded edge*; logos and lettering). A
+  picture that's nearly all black and white starts on Shapes, a photo on Smooth. **The inset** draws the face as it
+  will print (the engine's grid after the lean and the softening, lit from the upper left): in Steps and Shapes each
+  part (a connected area of one level) is outlined, and a tap presses it in, the next leaves it flat (dashed), the next
+  raises it back (`texture.taps`, kept with the design, through Undo); a part that never gets to 70% of its depth is
+  outlined in orange, and the readout says how wide and how tall a part has to be at this depth; a speck smaller than
+  the bead is merged into what's round it and circled. **Swap out and in** raises the light parts instead. Each layer
+  leans at most 90% of the overhang a bead holds over the one below; along each layer the relief is softened just
+  enough that the line turns no tighter than about two thirds of the bead (0.65 mm at 1 mm deep with the 0.84 mm
+  needle, 0.86 at 2). Direction (out, in, both), front, back or both, a polygon's faces and a round wall's span and turn
+  as before. Tests E65, E66, E67, A72, A77.
 
 **Take a picture** (`web-app/features/camera/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
 phone) outlines the page it finds (`UNB.findPage`: the largest light, plain area on a small copy of the frame, its four

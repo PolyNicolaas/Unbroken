@@ -54,6 +54,25 @@ const cssRGBA = (n) => {
 
 // Size a canvas's pixels to its box on screen (× device pixel ratio). Returns { r (its box), dpr }, or null when it
 // isn't shown (zero width). keep: leave the pixels alone when they already match (redrawing every frame).
+// An inset drawing (the Ties card's line, a relief's face): the canvas as wide as it's shown, as tall as a w × h
+// drawing needs at that width (at most maxH px, and the drawing then narrower), a pad round it. Returns the 2D
+// context (in CSS px), the scale s (px per unit) and where (0, 0) lands (ox, oy), or null while it isn't shown.
+function insetCanvas(cv, w, h, maxH, pad = 10) {
+  const dpr = window.devicePixelRatio || 1,
+    W = cv.clientWidth;
+  if (!W) return null;
+  const s = Math.min((W - 2 * pad) / Math.max(1e-9, w), maxH / Math.max(1e-9, h)),
+    H = Math.round(h * s + 2 * pad);
+  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
+    cv.width = Math.round(W * dpr);
+    cv.height = Math.round(H * dpr);
+    cv.style.height = H + "px";
+  }
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, W, H);
+  return { g, s, ox: (W - w * s) / 2, oy: pad, W, H };
+}
 function fitCanvas(cv, keep) {
   const r = cv.getBoundingClientRect(),
     dpr = window.devicePixelRatio || 1;

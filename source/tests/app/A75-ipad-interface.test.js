@@ -14,12 +14,12 @@ module.exports = {
     const o = {};
     o.coarse = await page.evaluate(() => matchMedia("(pointer: coarse)").matches);
     o.emptyChip = await page.textContent("#chip");
-    o.emptyRelief = await page.evaluate(() => $("picReliefRow").getClientRects().length > 0);
+    o.emptyRelief = await page.evaluate(() => $("reliefRow").getClientRects().length > 0);
     await shot("1-empty");
     // the leaf
     await page.goto(page.url().split("?")[0] + "?example=leaf");
     await A.idle(page, 2500);
-    o.relief = await page.evaluate(() => { mapOpen("art"); return $("picReliefRow").getClientRects().length > 0; });
+    o.relief = await page.evaluate(() => { mapOpen("art"); return $("reliefRow").getClientRects().length > 0; });
     await page.evaluate(async () => { mapOpen("size"); await new Promise((r) => setTimeout(r, 300)); });
     o.size = await page.evaluate(() => ({ w: +$("outW").value, h: +$("outH").value, head: sizeText(), info: $("sizeInfo").textContent, lay: plateNow() }));
     o.toolsLine = await page.evaluate(() => $("box").closest(".stage").querySelector(".toolbar.tools").getBoundingClientRect().height);
@@ -54,7 +54,7 @@ module.exports = {
       check("a touch pointer (pointer: coarse)", +o.coarse, "==", 1),
       check("empty: the chip says what to pick", +/pick a picture/.test(o.emptyChip), "==", 1),
       check("empty: no Make it 3D", +o.emptyRelief, "==", 0),
-      check("a picture: Make it 3D on the Picture card", +o.relief, "==", 1),
+      check("a picture: Make it 3D on the Input card", +o.relief, "==", 1),
       check("Width box = the Plate card's footprint (mm off)", Math.abs(o.size.w - o.size.lay.w), "<=", 0.15),
       check("Height box = the Plate card's footprint (mm off)", Math.abs(o.size.h - o.size.lay.h), "<=", 0.15),
       check("the Size header says the boxes' size", +(o.size.head === `${o.size.w.toFixed(1)} × ${o.size.h.toFixed(1)} mm`), "==", 1),

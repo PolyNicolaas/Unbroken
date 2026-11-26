@@ -88,7 +88,7 @@ For an agent that clicks instead (or to find a setting on screen):
 | Hold a large print's parts together | `#ties` (Print: Ties), `#tieStand`, `#tieInside`, `#tieMax`, `#tieEvery`; tap ties on `#tieEdit` (the person's taps, kept in `#tieEdits`), `#tieReset`; or a base: `#baseLayers` |
 | Name the files | `#designName` |
 | Files | `#gcodeBtn` (G-code, zipped), `#dxfBtn` (DXF for choc OS), `#exportBtn` (plotter SVG) |
-| A picture in relief on a wall (flat plaque or round) | `#reliefFromPic` (Line tool: Make a relief from this picture), then the vase's Shape (`#vpPlaque` Flat, `#vpThick`; `#vpCircle`) and Texture (`#vtPicture`, `#vtSideFront` / `#vtSideBack` / `#vtSideBoth`, `#vtFace` (a polygon: a face, or every face), `#vtTurn` (round: where it starts), `#vtDepth`, `#vtSoft`, `#vtInvert`, `#vtSpan`) |
+| A picture, text or pattern in relief on a wall (flat plaque or round) | `#reliefMake` (Input card: Make a relief; made again it keeps the shape), then the vase's Shape (`#vpPlaque` Flat, `#vpThick`; `#vpCircle`) and Texture (`#vtRelief`; height: `#rlSmooth` + `#rlContrast`, `#rlSteps` + `#rlLevels`, `#rlShapes` + `#rlBevel`; `#rlLineW` (text, pattern); `#rlInset` (tap a part: in, flat, out; `texture.taps`); `#rlSwap`; `#vtDirOut` / `#vtDirIn` / `#vtDirBoth`; `#vtSideFront` / `#vtSideBack` / `#vtSideBoth`, `#vtFace` (a polygon), `#vtTurn`, `#vtSpan` (round); `#vtDepth`) |
 | Check the print by eye | 3D layers view, `#pvAbove` (From above: straight down on the plate) |
 
 Steps: `label[for=viewArt]`, `label[for=viewDesign]` (Line), `label[for=viewChoc]` (Print), `label[for=view2D]`

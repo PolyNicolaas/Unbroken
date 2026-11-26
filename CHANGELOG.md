@@ -3,6 +3,35 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v173 · 2026-11-26
+
+Reliefs from any flat source, with their own height controls (Nicolaas, 26 November 2026: image manipulation for
+reliefs, kept simple, with an inset to tap like the Ties card's; plan in docs/RELIEF-PLAN.md):
+
+- **Make a relief from a picture, a text or a pattern.** One button, on the Input card's **Make it 3D** row (the
+  Picture card's and the Line tool's buttons are gone). Made again, from the same source or another, the relief keeps
+  its shape and settings and takes only the new source (a plaque's height follows the source). A text is drawn again
+  from its layout without the joins along the baseline (they're for the trace).
+- **Height from the source**, one choice with one slider: **Smooth** (greys as a slope; Contrast), **Steps** (2–6
+  flat Levels), **Shapes** (each dark shape one height with a Rounded edge). A logo or drawing (nearly all black and
+  white) starts on Shapes, a photo on Smooth, text and patterns on Shapes. **Line width** for a text's or pattern's
+  strokes starts under the narrow gaps between them, so letters and a pattern's lines don't run together.
+- **The inset**: the relief's face as it will print, lit so raised and pressed parts read. In Steps and Shapes each
+  part is outlined; tap it to press it in, again to leave it flat, again to raise it back (kept with the design,
+  through Undo). A part that can't reach its depth is outlined in orange, and the readout says how wide and tall a part
+  must be at this depth; specks smaller than the bead are circled. **Swap out and in** replaces Light parts stand out.
+- **Softening follows the depth.** Along each layer the relief was softened 1.3 mm whatever its depth, which flattened
+  strokes narrower than about 2.7 mm (a text's letters barely stood out). It's now just enough that the line turns no
+  tighter than about two thirds of the bead: 0.65 mm at 1 mm deep with the 0.84 mm needle, 0.86 at 2 (the engine's
+  turn check: 1.1 and 0.68 mm turns against the 0.42 it asks for). The Soften edges slider is gone.
+- Strength up the wall is hidden for a relief (it's a vase's).
+- Code: the relief is its own feature (`features/relief/relief.js`, switchable in settings.js, needs the vase) and
+  engine part (`19-relief.js`: `UNB.reliefHeight`, `UNB.reliefGrid`, `UNB.reliefShort` …); the vase joins it through
+  four moments. `texture.kind` is `"relief"` and its image `texture.source`. vase.js is 224 lines shorter, 17-vase.js
+  188. The Ties card and the relief share `insetCanvas` (ui.js).
+- Tests: E67 (the styles, a text's strokes, specks, taps, what can't be printed), A77 (logo, text, pattern and photo,
+  taps through Undo, made again keeping the shape, a design file); E65, E66, A72–A75 follow the new names and button.
+
 ## v172 · 2026-11-25
 
 From a third walkthrough on an iPad-sized screen (Nicolaas, 25 November 2026; he picked the shared tools pinned to
