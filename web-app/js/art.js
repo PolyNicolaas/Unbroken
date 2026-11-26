@@ -298,6 +298,17 @@ function turnedCanvas(src, deg) {
   g.translate(w / 2, h / 2);
   g.rotate(a);
   g.drawImage(src, -src.width / 2, -src.height / 2);
+  // (a picture with transparent parts: those turned too, the corners that come in transparent)
+  if (src.__clear) {
+    const t = document.createElement("canvas");
+    t.width = out.width;
+    t.height = out.height;
+    const q = t.getContext("2d");
+    q.translate(w / 2, h / 2);
+    q.rotate(a);
+    q.drawImage(src.__clear, -src.width / 2, -src.height / 2);
+    out.__clear = t;
+  }
   return out;
 }
 let turnTimer = null;

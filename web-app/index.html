@@ -166,6 +166,14 @@
                 <option value="band" selected>Width (faded)</option>
                 <option value="print">As printed</option>
               </select></label>
+            <label class="vrow" title="How the Solid view (Print, 3D layers) is lit. Front: mostly from in front. Raking: low across the surface, so every step out or back catches the light or falls into shadow (best for reliefs). Auto: Raking for a relief, Front for everything else"><span>Light <span class="val" id="pvLightVal"></span></span>
+              <select id="pvLight" aria-label="How the Solid view is lit">
+                <option value="auto" selected>Auto</option>
+                <option value="front">Front</option>
+                <option value="raking">Raking</option>
+              </select></label>
+            <label class="vrow" title="Where the light comes from on the screen. A raking light hides edges that run the same way it does: turn it to see them"><span>Light from <span class="val" id="pvLightFromVal"></span></span>
+              <input type="range" id="pvLightFrom" min="0" max="345" step="15" value="315" aria-label="Where the light comes from (degrees clockwise from the top)"></label>
             <hr>
             <label class="check" title="Show the rotating circles while the drawing plays"><input type="checkbox" id="circles" checked> Circles</label>
             <label class="check" title="Highlight the connectors: the straight strands the line prints to reach a part it doesn't touch (it never stops)"><input type="checkbox" id="showConn" checked> <span>Connectors</span><span class="swatch"></span></label>

@@ -89,7 +89,7 @@ For an agent that clicks instead (or to find a setting on screen):
 | Name the files | `#designName` |
 | Files | `#gcodeBtn` (G-code, zipped), `#dxfBtn` (DXF for choc OS), `#exportBtn` (plotter SVG) |
 | A picture, text or pattern in relief on a wall (flat plaque or round) | `#reliefMake` (Input card: Make a relief; made again it keeps the shape), then the vase's Shape (`#vpPlaque` Flat, `#vpThick`; `#vpCircle`) and Texture (`#vtRelief`; height: `#rlSmooth` + `#rlContrast`, `#rlSteps` + `#rlLevels`, `#rlShapes` + `#rlBevel`; `#rlLineW` (text, pattern); `#rlInset` (tap a part: in, flat, out; `texture.taps`); `#rlSwap`; `#vtDirOut` / `#vtDirIn` / `#vtDirBoth`; `#vtSideFront` / `#vtSideBack` / `#vtSideBoth`, `#vtFace` (a polygon), `#vtTurn`, `#vtSpan` (round); `#vtDepth`) |
-| Check the print by eye | 3D layers view, `#pvAbove` (From above: straight down on the plate) |
+| Check the print by eye | 3D layers view, `#pvAbove` (From above: straight down on the plate); View menu `#pvLight` (auto, front, raking: raking shows a relief best) and `#pvLightFrom` (degrees clockwise from the top) |
 
 Steps: `label[for=viewArt]`, `label[for=viewDesign]` (Line), `label[for=viewChoc]` (Print), `label[for=view2D]`
 (Plot). The map opens the panel a control is in when it's clicked (see the tests' `mapNav` in

@@ -3,6 +3,26 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v174 · 2026-11-26
+
+From testing v173 (Nicolaas, 26 November 2026: the Solid view doesn't show reliefs off, and a relief should know a
+transparent background from white in the art):
+
+- **The Solid view shows a relief's shape.** Each bead is shaded by how far it steps out from the layer below as well
+  as by which way it turns, so an overhang faces down and a step back faces up: a raised part's top and bottom edges
+  catch the light or fall into shadow (before, they shaded like the wall round them). It helps every print a little
+  (the skull cup's facets read more clearly). Worked out once per print; 16 shades instead of 10.
+- **Light** (View menu): **Front** (mostly from in front, as before), **Raking** (low across the wall, the way
+  reliefs and coins are photographed) or **Auto** (Raking for a relief, Front for the rest); **Light from** turns it
+  round the screen. Both are kept in the browser.
+- **Transparent backgrounds in a relief.** A picture with transparent parts keeps them beside the white version
+  everything else reads, and a relief makes them the bare wall whatever its style, swap, direction or taps. Swap out
+  and in on a transparent badge raises its white inside as a coin, not the background; white art on a transparent
+  background starts swapped, so it stands out straight away. A coloured background still frames the art as a panel.
+- The camera's "choose a photo" fallback puts a transparent picture on white first (the clean-up read it as black).
+- Tests: A78 (the light, the slope, four badges: transparent, white, blue, white art on transparent); E67 adds
+  transparency. Fixtures: `badge-*.png`.
+
 ## v173 · 2026-11-26
 
 Reliefs from any flat source, with their own height controls (Nicolaas, 26 November 2026: image manipulation for

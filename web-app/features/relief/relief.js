@@ -97,20 +97,40 @@ function reliefTextCanvas() {
   for (let i = 0; i < gray.length; i++) gray[i] = d[4 * i];
   return { w: c.width, h: c.height, gray };
 }
+// A picture with transparent parts (controls.js keepClear: st.source.__clear) as the working image is cropped and
+// scaled: 1 where it's transparent (under 80% opaque: a soft edge blended with the paper would read as light), or null.
+function reliefClearAt(W) {
+  const src = st.source && st.source.__clear;
+  if (!src || !W.crop) return null;
+  const c = document.createElement("canvas");
+  c.width = W.w;
+  c.height = W.h;
+  const g = c.getContext("2d"),
+    { sx, sy, kx, ky } = W.crop;
+  g.drawImage(src, sx, sy, W.w / kx, W.h / ky, 0, 0, W.w, W.h);
+  const a = g.getImageData(0, 0, W.w, W.h).data,
+    m = new Uint8Array(W.w * W.h);
+  let any = 0;
+  for (let i = 0; i < m.length; i++) if (a[4 * i + 3] < 200) ((m[i] = 1), (any = 1));
+  return any ? m : null;
+}
 async function reliefSource() {
   const kind = st.art.kind,
     strokes = kind !== "picture",
     W = (kind === "text" && reliefTextCanvas()) || (await working()), // pipeline.js: as Image prep makes it
     gw = W.w,
     gh = W.h,
-    dark = strokes ? 128 : 200;
+    dark = strokes ? 128 : 200,
+    // a transparent background: the art is what isn't transparent, light or dark
+    clearW = strokes ? null : reliefClearAt(W),
+    isArt = (i) => (clearW ? !clearW[i] : W.gray[i] < dark);
   let x0 = gw,
     y0 = gh,
     x1 = -1,
     y1 = -1;
   for (let y = 0; y < gh; y++)
     for (let x = 0; x < gw; x++)
-      if (W.gray[y * gw + x] < dark) {
+      if (isArt(y * gw + x)) {
         x0 = Math.min(x0, x);
         x1 = Math.max(x1, x);
         y0 = Math.min(y0, y);
@@ -127,7 +147,8 @@ async function reliefSource() {
     k = Math.min(1, (strokes ? 480 : 320) / Math.max(cw, ch)),
     w = Math.max(8, Math.round(cw * k)),
     h = Math.max(8, Math.round(ch * k)),
-    data = new Array(w * h);
+    data = new Array(w * h),
+    clear = clearW ? new Uint8Array(w * h) : null;
   let hash = kind.length;
   for (let y = 0; y < h; y++)
     for (let x = 0; x < w; x++) {
@@ -137,21 +158,42 @@ async function reliefSource() {
         by = Math.max(ay, Math.min(y1, y0 + Math.floor((y + 1) / k) - 1));
       let s = 0,
         c = 0,
-        m = 255;
+        m = 255,
+        cl = 0;
       for (let yy = ay; yy <= by; yy++)
         for (let xx = ax; xx <= bx; xx++) {
           const g = W.gray[yy * gw + xx];
           s += g;
           c++;
           if (g < m) m = g;
+          if (clearW && clearW[yy * gw + xx]) cl++;
         }
       const v = Math.round(Math.min(255, Math.max(0, strokes ? m : s / Math.max(1, c))));
       data[y * w + x] = v;
-      hash = (hash * 31 + v) % 2147483647;
+      if (clear && 2 * cl > c) clear[y * w + x] = 1;
+      hash = (hash * 31 + v + (clear ? 7 * clear[y * w + x] : 0)) % 2147483647;
     }
-  // a picture that's nearly all black and white (a logo, a drawing) is flat art: Shapes suits it better than a slope
-  let mid = 0;
-  for (const v of data) if (v > 50 && v < 205) mid++;
+  // a picture that's nearly all black and white (a logo, a drawing) is flat art: Shapes suits it better than a slope;
+  // counted over the whole picture (a transparent background counts as plain), since a thin logo's soft edges are
+  // grey. Light art on a transparent background (white letters) starts swapped, so it's the art that stands out.
+  let mid = 0,
+    art = 0,
+    light = 0;
+  for (let i = 0; i < data.length; i++) {
+    if (clear && clear[i]) continue;
+    art++;
+    if (data[i] > 50 && data[i] < 205) mid++;
+    if (data[i] >= 128) light++;
+  }
+  // the transparent parts, as runs: [start, length, …] (a design keeps them small)
+  const runs = [];
+  if (clear)
+    for (let i = 0; i < clear.length; i++)
+      if (clear[i] && (i === 0 || !clear[i - 1])) {
+        let j = i;
+        while (j < clear.length && clear[j]) j++;
+        runs.push(i, j - i);
+      }
   return {
     w,
     h,
@@ -159,6 +201,7 @@ async function reliefSource() {
     kind,
     strokes,
     flat: !strokes && mid < 0.1 * data.length,
+    ...(clear ? { clear: runs, light: light > 0.6 * art } : {}),
     id: `${kind}:${w}x${h}:${hash}`,
     from: $("designName").value.trim() || "",
   };
@@ -213,6 +256,7 @@ async function reliefMake() {
     }
     if (!same) T.depth = reliefDepth(src); // (lettering can't climb as far as a picture)
     T.source = src;
+    if (src.clear) T.invert = src.light; // (light art on a transparent background: swapped, so the art stands out)
     // a plaque is as tall as its source needs (its width, front to back and everything else stay)
     if (V.plan.kind === "plaque")
       V.height = Math.round(Math.min(200, Math.max(10, (reliefFaceMM(V) * src.h) / src.w / 0.92)));
@@ -237,7 +281,7 @@ async function reliefMake() {
       depth: reliefDepth(src),
       sides: "front",
       span: 0.5,
-      invert: false,
+      invert: !!(src.clear && src.light),
       dir: "out",
       height: reliefStart(src),
       taps: [],
@@ -571,4 +615,7 @@ $("rlInset").addEventListener("click", (e) => {
   if (next) taps.push({ u: +u.toFixed(4), v: +w.toFixed(4), to: next });
   rlChange((T) => (T.taps = taps));
 });
-new ResizeObserver(rlDrawSoon).observe($("rlInset")); // (drawn when its panel opens, and when it's resized)
+new ResizeObserver(rlDrawSoon).observe($("rlInset"));
+// the Solid view's light on Auto: raking, low across the wall, for a relief in use
+// (drawn when its panel opens, and when it's resized)
+on("lightDefault", () => (isModel() && st.model && reliefIs(st.model.vase) ? "raking" : null));

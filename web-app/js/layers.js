@@ -584,6 +584,7 @@ function drawStack() {
   const S = L.stack,
     n = S.x.length;
   if (!n) return;
+  lightLabels(); // (Auto follows what's being made)
   const show = pathShown(),
     anim = st.playing || (st.t > 0 && st.t < 1),
     choc = css("--choc"),
@@ -728,26 +729,166 @@ function stackProjection(cv, dpr, S, n, all, solid, box) {
   };
   return { proj, TP, k, zx, cx, cy, ca, sa, bed, pad };
 }
-// Lit beads (Solid): each bead shaded by which way its side faces a light from the upper left, with a dark groove
-// where it meets its neighbours, so the form and the layer texture read. Segments are drawn layer by layer from the
-// bottom and, within a layer, from the back, so nearer beads cover farther ones. seg: [x0, y0, z0, x1, y1, z1] in mm.
-function litBeads(c, segs, layerOf) {
+// The light on the Solid view (the View menu's Light and Light from, kept in the browser): Front lights the beads
+// mostly from in front, Raking sweeps the light low across the surface (the way reliefs and coins are photographed),
+// so every step out or back catches the light or falls into shadow. Auto: Raking for a relief (a feature answers
+// "lightDefault"), Front for everything else. Light from: where on the screen the light comes from, degrees
+// clockwise from the top (315: the upper left).
+const LIGHT_KEY = storeKey("light");
+function lightLoad() {
+  try {
+    const L = JSON.parse(localStorage.getItem(LIGHT_KEY) || "null");
+    if (L && ["auto", "front", "raking"].includes(L.mode)) $("pvLight").value = L.mode;
+    if (L && L.from >= 0 && L.from < 360) $("pvLightFrom").value = L.from;
+  } catch {}
+  lightLabels();
+}
+function lightNow() {
+  const v = $("pvLight").value;
+  return { mode: v === "auto" ? answer("lightDefault") || "front" : v, from: +$("pvLightFrom").value };
+}
+function lightLabels() {
+  const L = lightNow(),
+    f = L.from,
+    names = [
+      "the top",
+      "the upper right",
+      "the right",
+      "the lower right",
+      "the bottom",
+      "the lower left",
+      "the left",
+      "the upper left",
+    ];
+  $("pvLightFromVal").textContent = f % 45 ? `${f}°` : names[f / 45];
+  $("pvLightVal").textContent = $("pvLight").value === "auto" ? `auto: ${L.mode}` : "";
+}
+for (const id of ["pvLight", "pvLightFrom"])
+  $(id).addEventListener(id === "pvLight" ? "change" : "input", () => {
+    try {
+      localStorage.setItem(LIGHT_KEY, JSON.stringify({ mode: $("pvLight").value, from: +$("pvLightFrom").value }));
+    } catch {}
+    lightLabels();
+    drawStack();
+  });
+// The light as a unit vector in the print's x, y, z, for a view turned az and tilted el (stackTurn): its direction
+// across the screen (light.from: right, and up: the print's own up, so a light "from the top" grazes its walls;
+// looking straight down, the screen's up), plus a share towards you (level, so the walls face it): most of it for
+// Front, a little for Raking.
+function lightVector(light, az, el) {
+  const ca = Math.cos(az),
+    sa = Math.sin(az),
+    ce = Math.cos(el),
+    se = Math.sin(el),
+    R = [ca, -sa, 0], // the screen's right, up and towards you
+    U = [sa * se, ca * se, ce],
+    T = [-sa * ce, -ca * ce, se],
+    above = el > 1.2,
+    up = above ? U : [0, 0, 1],
+    to = above ? T : [-sa, -ca, 0],
+    ang = (light.from * Math.PI) / 180,
+    [wd, wt] = light.mode === "raking" ? [0.96, 0.3] : [0.62, 0.78],
+    L = [0, 1, 2].map((k) => wd * (Math.sin(ang) * R[k] + Math.cos(ang) * up[k]) + wt * to[k]),
+    l = Math.hypot(...L);
+  return L.map((v) => v / l);
+}
+// How much light a bead's side takes (0–1): its side faces (nx, ny) along the layer (a unit vector, towards you), and
+// tips down by how far it steps out from the layer below over the layer height h (out mm: an overhang faces down, a
+// step back faces up; at most 3 × the layer height).
+function beadShade(nx, ny, out, h, L) {
+  const nz = -Math.max(-3, Math.min(3, out / h)),
+    nl = Math.hypot(nx, ny, nz);
+  return Math.max(0, (nx * L[0] + ny * L[1] + nz * L[2]) / nl);
+}
+// Each bead's offset from the layer below, as the wall rises (mm, x and y): where it steps out or back. seg: flat
+// [x0, y0, z0, x1, y1, z1, …]; keyOf(j): its layer. For every segment, the nearest point on the layer below's segments
+// to its middle (a grid of 1.5 mm cells over the layer below); 0 on the first layer, or with nothing within 1.5 mm.
+function beadOffsets(seg, keyOf) {
+  const m = seg.length / 6,
+    off = new Float32Array(2 * m),
+    byKey = new Map();
+  for (let j = 0; j < m; j++) {
+    const k = keyOf(j);
+    if (!byKey.has(k)) byKey.set(k, []);
+    byKey.get(k).push(j);
+  }
+  const keys = [...byKey.keys()].sort((a, b) => a - b),
+    C = 1.5,
+    cell = (x, y) => Math.floor(x / C) * 100003 + Math.floor(y / C);
+  for (let t = 1; t < keys.length; t++) {
+    const below = byKey.get(keys[t - 1]),
+      grid = new Map();
+    for (const j of below) {
+      // every cell along the segment (a straight run may be long)
+      const q = 6 * j,
+        L = Math.hypot(seg[q + 3] - seg[q], seg[q + 4] - seg[q + 1]),
+        steps = Math.max(1, Math.ceil(L / (C / 2)));
+      let last = null;
+      for (let s = 0; s <= steps; s++) {
+        const c = cell(
+          seg[q] + ((seg[q + 3] - seg[q]) * s) / steps,
+          seg[q + 1] + ((seg[q + 4] - seg[q + 1]) * s) / steps
+        );
+        if (c === last) continue;
+        last = c;
+        if (!grid.has(c)) grid.set(c, []);
+        grid.get(c).push(j);
+      }
+    }
+    for (const j of byKey.get(keys[t])) {
+      const q = 6 * j,
+        mx = (seg[q] + seg[q + 3]) / 2,
+        my = (seg[q + 1] + seg[q + 4]) / 2,
+        cx = Math.floor(mx / C),
+        cy = Math.floor(my / C);
+      let best = C * C,
+        bx = mx,
+        by = my;
+      for (let dx = -1; dx <= 1; dx++)
+        for (let dy = -1; dy <= 1; dy++)
+          for (const i of grid.get((cx + dx) * 100003 + cy + dy) || []) {
+            const r = 6 * i,
+              ax = seg[r],
+              ay = seg[r + 1],
+              ex = seg[r + 3] - ax,
+              ey = seg[r + 4] - ay,
+              l2 = ex * ex + ey * ey || 1,
+              u = Math.max(0, Math.min(1, ((mx - ax) * ex + (my - ay) * ey) / l2)),
+              px = ax + u * ex,
+              py = ay + u * ey,
+              d2 = (mx - px) ** 2 + (my - py) ** 2;
+            if (d2 < best) ((best = d2), (bx = px), (by = py));
+          }
+      off[2 * j] = mx - bx;
+      off[2 * j + 1] = my - by;
+    }
+  }
+  return off;
+}
+// Lit beads (Solid): each bead shaded by which way its side faces the light (lightNow), with a dark groove where it
+// meets its neighbours, so the form and the layer texture read. Its side faces the way it turns along the layer and,
+// with offs (beadOffsets: how far it sits out from the layer below), tips down where the wall steps out as it rises
+// and up where it steps back, so a relief's raised parts show their top and bottom edges. Segments are drawn layer by
+// layer from the bottom and, within a layer, from the back, so nearer beads cover farther ones. seg: [x0, y0, z0, x1,
+// y1, z1] in mm.
+function litBeads(c, segs, layerOf, offs) {
   const { g, TP, B, sa, ca, cx, cy } = c;
   const rgb = cssRGBA("--choc"),
-    LEVELS = 10;
+    LEVELS = 16,
+    light = lightNow(),
+    raking = light.mode === "raking";
   const tone = (f) =>
     `rgb(${Math.min(255, Math.round(rgb[0] * f))}, ${Math.min(255, Math.round(rgb[1] * f))}, ${Math.min(255, Math.round(rgb[2] * f))})`;
   const toneOf = Array.from({ length: LEVELS }, (_, i) => {
     const t = i / (LEVELS - 1),
-      b = 0.38 + 0.92 * t;
+      b = raking ? 0.42 + 0.9 * t : 0.34 + 0.96 * t;
     return { body: tone(b) };
   });
-  const groove = tone(0.3),
+  const groove = tone(raking ? 0.5 : 0.3),
     shine = "rgba(255, 255, 255, 0.16)";
   const toward = [-sa, -ca],
-    left = [-ca, sa],
-    lh = [0.8 * left[0] + 0.6 * toward[0], 0.8 * left[1] + 0.6 * toward[1]],
-    ll = Math.hypot(lh[0], lh[1]);
+    Lv = lightVector(light, stackTurn.az, stackTurn.el),
+    h = layerHmm();
   const m = segs.length / 6,
     order = new Uint32Array(m),
     key = new Float64Array(m),
@@ -764,7 +905,8 @@ function litBeads(c, segs, layerOf) {
       nx = -nx;
       ny = -ny;
     } // the side facing us
-    const diff = Math.max(0, (nx * lh[0] + ny * lh[1]) / ll);
+    // stepping out (towards us) from the layer below as it rises: the bead's side faces down that much
+    const diff = beadShade(nx, ny, offs ? offs[2 * j] * nx + offs[2 * j + 1] * ny : 0, h, Lv);
     lev[j] = Math.min(LEVELS - 1, Math.round(Math.pow(diff, 0.8) * (LEVELS - 1)));
     const u = (segs[q] + segs[q + 3]) / 2 - cx,
       v = (segs[q + 1] + segs[q + 4]) / 2 - cy;
@@ -820,6 +962,7 @@ function litBeads(c, segs, layerOf) {
   }
 }
 // Whole plate: the plate, then every copy's path as the G-code prints it (beads or lines by kind), the slider's layer
+const plateOffsCache = new WeakMap(); // print path → each segment's offset from the layer below (beadOffsets)
 function drawPlateStack(c) {
   const { g, all, anim, show, solid, choc, acc, lw, TP, bed, picked, zCut, zLow, mark } = c;
   let tip = null,
@@ -844,16 +987,30 @@ function drawPlateStack(c) {
     purge: [css("--warn"), 1, []],
   };
   if (solid) {
-    // the chocolate as lit beads, layer by layer
-    const segs = [];
+    // the chocolate as lit beads, layer by layer, each shaded by how it steps from the layer below (worked out once
+    // per print path, over its walls and fill)
+    let O = plateOffsCache.get(all);
+    if (!O) {
+      const I = [];
+      for (let i = 0; i < m; i++) if (PATH_KINDS[kd[i]] === "wall" || PATH_KINDS[kd[i]] === "fill") I.push(i);
+      const flat = new Float64Array(6 * I.length);
+      I.forEach((i, j) => flat.set(sg.subarray ? sg.subarray(6 * i, 6 * i + 6) : sg.slice(6 * i, 6 * i + 6), 6 * j));
+      const o = beadOffsets(flat, (j) => Math.round(flat[6 * j + 5] / 0.05));
+      O = new Float32Array(2 * m);
+      I.forEach((i, j) => ((O[2 * i] = o[2 * j]), (O[2 * i + 1] = o[2 * j + 1])));
+      plateOffsCache.set(all, O);
+    }
+    const segs = [],
+      offs = [];
     for (let i = 0; i < upTo; i++) {
       const nm = PATH_KINDS[kd[i]];
       if ((nm !== "wall" && nm !== "fill") || !show[nm]) continue;
       // above the slider's layer; the layer itself is drawn below
       if (sg[6 * i + 5] > zCut || (picked && sg[6 * i + 5] > zLow)) continue;
       for (let c = 0; c < 6; c++) segs.push(sg[6 * i + c]);
+      offs.push(O[2 * i], O[2 * i + 1]);
     }
-    litBeads(c, segs, (j) => Math.round(segs[6 * j + 5] / 0.05));
+    litBeads(c, segs, (j) => Math.round(segs[6 * j + 5] / 0.05), offs);
   }
   for (const name of ["travel", "fill", "wall", "purge"]) {
     // one path per kind, in this order (walls over fill)
@@ -961,6 +1118,29 @@ function dpKeep(S, a, b, tol) {
   for (let i = 0; i < keep.length; i++) if (keep[i]) I.push(a + i);
   return I;
 }
+// Each kept segment's offset from the lap below (beadOffsets), worked out once per copy's kept points (lapKeep):
+// { off, base } with base[li] the index of lap li's first segment
+const lapOffsCache = new WeakMap();
+function lapOffsets(S, K) {
+  let O = lapOffsCache.get(K);
+  if (O) return O;
+  const base = [],
+    flat = [],
+    lapOf = [];
+  let n = 0;
+  K.forEach((I, li) => {
+    base[li] = n;
+    for (let q = 0; q < I.length - 1; q++, n++) {
+      const i = I[q],
+        j = I[q + 1];
+      flat.push(S.x[i], S.y[i], S.z[i], S.x[j], S.y[j], S.z[j]);
+      lapOf.push(li);
+    }
+  });
+  O = { off: beadOffsets(flat, (j) => lapOf[j]), base };
+  lapOffsCache.set(K, O);
+  return O;
+}
 // One copy: its layers (beads, or lines darker towards the top), the slider's layer marked
 function drawLapStack(c) {
   const { g, S, n, anim, show, solid, choc, acc, lw, TP, cut, picked, mark } = c;
@@ -971,7 +1151,9 @@ function drawLapStack(c) {
   if (solid) {
     // the chocolate as lit beads; the slider's layer is marked below
     const segs = [],
-      lapOf = [];
+      lapOf = [],
+      offs = [],
+      O = lapOffsets(S, K);
     S.laps.forEach((lap, li) => {
       if (lap.from > upTo || li >= cut - (picked ? 1 : 0) || !show[lap.kind === "base" ? "fill" : "wall"]) return;
       const end = Math.min(lap.to, upTo),
@@ -981,9 +1163,10 @@ function drawLapStack(c) {
           j = Math.min(end, I[q + 1]);
         segs.push(S.x[i], S.y[i], S.z[i], S.x[j], S.y[j], S.z[j]);
         lapOf.push(li);
+        offs.push(O.off[2 * (O.base[li] + q)], O.off[2 * (O.base[li] + q) + 1]);
       }
     });
-    litBeads(c, segs, (j) => lapOf[j]);
+    litBeads(c, segs, (j) => lapOf[j], offs);
   }
   S.laps.forEach((lap, li) => {
     if (lap.from > upTo || li >= cut || !show[lap.kind === "base" ? "fill" : "wall"]) return;
@@ -1060,6 +1243,7 @@ function pvAboveFollowArt(kind) {
   drawStack();
 }
 new ResizeObserver(() => drawStack()).observe($("stackView"));
+lightLoad();
 for (const id of ["gFeed", "gZ", "layerTime"])
   $(id).addEventListener("input", () => {
     showHeight();

@@ -12,8 +12,9 @@
   // ---------- the settings ----------
   // V.texture for a relief: { kind: "relief", depth (mm: how far the most raised part stands out), source: { w, h,
   // data: [grey 0–255, … row by row, top first], id (what it is, for the cache), kind: "picture" | "text" |
-  // "pattern", strokes (true: a drawing of strokes, a text's or a pattern's, thickened to height.lineW), from (the
-  // design's name) }, height: { style: "smooth" | "steps" | "shapes", contrast (smooth: 0–100, 50 as it is), levels
+  // "pattern", strokes (true: a drawing of strokes, a text's or a pattern's, thickened to height.lineW), clear (a
+  // picture's transparent parts, runs [start, length, …]: always the bare wall), from (the design's name) }, height: {
+  // style: "smooth" | "steps" | "shapes", contrast (smooth: 0–100, 50 as it is), levels
   // (steps: 2–6 heights, the wall counted), bevel (shapes: mm, the rounded edge; 0 sharp), lineW (strokes: mm wide on
   // the wall) }, taps: [{ u, v, to: "in" | "flat" }] (u, v: shares of the source's width and height; the part there
   // is pressed in or left flat), sides: "front" | "back" | "both", span (round walls: the share of the way round one
@@ -73,6 +74,14 @@
       for (let i = 0; i < N; i++) a[i] = Math.min(1, Math.max(0, r + 0.5 - dist[i]));
     }
     if (T.invert) for (let i = 0; i < N; i++) a[i] = 1 - a[i];
+    // transparent parts (source.clear, runs [start, length, …]): the bare wall, whatever the style, swap or taps
+    let clear = null;
+    if (P.clear && P.clear.length) {
+      clear = new Uint8Array(N);
+      for (let k = 0; k + 1 < P.clear.length; k += 2)
+        clear.fill(1, P.clear[k], Math.min(N, P.clear[k] + P.clear[k + 1]));
+      for (let i = 0; i < N; i++) if (clear[i]) a[i] = 0;
+    }
     // the style
     const style = UNB.RELIEF_STYLES.includes(Hs.style) ? Hs.style : "smooth",
       nl = style === "steps" ? Math.max(2, Math.min(6, Math.round(Hs.levels))) : style === "shapes" ? 2 : 3,
@@ -98,6 +107,7 @@
           for (let L = 0; L < nl; L++) if (count[L] > count[best]) best = L;
           lev[y * w + x] = best;
         }
+      if (clear) for (let i = 0; i < N; i++) if (clear[i]) lev[i] = 0;
     }
     // what Shapes leaves out: ink lighter than mid-grey (a faint or thin line, averaged down), as a share of the ink
     let faint = 0,
@@ -205,7 +215,7 @@
     }
     for (let id = 0; id < parts.length; id++) if (parts[id].n === 0) parts[id].to = "gone";
     for (let i = 0; i < N; i++) if (!lev[i]) lab[i] = -1;
-    R = { a, lev, lab, parts, specks, faint: inked ? faint / inked : 0, w, h, levels: nl, style };
+    R = { a, lev, lab, parts, specks, faint: inked ? faint / inked : 0, clear, w, h, levels: nl, style };
     if (heightCache.size > 6) heightCache.clear();
     heightCache.set(key, R);
     return R;
@@ -265,7 +275,7 @@
       else if (T.dir === "both") x = x - 0.5;
       const id = R.lab[i],
         to = id >= 0 ? R.parts[id].to : "out";
-      v[i] = to === "flat" ? 0 : to === "in" ? -Math.abs(x) : x;
+      v[i] = (R.clear && R.clear[i]) || to === "flat" ? 0 : to === "in" ? -Math.abs(x) : x;
     }
     const at = (gx, gy) => {
       const X = Math.min(w - 1, Math.max(0, gx)),

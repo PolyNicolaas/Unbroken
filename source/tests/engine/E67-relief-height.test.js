@@ -55,8 +55,8 @@ module.exports = {
   guards:
     "a style that doesn't do what it says (a slope that isn't one, steps that aren't flat or the wrong number of them, shapes that keep their greys or lose their rounded edge), a text's stroke not thickened to its line width, a speck smaller than the bead left in, a tap that presses in or flattens the wrong part, and a thin band across the wall not flagged as short",
   why: "Nicolaas (26 November 2026): image manipulation for reliefs, simple: one style with one slider, and the parts tapped on an inset like the Ties card's (docs/RELIEF-PLAN.md).",
-  how: "UNB.reliefHeight on a left-to-right gradient (with a 2 px speck), at 0.5 mm a pixel, in each style; on a one-pixel stroke drawing as a text at 0.2 mm a pixel and a 3 mm line width. Then a plaque with two squares through UNB.reliefGrid: no taps, the right square tapped in, then flat. Then a thin band across the wall (1 mm tall) and a tall one (10 mm) through UNB.reliefShort.",
-  pass: "Smooth falls steadily from 1 at black to 0 at white, Contrast 100 lifting the greys; Steps 4 has exactly 4 heights (1, ⅔, ⅓, 0) and the speck gone; Shapes is 1 on the dark half and 0 on the light (the speck merged away and reported), rising in a curve over its Rounded edge (2 mm: under 1 a pixel from the edge, 1 four pixels in); the stroke stands 3 mm wide (13–17 rows at 0.2 mm), both strokes one part each; the right square stands out 2 mm untapped, −2 mm tapped in and 0 tapped flat while the left stays at 2; the thin band is short and the tall one isn't.",
+  how: "UNB.reliefHeight on a left-to-right gradient (with a 2 px speck), at 0.5 mm a pixel, in each style; on a one-pixel stroke drawing as a text at 0.2 mm a pixel and a 3 mm line width. Then a plaque with two squares through UNB.reliefGrid: no taps, the right square tapped in, then flat. Then a thin band across the wall (1 mm tall) and a tall one (10 mm) through UNB.reliefShort. Then the two squares with the left half transparent (source.clear), swapped, in Shapes and on a plaque with Direction Both.",
+  pass: "Smooth falls steadily from 1 at black to 0 at white, Contrast 100 lifting the greys; Steps 4 has exactly 4 heights (1, ⅔, ⅓, 0) and the speck gone; Shapes is 1 on the dark half and 0 on the light (the speck merged away and reported), rising in a curve over its Rounded edge (2 mm: under 1 a pixel from the edge, 1 four pixels in); the stroke stands 3 mm wide (13–17 rows at 0.2 mm), both strokes one part each; the right square stands out 2 mm untapped, −2 mm tapped in and 0 tapped flat while the left stays at 2; the thin band is short and the tall one isn't; with the left half transparent and swapped, its white stays the wall (without transparency it stands out) while the right half's white stands out, and with Direction Both the transparent half isn't pressed in.",
   run() {
     const P = gradient(),
       sm = UNB.reliefHeight(P, { height: { style: "smooth" } }, 0.5),
@@ -95,6 +95,19 @@ module.exports = {
       const G = UNB.reliefGrid(V, 60);
       return UNB.reliefShort(G).short.length;
     };
+    // transparency: the two squares' picture with its left half transparent (source.clear), swapped (the light
+    // parts out): the transparent half stays the wall, the white right half stands out round its square
+    const clearLeft = (() => {
+      const P2 = squares(), runs = [];
+      for (let y = 0; y < P2.h; y++) runs.push(y * P2.w, 30);
+      return Object.assign(P2, { id: "E67-squares-clear", clear: runs });
+    })();
+    const sw = UNB.reliefHeight(clearLeft, { invert: true, height: { style: "shapes", bevel: 0 } }, 0.5),
+      swPlain = UNB.reliefHeight(squares(), { invert: true, height: { style: "shapes", bevel: 0 } }, 0.5),
+      cV = plaque({ source: clearLeft, invert: true, dir: "both", height: { style: "shapes", bevel: 0 } }),
+      cG = UNB.reliefGrid(cV, UNB.reliefFace(cV, 30)),
+      cM = cG.map,
+      cAt = (px, py) => UNB.reliefAt(cG, cM.y0 + cM.ih - (py + 0.5) * cM.sc, (cM.x0 + (px + 0.5) * cM.sc) / cG.face);
     return {
       checks: [
         check("Smooth: falls steadily from black to white", +falls, "==", 1),
@@ -119,6 +132,10 @@ module.exports = {
         check("tapped flat: the left square still out (mm)", l2, ">=", 1.9),
         check("a band 1 mm tall across the wall: short", band(1), "==", 1),
         check("a band 10 mm tall: reaches its depth", band(10), "==", 0),
+        check("transparent, swapped: the transparent half's white stays the wall", at(sw, 2, 2), "==", 0),
+        check("… the white right half stands out", at(sw, 58, 2), "==", 1),
+        check("… without the transparency the white left half stands out too", at(swPlain, 2, 2), "==", 1),
+        check("transparent, Direction Both: the transparent half on the wall (not pressed in, mm)", Math.abs(cAt(2, 2)), "<=", 0.05),
       ],
       notes: `smooth ${[0, 50, 99].map((x) => at(sm, x, 20).toFixed(2)).join(" ")}; contrast 100 ${at(smHi, 60, 20).toFixed(2)}; stroke ${rows} rows; squares ${[l0, r0, l1, r1, l2, r2].map((v) => v.toFixed(2)).join(" ")}`,
     };

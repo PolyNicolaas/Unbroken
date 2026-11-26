@@ -212,6 +212,7 @@ function loadFile(f, label) {
     g.fillStyle = "#fff";
     g.fillRect(0, 0, c.width, c.height);
     g.drawImage(img, 0, 0, c.width, c.height);
+    keepClear(c, img); // a picture with a transparent background keeps it beside the white one (a relief reads it)
     URL.revokeObjectURL(url);
     const name = label || f.name || "image";
     artUsePicture(c, name.length > 22 ? name.slice(0, 20) + "…" : name); // art.js: into the chosen picture layer
@@ -226,6 +227,23 @@ function loadFile(f, label) {
   img.src = url;
 }
 
+// Everything reads a picture on white paper (transparent parts are paper). A picture with transparent parts also keeps
+// itself as loaded, transparency and all, as canvas.__clear, the same size: a relief makes those parts the bare wall
+// whatever its style or swap (white art on a transparent background stands out with Swap out and in). Turning the
+// picture turns it too (art.js turnedCanvas).
+function keepClear(c, img) {
+  const t = document.createElement("canvas");
+  t.width = c.width;
+  t.height = c.height;
+  const g = t.getContext("2d");
+  g.drawImage(img, 0, 0, t.width, t.height);
+  const a = g.getImageData(0, 0, t.width, t.height).data;
+  for (let i = 3; i < a.length; i += 4)
+    if (a[i] < 250) {
+      c.__clear = t;
+      return;
+    }
+}
 // A picture from a link (the Picture card's link box, a pasted link, or ?src= in the page's address): fetched and
 // opened
 // like a chosen file. Works when the site allows other pages to load its pictures (most image hosts and Wikimedia do);
