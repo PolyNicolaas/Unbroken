@@ -1044,10 +1044,21 @@ function drawLapStack(c) {
   });
 })();
 // From above: straight down on the plate (a turn or tilt by hand leaves it)
+let pvAboveSet = false; // From above ticked or unticked by hand: the art no longer picks it
 $("pvAbove").addEventListener("change", () => {
+  pvAboveSet = true;
   Object.assign(stackTurn, $("pvAbove").checked ? { az: 0, el: Math.PI / 2 } : STACK_TURN0);
   drawStack();
 });
+// lettering is easiest to check from above: text starts there, everything else tilted (until you pick one yourself)
+function pvAboveFollowArt(kind) {
+  if (pvAboveSet) return;
+  const above = kind === "text";
+  if ($("pvAbove").checked === above) return;
+  $("pvAbove").checked = above;
+  Object.assign(stackTurn, above ? { az: 0, el: Math.PI / 2 } : STACK_TURN0);
+  drawStack();
+}
 new ResizeObserver(() => drawStack()).observe($("stackView"));
 for (const id of ["gFeed", "gZ", "layerTime"])
   $(id).addEventListener("input", () => {

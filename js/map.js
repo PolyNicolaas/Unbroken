@@ -213,7 +213,8 @@ function mapShape() {
 // output's own screen, whose rail is on the right (the plate, layers, tests, the machine) with Back to the design at
 // its top. One panel at a time; tapping the open tool again closes it. The preview takes the room the rail and the
 // panel leave.
-let mapOpenId = null,
+let mapLastDesign = null, // the design tool open last (Design, from the output's screen, comes back to it)
+  mapOpenId = null,
   mapTrayOpen = false,
   mapShut = false, // the open tool's panel closed (its tool tapped again)
   mapScreen = "design"; // "design" or "out": the output's own screen
@@ -290,11 +291,15 @@ function mapPalette() {
   if (line) line.push(...take(["size"]));
   if (how.length) design.push(how);
   const own = before.flatMap(group);
-  // a 3D object's layers are its design: they're with its material too
-  if (st.art.kind === "model" && MAP_NODES.layers && OUTPUTS[outputNow()] === OUTPUTS.print) own.push("layers");
+  // a 3D object's layers are its design: they're with its material too (above it, as Math is above it for a line)
+  if (st.art.kind === "model" && MAP_NODES.layers && OUTPUTS[outputNow()] === OUTPUTS.print) own.unshift("layers");
   if (own.length) design.push(own);
   const out = [...group(O.step), ...before.filter((k) => MAP_NODES[k])];
-  return { S, O, design: design.filter((g) => g.length), out: [...new Set(out)] };
+  // the tools every kind of art shares (the line's, how it's made, the material) sit at the rail's foot, so they keep
+  // their places whatever the art is; the art's own tools are at the top, under its button
+  const groups = design.filter((g) => g.length),
+    foot = groups.findIndex((g) => g.includes("line") || g.includes("watch") || g.includes("math") || g === own);
+  return { S, O, design: groups, foot: foot < 0 ? groups.length : foot, out: [...new Set(out)] };
 }
 // the screen a tool opens on: the output's tools on its screen; one on both rails stays where it is
 function mapScreenOf(id, P = mapPalette()) {
@@ -323,6 +328,7 @@ function mapButton(id, rail) {
   return el;
 }
 function mapRender() {
+  if (typeof namePlaceholder === "function") namePlaceholder(); // export.js: a vase becoming a relief renames it too
   const box = $("map"),
     nodes = $("mapNodes");
   if (!box || !nodes) return;
@@ -338,6 +344,17 @@ function mapRender() {
   };
   // the design's rail, in groups, and at its foot the way to the output's screen
   P.design.forEach((g, k) => {
+    // the room between the art's own tools and the shared ones at the foot
+    if (k && k === P.foot) {
+      let gap = $("mapGap");
+      if (!gap) {
+        gap = document.createElement("div");
+        gap.id = "mapGap";
+        gap.className = "map-gap";
+        gap.setAttribute("aria-hidden", "true");
+      }
+      want.push(gap);
+    }
     if (k) want.push(head());
     for (const id of g) want.push(mapButton(id, "design"));
   });
@@ -367,8 +384,10 @@ function mapRender() {
     back.setAttribute("aria-label", "Back to the design");
     back.addEventListener("click", () => {
       mapScreen = "design";
-      const v = MAP_NODES.line && P.S.spine.includes("line") ? "line" : "art";
-      mapOpen(v);
+      // back where you were: the design tool last open, if it's still on the rail; else the line (or the art)
+      const P2 = mapPalette(),
+        last = mapLastDesign && P2.design.some((g) => g.includes(mapLastDesign)) ? mapLastDesign : null;
+      mapOpen(last || (MAP_NODES.line && P2.S.spine.includes("line") ? "line" : "art"));
     });
   }
   want.push(back);
@@ -528,6 +547,7 @@ function mapOpen(id) {
   mapOpenId = id;
   mapShut = false;
   mapScreen = mapScreenOf(id);
+  if (mapScreen === "design") mapLastDesign = id;
   mapTray(false);
   const r = $(MAP_STEP_RADIO[N.step]);
   if (r && !r.checked) mapPick(r);

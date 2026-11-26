@@ -212,7 +212,7 @@ function vaseLabels() {
         in: `its ${dark} parts pressed in`,
         both: `mid-grey on the wall, its ${dark} parts out and its ${light} parts in`,
       }[T.dir || "out"];
-    $("vtPicMsg").textContent = `Made from your picture (${T.picture.w} × ${T.picture.h} px, ${how}). Each layer leans out or back at most ${fmt(0.9 * overhangMM(), 2)} mm over the one below (90% of the overhang a bead holds, ${fmt(overhangMM(), 2)} mm: Fine-tuning), so a raised or pressed part's top and bottom are short ramps; its sides are sharp.`;
+    $("vtPicMsg").textContent = `Made from your picture (${T.picture.w} × ${T.picture.h} px, ${how}). Each layer leans out or back at most ${fmt(0.9 * overhangMM(), 2)} mm over the one below (90% of the overhang a bead holds, ${fmt(overhangMM(), 2)} mm: Material), so a raised or pressed part's top and bottom are short ramps; its sides are sharp.`;
   }
   // a relief says so: the 3D model card's switch and the Input card's name
   $("mfVase").nextElementSibling.textContent = T.kind === "picture" ? "A relief" : "Make a vase";

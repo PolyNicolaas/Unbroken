@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v171">
-<link rel="stylesheet" href="css/app.css?v=v171">
+<link rel="stylesheet" href="css/theme.css?v=v172">
+<link rel="stylesheet" href="css/app.css?v=v172">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v171</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v172</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -106,7 +106,7 @@
         <div class="empty-state" id="emptyState" hidden>
           <p class="es-title">Start with a picture, text, a pattern or a 3D model</p>
           <p data-feature="camera" class="es-sub"><button class="btn primary" type="button" id="esCamera">Take a picture</button></p>
-          <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>. Not sure where to start? Tap Examples on the map.</p>
+          <p class="es-sub">Drop a file anywhere, paste an image, or <button class="linkish" type="button" id="esChoose">choose a file</button>. Not sure where to start? Tap Examples at the top of the rail on the left.</p>
         </div>
         <button class="btn mini pv-size" type="button" id="pvSize" aria-pressed="false" title="Phones: make the preview bigger (with its tools), or small again so it stays in view while you scroll the settings">Bigger</button>
         <div class="pathbar" role="group" aria-label="What the view shows">
@@ -330,7 +330,7 @@
       <label data-feature="model" class="field model-only stl-only" title="How many walls, one line spacing inside each other"><span>Walls</span><input type="number" id="wallCount" min="1" max="5" step="1" value="1"></label>
       <p data-feature="model" class="hint help model-only stl-only" data-anchor="wallCount">A model prints its outside contour only: the inside surface of a hollow model (a cup's inner wall) and any hole are not traced. Walls adds lines inside the outside contour, one spacing apart; how much of the inside gets chocolate is up to Base and Infill.</p>
       <label data-feature="model" class="field model-only stl-only" title="Holds up parts that reach out further than a bead can step: the support is part of the same line, from the plate up"><span>Support</span><select id="support"><option value="off" selected>Off</option><option value="skirt">Flared skirt</option><option value="thin">Thin wall</option><option value="slope">Slope</option></select></label>
-      <p data-feature="model" class="hint help model-only stl-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, in Fine-tuning) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Slope: the model's own ledges turned into short slopes, so no layer steps out more than a bead holds, nor in further than its wall (on a hollow print a layer that steps in hangs over the empty inside, like the bottom of a skull's nose): only the layers round a ledge change. Each layer stays one loop. The ready list says how far the model steps out, or in, with Support off.</p>
+      <p data-feature="model" class="hint help model-only stl-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, under Material) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Slope: the model's own ledges turned into short slopes, so no layer steps out more than a bead holds, nor in further than its wall (on a hollow print a layer that steps in hangs over the empty inside, like the bottom of a skull's nose): only the layers round a ledge change. Each layer stays one loop. The ready list says how far the model steps out, or in, with Support off.</p>
       <p class="hint" id="layerCount"></p>
       <p class="hint" id="layerHint"></p>
       <p class="hint" id="cartHint" hidden></p>
@@ -1029,68 +1029,68 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v171"></script>
-<script src="01-image.js?v=v171"></script>
-<script src="02-lines.js?v=v171"></script>
-<script src="03-text.js?v=v171"></script>
-<script src="04-walk.js?v=v171"></script>
-<script src="05-fill.js?v=v171"></script>
-<script src="06-fourier.js?v=v171"></script>
-<script src="07-measure.js?v=v171"></script>
-<script src="08-shape.js?v=v171"></script>
-<script src="09-plate.js?v=v171"></script>
-<script src="10-export.js?v=v171"></script>
-<script src="11-stages.js?v=v171"></script>
-<script src="12-models.js?v=v171"></script>
-<script src="13-patterns.js?v=v171"></script>
-<script src="14-photo.js?v=v171"></script>
-<script src="15-cutout.js?v=v171"></script>
-<script src="16-molecule.js?v=v171"></script>
-<script src="17-vase.js?v=v171"></script>
-<script src="18-ties.js?v=v171"></script>
-<script src="core.js?v=v171"></script>
-<script src="fonts.js?v=v171"></script>
-<script src="settings.js?v=v171"></script>
-<script src="js/state.js?v=v171"></script>
-<script src="js/ui.js?v=v171"></script>
-<script src="js/config.js?v=v171"></script>
-<script src="js/engine-bridge.js?v=v171"></script>
-<script src="js/source.js?v=v171"></script>
-<script src="js/pipeline.js?v=v171"></script>
-<script src="js/preview.js?v=v171"></script>
-<script src="js/tools.js?v=v171"></script>
-<script src="js/art.js?v=v171"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v171");</script>
-<script src="js/readouts.js?v=v171"></script>
-<script src="js/controls.js?v=v171"></script>
-<script>feature("levels", "features/levels/levels.js?v=v171");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v171");</script>
-<script src="js/export.js?v=v171"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v171");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v171");</script>
-<script>feature("ties", "features/ties/ties.js?v=v171");</script>
-<script src="js/views.js?v=v171"></script>
-<script src="js/zoom.js?v=v171"></script>
-<script src="js/layers.js?v=v171"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v171");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v171");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v171");</script>
-<script src="js/workflow.js?v=v171"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v171");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v171");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v171");</script>
-<script>feature("camera", "features/camera/camera.js?v=v171");</script>
-<script src="js/steppers.js?v=v171"></script>
-<script src="js/scroll.js?v=v171"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v171");</script>
-<script>feature("model", "features/model/model.js?v=v171");</script>
-<script>feature("vase", "features/vase/vase.js?v=v171");</script>
-<script src="js/history.js?v=v171"></script>
-<script src="js/map.js?v=v171"></script>
-<script src="js/showall.js?v=v171"></script>
-<script src="js/main.js?v=v171"></script>
-<script src="js/parts.js?v=v171"></script>
-<script src="js/agent.js?v=v171"></script>
+<script src="00-util.js?v=v172"></script>
+<script src="01-image.js?v=v172"></script>
+<script src="02-lines.js?v=v172"></script>
+<script src="03-text.js?v=v172"></script>
+<script src="04-walk.js?v=v172"></script>
+<script src="05-fill.js?v=v172"></script>
+<script src="06-fourier.js?v=v172"></script>
+<script src="07-measure.js?v=v172"></script>
+<script src="08-shape.js?v=v172"></script>
+<script src="09-plate.js?v=v172"></script>
+<script src="10-export.js?v=v172"></script>
+<script src="11-stages.js?v=v172"></script>
+<script src="12-models.js?v=v172"></script>
+<script src="13-patterns.js?v=v172"></script>
+<script src="14-photo.js?v=v172"></script>
+<script src="15-cutout.js?v=v172"></script>
+<script src="16-molecule.js?v=v172"></script>
+<script src="17-vase.js?v=v172"></script>
+<script src="18-ties.js?v=v172"></script>
+<script src="core.js?v=v172"></script>
+<script src="fonts.js?v=v172"></script>
+<script src="settings.js?v=v172"></script>
+<script src="js/state.js?v=v172"></script>
+<script src="js/ui.js?v=v172"></script>
+<script src="js/config.js?v=v172"></script>
+<script src="js/engine-bridge.js?v=v172"></script>
+<script src="js/source.js?v=v172"></script>
+<script src="js/pipeline.js?v=v172"></script>
+<script src="js/preview.js?v=v172"></script>
+<script src="js/tools.js?v=v172"></script>
+<script src="js/art.js?v=v172"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v172");</script>
+<script src="js/readouts.js?v=v172"></script>
+<script src="js/controls.js?v=v172"></script>
+<script>feature("levels", "features/levels/levels.js?v=v172");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v172");</script>
+<script src="js/export.js?v=v172"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v172");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v172");</script>
+<script>feature("ties", "features/ties/ties.js?v=v172");</script>
+<script src="js/views.js?v=v172"></script>
+<script src="js/zoom.js?v=v172"></script>
+<script src="js/layers.js?v=v172"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v172");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v172");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v172");</script>
+<script src="js/workflow.js?v=v172"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v172");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v172");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v172");</script>
+<script>feature("camera", "features/camera/camera.js?v=v172");</script>
+<script src="js/steppers.js?v=v172"></script>
+<script src="js/scroll.js?v=v172"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v172");</script>
+<script>feature("model", "features/model/model.js?v=v172");</script>
+<script>feature("vase", "features/vase/vase.js?v=v172");</script>
+<script src="js/history.js?v=v172"></script>
+<script src="js/map.js?v=v172"></script>
+<script src="js/showall.js?v=v172"></script>
+<script src="js/main.js?v=v172"></script>
+<script src="js/parts.js?v=v172"></script>
+<script src="js/agent.js?v=v172"></script>
 
 </body>
 </html>
