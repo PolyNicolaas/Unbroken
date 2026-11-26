@@ -704,3 +704,12 @@ body:not([data-art="model"]) #dropZone, body[data-empty="1"] #dropZone { display
 body[data-screen="out"] .toolbar.tools { display: none; }
 /* the series written out (Math): wider than the panel, it scrolls sideways inside it instead of running over the preview */
 #series { max-width: 100%; overflow-x: auto; overflow-y: hidden; }
+/* the design's rail fills its height: the art's own tools at the top, the shared ones (line, size, how it's made,
+   the material, Print…) at its foot, in the same places whatever the art is */
+body[data-screen="design"] .map-nodes { height: 100%; }
+.map-gap { flex: 1 1 0; min-height: 0; }
+body[data-screen="out"] .map-gap { display: none; }
+/* nothing made yet: the start message in the preview says what to do (the corner label would repeat it, faintly),
+   and Trace and Play drawing have nothing to work on */
+body[data-empty="1"] #chip { display: none; }
+body[data-empty="1"] :is(.trace-switch, #play) { opacity: .35; pointer-events: none; }

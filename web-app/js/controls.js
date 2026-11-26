@@ -345,7 +345,7 @@ function lineUI() {
   $("needleDot").style.background = opt.dataset.c;
   $("needleDot").title = opt.textContent;
   $("needleHint").textContent = o
-    ? `Sets the line width on the Line step (${fmt(w, 2)} mm) and, with the ${CFG.printer.cartridge || "cartridge"}, how fast the plunger pushes (E per mm, Fine-tuning).`
+    ? `Sets the line width on the Line step (${fmt(w, 2)} mm) and, with the ${CFG.printer.cartridge || "cartridge"}, how fast the plunger pushes (E per mm, under Material).`
     : st.needleCustom
       ? `Custom: type the width in Line width (mm) on the Line step (now ${fmt(w, 2)} mm).`
       : `Custom: the Line step's line width (${fmt(w, 2)} mm) doesn't match a needle in settings.js.`;

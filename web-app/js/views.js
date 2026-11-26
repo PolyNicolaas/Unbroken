@@ -344,7 +344,7 @@ function drawPlate() {
   const rot = lay.angle ? ` Rotated ${fmt(lay.angle, 0)}° to fit${single ? "" : " the most copies"}.` : "";
   if (single)
     $("plateHint").textContent = ok
-      ? `Fits on the ${BED.w} × ${BED.h} mm plate.${rot} ${posManual ? "Position is the footprint's front-left corner." : "Centred; set a position under Fine-tuning to move it."}`
+      ? `Fits on the ${BED.w} × ${BED.h} mm plate.${rot} ${posManual ? "Position is the footprint's front-left corner." : "Centred; set a position under Machine to move it."}`
       : lay.fits
         ? `Off the plate at this position.${rot} Use Center on plate.`
         : `Too big for the plate even rotated: the footprint is ${fmt(lay.w, 1)} × ${fmt(lay.h, 1)} mm. Make the design smaller.`;

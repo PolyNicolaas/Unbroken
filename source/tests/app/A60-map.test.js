@@ -20,7 +20,7 @@ module.exports = {
     const nodes = () => page.$$eval("#mapNodes .map-node", (els) => [...new Set(els.map((e) => e.dataset.node))].sort().join(","));
     const spine = () => A.spine(page);
     // the tools showing, top to bottom, on the screen now
-    const rail = () => page.$$eval("#mapNodes > *", (els) => els.filter((e) => e.getClientRects().length && !e.classList.contains("map-sep")).map((e) => e.dataset.node || e.id).join(","));
+    const rail = () => page.$$eval("#mapNodes > *", (els) => els.filter((e) => e.getClientRects().length && !e.classList.contains("map-sep") && !e.classList.contains("map-gap")).map((e) => e.dataset.node || e.id).join(","));
     const cards = () => page.$$eval(".panel section.card", (els) => els.filter((c) => c.getClientRects().length).map((c) => c.querySelector("h2").id).join(","));
     const inRows = (ids) => page.evaluate((ids) => ids.filter((i) => document.getElementById(i).closest("#mapRows")).length, ids);
     // no step or chip of the band sits on another (a vase's Layers chip was under Movement, 9 November 2026)
@@ -31,11 +31,13 @@ module.exports = {
     // the palette: the design's rail at the left, in groups; Print… at its foot
     checks.push(check("leaf: the design's rail, top to bottom", await rail(), "==", "examples,art,levels,tracing,line,size,watch,math,material,mapGo"),
       check("… at the left of the preview", await page.evaluate(() => Math.round($("map").getBoundingClientRect().right - document.querySelector(".left").getBoundingClientRect().left)), "<", 0));
+    // (Line open, then Print… and Design: back where you were, v172)
+    await page.$eval('#mapNodes [data-key="design:line"]', (b) => b.click()); await page.waitForTimeout(200);
     await page.click("#mapGo"); await A.idle(page, 800);
     checks.push(check("Print…: the output's screen, its rail at the left too", await rail(), "==", "mapBack,print,plate,machine,layers,tests,ties,material"),
       check("… left of the preview, Print open (the rail never moves sides, v171)", await page.evaluate(() => [document.body.dataset.screen, $("map").getBoundingClientRect().right < document.querySelector(".left").getBoundingClientRect().left, mapOpenId].join(",")), "==", "out,true,print"));
     await page.click("#mapBack"); await A.idle(page, 600);
-    checks.push(check("Design: back to the design's screen, at Line", await page.evaluate(() => [document.body.dataset.screen, mapOpenId].join(",")), "==", "design,line"));
+    checks.push(check("Design: back to the design's screen, at Line (the tool open before Print…)", await page.evaluate(() => [document.body.dataset.screen, mapOpenId].join(",")), "==", "design,line"));
     // tapping the open tool closes its panel (the preview takes the room), × and Esc too; the tool stays in use
     const w = () => page.evaluate(() => Math.round(document.querySelector(".left").getBoundingClientRect().width));
     const w0 = await w();

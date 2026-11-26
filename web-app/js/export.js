@@ -160,7 +160,8 @@ function autoName(name) {
   const k = st.art.kind;
   return (
     name ||
-    (st.text || k === "text"
+    (k === "model" && st.model && st.model.name) || // a 3D model, a vase or a relief: its own name
+    (k === "text"
       ? $("textIn").value.split("\n")[0] || "text"
       : (ART_KINDS[k] && k !== "model" && ART_KINDS[k].name()) ||
         (st.srcLabel || "").replace(/\.[a-z0-9]{2,4}$/i, "") ||

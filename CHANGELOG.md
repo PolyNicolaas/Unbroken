@@ -3,6 +3,28 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v172 · 2026-11-25
+
+From a third walkthrough on an iPad-sized screen (Nicolaas, 25 November 2026; he picked the shared tools pinned to
+the rail's foot):
+
+- **The rail's shared tools keep their places.** Line, Size, Drawing, Math (or a 3D object's Layers), Material and
+  Print… sit at the rail's foot, in the same places whatever the art is; the art's own tools (Grey levels and
+  Tracing for a picture; Profile, Shape, Texture, Movement and Rim for a vase) are at the top under its button. Before,
+  Size moved with the art and was easy to miss (a tap landed on Math).
+- **Design comes back where you were.** From the Print or Plot screen, Design reopens the design tool open last
+  (it opened Line, or Material).
+- **The files' name follows the art.** The name box's hint names a 3D model, a vase or a relief (it kept the text or
+  pattern before it, e.g. "now: happy-birthday" for the skull cup).
+- **Text starts From above** on the Print screen, the way lettering is easiest to check (until you turn the view
+  yourself).
+- **The empty start** has no faint corner label (the start message says what to do), and Trace and Play drawing are
+  greyed until there's something to trace.
+- Wording: the start screen says Examples is at the top of the rail (not "on the map"); position, overhang and E per
+  mm point to Machine and Material (they said Fine-tuning, a card no longer on the rail).
+- Tests: A76 (the rail's places for a picture, text and a vase; screenshots in results/rail-*.png); A60 opens Line
+  before Print… and comes back to it.
+
 ## v171 · 2026-11-25
 
 The interface on an iPad, from a second walkthrough (Nicolaas, 25 November 2026; he picked one size and one layout):
