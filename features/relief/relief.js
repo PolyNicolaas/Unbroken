@@ -109,9 +109,14 @@ function reliefClearAt(W) {
     { sx, sy, kx, ky } = W.crop;
   g.drawImage(src, sx, sy, W.w / kx, W.h / ky, 0, 0, W.w, W.h);
   const a = g.getImageData(0, 0, W.w, W.h).data,
-    m = new Uint8Array(W.w * W.h);
+    m = new Uint8Array(W.w * W.h),
+    alpha = new Float32Array(W.w * W.h);
   let any = 0;
-  for (let i = 0; i < m.length; i++) if (a[4 * i + 3] < 200) ((m[i] = 1), (any = 1));
+  for (let i = 0; i < m.length; i++) {
+    alpha[i] = a[4 * i + 3] / 255;
+    if (a[4 * i + 3] < 200) ((m[i] = 1), (any = 1));
+  }
+  if (any) m.alpha = alpha; // (reliefSource takes the paper back out of the soft edges)
   return any ? m : null;
 }
 async function reliefSource() {
@@ -162,13 +167,20 @@ async function reliefSource() {
         cl = 0;
       for (let yy = ay; yy <= by; yy++)
         for (let xx = ax; xx <= bx; xx++) {
-          const g = W.gray[yy * gw + xx];
-          s += g;
+          // (a soft edge of art on a transparent background was mixed with the white paper: the paper taken back out,
+          // so a dark line's edge stays dark instead of reading light, and rising, when swapped)
+          const q = yy * gw + xx,
+            al = clearW && !clearW[q] ? clearW.alpha[q] : 1,
+            g = al < 1 ? Math.max(0, Math.min(255, (W.gray[q] - 255 * (1 - al)) / al)) : W.gray[q];
           c++;
+          if (clearW && clearW[q]) {
+            cl++;
+            continue; // (the transparent background isn't averaged in: a thin dark line beside it stays dark)
+          }
+          s += g;
           if (g < m) m = g;
-          if (clearW && clearW[yy * gw + xx]) cl++;
         }
-      const v = Math.round(Math.min(255, Math.max(0, strokes ? m : s / Math.max(1, c))));
+      const v = Math.round(Math.min(255, Math.max(0, strokes ? m : c > cl ? s / (c - cl) : 255)));
       data[y * w + x] = v;
       if (clear && 2 * cl > c) clear[y * w + x] = 1;
       hash = (hash * 31 + v + (clear ? 7 * clear[y * w + x] : 0)) % 2147483647;
