@@ -3,6 +3,16 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v175 · 2026-11-26
+
+From the v174 browser check (a logo with a transparent background, swapped):
+
+- **A transparent picture's soft edges and thin lines stay as dark as they are.** Scaling a picture down for a relief
+  averaged each small block with the transparent background read as white paper, and a soft edge was already mixed
+  with it, so a thin dark line or a letter's edge read light and rose when swapped (11 slivers on the test logo).
+  The background is now left out of the average and the paper taken back out of the soft edges; only the logo's
+  genuinely light-grey ring rises when it's swapped.
+
 ## v174 · 2026-11-26
 
 From testing v173 (Nicolaas, 26 November 2026: the Solid view doesn't show reliefs off, and a relief should know a

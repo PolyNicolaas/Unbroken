@@ -51,7 +51,7 @@ function squareDepths(V) {
 module.exports = {
   id: "E67",
   title:
-    "A relief's height from its source: Smooth, Steps or Shapes, a text's strokes, specks, taps, and what can't be printed",
+    "A relief's height from its source: Smooth, Steps or Shapes, a text's strokes, specks, taps, transparency, and what can't be printed",
   guards:
     "a style that doesn't do what it says (a slope that isn't one, steps that aren't flat or the wrong number of them, shapes that keep their greys or lose their rounded edge), a text's stroke not thickened to its line width, a speck smaller than the bead left in, a tap that presses in or flattens the wrong part, and a thin band across the wall not flagged as short",
   why: "Nicolaas (26 November 2026): image manipulation for reliefs, simple: one style with one slider, and the parts tapped on an inset like the Ties card's (docs/RELIEF-PLAN.md).",
