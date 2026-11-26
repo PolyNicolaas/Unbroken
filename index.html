@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v173">
-<link rel="stylesheet" href="css/app.css?v=v173">
+<link rel="stylesheet" href="css/theme.css?v=v174">
+<link rel="stylesheet" href="css/app.css?v=v174">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v173</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v174</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -166,6 +166,14 @@
                 <option value="band" selected>Width (faded)</option>
                 <option value="print">As printed</option>
               </select></label>
+            <label class="vrow" title="How the Solid view (Print, 3D layers) is lit. Front: mostly from in front. Raking: low across the surface, so every step out or back catches the light or falls into shadow (best for reliefs). Auto: Raking for a relief, Front for everything else"><span>Light <span class="val" id="pvLightVal"></span></span>
+              <select id="pvLight" aria-label="How the Solid view is lit">
+                <option value="auto" selected>Auto</option>
+                <option value="front">Front</option>
+                <option value="raking">Raking</option>
+              </select></label>
+            <label class="vrow" title="Where the light comes from on the screen. A raking light hides edges that run the same way it does: turn it to see them"><span>Light from <span class="val" id="pvLightFromVal"></span></span>
+              <input type="range" id="pvLightFrom" min="0" max="345" step="15" value="315" aria-label="Where the light comes from (degrees clockwise from the top)"></label>
             <hr>
             <label class="check" title="Show the rotating circles while the drawing plays"><input type="checkbox" id="circles" checked> Circles</label>
             <label class="check" title="Highlight the connectors: the straight strands the line prints to reach a part it doesn't touch (it never stops)"><input type="checkbox" id="showConn" checked> <span>Connectors</span><span class="swatch"></span></label>
@@ -1042,70 +1050,70 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v173"></script>
-<script src="01-image.js?v=v173"></script>
-<script src="02-lines.js?v=v173"></script>
-<script src="03-text.js?v=v173"></script>
-<script src="04-walk.js?v=v173"></script>
-<script src="05-fill.js?v=v173"></script>
-<script src="06-fourier.js?v=v173"></script>
-<script src="07-measure.js?v=v173"></script>
-<script src="08-shape.js?v=v173"></script>
-<script src="09-plate.js?v=v173"></script>
-<script src="10-export.js?v=v173"></script>
-<script src="11-stages.js?v=v173"></script>
-<script src="12-models.js?v=v173"></script>
-<script src="13-patterns.js?v=v173"></script>
-<script src="14-photo.js?v=v173"></script>
-<script src="15-cutout.js?v=v173"></script>
-<script src="16-molecule.js?v=v173"></script>
-<script src="17-vase.js?v=v173"></script>
-<script src="18-ties.js?v=v173"></script>
-<script src="19-relief.js?v=v173"></script>
-<script src="core.js?v=v173"></script>
-<script src="fonts.js?v=v173"></script>
-<script src="settings.js?v=v173"></script>
-<script src="js/state.js?v=v173"></script>
-<script src="js/ui.js?v=v173"></script>
-<script src="js/config.js?v=v173"></script>
-<script src="js/engine-bridge.js?v=v173"></script>
-<script src="js/source.js?v=v173"></script>
-<script src="js/pipeline.js?v=v173"></script>
-<script src="js/preview.js?v=v173"></script>
-<script src="js/tools.js?v=v173"></script>
-<script src="js/art.js?v=v173"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v173");</script>
-<script src="js/readouts.js?v=v173"></script>
-<script src="js/controls.js?v=v173"></script>
-<script>feature("levels", "features/levels/levels.js?v=v173");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v173");</script>
-<script src="js/export.js?v=v173"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v173");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v173");</script>
-<script>feature("ties", "features/ties/ties.js?v=v173");</script>
-<script src="js/views.js?v=v173"></script>
-<script src="js/zoom.js?v=v173"></script>
-<script src="js/layers.js?v=v173"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v173");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v173");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v173");</script>
-<script src="js/workflow.js?v=v173"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v173");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v173");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v173");</script>
-<script>feature("camera", "features/camera/camera.js?v=v173");</script>
-<script src="js/steppers.js?v=v173"></script>
-<script src="js/scroll.js?v=v173"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v173");</script>
-<script>feature("model", "features/model/model.js?v=v173");</script>
-<script>feature("vase", "features/vase/vase.js?v=v173");</script>
-<script>feature("relief", "features/relief/relief.js?v=v173");</script>
-<script src="js/history.js?v=v173"></script>
-<script src="js/map.js?v=v173"></script>
-<script src="js/showall.js?v=v173"></script>
-<script src="js/main.js?v=v173"></script>
-<script src="js/parts.js?v=v173"></script>
-<script src="js/agent.js?v=v173"></script>
+<script src="00-util.js?v=v174"></script>
+<script src="01-image.js?v=v174"></script>
+<script src="02-lines.js?v=v174"></script>
+<script src="03-text.js?v=v174"></script>
+<script src="04-walk.js?v=v174"></script>
+<script src="05-fill.js?v=v174"></script>
+<script src="06-fourier.js?v=v174"></script>
+<script src="07-measure.js?v=v174"></script>
+<script src="08-shape.js?v=v174"></script>
+<script src="09-plate.js?v=v174"></script>
+<script src="10-export.js?v=v174"></script>
+<script src="11-stages.js?v=v174"></script>
+<script src="12-models.js?v=v174"></script>
+<script src="13-patterns.js?v=v174"></script>
+<script src="14-photo.js?v=v174"></script>
+<script src="15-cutout.js?v=v174"></script>
+<script src="16-molecule.js?v=v174"></script>
+<script src="17-vase.js?v=v174"></script>
+<script src="18-ties.js?v=v174"></script>
+<script src="19-relief.js?v=v174"></script>
+<script src="core.js?v=v174"></script>
+<script src="fonts.js?v=v174"></script>
+<script src="settings.js?v=v174"></script>
+<script src="js/state.js?v=v174"></script>
+<script src="js/ui.js?v=v174"></script>
+<script src="js/config.js?v=v174"></script>
+<script src="js/engine-bridge.js?v=v174"></script>
+<script src="js/source.js?v=v174"></script>
+<script src="js/pipeline.js?v=v174"></script>
+<script src="js/preview.js?v=v174"></script>
+<script src="js/tools.js?v=v174"></script>
+<script src="js/art.js?v=v174"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v174");</script>
+<script src="js/readouts.js?v=v174"></script>
+<script src="js/controls.js?v=v174"></script>
+<script>feature("levels", "features/levels/levels.js?v=v174");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v174");</script>
+<script src="js/export.js?v=v174"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v174");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v174");</script>
+<script>feature("ties", "features/ties/ties.js?v=v174");</script>
+<script src="js/views.js?v=v174"></script>
+<script src="js/zoom.js?v=v174"></script>
+<script src="js/layers.js?v=v174"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v174");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v174");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v174");</script>
+<script src="js/workflow.js?v=v174"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v174");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v174");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v174");</script>
+<script>feature("camera", "features/camera/camera.js?v=v174");</script>
+<script src="js/steppers.js?v=v174"></script>
+<script src="js/scroll.js?v=v174"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v174");</script>
+<script>feature("model", "features/model/model.js?v=v174");</script>
+<script>feature("vase", "features/vase/vase.js?v=v174");</script>
+<script>feature("relief", "features/relief/relief.js?v=v174");</script>
+<script src="js/history.js?v=v174"></script>
+<script src="js/map.js?v=v174"></script>
+<script src="js/showall.js?v=v174"></script>
+<script src="js/main.js?v=v174"></script>
+<script src="js/parts.js?v=v174"></script>
+<script src="js/agent.js?v=v174"></script>
 
 </body>
 </html>

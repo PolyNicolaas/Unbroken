@@ -494,7 +494,10 @@ $("camFile").addEventListener("change", () => {
       c = document.createElement("canvas");
     c.width = Math.round(img.naturalWidth * k);
     c.height = Math.round(img.naturalHeight * k);
-    c.getContext("2d").drawImage(img, 0, 0, c.width, c.height);
+    const g = c.getContext("2d");
+    g.fillStyle = "#fff"; // (a transparent picture: on paper, as everywhere else; the clean-up would read it as black)
+    g.fillRect(0, 0, c.width, c.height);
+    g.drawImage(img, 0, 0, c.width, c.height);
     URL.revokeObjectURL(url);
     cameraEdit(c, "file");
   };
