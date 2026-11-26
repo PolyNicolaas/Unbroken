@@ -185,7 +185,7 @@ function useVase(V, record) {
   if (prev && !prev.vase) vaseStl = prev;
   const mesh = UNB.vaseMesh(V, { h: layerHmm() });
   st.model = {
-    name: V.texture && V.texture.kind === "picture" && V.texture.picture ? "relief" : "vase", // (a relief: a picture standing out from the wall)
+    name: UNB.reliefOn(V) ? "relief" : "vase", // (a relief: a picture, text or pattern standing out from the wall)
     tri: mesh.tri,
     n: mesh.n,
     turns: { x: 0, y: 0, z: 0 },

@@ -78,11 +78,16 @@
                       UNB.molBlock
     17-vase.js    16. Vases — a profile curve turned round the middle, a surface texture (ribs, rings) and a movement
                       pattern along the path (wave, zigzag, loops), written straight to one lap per layer; the checks.
-                      UNB.VASE_SHAPES, UNB.vaseDefaults, VASE_MIN_R, UNB.vaseRadius, UNB.vaseProfile, UNB.vaseReliefInMax, vaseWiggle,
+                      UNB.VASE_SHAPES, UNB.vaseDefaults, VASE_MIN_R, UNB.vaseRadius, UNB.vaseProfile, vaseWiggle,
                       vaseRing, vaseLap, vaseCrosses, vaseLapPoints, vaseStacking, vaseTightest, UNB.vaseStack, UNB.vaseMesh
     18-ties.js    17. Ties — more connectors for a large print: short struts of two strands across the open gaps between
                       parts, spliced into the one line.
                       openOutside, UNB.ties
+    19-relief.js  18. Reliefs — a picture, text or pattern standing out from a vase's wall: its style (smooth, steps,
+                      shapes) and taps as height, fitted to the wall and limited to what a bead prints.
+                      UNB.RELIEF_STYLES, UNB.reliefDefaults, UNB.reliefOn, UNB.reliefHeight, UNB.reliefPartAt,
+                      UNB.reliefMap, UNB.reliefGrid, UNB.reliefAt, UNB.reliefShort, onFaces, faceOf, UNB.reliefUV,
+                      UNB.reliefFace, RELIEF_GAP, UNB.reliefInMax
 
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
@@ -112,6 +117,7 @@
     "16-molecule.js",
     "17-vase.js",
     "18-ties.js",
+    "19-relief.js",
   ];
   if (typeof module !== "undefined" && module.exports) {
     // Node
@@ -120,7 +126,7 @@
     module.exports = root.UNB;
   } else if (typeof importScripts === "function") {
     // a Web Worker (worker.js): the parts sit next to this file
-    importScripts(...PARTS.map((p) => p + "?v=v172"));
+    importScripts(...PARTS.map((p) => p + "?v=v173"));
     root.UNB.PARTS = PARTS;
   } else if (root.UNB) root.UNB.PARTS = PARTS; // the page: index.html loads the parts itself, before this file
 })(typeof window !== "undefined" ? window : globalThis);

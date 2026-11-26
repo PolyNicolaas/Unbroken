@@ -119,22 +119,12 @@ function tieDraw() {
     y0 = Math.min(y0, f.im[i]);
     y1 = Math.max(y1, f.im[i]);
   }
-  const dpr = window.devicePixelRatio || 1,
-    W = cv.clientWidth,
-    pad = 10,
-    s = Math.min((W - 2 * pad) / Math.max(1, x1 - x0), 560 / Math.max(1, y1 - y0)),
-    H = Math.round((y1 - y0) * s + 2 * pad);
-  if (cv.width !== Math.round(W * dpr) || cv.height !== Math.round(H * dpr)) {
-    cv.width = Math.round(W * dpr);
-    cv.height = Math.round(H * dpr);
-    cv.style.height = H + "px";
-  }
-  const ox = (W - (x1 - x0) * s) / 2 - x0 * s,
-    oy = pad - y0 * s;
+  const v = insetCanvas(cv, x1 - x0, y1 - y0, 560); // ui.js
+  if (!v) return;
+  const { g, s } = v,
+    ox = v.ox - x0 * s,
+    oy = v.oy - y0 * s;
   tieView = { s, ox, oy };
-  const g = cv.getContext("2d");
-  g.setTransform(dpr, 0, 0, dpr, 0, 0);
-  g.clearRect(0, 0, W, H);
   const P = (x, y) => [ox + x * s, oy + y * s];
   // the line as traced (the trace's own connectors in it)
   g.strokeStyle = css("--muted");
