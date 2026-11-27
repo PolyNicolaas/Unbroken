@@ -187,7 +187,8 @@ async function smokeTest(dir) {
       missing = [];
     page.on("pageerror", (e) => errors.push(e.message));
     page.on("console", (m) => {
-      if (m.type() === "error") errors.push(m.text());
+      // (the browser asking the local server for a favicon it doesn't have isn't the page's error)
+      if (m.type() === "error" && !/\/favicon\.ico$/.test((m.location && m.location().url) || "")) errors.push(m.text());
     });
     page.on("response", (r) => {
       if (r.status() === 404) missing.push(r.url());
