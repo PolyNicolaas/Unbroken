@@ -3,6 +3,14 @@ const UNB = require("/home/claude/Unbroken/source/engine/core.js");
 const FONTS = require("/home/claude/Unbroken/source/engine/fonts.js");
 const { plotLine, label4 } = UNB._u;
 
+// Letters redrawn for morphing (font units, cap 700, y up): shapes whose outline turns sharply inward tangle in the
+// middle of a morph. G: the C with its lower end turned up into a short upright, no crossbar pointing into the bowl.
+function MORPH_GLYPHS(f) {
+  const vstad = (x, y0, y1, r, k = 12) => { const P = []; for (let i = 0; i <= k; i++) { const a = Math.PI + (Math.PI * i) / k; P.push([x + r * Math.cos(a), y0 + r * Math.sin(a)]); } for (let i = 0; i <= k; i++) { const a = (Math.PI * i) / k; P.push([x + r * Math.cos(a), y1 + r * Math.sin(a)]); } P.push(P[0]); return P.map(([X, Y]) => `${Math.round(X)},${Math.round(Y)}`).join(" "); };
+  const out = {};
+  if (f.glyphs.C) out.G = [613, f.glyphs.C[1] + "|" + vstad(497, 95, 330, 63)];
+  return out;
+}
 // opt: cap (mm), d (spacing, mm), font, gap (between letters, × d; 1.6), neck (join width, × d; 1.5), slit (× d; 1.2),
 // round (corner radius, × d; 0.5), smooth (× d; 0.3)
 function wordShape(text, opt) {
@@ -11,7 +19,7 @@ function wordShape(text, opt) {
   // stroke width (126 units at a cap of 700)
   const ring = (cx, cy, r, k = 24) => Array.from({ length: k + 1 }, (_, i) => `${Math.round(cx + r * Math.cos((2 * Math.PI * i) / k))},${Math.round(cy + r * Math.sin((2 * Math.PI * i) / k))}`).join(" ");
   const stadium = (x0, x1, y, r, k = 12) => { const P = []; for (let i = 0; i <= k; i++) { const a = -Math.PI / 2 + (Math.PI * i) / k; P.push([x1 + r * Math.cos(a), y + r * Math.sin(a)]); } for (let i = 0; i <= k; i++) { const a = Math.PI / 2 + (Math.PI * i) / k; P.push([x0 + r * Math.cos(a), y + r * Math.sin(a)]); } P.push(P[0]); return P.map(([x, y]) => `${Math.round(x)},${Math.round(y)}`).join(" "); };
-  const font = font0.label && font0.family === "Chocolate" ? Object.assign({}, font0, { glyphs: Object.assign({}, font0.glyphs, { ".": [150, ring(70, 68, 68)], "-": [330, stadium(63, 267, 300, 63)] }) }) : font0;
+  const font = font0.label && font0.family === "Chocolate" ? Object.assign({}, font0, { glyphs: Object.assign({}, font0.glyphs, { ".": [150, ring(70, 68, 68)], "-": [330, stadium(63, 267, 300, 63)], ...MORPH_GLYPHS(font0) }) }) : font0;
   const ws = (opt.slit || 1.2) * d, neck = (opt.neck || 1.5) * d, rc = (opt.round || 0.5) * d;
   const lay = UNB.textLayout(text, font, { cap, join: false, dots: "keep", spacing: "even", gap: (opt.gap || 1.6) * d, word: 0.6 * cap });
   const g = opt.g || 0.06, pad = 3 * d, w = Math.ceil((lay.width + 2 * pad) / g), h = Math.ceil((lay.height + 2 * pad) / g);
@@ -31,6 +39,8 @@ function wordShape(text, opt) {
   const bar = (i, j, width) => { const L = new Uint8Array(N); plotLine(L, w, h, i % w, Math.floor(i / w), j % w, Math.floor(j / w)); const o = fat(L, width / 2); for (let k = 0; k < N; k++) ink[k] |= o[k]; };
   // the baseline (y down: the text's baseline in grid rows) and the band near it where joins go
   const base = P(lay.baselines[0].y), bandTop = base - 0.35 * cap / g;
+  // heavier letters: grown by opt.grow (× d) all round before anything else
+  if (opt.grow > 0) ink = fat(ink, opt.grow * d);
   const joinAll = () => {
   // 2. pieces: letters left to right joined near the baseline; dots (small pieces above another) joined straight down
   for (let guard = 0; guard < 80; guard++) {

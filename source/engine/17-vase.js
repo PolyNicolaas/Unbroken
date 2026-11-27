@@ -7,7 +7,7 @@
 (function (root) {
   "use strict";
   const UNB = root.UNB,
-    { segDist2, startNearest, rasterPolyline, resampleLoop, isoContours } = UNB._u; // shared helpers (00-util.js)
+    { segDist2, startNearest, rasterPolyline, resampleLoop, isoContours, cellGrid } = UNB._u; // shared helpers (00-util.js)
 
   // ---------- the vase's settings ----------
   // V = { height (mm), profile: [[t, r], …] (t: share of the height, 0 at the plate to 1 at the rim, rising; r: mm
@@ -340,7 +340,7 @@
   // The pairing: W[i] (i = 0 … N) the share round B paired with share i / N round A, rising, W[N] = W[0] + 1.
   // 1. the offset round B whose points sit nearest A's; 2. dynamic time warping within a band about that offset
   // (a few offsets either side tried), costing distance² + 0.08 × (turning angle difference)², with a small charge
-  // for every step that isn't along both; 3. the warp's offset smoothed over 1/20 of the way round, kept rising.
+  // for every step that isn't along both; 3. the warp's offset smoothed over 2/15 of the way round (a B's two slits tangled at 1/20), kept rising.
   function morphWarp(A, B, turnDeg) {
     const key = `${A ? A.key : "circle"}>${B ? B.key : "circle"}>${turnDeg}`;
     let R = morphCache.get(key);
@@ -433,7 +433,7 @@
     }
     const off = best.map((j, i) => j - i),
       W = new Float64Array(N + 1),
-      K = Math.round(N / 40);
+      K = Math.round(N / 15);
     for (let i = 0; i <= N; i++) {
       let v = 0;
       for (let d = -K; d <= K; d++) v += off[(((i + d) % N) + N) % N];
@@ -954,8 +954,25 @@
             const na = A.x.length,
               c = Math.round((i / nb) * na),
               win = Math.min(80, Math.ceil(na / Math.max(1, laps.cycles || 1)) + 6);
-            for (let d = -win; d <= win; d++) {
-              const a = (((c + d) % na) + na) % na,
+            // (a morph's laps: searched everywhere near the point, since a lap that was untangled no longer pairs
+            // share for share with the one below)
+            const cand = laps.global ? [] : null;
+            if (cand) {
+              let G = A.__grid;
+              if (!G) {
+                G = A.__grid = cellGrid(2);
+                for (let a = 0; a < na; a++) G.add(A.x[a], A.y[a], a);
+              }
+              G.near(B.x[i], B.y[i], (a) => {
+                cand.push(a, (a - 1 + na) % na);
+              });
+              if (!cand.length) {
+                best = Math.min(best, 9);
+                side = 1;
+              }
+            }
+            for (let d = -win; d <= (cand ? -win + cand.length - 1 : win); d++) {
+              const a = cand ? cand[d + win] : (((c + d) % na) + na) % na,
                 b = (a + 1) % na,
                 dd = segDist2(B.x[i], B.y[i], A.x[a], A.y[a], A.x[b], A.y[b]);
               if (dd < best) {
@@ -1173,10 +1190,13 @@
     }
     const M = V.move || {};
     walls.cycles = M.kind && M.kind !== "none" ? Math.max(1, Math.round(M.count || 1)) : 0;
+    walls.global = !!V.planTop;
     const stk = vaseStacking(walls, base.length),
       step = o.overhang || w / 3,
       tight = vaseTightest(walls, base.length);
     delete walls.cycles;
+    delete walls.global;
+    for (const L of walls) for (const P of L.parts || [L]) delete P.__grid;
     // a lattice: the longest span a flip layer bridges, crossing to crossing (half a repeat of the movement along the
     // lap below)
     let lattice = null;
