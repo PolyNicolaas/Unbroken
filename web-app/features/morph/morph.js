@@ -208,7 +208,8 @@ $("moCap").addEventListener("input", () => ($("moCapVal").textContent = `${$("mo
       lab = document.createElement("label");
     Object.assign(inp, { type: "radio", name: "moFont", id, value: k, checked: k === "chocolate" });
     lab.htmlFor = id;
-    lab.textContent = morphFontLabel(k);
+    lab.className = "mo-font";
+    lab.innerHTML = `<svg viewBox="0 0 10 10" aria-hidden="true"><path/></svg><span>${morphFontLabel(k)}</span>`;
     if (MORPH_FONTS[k].from) lab.title = `${morphFontLabel(k)}: ${MORPH_FONTS[k].from}`;
     box.append(inp, lab);
     inp.addEventListener("change", () => {
@@ -219,6 +220,31 @@ $("moCap").addEventListener("input", () => ($("moCapVal").textContent = `${$("mo
     });
   }
 }
+
+// each lettering's button shows the letter in it (the font's own outlines, as drawn: not yet made one line)
+function morphFontPics(ch) {
+  ch = (ch || "A").toUpperCase();
+  for (const k of Object.keys(MORPH_FONTS)) {
+    const lab = document.querySelector(`label[for="moFont-${k}"]`),
+      g = MORPH_FONTS[k].glyphs[ch] || MORPH_FONTS[k].glyphs.A;
+    if (!lab || !g) continue;
+    const L = g[1].split("|").map((st) => st.trim().split(/\s+/).map((q) => q.split(",").map(Number)));
+    const xs = L.flat().map((q) => q[0]),
+      ys = L.flat().map((q) => q[1]),
+      x0 = Math.min(...xs),
+      y1 = Math.max(...ys),
+      w = Math.max(...xs) - x0,
+      h = y1 - Math.min(...ys),
+      sc = 9 / Math.max(w, h, 1),
+      ox = (10 - w * sc) / 2,
+      oy = (10 - h * sc) / 2;
+    const d = L.map((P) => P.map(([x, y], i) => `${i ? "L" : "M"}${(ox + (x - x0) * sc).toFixed(2)} ${(oy + (y1 - y) * sc).toFixed(2)}`).join("") + (k === "chocolate" ? "" : "Z")).join("");
+    const path = lab.querySelector("path");
+    path.setAttribute("d", d);
+    path.classList.toggle("hair", k === "chocolate");
+  }
+}
+morphFontPics("A");
 
 // ---------- a ready-made shape at the bottom or the top (UNB.MORPH_SHAPES) ----------
 const morphShapeName = (k) => (UNB.MORPH_SHAPES && UNB.MORPH_SHAPES[k]) || k;
@@ -257,7 +283,58 @@ function morphUseShape(where, key) {
   vaseSend(true);
   vaseUI();
 }
-// the buttons: each shape drawn small, its name on hover
+// one picker: in a morph the vase's own shapes (Circle, Polygon, Star, Flower; Flat at the bottom) are buttons at the
+// start of the grid, drawn like the rest; each taps the vase's own choice (its radio, put away in a morph)
+const MORPH_BUILTIN = {
+  bottom: [
+    ["circle", "Circle", "vpCircle"],
+    ["polygon", "Polygon", "vpPolygon"],
+    ["star", "Star", "vpStar"],
+    ["flower", "Flower", "vpFlower"],
+    ["plaque", "Flat", "vpPlaque"],
+  ],
+  top: [
+    ["circle", "Circle", "vrCircle"],
+    ["polygon", "Polygon", "vrPolygon"],
+    ["star", "Star", "vrStar"],
+    ["flower", "Flower", "vrFlower"],
+  ],
+};
+const builtinPath = (k) => {
+  const P = [];
+  for (let i = 0; i < 120; i++) {
+    const a = Math.PI / 2 + (2 * Math.PI * i) / 120,
+      r =
+        k === "polygon"
+          ? Math.cos(Math.PI / 6) / Math.cos((((a - Math.PI / 2) % (Math.PI / 3)) + Math.PI / 3) % (Math.PI / 3) - Math.PI / 6)
+          : k === "star"
+            ? 0.72 + 0.28 * Math.cos(5 * (a - Math.PI / 2))
+            : k === "flower"
+              ? 0.78 + 0.22 * Math.cos(6 * a)
+              : 1;
+    P.push(k === "plaque" ? [Math.cos(a), 0.32 * Math.sign(Math.sin(a)) * Math.min(1, Math.abs(Math.sin(a)) * 4)] : [r * Math.cos(a), r * Math.sin(a)]);
+  }
+  return P.map(([x, y], i) => `${i ? "L" : "M"}${(22 + 19 * x).toFixed(1)} ${(22 - 19 * y).toFixed(1)}`).join("") + "Z";
+};
+for (const [where, box] of [
+  ["bottom", $("moBotShapes")],
+  ["top", $("moTopShapes")],
+])
+  for (const [k, name, radio] of MORPH_BUILTIN[where]) {
+    const b = document.createElement("button");
+    b.type = "button";
+    b.className = "btn mini";
+    b.dataset.builtin = k;
+    b.title = name;
+    b.setAttribute("aria-label", name);
+    b.innerHTML = `<svg viewBox="0 0 44 44" aria-hidden="true"><path d="${builtinPath(k)}"/></svg>`;
+    b.addEventListener("click", () => {
+      $(radio).checked = true;
+      $(radio).dispatchEvent(new Event("change", { bubbles: true }));
+    });
+    box.append(b);
+  }
+// the ready-made shapes after them: each drawn small, its name on hover
 for (const [where, box] of [
   ["bottom", $("moBotShapes")],
   ["top", $("moTopShapes")],
@@ -489,6 +566,7 @@ async function morphCheckNow() {
     };
   $("moMsg").textContent = "Checking the morph…";
   $("moMsg").className = "hint";
+  morphChip("busy", "Checking…");
   let r;
   try {
     r = await MORPH_ENG.call("morphCheck", [V, opt], (p) => {
@@ -502,6 +580,7 @@ async function morphCheckNow() {
     }
     $("moMsg").textContent = `The check failed: ${String(e).slice(0, 120)}`;
     $("moMsg").className = "hint warn";
+    morphChip("warn", "Check failed");
     return;
   }
   if (run !== morphRun) return;
@@ -546,6 +625,52 @@ function morphVerdict() {
   };
 }
 
+// From above: the bottom (grey) and the top (the accent) drawn over each other as they print, in a corner of the
+// preview: how the change has to go, and what Turn and Pair do
+function morphFromAbove(V) {
+  const box = $("moAbove");
+  box.hidden = !(V && V.planTop && morphOn());
+  if (box.hidden) return;
+  const cv = $("moAboveCv"),
+    dpr = window.devicePixelRatio || 1,
+    S = 120;
+  cv.width = cv.height = S * dpr;
+  const g = cv.getContext("2d");
+  g.setTransform(dpr, 0, 0, dpr, 0, 0);
+  g.clearRect(0, 0, S, S);
+  let E;
+  try {
+    E = UNB.vaseEnds(V, 720);
+  } catch (e) {
+    box.hidden = true;
+    return;
+  }
+  const all = [...E.bottom.x, ...E.top.x].map(Math.abs).concat([...E.bottom.y, ...E.top.y].map(Math.abs)),
+    k = (S / 2 - 8) / Math.max(1, ...all);
+  const css = getComputedStyle(document.body);
+  for (const [R, col, w] of [
+    [E.bottom, css.getPropertyValue("--muted") || "#888", 1.2],
+    [E.top, css.getPropertyValue("--accent") || "#b0703a", 1.6],
+  ]) {
+    g.beginPath();
+    for (let i = 0; i < R.x.length; i++) g[i ? "lineTo" : "moveTo"](S / 2 + R.x[i] * k, S / 2 - R.y[i] * k);
+    g.closePath();
+    g.strokeStyle = col.trim();
+    g.lineWidth = w;
+    g.stroke();
+  }
+}
+
+// the verdict on the preview too, beside the size (a tap opens Change): "✓ Prints", "Too short: …", "Checking…"
+function morphChip(cls, text) {
+  const c = $("moChip");
+  c.hidden = !cls || !morphOn();
+  if (!cls) return;
+  c.textContent = text;
+  c.className = `mo-chip ${cls}`;
+}
+$("moChip").addEventListener("click", () => mapOpen("mchange"));
+
 // ---------- the panel ----------
 function morphLabels() {
   const V = vaseCur,
@@ -572,12 +697,31 @@ function morphLabels() {
     ["moBotShapes", botShape],
     ["moTopShapes", topShape && Q.shape],
   ])
-    $(box).querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.shape === k));
+    $(box).querySelectorAll("button[data-shape]").forEach((b) => b.classList.toggle("on", b.dataset.shape === k));
+  // the built-ins: lit when that's the shape (a top: not a letter or a shape); their radios put away in a morph
+  const mo = morphOn();
+  for (const [where, box, kind] of [
+    ["bottom", "moBotShapes", P && !botShape && P.kind],
+    ["top", "moTopShapes", Q && !letter && !topShape && Q.kind],
+  ]) {
+    $(box).querySelectorAll("button[data-builtin]").forEach((b) => b.classList.toggle("on", b.dataset.builtin === kind));
+    for (const [, , radio] of MORPH_BUILTIN[where]) {
+      $(radio).hidden = mo;
+      document.querySelector(`label[for="${radio}"]`).hidden = mo;
+    }
+  }
   $("moBotShapeVal").textContent = botShape ? morphShapeName(P.shape) : "";
   $("moTopShapeVal").textContent = topShape ? morphShapeName(Q.shape) : "";
   if (topShape) $("vaseTopVal").textContent = `blends to ${morphShapeName(Q.shape).toLowerCase()}`;
   $("moFontVal").textContent = morphFontLabel(letter ? Q.font || "chocolate" : morphFont);
+  morphFontPics(letter ? Q.letter : $("moLetter").value);
   morphParts();
+  morphFromAbove(V);
+  // a shape choice with nothing left in it (a morph's built-ins are in the grid) isn't shown
+  for (const id of ["vpCircle", "vrCircle"]) {
+    const seg = $(id).closest(".seg");
+    seg.hidden = mo && ![...seg.querySelectorAll("input")].some((i) => !i.hidden);
+  }
   // the 3D model card's switch, and the Line tool's second button (only once there's a morph)
   if (morphOn()) $("mfMorph").checked = true;
   $("moTopFromLine").hidden = !morphOn();
@@ -595,7 +739,9 @@ function morphLabels() {
   if (v) {
     msg.textContent = v.text;
     msg.className = v.cls === "ok" ? "hint verdict ok" : "hint verdict warn";
+    morphChip(v.cls, v.cls === "ok" ? "✓ Prints" : `Too short: about ${morphRes.r.needH} mm would print`);
   } else if (!on) msg.textContent = "";
+  if (!morphOn()) morphChip(null);
   $("moFlip").hidden = !(v && v.flip);
 }
 // what a morph's tools hold that a vase's don't: the twist and the lean are part of the change (Change, not Bottom),
@@ -610,8 +756,9 @@ function morphParts() {
     }
   };
   document.querySelectorAll("#vaseBox .mo-shift").forEach((el) => set(el, m ? "mchange" : "vshape"));
-  set($("drawViewRow"), m ? "whole" : "vprofile");
-  $("vaseTwistLab").textContent = m ? "Twist as it rises" : "Turn the shape, bottom to rim";
+  // (reached through their controls: the rows are the model's and the vase's)
+  set($("hlPreview").closest("[data-part]"), m ? "whole" : "vprofile");
+  $("vaseTwist").closest(".row").querySelector(".lab label").textContent = m ? "Twist as it rises" : "Turn the shape, bottom to rim";
   // (a tool open now: shown or put away as its part says, as map.js does on opening it)
   const N = typeof mapOpenId !== "undefined" && mapOpenId && MAP_NODES[mapOpenId];
   if (N) for (const el of moves) el.classList.toggle("part-off", !!N.part && !el.dataset.part.split(" ").includes(N.part));

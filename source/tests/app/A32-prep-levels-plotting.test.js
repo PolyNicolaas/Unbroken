@@ -17,6 +17,7 @@ module.exports = {
     const sk = await page.evaluate(() => ({ n: st.walk.px.length, m: $("levelModes").value }));
     checks.push(check("the second grey set to Skip: the line changed again", +(sk.m === "tstts" && sk.n !== lv.n), "==", 1));
     await A.card(page, "h-prep");
+    await page.evaluate(() => { const h = $("h-prep"); if (!h.closest("section").classList.contains("open")) h.click(); });   // (Image prep folds away while it's off: its heading opens it)
     await page.click("#bgPick"); await A.idle(page, 200);
     await page.evaluate(() => window.scrollTo(0, 0)); // (the card's controls are further down the page)
     const box = await page.locator("#view").boundingBox();

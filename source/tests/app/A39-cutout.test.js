@@ -15,6 +15,7 @@ module.exports = {
     await page.evaluate(({ b64, w, h }) => { const c = document.createElement("canvas"); c.width = w; c.height = h; c.getContext("2d").putImageData(new ImageData(Uint8ClampedArray.from(atob(b64), (ch) => ch.charCodeAt(0)), w, h), 0, 0); artUsePicture(c, "vase"); }, { b64: Buffer.from(V.rgba.buffer).toString("base64"), w: V.w, h: V.h });
     await A.idle(page, 3000);
     await page.evaluate(() => $("card-h-prep").classList.remove("collapsed"));
+    await page.evaluate(() => { const h = $("h-prep"); if (!h.closest("section").classList.contains("open")) h.click(); });   // (Image prep folds away while it's off: its heading opens it)
     await page.click("#cutBtn"); await page.waitForTimeout(200);
     await drag(page, await pt(page, 0.28, 0.16), await pt(page, 0.72, 0.88)); await done(page);
     // the working (traced) picture: white on the floor and the wall beside the vase, not on the vase

@@ -24,6 +24,8 @@ module.exports = {
         if (await page.$(`#mapNodes [data-node="${id}"]`)) await page.click(`#mapNodes [data-node="${id}"]`);
         else await page.evaluate((n) => mapOpen(n), id);
         await A.idle(page, 600);
+        // (a folded card, Image prep while it's off, is opened from its heading, as it would be to use it)
+        await page.evaluate(() => document.querySelectorAll(".panel .card.fold:not(.open) > h2").forEach((h) => h.getClientRects().length && h.click()));
         for (const s of sels) if (await visible(page, s)) seen.add(s);
         over = Math.max(over, await page.evaluate(() => { const p = document.querySelector(".panel"); return [...p.querySelectorAll("section.card, .map-rows")].filter((c) => c.getClientRects().length).reduce((m, c) => Math.max(m, c.scrollWidth - c.clientWidth), 0); }));
       }

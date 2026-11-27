@@ -43,6 +43,7 @@ module.exports = {
     // an object photo cut out, then its Light changed
     await page.click("label[for=phKobject]"); await A.idle(page, 3000);
     await page.evaluate(() => $("card-h-prep").classList.remove("collapsed"));
+    await page.evaluate(() => { const h = $("h-prep"); if (!h.closest("section").classList.contains("open")) h.click(); });   // (Image prep folds away while it's off: its heading opens it)
     await page.click("#cutBtn"); await page.waitForTimeout(200);
     await drag(page, await pt(page, 0.1, 0.1), await pt(page, 0.9, 0.9));
     await page.waitForFunction(() => !CUT.busy && st.cutout && st.cutout.mask, null, { timeout: 15000 }); await A.idle(page, 2000);

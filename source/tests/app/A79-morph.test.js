@@ -112,7 +112,7 @@ module.exports = {
       $("vaseH").dispatchEvent(new Event("change", { bubbles: true }));
     });
     await A.idle(page, 600);
-    await page.click('label[for="vrStar"]');
+    await page.click('#moTopShapes button[data-builtin="star"]');
     await A.idle(page, 800);
     o.vTopStar = await V();
     o.radioStar = await page.evaluate(() => $("vrStar").checked && !$("vrLetter").checked);
@@ -135,7 +135,7 @@ module.exports = {
     );
     await page.click('[data-node="mbottom"]');
     await A.idle(page, 500);
-    await page.click('label[for="vpStar"]');
+    await page.click('#moBotShapes button[data-builtin="star"]');
     await A.idle(page, 800);
     o.vBottom = await V();
     checks.push(
@@ -146,7 +146,7 @@ module.exports = {
         1
       )
     );
-    await page.click('label[for="vpCircle"]');
+    await page.click('#moBotShapes button[data-builtin="circle"]');
     await page.evaluate(() => {
       $("vaseH").value = 20;
       $("vaseH").dispatchEvent(new Event("change", { bubbles: true }));
@@ -207,7 +207,7 @@ module.exports = {
     o.even = (await V()).planTop.match;
     await page.click('[data-node="mtop"]');
     await A.idle(page, 400);
-    await page.click('label[for="vrStar"]');
+    await page.click('#moTopShapes button[data-builtin="star"]');
     o.msgStar = await waitCheck();
     o.vStar = await V();
     checks.push(
@@ -271,7 +271,7 @@ module.exports = {
     await A.idle(page, 400);
     await page.click('[data-node="mbottom"]');
     await A.idle(page, 400);
-    await page.click('label[for="vpStar"]');
+    await page.click('#moBotShapes button[data-builtin="star"]');
     await A.idle(page, 600);
     await page.evaluate(() => {
       $("vaseH").value = 8;

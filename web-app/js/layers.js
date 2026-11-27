@@ -413,6 +413,15 @@ function cartridgeUI() {
       ? `One copy needs ${ml(c.per)}, more than a full ${ml(c.V)} cartridge holds. Make it smaller or with fewer layers.`
       : `${c.n} copies need ${ml(c.total)}, more than one ${ml(c.V)} cartridge: it runs out during copy ${c.fit + 1}. Print ${c.fit} cop${c.fit === 1 ? "y" : "ies"}, or refill after copy ${c.fit}.`;
 }
+// the button under a too-short warning: "Allow 12 s per layer" (the most every layer can take), or none
+function layerFixUI(sec) {
+  const b = $("layerFixTime");
+  $("layerFix").hidden = !sec;
+  if (sec) {
+    b.textContent = `Allow ${sec} s per layer`;
+    b.dataset.sec = sec;
+  }
+}
 function layerReadout() {
   const L = st.layers,
     S = L.S,
@@ -432,8 +441,14 @@ function layerReadout() {
     slowed = Math.max(
       ...all.map((Q) => Q.stack.laps.filter((q) => q.kind !== "wall-finish" && q.length / feed < need).length)
     );
+  // too short: said in a line, with the one change that fixes it here (the most seconds every layer can take at the
+  // slowest speed); bigger, more copies or a filled base are the other ways, said under it
+  const vMin = CFG.printer.minPrintSpeed || 5,
+    shortest = Math.min(...all.flatMap((Q) => Q.stack.laps.filter((q) => q.kind !== "wall-finish" && q.length > 0).map((q) => q.length))),
+    canTake = Number.isFinite(shortest) ? Math.floor(shortest / vMin) : 0;
+  layerFixUI(lf.short && canTake >= 1 && canTake < need ? canTake : 0);
   const timing = lf.short
-    ? `${lf.short} layer${lf.short === 1 ? " is" : "s are"} too short to take ${need} s even at ${fmt(CFG.printer.minPrintSpeed || 5, 0)} mm/s (the slowest the printer goes). Make the design bigger, add copies, or add a filled base. `
+    ? `${lf.short} of ${layers} layer${layers === 1 ? " is" : "s are"} too short to take ${need} s, even at the slowest speed. `
     : slowed
       ? `${slowed} of ${layers} layer${layers === 1 ? "" : "s"} slowed to take ${need} s each so the chocolate sets. `
       : "";
@@ -474,21 +489,24 @@ function layerReadout() {
       hi = t.length ? Math.max(...t) : 0,
       hint = $("layerHint");
     hint.className = lf.short ? "hint warn" : "hint";
-    hint.hidden = false;
+    hint.textContent = timing.trim();
+    hint.hidden = !timing;
+    const how = $("layerHow");
+    how.hidden = false;
     // (a spiral base asked for, where the shape has no single way in)
     const noSpiral =
       S.spiral === false
         ? " The base couldn't spiral everywhere (a layer in more than one piece, or one that pinches in two as it narrows): those layers are rings."
         : "";
     if (L.vase) {
-      hint.textContent =
-        timing +
+      how.textContent =
+        (lf.short ? `To take ${need} s: make it bigger, print more copies at once (Plate) or add a filled base. ` : "") +
         `The vase's path is written lap by lap from its profile, texture and movement (no slicing): the profile is the middle of the bead${S.N ? `; the first ${S.N} layer${S.N === 1 ? " is" : "s are"} filled at ${dens}% for the base` : "; no base, so the bottom is open"}. The layers spiral up with no seam; the top is open.` +
         noSpiral;
       return;
     }
-    hint.textContent =
-      timing +
+    how.textContent =
+      (lf.short ? `To take ${need} s: make it bigger, print more copies at once (Plate) or add a filled base. ` : "") +
       `Sliced every ${fmt(S.h, 2)} mm through the model (the first at ${fmt(z0 / 2, 2)} mm); each layer's outside contour is moved in half a line width${L.walls > 1 ? ` with ${L.walls} walls` : ""} (inside surfaces and holes aren't traced; separate parts are joined by connector strands), ${S.N ? `filled at ${dens}% for the base, ` : ""}${S.F.infillDensity > 0 ? `filled at ${Math.round(S.F.infillDensity * 100)}% above it, ` : ""}and fitted with a Fourier series (${lo === hi ? lo : `${lo}–${hi}`} terms). The layers spiral up with no seam${S.F.infillDensity > 0 ? "" : "; the top is open"}.` +
       noSpiral +
       (L.empty ? ` ${L.empty} layer${L.empty === 1 ? " had" : "s had"} nothing to cut and repeat the one below.` : "") +
@@ -499,8 +517,9 @@ function layerReadout() {
   }
   const h = $("layerHint");
   h.className = lf.short ? "hint warn" : "hint";
-  h.textContent = timing.trim();
+  h.textContent = timing.trim() + (lf.short ? ` Make it bigger, print more copies at once (Plate) or add a filled base.` : "");
   h.hidden = !timing;
+  $("layerHow").hidden = true;
   $("layerCount").title =
     (S.N
       ? `The ${S.N} base layer${S.N === 1 ? " prints" : "s print"} flat${S.pat ? ` and filled at ${dens}%` : ""}; `
@@ -1244,6 +1263,12 @@ function pvAboveFollowArt(kind) {
 }
 new ResizeObserver(() => drawStack()).observe($("stackView"));
 lightLoad();
+$("layerFixTime").addEventListener("click", () => {
+  const el = $("layerTime");
+  el.value = $("layerFixTime").dataset.sec;
+  el.dispatchEvent(new Event("input", { bubbles: true }));
+  el.dispatchEvent(new Event("change", { bubbles: true }));
+});
 for (const id of ["gFeed", "gZ", "layerTime"])
   $(id).addEventListener("input", () => {
     showHeight();

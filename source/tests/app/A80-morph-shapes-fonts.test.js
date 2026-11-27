@@ -35,8 +35,8 @@ module.exports = {
     // the shapes: as many buttons as UNB.MORPH_SHAPES, at the bottom and the top
     o.count = await page.evaluate(() => ({
       shapes: Object.keys(UNB.MORPH_SHAPES).length,
-      bottom: $("moBotShapes").children.length,
-      top: $("moTopShapes").children.length,
+      bottom: $("moBotShapes").querySelectorAll("button[data-shape]").length,
+      top: $("moTopShapes").querySelectorAll("button[data-shape]").length,
     }));
     checks.push(
       check("a button for every shape, at the bottom and the top", +(o.count.shapes >= 18 && o.count.bottom === o.count.shapes && o.count.top === o.count.shapes), "==", 1)
@@ -57,13 +57,13 @@ module.exports = {
       )
     );
     // a Circle after it: the heart's button no longer lit (Shape brings it back)
-    await page.click('label[for="vpCircle"]');
+    await page.click('#moBotShapes button[data-builtin="circle"]');
     await waitCheck();
-    o.circleLit = await page.evaluate(() => [...document.querySelectorAll("#moBotShapes button.on")].length);
+    o.circleLit = await page.evaluate(() => document.querySelectorAll("#moBotShapes button[data-shape].on").length + (document.querySelector('#moBotShapes button.on[data-builtin="circle"]') ? 0 : 1));
     await page.click('label[for="vpDrawing"]');
     await waitCheck();
     o.backHeart = await page.evaluate(() => st.model.vase.plan.kind === "drawing" && st.model.vase.plan.shape === "heart" && !!document.querySelector('#moBotShapes button.on[data-shape="heart"]'));
-    checks.push(check("Circle after the heart: no shape button lit; Shape brings the heart back, lit", +(o.circleLit === 0 && o.backHeart), "==", 1));
+    checks.push(check("Circle after the heart: Circle lit, no shape button; Shape brings the heart back, lit", +(o.circleLit === 0 && o.backHeart), "==", 1));
     await page.click('[data-node="mtop"]');
     await A.idle(page, 400);
     await page.click('#moTopShapes button[data-shape="star"]');

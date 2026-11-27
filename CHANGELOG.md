@@ -3,6 +3,29 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v182 · 2026-11-27
+
+Twelve UI improvements from trying v181 (Nicolaas, 27 November 2026: "i like all of these"):
+
+- **Layers, for a vase or a morph:** no Infill and no second Height (Profile has it), since a vase is printed lap by
+  lap. A too-short warning is now one line ("66 of 66 layers are too short to take 20 s, even at the slowest speed")
+  with the fix that works here, **Allow 13 s per layer**. The other ways (bigger, more copies, a filled base) and how
+  the path is made are written under it.
+- **No Trace switch for a 3D design** (a vase, a morph, an STL), and no stray divider in the toolbar.
+- **The morph's verdict on the preview:** ✓ Prints, Too short: about … mm, or Checking…, top right. Tap it for Change.
+- **From above:** a small view in the preview's corner with the bottom (grey) and the top (coloured) drawn over each
+  other as they print (`UNB.vaseEnds`), so Turn and Pair can be judged.
+- **Lettering as pictures:** Chocolate, Swirl and Grand each show the letter in that lettering.
+- **One shape picker:** in a morph, Circle, Polygon, Star, Flower (and Flat at the bottom) are buttons at the start of
+  the shapes grid, drawn like the rest. Top's choice is just Letter (or Shape / Drawing).
+- **The Examples tray puts the open panel away**; closing it without picking brings the panel back.
+- **The Morph / Vase node shows the design first;** where the input comes from (Picture, Text, …) is last, without
+  the drop zone (dropping on the page still works).
+- **Image prep folds away while it's off**; its heading opens it (it opens itself when something in it is on).
+- **The 3D preview fills its view:** fitted across to the model's widest, any way round, and up and down to its
+  height as tilted (it was fitted to a sphere round it). An iPad held upright shows it about a third bigger.
+- Tests: A81; A12, A32, A39 and A44 open the folded Image prep from its heading; A79 and A80 pick shapes from the grid. 146 of 146 pass.
+
 ## v181 · 2026-11-27
 
 Cleaning up the tool panels (Nicolaas, 27 November 2026: keep cleaning up the UI; desktop and iPad only):

@@ -126,7 +126,7 @@ const MAP_CORE = {
     cap: "Layers",
     step: "choc",
     rows: [
-      ["Height and time", ["printHeightMM", "layerTime", "#layerCount", "#layerHint", "#cartHint"]],
+      ["Height and time", ["printHeightMM", "layerTime", "#layerCount", "#layerHint", "#layerFix", "#layerHow", "#cartHint"]],
       ["Walls and support", ["cutRow", "wallCount", "support"]],
       ["Base", ["baseLayers", "basePattern", "baseCover", "baseDensity", "baseDirRow", "infillMin"]],
       ["Infill", ["fillDensity", "fillPattern", "fillAngle", "fillTurnF", "fillMin"]],
@@ -607,7 +607,11 @@ function mapFollowStep() {
 
 // ---------- the examples tray ----------
 // the examples (state.js EXAMPLES) as tiles over the preview; picking one starts from it. It opens only when asked.
+let mapTrayWasShut = false;
 function mapTray(on) {
+  // the tray over the preview puts the open panel away (closed without picking: it comes back)
+  if (on && !mapTrayOpen) mapTrayWasShut = mapShut;
+  if (on) mapShut = true;
   mapTrayOpen = !!on;
   let t = $("mapTray");
   if (on && !t) {
@@ -620,7 +624,11 @@ function mapTray(on) {
     head.className = "map-tray-head";
     head.innerHTML =
       '<h2>Start from</h2><span class="hint">an example: one tap starts from it; everything stays editable</span><button type="button" class="map-tray-x" aria-label="Close">×</button>';
-    head.querySelector("button").addEventListener("click", () => mapTray(false));
+    head.querySelector("button").addEventListener("click", () => {
+      mapTray(false);
+      mapShut = mapTrayWasShut;
+      mapRender();
+    });
     // your own: a picture, an STL model or a saved design (the same as dropping it on the page)
     const own = document.createElement("div");
     own.className = "map-tray-own";

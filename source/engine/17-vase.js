@@ -713,6 +713,13 @@
     return Math.min(24000, Math.max(256, Math.ceil(L / 0.25), m * (M.kind === "loops" ? 32 : 24)));
   }
   UNB.vaseLapPoints = (V) => vaseLapPoints(vaseClean(V)); // (how long a lap is in points: the app keeps big ones cheap)
+  // The wall at the bottom and at the top, seen from above (mm, y up; n points round each): a morph's two ends
+  // drawn over each other (its "From above" view), turned, twisted and leaned as they print.
+  UNB.vaseEnds = function (V0, n) {
+    const V = vaseClean(V0),
+      k = Math.max(64, Math.min(2400, n || vaseLapPoints(V)));
+    return { bottom: vaseRing(V, 0, k), top: vaseRing(V, Math.max(0.5, V.height), k) };
+  };
 
   // ---------- the checks ----------
   // How far each lap's bead sits off the one below (mm): every point's distance to the nearest piece of the lap below

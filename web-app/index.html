@@ -40,6 +40,8 @@
         <div class="stage-pane" id="paneLayers"><canvas class="stack" id="stackView" aria-label="The layers stacked, seen in 3D. Drag to turn it."></canvas><span class="pane-tip">Drag to turn · double-click to reset</span>
           <div class="layerbar" title="Show the print up to this layer; the layer itself is highlighted. Arrow keys step one layer."><label for="layerUpTo">Layer</label><input type="range" id="layerUpTo" min="1" max="1" value="1"><span class="val" id="layerUpToVal">all</span><span class="what" id="layerWhat"></span></div></div>
         <div class="chip" id="chip" role="status" aria-live="polite">loading…</div>
+        <div data-feature="morph" class="mo-above" id="moAbove" hidden title="From above: the bottom (grey) and the top (coloured) as they print"><canvas id="moAboveCv" width="120" height="120"></canvas><span>from above</span></div>
+        <button data-feature="morph" class="mo-chip" id="moChip" type="button" hidden title="The morph's check: tap for Change">✓ Prints</button>
         <div data-feature="patterns" class="moled" id="pathEd" hidden role="dialog" aria-modal="true" aria-label="Draw the centre's path">
           <div class="me-top"><p class="hint" id="peHint">Drag the path the ring's centre should follow, from its start to its end. The faint figure is the ring at rest; the dashed box is the frame. Start outside it if you like.</p></div>
           <div class="me-stage"><canvas id="peView" aria-label="The centre's path being drawn"></canvas></div>
@@ -323,7 +325,7 @@
     <section class="card choc-only" aria-labelledby="h-layers">
       <h2 id="h-layers">Layers <span id="layerInfo"></span></h2>
       <div class="two">
-        <label class="field" title="How tall the print is, from the plate to the top. The layers follow: the base layers, then as many layers above them as reach this height (whole layers)."><span>Height (mm)</span><input type="number" id="printHeightMM" min="0.05" max="500" step="0.05" value="0.3"></label>
+        <label class="stl-only field" title="How tall the print is, from the plate to the top. The layers follow: the base layers, then as many layers above them as reach this height (whole layers)."><span>Height (mm)</span><input type="number" id="printHeightMM" min="0.05" max="500" step="0.05" value="0.3"></label>
         <label class="field" title="Chocolate needs time to set before the next layer lands on it. Layers that would print faster are slowed down (not below the printer's slowest speed)."><span>Seconds per layer (at least)</span><input type="number" id="layerTime" min="0" max="300" step="1" value="20"></label>
       </div>
       <input type="hidden" id="wallLayers" value="1">
@@ -341,6 +343,8 @@
       <p data-feature="model" class="hint help model-only stl-only" data-anchor="support">A bead can only reach a little past the layer under it (Overhang per layer, under Material) before it has nothing to sit on. One continuous line can't print a separate support, so the support is the print's own wall, widened from the plate up, and it stays on the piece. Flared skirt: the support pulls back towards the model one overhang step a layer, from its far edge only, so it fans out under a cap and braces an arm back into the model at that slope (least chocolate). Thin wall: a wall the width of one narrow loop runs from the plate up under each overhang, into the model, and flares out near the top to hold the whole overhang (a standing r keeps its arm, with a thin wall under it; on a round model it is the same as the skirt). Slope: the model's own ledges turned into short slopes, so no layer steps out more than a bead holds, nor in further than its wall (on a hollow print a layer that steps in hangs over the empty inside, like the bottom of a skull's nose): only the layers round a ledge change. Each layer stays one loop. The ready list says how far the model steps out, or in, with Support off.</p>
       <p class="hint" id="layerCount"></p>
       <p class="hint" id="layerHint"></p>
+      <div class="inline" id="layerFix" hidden><button class="btn mini" type="button" id="layerFixTime" title="Every layer can take this long at the slowest speed: less time for the chocolate to set than asked"></button></div>
+      <p class="hint help" id="layerHow" hidden></p>
       <p class="hint" id="cartHint" hidden></p>
     </section>
 
@@ -397,18 +401,18 @@
       </div>
       <p class="hint help" id="tiesHint">For a large print with no base. The trace holds the separate parts of a drawing together with as few connectors as it can, a single strand here and there, and a tall wall held on by one strand flexes and snaps. Ties add more: each is two strands side by side, from one part across an open gap to the next, the full height of the walls, still part of the one line. They only cross gaps that open to the outside (not the inside of a letter's bowl), never cross the line, and leave the trace's own connectors be. Longer ties reach across wider gaps; closer together, more of them. A base (above) is the other way to tie a print together, from underneath. The drawing shows every tie (blue), the ones left out inside a letter (grey) and the ones you took away (red): tap to change them; your changes are kept with the design until the line itself changes.</p>
     </section>
-    <section class="card choc-only" aria-labelledby="h-infill">
+    <section class="stl-only card choc-only" aria-labelledby="h-infill">
       <h2 id="h-infill">Infill <span id="fillVal">none</span></h2>
-      <div class="row">
+      <div class="row stl-only">
         <div class="lab"><label for="fillDensity">Density</label><span class="val" id="fillDensityVal">0% · hollow</span></div>
         <input type="range" id="fillDensity" min="0" max="100" step="5" value="0">
       </div>
       <div class="two">
-        <label class="field"><span>Pattern</span><select id="fillPattern"><option value="lines" selected>Lines</option><option value="rings">Rings</option></select></label>
-        <label class="field lines-only" title="Direction of the rows, degrees (0 = across)"><span>Angle (°)</span><input type="number" id="fillAngle" min="-90" max="90" step="5" value="45"></label>
+        <label class="stl-only field"><span>Pattern</span><select id="fillPattern"><option value="lines" selected>Lines</option><option value="rings">Rings</option></select></label>
+        <label class="stl-only field lines-only" title="Direction of the rows, degrees (0 = across)"><span>Angle (°)</span><input type="number" id="fillAngle" min="-90" max="90" step="5" value="45"></label>
       </div>
-      <label class="field lines-only" id="fillTurnF" title="Rows keep their direction for this many layers, then turn 90°: a few layers the same, then across them, builds strength"><span>Turn 90° every … layers</span><input type="number" id="fillTurn" min="1" max="50" step="1" value="2"></label>
-      <div class="row">
+      <label class="stl-only field lines-only" id="fillTurnF" title="Rows keep their direction for this many layers, then turn 90°: a few layers the same, then across them, builds strength"><span>Turn 90° every … layers</span><input type="number" id="fillTurn" min="1" max="50" step="1" value="2"></label>
+      <div class="row stl-only">
         <div class="lab"><label for="fillMin">Leave small areas open</label><span class="val" id="fillMinVal">fill all</span></div>
         <input type="range" id="fillMin" min="0" max="100" value="0">
       </div>
@@ -637,13 +641,13 @@
             <input type="radio" name="vasePlan" id="vpPlaque" value="plaque"><label for="vpPlaque" title="A flat wall: a front and a back a few millimetres apart, joined by round ends, one closed line round (a plaque that stands up). The profile is half its width">Flat</label>
             <input type="radio" name="vasePlan" id="vpDrawing" value="drawing"><label for="vpDrawing" id="vpDrawingLab" title="The traced line this vase was made from (Make a vase from this line, on the Line tool)">Drawing</label>
           </div>
+          <div data-feature="morph" data-part="vshape" class="row mo-only" hidden title="A ready-made shape at the bottom: it keeps the size the profile gives it"><div class="lab" hidden><span class="name">Shapes</span><span class="val" id="moBotShapeVal"></span></div><div class="mo-grid" id="moBotShapes" role="group" aria-label="Shapes for the bottom"></div></div>
           <div data-part="vshape" class="row vp-sides"><div class="lab"><label for="vpSides" id="vpSidesLab">Corners</label><span class="val" id="vpSidesVal"></span></div><input type="range" id="vpSides" min="2" max="24" step="1" value="6"></div>
           <div data-part="vshape" class="row vp-depth" title="How far in between the points or petals, as a share of the reach"><div class="lab"><label for="vpDepth" id="vpDepthLab">Depth</label><span class="val" id="vpDepthVal"></span></div><input type="range" id="vpDepth" min="0" max="90" step="1" value="30"></div>
           <div data-part="vshape" class="row vp-round" title="Corners and dips rounded off"><div class="lab"><label for="vpRound" id="vpRoundLab">Rounded</label><span class="val" id="vpRoundVal"></span></div><input type="range" id="vpRound" min="0" max="100" step="1" value="20"></div>
           <div data-part="vshape" class="row vp-plaque" title="How far apart the front and the back are (middle of the bead to middle of the bead), at least 10 mm: a closed loop, so it stands stiff"><div class="lab"><label for="vpThick">Front to back</label><span class="val" id="vpThickVal"></span></div><input type="range" id="vpThick" min="10" max="40" step="0.5" value="10"></div>
           <div data-part="vshape" class="row vp-drawing"><p class="hint" id="vpDrawMsg" role="status"></p></div>
-          <div data-feature="morph" data-part="vshape" class="row mo-only" hidden title="A ready-made shape at the bottom: it keeps the size the profile gives it"><div class="lab"><span class="name">More shapes</span><span class="val" id="moBotShapeVal"></span></div><div class="mo-grid" id="moBotShapes" role="group" aria-label="Shapes for the bottom"></div></div>
-          <div data-feature="morph" data-part="vshape" class="row mo-only" hidden><p class="hint">Or a shape you draw or import: trace it, then <b>Make a morph from this line</b> on the Line tool.</p></div>
+                    <div data-feature="morph" data-part="vshape" class="row mo-only" hidden><p class="hint">Or a shape you draw or import: trace it, then <b>Make a morph from this line</b> on the Line tool.</p></div>
           <div data-part="vshape" class="lab"><span class="name">At the rim</span><span class="val" id="vaseTopVal"></span></div>
           <div data-part="vshape" class="seg small" role="radiogroup" aria-label="The shape at the rim">
             <input type="radio" name="vaseTop" id="vrSame" value="same" checked><label for="vrSame">Same</label>
@@ -661,7 +665,7 @@
           <div data-feature="morph" data-part="mtop" class="seg small mo-letter" hidden role="radiogroup" aria-label="The letter's lettering" id="moFonts"></div>
           <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="One capital letter, ! or ?: the shape below changes into it as the wall rises"><div class="lab"><label for="moLetter">Letter</label><span class="val" id="moLetterVal"></span></div><input type="text" id="moLetter" maxlength="1" value="A" autocomplete="off" autocapitalize="characters" spellcheck="false" class="mo-char"></div>
           <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="How tall the letter is from above (its capital height). The rim follows it; the bottom keeps its size"><div class="lab"><label for="moCap">Letter size</label><span class="val" id="moCapVal"></span></div><input type="range" id="moCap" min="10" max="40" step="1" value="20"></div>
-          <div data-feature="morph" data-part="mtop" class="row mo-on" hidden title="A ready-made shape at the top: the bottom changes into it as the wall rises"><div class="lab"><span class="name">More shapes</span><span class="val" id="moTopShapeVal"></span></div><div class="mo-grid" id="moTopShapes" role="group" aria-label="Shapes for the top"></div></div>
+          <div data-feature="morph" data-part="mtop" class="row mo-on" hidden title="A ready-made shape at the top: the bottom changes into it as the wall rises"><div class="lab"><span class="name">Shapes</span><span class="val" id="moTopShapeVal"></span></div><div class="mo-grid" id="moTopShapes" role="group" aria-label="Shapes for the top"></div></div>
           <div data-feature="morph" data-part="mchange" class="row mo-on" hidden title="Where up the wall the shape starts changing: below this it keeps the bottom's shape"><div class="lab"><label for="moFrom">Change starts</label><span class="val" id="moFromVal"></span></div><input type="range" id="moFrom" min="0" max="80" step="5" value="0"></div>
           <div data-feature="morph" data-part="mchange" class="row mo-on" hidden title="Where up the wall the change is done: above this it keeps the rim's shape"><div class="lab"><label for="moTo">Change ends</label><span class="val" id="moToVal"></span></div><input type="range" id="moTo" min="20" max="100" step="5" value="100"></div>
           <div data-feature="morph" data-part="mchange" class="lab mo-on" hidden><span class="name">Pair the shapes</span><span class="val" id="moMatchVal"></span></div>
