@@ -1,0 +1,2 @@
+{"pat":"labyrinth{\"detail\":4}","exact":true,"reach":21.6,"ownGap":3.47,"circle":"to:x from:x","square":"to:x from:x","flower":"to:-20 from:x","star":"to:-20 from:x","N":"to:x from:45","O":"to:x from:x","G":"to:x from:x"}
+{"pat":"labyrinth{\"detail\":6}","exact":true,"reach":23.7,"ownGap":3.19,"circle":"to:x from:x","square":"to:x from:x","flower":"to:x from:x","star":"to:x from:x","N":"to:x from:x","O":"to:x from:x","G":"to:x from:x"}

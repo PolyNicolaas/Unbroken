@@ -1,0 +1,3 @@
+{"pat":"moore{\"detail\":1}","exact":true,"reach":28.3,"ownGap":2.97,"circle":"to:x from:x","square":"to:20 from:0","flower":"to:0 from:0","star":"to:0 from:0","N":"to:0 from:0","O":"to:x from:x","G":"to:x from:x"}
+{"pat":"moore{\"detail\":2}","exact":true,"reach":28.3,"ownGap":2.97,"circle":"to:x from:x","square":"to:20 from:0","flower":"to:0 from:0","star":"to:0 from:0","N":"to:0 from:0","O":"to:x from:x","G":"to:x from:x"}
+{"pat":"spiral{\"detail\":1}","exact":true,"reach":26.6,"ownGap":2.86,"circle":"to:x from:x","square":"to:x from:x","flower":"to:x from:x","star":"to:x from:x","N":"to:x from:x","O":"to:x from:x","G":"to:x from:x"}

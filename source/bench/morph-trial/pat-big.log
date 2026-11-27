@@ -1,0 +1,2 @@
+{"pat":"moore{\"detail\":1}","exact":true,"reach":56.6,"ownGap":3.12,"circle":"to:x from:x","square":"to:20 from:0","flower":"to:45 from:0","N":"to:x from:x"}
+{"pat":"labyrinth{\"detail\":4}","exact":true,"reach":43.3,"ownGap":null,"circle":"to:x from:x","square":"to:x from:x","flower":"to:-20 from:20","N":"to:x from:x"}
