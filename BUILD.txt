@@ -1,6 +1,6 @@
-Unbroken · web app build v182
-Built:  2026-11-27T21:29:29.506Z
-Tests:  146 of 146 at v182 (node run.js all: 143, then A61 A79 A80 again after their fixes)
+Unbroken · web app build v183
+Built:  2026-11-27T22:43:29.887Z
+Tests:  146 of 146 at v183 (node run.js all, 2173 s)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -25,8 +25,8 @@ Files (sha1, first 12):
   0e52c6f85462  18-ties.js
   6005b41c00a4  19-relief.js
   efe101932cf8  20-morph.js
-  b112186c9bc8  core.js
-  e4e06e741329  css/app.css
+  e9b523ed1746  core.js
+  78e645032349  css/app.css
   2e7b02cdb930  css/theme.css
   8ddfb3bb0b15  features/camera/camera.js
   91b174b409e5  features/cutout/cutout.js
@@ -41,25 +41,25 @@ Files (sha1, first 12):
   035f0cc17156  features/patterns/pathpad.js
   c064bb2fa3f9  features/patterns/patterns.js
   7a3ee1d073da  features/pieces/pieces.js
-  905c9c3f61e4  features/plotter/plot.js
+  fb9a4a693551  features/plotter/plot.js
   5327a703e268  features/relief/relief.js
   cd3e7072869b  features/testprint/testprint.js
   265c82ae5c9b  features/ties/ties.js
   d0bb8036334c  features/vase/vase.js
   84cc740df42b  fonts.js
-  c78097a8a216  index.html
+  9afb30174251  index.html
   97fe045db38e  js/agent.js
   ce4fd6897391  js/art.js
   5a825c30dfdd  js/config.js
   f89d67073855  js/controls.js
-  63b007902997  js/engine-bridge.js
+  f7aead920064  js/engine-bridge.js
   f703454f1231  js/export.js
   e877225ef298  js/history.js
   0d15cd5d2d6c  js/layers.js
   f0e0c037d497  js/main.js
-  b40a3ccbbcca  js/map.js
+  f15f62e7ea75  js/map.js
   620f87a5cad0  js/parts.js
-  5ef514c93439  js/pipeline.js
+  84317f5a25cf  js/pipeline.js
   2e48d2a66bf6  js/preview.js
   6da715462e92  js/readouts.js
   01f3cf4a980c  js/scroll.js
@@ -74,4 +74,4 @@ Files (sha1, first 12):
   cb0c999d9f14  js/zoom.js
   0c0c4ffbadb3  morph-fonts.js
   40380fce0493  settings.js
-  24e4aec57a46  worker.js
+  ed950c8de286  worker.js

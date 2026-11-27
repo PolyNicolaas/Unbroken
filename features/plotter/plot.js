@@ -184,6 +184,7 @@ function drawArtPage() {
 // the art as drawn has no fills (fill pens fill the traced drawing's shapes)
 function plotFromUI() {
   $("card-h-fills").hidden = plotFromArt();
+  if (typeof mapRender === "function") mapRender();
 }
 document.querySelectorAll('input[name="plotFrom"]').forEach((r) =>
   r.addEventListener("change", () => {
@@ -987,7 +988,7 @@ addMapNode("plot", {
   cards: ["h-plot"],
   val: () => (mapNothing() ? "nothing yet" : mapCardVal("h-plot") || "the page"),
 });
-addMapNode("fills", { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "" });
+addMapNode("fills", { cap: "Fills", step: "plot", cards: ["h-fills"], val: () => "", off: () => $("card-h-fills").hidden });
 addMapNode("pexport", { icon: "export", cap: "Export", step: "plot", cards: ["h-pexport"], val: () => "" });
 
 // with a design: its controls are saved, the fill pens kept, and the page follows a design that was restored

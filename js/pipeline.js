@@ -903,9 +903,13 @@ function finalizeReadout() {
   // (the boxes show the size as printed; this says what else could be meant, and how far above the smallest)
   const mb = st.mbox,
     tilted = mb && Math.abs(mb.angle) >= 0.5 ? ` · tilted ${fmt(mb.w * sc, 1)} × ${fmt(mb.h * sc, 1)} at ${fmt(Math.abs(mb.angle), 0)}°` : "";
-  $("sizeInfo").textContent =
-    `line centre ${fmt((b.x1 - b.x0) * sc, 1)} × ${fmt((b.y1 - b.y0) * sc, 1)}${tilted}` +
-    (m && m.fits ? ` · ×${fmt(st.outW / m.smallest, 1)} smallest` : "");
+  // (short, on one line: how far above the smallest first; the tilted box only on hover)
+  const info = $("sizeInfo");
+  info.textContent =
+    (m && m.fits ? `×${fmt(st.outW / m.smallest, 1)} smallest · ` : "") +
+    `line centre ${fmt((b.x1 - b.x0) * sc, 1)} × ${fmt((b.y1 - b.y0) * sc, 1)}`;
+  if (!info.dataset.title) info.dataset.title = info.title;
+  info.title = info.dataset.title + (tilted ? ` Its tightest box,${tilted.slice(2)}.` : "");
   const share = (st.problems && st.problems.driftShare) || 0,
     dh = $("driftHint"); // the line pushed off the drawing (shaded in the preview)
   dh.hidden = share < 0.025; // the marks allow 2%: say so only past that

@@ -97,10 +97,10 @@ const MAP_CORE = {
             : "one line";
     },
   },
-  size: { cap: "Size", step: "design", cards: ["h-size"], val: () => sizeText() },
+  size: { cap: "Size", step: "design", cards: ["h-size"], val: () => sizeText(), off: () => /^(strokes|drawn|none)$/.test(document.body.dataset.line || "") },
   // how it's made: the drawing played (the circles drawing the line), and the series behind it
   watch: { cap: "Drawing", step: "design", cards: ["h-watch"], val: () => "" },
-  math: { cap: "Math", step: "design", cards: [], extra: ["#math"], val: () => mapText("mathSummary") },
+  math: { cap: "Math", step: "design", cards: [], extra: ["#math"], val: () => mapText("mathSummary"), off: () => /^(strokes|drawn|none)$/.test(document.body.dataset.line || "") },
   print: {
     cap: "Print",
     icon: "printer",
@@ -280,12 +280,24 @@ const mapCap = (id) =>
       ] ||
       "Art"
     : MAP_NODES[id].cap;
+// a tool that has nothing to show for this design (Math and Size for separate strokes, the plotter's Fills for the
+// art as drawn): its node's off()
+const mapNodeOff = (k) => {
+  const N = MAP_NODES[k];
+  try {
+    return !!(N && N.off && N.off());
+  } catch (e) {
+    return false;
+  }
+};
 // the palette for this design: the design's rail in groups, and the output's own rail
 function mapPalette() {
   const S = mapShape(),
     O = OUTPUTS[outputNow()],
     before = O.before || [],
-    group = (id) => [id, ...(S.up[id] || []), ...(S.down[id] || [])].filter((k) => k !== "examples" && MAP_NODES[k]);
+    // (a tool with nothing in it for this design, its off(): not on the rail)
+    group = (id) =>
+      [id, ...(S.up[id] || []), ...(S.down[id] || [])].filter((k) => k !== "examples" && MAP_NODES[k] && !mapNodeOff(k));
   const design = [["examples"]];
   for (const id of S.spine) if (id !== O.step && !before.includes(id)) design.push(group(id));
   // (a picture's Tracing is with the picture; the line's Size with the line; how it's made, a group of its own)
@@ -663,6 +675,13 @@ function mapTray(on) {
   if (t) t.hidden = !on;
   mapRender();
 }
+
+// what's on the rail follows the line's kind (separate strokes have no Math or Size of their own)
+new MutationObserver(() => {
+  mapRender();
+  // (an open tool that has just gone off: put away)
+  if (mapOpenId && mapNodeOff(mapOpenId) && !mapShut) mapClose();
+}).observe(document.body, { attributes: true, attributeFilter: ["data-line"] });
 
 // ---------- starting up ----------
 // choosing a radio that holds the app's state (the step, what it's made for), as a tap on it would

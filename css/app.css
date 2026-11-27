@@ -22,8 +22,10 @@ header.top p { margin: 0; color: var(--muted); }
 #view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .chip { position: absolute; left: 10px; top: 10px; font: 500 calc(12px * var(--text))/1 var(--font-mono); background: var(--surface); border: 1px solid var(--rule); padding: calc(6px * var(--space)) calc(8px * var(--space)); border-radius: calc(6px * var(--corner)); font-variant-numeric: tabular-nums; }
 .card.fold > h2 { cursor: pointer; }
-.card.fold > h2::before { content: "▸ "; color: var(--muted); }
-.card.fold.open > h2::before { content: "▾ "; }
+.card.fold > h2::before { content: "▸"; color: var(--muted); display: inline-block; width: 1.1em; }
+.card.fold.open > h2::before { content: "▾"; }
+.inline:has(> label > #testPick) { display: flex; align-items: center; gap: 8px; padding: 4px 12px; }
+.inline:has(> label > #testPick) > label.field { flex: 1; border: 0 !important; padding: 0 !important; }
 .card.fold:not(.open):is(body:not(.show-all) *) > :not(h2) { display: none !important; }
 /* a vase or a morph: its design first on the Morph / Vase node; where its input comes from (Picture, Text, …) last,
    without the drop zone (dropping a file on the page still works) */
