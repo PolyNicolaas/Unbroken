@@ -415,7 +415,7 @@
       <p class="hint help" id="fillHint">Fills the inside of the layers above the base, as part of the same line: 0% leaves them hollow (walls only), 20–30% is a light support, 100% is solid.</p>
     </section>
     <section class="card choc-only" aria-labelledby="h-machine">
-      <h2 id="h-machine">Fine-tuning <span class="hval" id="tuneVal">as the profiles</span></h2>
+      <h2 id="h-machine">Machine <span class="hval" id="tuneVal">as the profiles</span></h2>
       <div class="tune tune-list">
         <label class="field" title="One layer of chocolate. Starts at the chocolate's own (settings.js), else the printer's."><span>Layer height (mm)</span><input type="number" id="layerH" min="0.05" max="3" step="0.05" value="0.3"><small class="from" id="fromLayerH"></small></label>
         <label class="field" title="Height of the first layer above the plate. Follows the layer height unless you change it."><span>First layer Z (mm)</span><input type="number" id="gZ" min="0.05" max="50" value="0.3" step="any"><small class="from" id="fromZ"></small></label>
@@ -445,7 +445,7 @@
       <div class="inline"><button class="btn" type="button" id="testBtn">Export test G-code</button></div>
       <div class="inline"><label class="field inline-field" title="The strip that printed best: its value goes into the setting"><span>Best strip</span><input type="number" id="testPick" min="1" max="10" step="1" value="3"></label><button class="btn mini" type="button" id="testUse">Use it</button></div>
       <p class="status" id="testMsg" role="status"></p>
-      <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it: it becomes the setting (a Flow strip sets the Flow in Fine-tuning). First layer Z strips each start at their own height above the plate, to find the one that sticks; 1 or 2 layers are enough for those.</p>
+      <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it: it becomes the setting (a Flow strip sets the Flow on the Machine tool). First layer Z strips each start at their own height above the plate, to find the one that sticks; 1 or 2 layers are enough for those.</p>
     </section>
     <section data-feature="matrix" class="card choc-only" aria-labelledby="h-matrix">
       <h2 id="h-matrix">Test matrix <span class="hval" id="mxVal"></span></h2>
@@ -458,7 +458,7 @@
           <tr><th scope="row">Layer height (mm)</th><td><input type="number" id="mxH1" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, low (mm)"></td><td><input type="number" id="mxH2" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, mid (mm)"></td><td><input type="number" id="mxH3" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, high (mm)"></td></tr>
         </tbody>
       </table>
-      <div class="inline"><button class="btn mini" type="button" id="mxAround" title="Low, mid and high round the Fine-tuning settings: speed ±25%, flow ±10%, layer height ±0.05 mm">Round the settings</button>
+      <div class="inline"><button class="btn mini" type="button" id="mxAround" title="Low, mid and high round the Machine settings: speed ±25%, flow ±10%, layer height ±0.05 mm">Round the settings</button>
         <label class="check" title="Off: every copy prints at its own speed, so the speed is what's tested (a small layer then comes round in a few seconds). On: small layers are slowed to the Seconds per layer, as a normal print is, which can leave the speeds all the same."><input type="checkbox" id="mxSlow"> Slow small layers to the seconds per layer</label></div>
       <p class="hint" id="mxInfo"></p>
       <div class="inline"><button class="btn" type="button" id="mxBtn">Export matrix G-code</button></div>
@@ -642,6 +642,7 @@
           <div data-part="vshape" class="row vp-round" title="Corners and dips rounded off"><div class="lab"><label for="vpRound" id="vpRoundLab">Rounded</label><span class="val" id="vpRoundVal"></span></div><input type="range" id="vpRound" min="0" max="100" step="1" value="20"></div>
           <div data-part="vshape" class="row vp-plaque" title="How far apart the front and the back are (middle of the bead to middle of the bead), at least 10 mm: a closed loop, so it stands stiff"><div class="lab"><label for="vpThick">Front to back</label><span class="val" id="vpThickVal"></span></div><input type="range" id="vpThick" min="10" max="40" step="0.5" value="10"></div>
           <div data-part="vshape" class="row vp-drawing"><p class="hint" id="vpDrawMsg" role="status"></p></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-only" hidden title="A ready-made shape at the bottom: it keeps the size the profile gives it"><div class="lab"><span class="name">Shapes</span><span class="val" id="moBotShapeVal"></span></div><div class="mo-grid" id="moBotShapes" role="group" aria-label="Shapes for the bottom"></div></div>
           <div data-feature="morph" data-part="vshape" class="row mo-only" hidden><p class="hint">Or a shape you draw or import: trace it, then <b>Make a morph from this line</b> on the Line tool.</p></div>
           <div data-part="vshape" class="lab"><span class="name">At the rim</span><span class="val" id="vaseTopVal"></span></div>
           <div data-part="vshape" class="seg small" role="radiogroup" aria-label="The shape at the rim">
@@ -656,8 +657,11 @@
           <div data-part="vshape" class="row vr-sides"><div class="lab"><label for="vrSides" id="vrSidesLab">Corners</label><span class="val" id="vrSidesVal"></span></div><input type="range" id="vrSides" min="2" max="24" step="1" value="6"></div>
           <div data-part="vshape" class="row vr-depth"><div class="lab"><label for="vrDepth" id="vrDepthLab">Depth</label><span class="val" id="vrDepthVal"></span></div><input type="range" id="vrDepth" min="0" max="90" step="1" value="30"></div>
           <div data-part="vshape" class="row vr-round"><div class="lab"><label for="vrRound" id="vrRoundLab">Rounded</label><span class="val" id="vrRoundVal"></span></div><input type="range" id="vrRound" min="0" max="100" step="1" value="20"></div>
+          <div data-feature="morph" data-part="mtop" class="lab mo-letter" hidden><span class="name">Lettering</span><span class="val" id="moFontVal"></span></div>
+          <div data-feature="morph" data-part="mtop" class="seg small mo-letter" hidden role="radiogroup" aria-label="The letter's lettering" id="moFonts"></div>
           <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="One capital letter, ! or ?: the shape below changes into it as the wall rises"><div class="lab"><label for="moLetter">Letter</label><span class="val" id="moLetterVal"></span></div><input type="text" id="moLetter" maxlength="1" value="A" autocomplete="off" autocapitalize="characters" spellcheck="false" class="mo-char"></div>
           <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="How tall the letter is from above (its capital height). The rim follows it; the bottom keeps its size"><div class="lab"><label for="moCap">Letter size</label><span class="val" id="moCapVal"></span></div><input type="range" id="moCap" min="10" max="40" step="1" value="20"></div>
+          <div data-feature="morph" data-part="mtop" class="row mo-on" hidden title="A ready-made shape at the top: the bottom changes into it as the wall rises"><div class="lab"><span class="name">Shapes</span><span class="val" id="moTopShapeVal"></span></div><div class="mo-grid" id="moTopShapes" role="group" aria-label="Shapes for the top"></div></div>
           <div data-feature="morph" data-part="mchange" class="row mo-on" hidden title="Where up the wall the shape starts changing: below this it keeps the bottom's shape"><div class="lab"><label for="moFrom">Change starts</label><span class="val" id="moFromVal"></span></div><input type="range" id="moFrom" min="0" max="80" step="5" value="0"></div>
           <div data-feature="morph" data-part="mchange" class="row mo-on" hidden title="Where up the wall the change is done: above this it keeps the rim's shape"><div class="lab"><label for="moTo">Change ends</label><span class="val" id="moToVal"></span></div><input type="range" id="moTo" min="20" max="100" step="5" value="100"></div>
           <div data-feature="morph" data-part="mchange" class="lab mo-on" hidden><span class="name">Pair the shapes</span><span class="val" id="moMatchVal"></span></div>
@@ -1089,6 +1093,7 @@
 <script src="../source/engine/20-morph.js"></script>
 <script src="../source/engine/core.js"></script>
 <script src="../source/engine/fonts.js"></script>
+<script src="../source/engine/morph-fonts.js"></script>
 <script src="settings.js"></script>
 <script src="js/state.js"></script>
 <script src="js/ui.js"></script>

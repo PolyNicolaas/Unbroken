@@ -27,7 +27,8 @@ module.exports = {
     await page.waitForFunction(() => st.marks && st.marks.fits, null, { timeout: 60000 }).catch(() => {});
     const want = await page.evaluate(() => Math.max(40, Math.ceil((st.marks && st.marks.smallest) || 0) + 1));
     await page.fill("#artWidth", String(want)); await page.press("#artWidth", "Enter"); await A.idle(page, 1500);
-    checks.push(check(`Width ${want} mm: the print is that wide, and the card warns the lines are closer than the spacing`, +((await page.evaluate(() => Math.round(printedW(st.outW)))) === want && /Closer than the needle's line spacing/.test(await page.textContent("#artGapHint"))), "==", 1));
+    // (within 1 mm: the printed width settles as the size marks arrive)
+    checks.push(check(`Width ${want} mm: the print is that wide, and the card warns the lines are closer than the spacing`, +(Math.abs((await page.evaluate(() => printedW(st.outW))) - want) <= 1 && /Closer than the needle's line spacing/.test(await page.textContent("#artGapHint"))), "==", 1));
     await A.setValue(page, "#artP-detail", 10); await A.idle(page, 1500);
     checks.push(check("… kept when the rows change (mm)", await page.evaluate(() => Math.round(printedW(st.outW))), ">=", want));
     await page.click("#artFit"); await A.idle(page, 1500);

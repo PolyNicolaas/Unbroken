@@ -362,3 +362,49 @@ Nicolaas asked for all of the morph's settings in one place, with shape to lette
 - **Fixed resets.** A shape at the top after a letter kept the letter's outline, so the letter came straight back.
   A letter after a shape started over at 20 mm. Now the top's own data is cleared when it becomes a shape, and only
   making a morph sets the height.
+
+## v179 (27 November 2026): shapes and lettering
+
+**Shapes.** Nicolaas asked for lots of basic shapes for the top or the bottom, clean, not all symmetric, and went
+over each with three versions to choose from (drawings: `source/bench/morph-trial/shapes/`, `approved.json`).
+- **Kept:**
+  - The hand-drawn heart, the pebble and the tall-puff cloud.
+  - The soft six-tooth gear, the gem, the chunky plus and the rainbow.
+  - The bell with a clapper, both trees (round, and the simple fir) and a crescent.
+  - The chunky bolt, the boxed speech bubble and the chubby star.
+  - Asked for after: a square, a triangle, a pentagon and a hexagon, with 2.5 mm corners.
+- **Left out:** the egg, drop, leaf, bean, shield, house, apple and fish.
+- **The moon** was tried as a set from sliver to full, in true phases. The simple crescent was kept.
+
+**Lettering.** The aim was a fancy font, likely made for the job. The trials are in `source/bench/morph-trial/fonts/`:
+`sheet.js` shows the letters, `sweep.js` runs the check.
+- **Made from our own single-stroke fonts, with a broad nib (failed).** Roman with serifs, an italic, a Didone with
+  ball ends and a script.
+  - The morph rounds anything thinner than about two lines (3 mm at a 20 mm letter, 110 of 700 font units) away.
+  - With the thinnest stroke held at 3 mm, a broad nib leaves almost no thick and thin.
+  - The single-stroke outlines are too coarse, so the letters came out lumpy.
+- **Display fonts, drawn heavier (worked).**
+  - Each was drawn heavier all round until its hairlines print.
+  - Every closed counter got a hairline cut to the outside, the shortest way, going down preferred. The morph
+    straightens it into its slit, as it does for choc OS's own openings.
+  - Each was then traced back to outlines.
+- **Eleven display fonts tried (OFL, from npm @fontsource):**
+  - **Lobster** (script) and **Playfair Display Black** (serif) were the clean ones.
+  - **Cinzel Decorative** swaps in ornate letters (its H, I, B, G).
+  - **Berkshire Swash** lost N and Y.
+  - **Abril Fatface** filled its counters.
+  - **Rye** is rough and lost its Z.
+  - **Pacifico**'s P came out solid.
+  - **Yeseva One** is close to Playfair.
+  - **Fascinate**, **Sancreek** and **Lilita One** look odd, have a broken Z, or are too plain.
+- **The check, letters 20 mm tall on 20 mm morphs:**
+
+  | Font | Pebble | Heart | Square | Star |
+  |---|---|---|---|---|
+  | Lobster | 27/28 (G) | 28/28 | 28/28 | 28/28 |
+  | Playfair Display | 26/28 (C, G) | 28/28 | 28/28 | 28/28 |
+  | Cinzel Decorative | 28/28 | 28/28 | 28/28 | 28/28 |
+  | Rye | 25/27 (L, ?) | 26/27 (L) | 25/27 (L, ?) | 25/27 (L, ?) |
+
+- **Shipped:** **Swirl** (from Lobster) and **Grand** (from Playfair Display). Both reserve their names, so the
+  changed versions have new ones.

@@ -3,6 +3,27 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v179 · 2026-11-27
+
+Shapes and lettering for the morph (Nicolaas, 27 November 2026: lots of basic shapes for the top or the bottom, drawn
+cleanly, not all symmetric, gone over one by one; and other fonts, fancy ones, so there are options):
+
+- **18 ready-made shapes**, each drawn and approved one by one: square, triangle, pentagon and hexagon (every corner
+  rounded 2.5 mm on a 40 mm shape), a hand-drawn heart, a chubby star, a pebble, a crescent, a cloud, a soft gear, a
+  gem, a plus, a rainbow, a bell, a round tree, a fir, a bolt and a speech bubble (`UNB.MORPH_SHAPES`). **Bottom** and
+  **Top** each have a grid of them: tap one to put it there. The top's button then says **Shape** and both name it;
+  a shape at the top is named in the print's name ("morph star").
+- **Lettering for the letter: Chocolate, Swirl or Grand.** Two new morph fonts (`source/engine/morph-fonts.js`):
+  **Swirl**, a script made from Lobster, and **Grand**, a high-contrast serif made from Playfair Display Black (both
+  SIL Open Font License; the changed versions have their own names). Each is drawn bold enough that its thinnest
+  stroke prints, every counter given an opening the morph makes into its slit. Every character of both morphs from a
+  pebble, a heart, a square and a star at 20 mm, but Swirl's G and Grand's C and G from the pebble (the check says
+  so). The lettering is kept for the next letter and when the design is opened again.
+- Small fixes: "Fine-tuning" is called **Machine** everywhere; a relief's rail says Relief; a leftover height sync
+  removed (controls.js).
+- Tests: A80 (the shapes at the bottom and the top, the three letterings, each printing); A31 allows the printed width
+  within 1 mm.
+
 ## v178 · 2026-11-27
 
 From trying v177 on the published site:

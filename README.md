@@ -184,8 +184,12 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   **Make a morph** on the 3D model card (a letter on top of the vase in use, 20 mm tall, no texture or movement), or
   **Make a morph from this line** on the Line tool (a shape you draw or import, traced, at the bottom at its own size,
   the letter on top). The rail then says **Morph**, with only its tools: **Bottom** (the vase's shape from above, or
-  the traced line), **Top** (a **Letter**: one capital, ! or ?, with Letter size; or Circle, Polygon, Star, Flower; or
-  **Drawing**: Use as the top shape, on the Line tool), **Change** and the vase's **Profile** and **Rim**. Make a vase
+  the traced line, or one of 18 ready-made **Shapes**), **Top** (a **Letter**: one capital, ! or ?, with Letter size and
+  **Lettering**: Chocolate, Swirl or Grand; or Circle, Polygon, Star, Flower; or one of the **Shapes**; or **Drawing**:
+  Use as the top shape, on the Line tool), **Change** and the vase's **Profile** and **Rim**. The shapes
+  (`UNB.MORPH_SHAPES`: square, triangle, pentagon, hexagon, heart, star, pebble, crescent, cloud, gear, gem, plus,
+  rainbow, bell, tree, fir, bolt, speech bubble) were each drawn and approved by eye; Swirl and Grand
+  (`source/engine/morph-fonts.js`) are display fonts made bold enough to print, every letter one closed outline. Make a vase
   turns it back into a vase, whose own tools have no top shape. The letter comes from the Chocolate lettering made
   into one closed outline (`UNB.morphLetter`): choc OS's hairline letters flooded from outside so their shapes and
   stroke width stay, each counter slit open where choc OS opens it (straightened, 1.7 spacings wide), so the line goes
@@ -201,7 +205,7 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   1 ÷ height), and offers **Turn it over** when the other way up prints. Changing the top keeps the height, profile
   and bottom. Found in the trials: every character prints out of a circle, square, hexagon, pentagon, octagon, the
   stars, the flowers and a heart on a 20 mm morph with 20 mm letters (a few turned); the letter at the top is cleaner
-  than at the bottom; words don't morph yet (one character only). Tests E68, A79.
+  than at the bottom; words don't morph yet (one character only). Tests E68, A79, A80.
 
 **Take a picture** (`web-app/features/camera/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
 phone) outlines the page it finds (`UNB.findPage`: the largest light, plain area on a small copy of the frame, its four
@@ -501,6 +505,12 @@ Tests E23 (slicing and fitting), E29 (cutting, outside only, overlapping shells)
 
 ## Credits
 
+- **The morph fonts** (`source/engine/morph-fonts.js`): **Swirl** is made from Lobster, Copyright 2010 The Lobster
+  Project Authors (https://github.com/impallari/The-Lobster-Font), with Reserved Font Name "Lobster"; **Grand** from
+  Playfair Display, Copyright 2017 The Playfair Display Project Authors (https://github.com/clauseggers/Playfair-Display),
+  with Reserved Font Name "Playfair Display". Both licensed under the
+  [SIL Open Font License 1.1](https://openfontlicense.org); changed (made bolder, counters opened, traced to outlines)
+  and so given their own names.
 - **The sample 3D model** (the Skull cup example, `web-app/features/model/sample-skull.js`): "Low Poly Skull Pencil Cup" from
   [Printables](https://www.printables.com/model/555563-low-poly-skull-pencil-cup), licensed under
   [Creative Commons Attribution-NonCommercial 4.0](https://creativecommons.org/licenses/by-nc/4.0/). Used unchanged;

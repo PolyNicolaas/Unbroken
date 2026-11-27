@@ -12,6 +12,8 @@
 
 VASE_RADIO.tex.relief = "vtRelief"; // (vase.js: the texture's radio buttons)
 const reliefIs = (V) => !!(V && UNB.reliefOn(V));
+// the rail's design tool says Relief for one (map.js: "artKind"; it said Vase)
+on("artKind", () => (st.art.kind === "model" && st.model && reliefIs(st.model.vase) ? { kind: "vase", cap: "Relief" } : null));
 
 // ---------- what the printer can do ----------
 // The lean: each layer may stand out (or step back) over the one below no more than the overhang a bead holds
