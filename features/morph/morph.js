@@ -3,7 +3,8 @@
 // into an A, a traced drawing into a G. It's its own design (the rail says Morph): a vase with a top shape, whose tools
 // are only the ones a morph uses: Bottom (the shape on the plate: a vase's shape from above, or a traced line: Make a
 // morph from this line, on the Line tool), Top (a letter: one capital, ! or ?, from the Chocolate lettering made into
-// one closed outline, UNB.morphLetter; a shape; or a traced line: Use as the top shape), Change (where the change
+// one closed outline, UNB.morphLetter, from the Chocolate font or one of the morph fonts; a ready-made shape,
+// UNB.MORPH_SHAPES; or a traced line: Use as the top shape; the Bottom has the shapes too), Change (where the change
 // starts and ends, how the shapes pair, the top's turn, and the check), the vase's Profile and Rim. A vase stays a
 // vase: with this feature on, its tools have no shape at the top (that's a morph's). Every morph pairs corner to
 // corner and each lap is kept apart (planTop.match "corners", keepApart: the engine's 20-morph.js); Auto finds the
@@ -30,7 +31,9 @@ let morphLastTop = null; // the traced line last at the top ({ loop, exact, from
 const morphOn = () => !!(st.art.kind === "model" && st.model && st.model.vase && st.model.vase.planTop);
 on("artKind", () => (morphOn() ? { kind: "morph", cap: "Morph" } : null));
 // its name (the print's name until one is typed, the file's, the preview's label): "morph A", or "morph"
-on("vaseName", (V) => (V.planTop ? (V.planTop.letter ? `morph ${V.planTop.letter}` : "morph") : null));
+on("vaseName", (V) =>
+  V.planTop ? (V.planTop.letter ? `morph ${V.planTop.letter}` : V.planTop.shape ? `morph ${morphShapeName(V.planTop.shape).toLowerCase()}` : "morph") : null
+);
 // the vase's top-shape rows are the morph's Top (a vase's Shape tool then has only the shape from above)
 {
   const lab = $("vaseTopVal").closest(".lab"),
@@ -61,7 +64,15 @@ addMapNode("mtop", {
   part: "mtop",
   val: () => {
     const Q = vaseCur.planTop;
-    return !Q ? "" : Q.letter ? `the letter ${Q.letter}, ${Q.cap} mm` : Q.kind === "drawing" ? "a traced line" : Q.kind;
+    return !Q
+      ? ""
+      : Q.letter
+        ? `the letter ${Q.letter}, ${Q.cap} mm${Q.font && Q.font !== "chocolate" ? `, ${morphFontLabel(Q.font)}` : ""}`
+        : Q.shape
+          ? morphShapeName(Q.shape).toLowerCase()
+          : Q.kind === "drawing"
+            ? "a traced line"
+            : Q.kind;
   },
 });
 addMapNode("mchange", {
@@ -88,8 +99,8 @@ on("vaseSending", (V) => {
   if (!Q) return;
   // a shape at the top isn't a letter or a drawing any more: what made it one goes (or a letter picked after a
   // shape would come back as the shape, and a shape after a letter as the letter)
-  if (Q.kind !== "drawing") for (const k of ["letter", "cap", "loop", "exact", "from"]) delete Q[k];
-  else if (!Q.letter) morphLastTop = { loop: Q.loop, exact: Q.exact, from: Q.from };
+  if (Q.kind !== "drawing") for (const k of ["letter", "cap", "font", "shape", "loop", "exact", "from"]) delete Q[k];
+  else if (!Q.letter && !Q.shape) morphLastTop = { loop: Q.loop, exact: Q.exact, from: Q.from };
   if (Q.match !== "even") Q.match = "corners";
   Q.keepApart = true;
   morphCheckSoon();
@@ -113,8 +124,13 @@ function morphPlainWall() {
 // ch: one of UNB.MORPH_CHARS; cap: its height (mm). Making a morph (no top shape yet) makes it 20 mm tall (what was
 // tried), with no texture or movement, the bottom at its own size if it's a traced line or else a little narrower
 // than the letter; within a morph a new letter, size or kind of top keeps the rest and moves the top.
-function morphLetterPlan(ch, cap) {
-  const L = UNB.morphLetter(ch, UNB_FONTS.chocolate, { cap, d: morphD() });
+// the lettering a letter is made from: the Chocolate font, or one of the morph fonts (morph-fonts.js: display fonts
+// made bold enough to print, each letter one closed outline)
+const MORPH_FONTS = Object.assign({ chocolate: UNB_FONTS.chocolate }, window.UNB_MORPH_FONTS || {});
+const morphFontLabel = (k) => (k === "chocolate" ? "Chocolate" : (MORPH_FONTS[k] && MORPH_FONTS[k].label) || k);
+let morphFont = "chocolate"; // (the one picked: a new letter is made from it)
+function morphLetterPlan(ch, cap, font = morphFont) {
+  const L = UNB.morphLetter(ch, MORPH_FONTS[font] || UNB_FONTS.chocolate, { cap, d: morphD() });
   if (!L || L.loops !== 1) return null;
   const O = UNB.vaseLineLoop(L.x, L.y);
   return O ? { loop: O.loop, reach: O.reach } : null;
@@ -147,9 +163,10 @@ function morphUseLetter(ch0) {
     round: 0,
     letter: ch,
     cap,
+    font: MORPH_FONTS[morphFont] ? morphFont : "chocolate",
     match: was && was.match === "even" ? "even" : "corners",
     keepApart: true,
-    turn: was && was.letter === ch ? +was.turn || 0 : 0,
+    turn: was && was.letter === ch && (was.font || "chocolate") === morphFont ? +was.turn || 0 : 0,
     auto: !(was && was.auto === false),
     sides: 6,
     depth: 0.3,
@@ -181,6 +198,86 @@ $("moCap").addEventListener("change", () => {
   if (vaseCur.planTop && vaseCur.planTop.letter) morphUseLetter(vaseCur.planTop.letter);
 });
 $("moCap").addEventListener("input", () => ($("moCapVal").textContent = `${$("moCap").value} mm tall`));
+
+// the lettering: the picked font's buttons (made here, one per font), the letter made again from it
+{
+  const box = $("moFonts");
+  for (const k of Object.keys(MORPH_FONTS)) {
+    const id = `moFont-${k}`,
+      inp = document.createElement("input"),
+      lab = document.createElement("label");
+    Object.assign(inp, { type: "radio", name: "moFont", id, value: k, checked: k === "chocolate" });
+    lab.htmlFor = id;
+    lab.textContent = morphFontLabel(k);
+    if (MORPH_FONTS[k].from) lab.title = `${morphFontLabel(k)}: ${MORPH_FONTS[k].from}`;
+    box.append(inp, lab);
+    inp.addEventListener("change", () => {
+      if (!inp.checked) return;
+      morphFont = k;
+      if (vaseCur.planTop && vaseCur.planTop.letter) morphUseLetter(vaseCur.planTop.letter);
+      else morphLabels();
+    });
+  }
+}
+
+// ---------- a ready-made shape at the bottom or the top (UNB.MORPH_SHAPES) ----------
+const morphShapeName = (k) => (UNB.MORPH_SHAPES && UNB.MORPH_SHAPES[k]) || k;
+function morphShapeLoop(key) {
+  const S = UNB.morphShape(key);
+  return S ? UNB.vaseLineLoop(S.x, S.y) : null;
+}
+// where: "bottom" (the vase's shape from above, at the size the profile gives it) or "top" (the rim's shape, at the
+// rim's size; entering a morph with it makes it 20 mm tall, a plain wall)
+function morphUseShape(where, key) {
+  const O = morphShapeLoop(key);
+  if (!O) return;
+  if (where === "bottom") {
+    vaseCur.plan = { kind: "drawing", loop: O.loop, exact: true, round: 0, shape: key, sides: 6, depth: 0.3 };
+    $("vpDrawMsg").textContent = "";
+  } else {
+    const was = vaseCur.planTop;
+    if (!was) {
+      morphPlainWall();
+      vaseCur.height = 20;
+    }
+    vaseCur.planTop = {
+      kind: "drawing",
+      loop: O.loop,
+      exact: true,
+      round: 0,
+      shape: key,
+      match: was && was.match === "even" ? "even" : "corners",
+      keepApart: true,
+      turn: 0,
+      auto: !(was && was.auto === false),
+      sides: 6,
+      depth: 0.3,
+    };
+  }
+  vaseSend(true);
+  vaseUI();
+}
+// the buttons: each shape drawn small, its name on hover
+for (const [where, box] of [
+  ["bottom", $("moBotShapes")],
+  ["top", $("moTopShapes")],
+]) {
+  for (const k of Object.keys(UNB.MORPH_SHAPES || {})) {
+    const S = UNB.morphShape(k),
+      b = document.createElement("button");
+    b.type = "button";
+    b.className = "btn mini";
+    b.dataset.shape = k;
+    b.title = morphShapeName(k);
+    b.setAttribute("aria-label", morphShapeName(k));
+    const x0 = Math.min(...S.x),
+      y1 = Math.max(...S.y),
+      d = S.x.map((x, i) => `${i ? "L" : "M"}${(x - x0 + 2).toFixed(1)} ${(y1 - S.y[i] + 2).toFixed(1)}`).join("") + "Z";
+    b.innerHTML = `<svg viewBox="0 0 44 44" aria-hidden="true"><path d="${d}"/></svg>`;
+    b.addEventListener("click", () => morphUseShape(where, k));
+    box.append(b);
+  }
+}
 
 // ---------- a traced line at the top of a morph (the Line tool: Use as the top shape) ----------
 function morphTopFromLine() {
@@ -260,8 +357,7 @@ $("moFromLine").addEventListener("click", morphBottomFromLine);
 $("vrDrawing").addEventListener("change", () => {
   if (morphLastTop) {
     vaseCur.planTop = Object.assign({}, vaseCur.planTop, morphLastTop, { kind: "drawing", round: 0, turn: 0 });
-    delete vaseCur.planTop.letter;
-    delete vaseCur.planTop.cap;
+    for (const k of ["letter", "cap", "font", "shape"]) delete vaseCur.planTop[k];
     vaseSend(true);
     vaseUI();
     return;
@@ -464,7 +560,21 @@ function morphLabels() {
     $("vrLetter").checked = true;
     $("vaseTopVal").textContent = `blends to the letter ${Q.letter}, ${Q.cap} mm tall`;
   }
+  // a ready-made shape shows as the Drawing button, called Shape (its name on the row above and on its own button)
+  const topShape = !!(Q && Q.shape),
+    P = V.plan;
   $("vrDrawingLab").hidden = $("vrDrawing").hidden = !((Q && Q.kind === "drawing" && !Q.letter) || morphLastTop);
+  $("vrDrawingLab").textContent = topShape ? "Shape" : "Drawing";
+  $("vpDrawingLab").textContent = P && P.shape ? "Shape" : "Drawing";
+  for (const [box, k] of [
+    ["moBotShapes", P && P.shape],
+    ["moTopShapes", topShape && Q.shape],
+  ])
+    $(box).querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.shape === k));
+  $("moBotShapeVal").textContent = P && P.shape ? morphShapeName(P.shape) : "";
+  $("moTopShapeVal").textContent = topShape ? morphShapeName(Q.shape) : "";
+  if (topShape) $("vaseTopVal").textContent = `blends to ${morphShapeName(Q.shape).toLowerCase()}`;
+  $("moFontVal").textContent = morphFontLabel(letter ? Q.font || "chocolate" : morphFont);
   // the 3D model card's switch, and the Line tool's second button (only once there's a morph)
   if (morphOn()) $("mfMorph").checked = true;
   $("moTopFromLine").hidden = !morphOn();
@@ -490,6 +600,9 @@ on("vaseShown", (V) => {
   if (Q && Q.letter) {
     $("moLetter").value = Q.letter;
     $("moCap").value = Q.cap || 20;
+    morphFont = MORPH_FONTS[Q.font] ? Q.font : "chocolate";
+    const fb = $(`moFont-${morphFont}`);
+    if (fb) fb.checked = true;
   }
   // the blend curve back to its two sliders (a curve made here; anything else shows as the whole wall)
   const B = V.blend;

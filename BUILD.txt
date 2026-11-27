@@ -1,6 +1,6 @@
-Unbroken · web app build v178
-Built:  2026-11-27T16:24:12.718Z
-Tests:  144 of 144 tests passed at v177; at v178 the engine (67) and A59, A61, A62, A79 again
+Unbroken · web app build v179
+Built:  2026-11-27T18:12:48.951Z
+Tests:  145 of 145 tests passed at v179 (node run.js all, 2157 s)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -24,9 +24,9 @@ Files (sha1, first 12):
   373f8a572612  17-vase.js
   0e52c6f85462  18-ties.js
   6005b41c00a4  19-relief.js
-  acb781465e00  20-morph.js
-  587382920385  core.js
-  c68ced4ee94c  css/app.css
+  efe101932cf8  20-morph.js
+  b4970334973a  core.js
+  ac087fffa45d  css/app.css
   2e7b02cdb930  css/theme.css
   8ddfb3bb0b15  features/camera/camera.js
   91b174b409e5  features/cutout/cutout.js
@@ -36,23 +36,23 @@ Files (sha1, first 12):
   ce0678154019  features/model/sample-skull.js
   da8e563b27ca  features/molecule/molecule.js
   add9b908520a  features/molecule/moleditor.js
-  26e3206b4b11  features/morph/morph.js
+  b53330b7616f  features/morph/morph.js
   993de1d0b4b7  features/optimize/optimize.js
   035f0cc17156  features/patterns/pathpad.js
   c064bb2fa3f9  features/patterns/patterns.js
   7a3ee1d073da  features/pieces/pieces.js
   905c9c3f61e4  features/plotter/plot.js
-  fbd1e8d12d8a  features/relief/relief.js
+  5327a703e268  features/relief/relief.js
   cd3e7072869b  features/testprint/testprint.js
   265c82ae5c9b  features/ties/ties.js
-  d50adf674c43  features/vase/vase.js
+  d0bb8036334c  features/vase/vase.js
   84cc740df42b  fonts.js
-  ce4a8096551d  index.html
+  cda2592864b6  index.html
   97fe045db38e  js/agent.js
   ce4fd6897391  js/art.js
   5a825c30dfdd  js/config.js
-  bafd7476b5d7  js/controls.js
-  4de6f4459fea  js/engine-bridge.js
+  81f44eef8db0  js/controls.js
+  8b92431cbf50  js/engine-bridge.js
   f703454f1231  js/export.js
   e877225ef298  js/history.js
   f5ebf0221081  js/layers.js
@@ -72,5 +72,6 @@ Files (sha1, first 12):
   1e497ad2bf76  js/views.js
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
+  0c0c4ffbadb3  morph-fonts.js
   40380fce0493  settings.js
-  6c6dcd7d2914  worker.js
+  7a86f4bf3b96  worker.js

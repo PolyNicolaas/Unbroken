@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v178">
-<link rel="stylesheet" href="css/app.css?v=v178">
+<link rel="stylesheet" href="css/theme.css?v=v179">
+<link rel="stylesheet" href="css/app.css?v=v179">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v178</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v179</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -415,7 +415,7 @@
       <p class="hint help" id="fillHint">Fills the inside of the layers above the base, as part of the same line: 0% leaves them hollow (walls only), 20–30% is a light support, 100% is solid.</p>
     </section>
     <section class="card choc-only" aria-labelledby="h-machine">
-      <h2 id="h-machine">Fine-tuning <span class="hval" id="tuneVal">as the profiles</span></h2>
+      <h2 id="h-machine">Machine <span class="hval" id="tuneVal">as the profiles</span></h2>
       <div class="tune tune-list">
         <label class="field" title="One layer of chocolate. Starts at the chocolate's own (settings.js), else the printer's."><span>Layer height (mm)</span><input type="number" id="layerH" min="0.05" max="3" step="0.05" value="0.3"><small class="from" id="fromLayerH"></small></label>
         <label class="field" title="Height of the first layer above the plate. Follows the layer height unless you change it."><span>First layer Z (mm)</span><input type="number" id="gZ" min="0.05" max="50" value="0.3" step="any"><small class="from" id="fromZ"></small></label>
@@ -445,7 +445,7 @@
       <div class="inline"><button class="btn" type="button" id="testBtn">Export test G-code</button></div>
       <div class="inline"><label class="field inline-field" title="The strip that printed best: its value goes into the setting"><span>Best strip</span><input type="number" id="testPick" min="1" max="10" step="1" value="3"></label><button class="btn mini" type="button" id="testUse">Use it</button></div>
       <p class="status" id="testMsg" role="status"></p>
-      <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it: it becomes the setting (a Flow strip sets the Flow in Fine-tuning). First layer Z strips each start at their own height above the plate, to find the one that sticks; 1 or 2 layers are enough for those.</p>
+      <p class="hint help">Numbered strips side by side, each the same small zigzag a few layers tall, with one setting stepped from strip to strip. A strip's number is the count of teeth in the comb printed in front of it, and strip 1 is on the left. The layers go round every strip before stepping up, so each has time to set. Print it, pick the best strip, and Use it: it becomes the setting (a Flow strip sets the Flow on the Machine tool). First layer Z strips each start at their own height above the plate, to find the one that sticks; 1 or 2 layers are enough for those.</p>
     </section>
     <section data-feature="matrix" class="card choc-only" aria-labelledby="h-matrix">
       <h2 id="h-matrix">Test matrix <span class="hval" id="mxVal"></span></h2>
@@ -458,7 +458,7 @@
           <tr><th scope="row">Layer height (mm)</th><td><input type="number" id="mxH1" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, low (mm)"></td><td><input type="number" id="mxH2" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, mid (mm)"></td><td><input type="number" id="mxH3" data-stepper="off" min="0.05" max="3" step="0.05" aria-label="Layer height, high (mm)"></td></tr>
         </tbody>
       </table>
-      <div class="inline"><button class="btn mini" type="button" id="mxAround" title="Low, mid and high round the Fine-tuning settings: speed ±25%, flow ±10%, layer height ±0.05 mm">Round the settings</button>
+      <div class="inline"><button class="btn mini" type="button" id="mxAround" title="Low, mid and high round the Machine settings: speed ±25%, flow ±10%, layer height ±0.05 mm">Round the settings</button>
         <label class="check" title="Off: every copy prints at its own speed, so the speed is what's tested (a small layer then comes round in a few seconds). On: small layers are slowed to the Seconds per layer, as a normal print is, which can leave the speeds all the same."><input type="checkbox" id="mxSlow"> Slow small layers to the seconds per layer</label></div>
       <p class="hint" id="mxInfo"></p>
       <div class="inline"><button class="btn" type="button" id="mxBtn">Export matrix G-code</button></div>
@@ -642,6 +642,7 @@
           <div data-part="vshape" class="row vp-round" title="Corners and dips rounded off"><div class="lab"><label for="vpRound" id="vpRoundLab">Rounded</label><span class="val" id="vpRoundVal"></span></div><input type="range" id="vpRound" min="0" max="100" step="1" value="20"></div>
           <div data-part="vshape" class="row vp-plaque" title="How far apart the front and the back are (middle of the bead to middle of the bead), at least 10 mm: a closed loop, so it stands stiff"><div class="lab"><label for="vpThick">Front to back</label><span class="val" id="vpThickVal"></span></div><input type="range" id="vpThick" min="10" max="40" step="0.5" value="10"></div>
           <div data-part="vshape" class="row vp-drawing"><p class="hint" id="vpDrawMsg" role="status"></p></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-only" hidden title="A ready-made shape at the bottom: it keeps the size the profile gives it"><div class="lab"><span class="name">Shapes</span><span class="val" id="moBotShapeVal"></span></div><div class="mo-grid" id="moBotShapes" role="group" aria-label="Shapes for the bottom"></div></div>
           <div data-feature="morph" data-part="vshape" class="row mo-only" hidden><p class="hint">Or a shape you draw or import: trace it, then <b>Make a morph from this line</b> on the Line tool.</p></div>
           <div data-part="vshape" class="lab"><span class="name">At the rim</span><span class="val" id="vaseTopVal"></span></div>
           <div data-part="vshape" class="seg small" role="radiogroup" aria-label="The shape at the rim">
@@ -656,8 +657,11 @@
           <div data-part="vshape" class="row vr-sides"><div class="lab"><label for="vrSides" id="vrSidesLab">Corners</label><span class="val" id="vrSidesVal"></span></div><input type="range" id="vrSides" min="2" max="24" step="1" value="6"></div>
           <div data-part="vshape" class="row vr-depth"><div class="lab"><label for="vrDepth" id="vrDepthLab">Depth</label><span class="val" id="vrDepthVal"></span></div><input type="range" id="vrDepth" min="0" max="90" step="1" value="30"></div>
           <div data-part="vshape" class="row vr-round"><div class="lab"><label for="vrRound" id="vrRoundLab">Rounded</label><span class="val" id="vrRoundVal"></span></div><input type="range" id="vrRound" min="0" max="100" step="1" value="20"></div>
+          <div data-feature="morph" data-part="mtop" class="lab mo-letter" hidden><span class="name">Lettering</span><span class="val" id="moFontVal"></span></div>
+          <div data-feature="morph" data-part="mtop" class="seg small mo-letter" hidden role="radiogroup" aria-label="The letter's lettering" id="moFonts"></div>
           <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="One capital letter, ! or ?: the shape below changes into it as the wall rises"><div class="lab"><label for="moLetter">Letter</label><span class="val" id="moLetterVal"></span></div><input type="text" id="moLetter" maxlength="1" value="A" autocomplete="off" autocapitalize="characters" spellcheck="false" class="mo-char"></div>
           <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="How tall the letter is from above (its capital height). The rim follows it; the bottom keeps its size"><div class="lab"><label for="moCap">Letter size</label><span class="val" id="moCapVal"></span></div><input type="range" id="moCap" min="10" max="40" step="1" value="20"></div>
+          <div data-feature="morph" data-part="mtop" class="row mo-on" hidden title="A ready-made shape at the top: the bottom changes into it as the wall rises"><div class="lab"><span class="name">Shapes</span><span class="val" id="moTopShapeVal"></span></div><div class="mo-grid" id="moTopShapes" role="group" aria-label="Shapes for the top"></div></div>
           <div data-feature="morph" data-part="mchange" class="row mo-on" hidden title="Where up the wall the shape starts changing: below this it keeps the bottom's shape"><div class="lab"><label for="moFrom">Change starts</label><span class="val" id="moFromVal"></span></div><input type="range" id="moFrom" min="0" max="80" step="5" value="0"></div>
           <div data-feature="morph" data-part="mchange" class="row mo-on" hidden title="Where up the wall the change is done: above this it keeps the rim's shape"><div class="lab"><label for="moTo">Change ends</label><span class="val" id="moToVal"></span></div><input type="range" id="moTo" min="20" max="100" step="5" value="100"></div>
           <div data-feature="morph" data-part="mchange" class="lab mo-on" hidden><span class="name">Pair the shapes</span><span class="val" id="moMatchVal"></span></div>
@@ -1066,72 +1070,73 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v178"></script>
-<script src="01-image.js?v=v178"></script>
-<script src="02-lines.js?v=v178"></script>
-<script src="03-text.js?v=v178"></script>
-<script src="04-walk.js?v=v178"></script>
-<script src="05-fill.js?v=v178"></script>
-<script src="06-fourier.js?v=v178"></script>
-<script src="07-measure.js?v=v178"></script>
-<script src="08-shape.js?v=v178"></script>
-<script src="09-plate.js?v=v178"></script>
-<script src="10-export.js?v=v178"></script>
-<script src="11-stages.js?v=v178"></script>
-<script src="12-models.js?v=v178"></script>
-<script src="13-patterns.js?v=v178"></script>
-<script src="14-photo.js?v=v178"></script>
-<script src="15-cutout.js?v=v178"></script>
-<script src="16-molecule.js?v=v178"></script>
-<script src="17-vase.js?v=v178"></script>
-<script src="18-ties.js?v=v178"></script>
-<script src="19-relief.js?v=v178"></script>
-<script src="20-morph.js?v=v178"></script>
-<script src="core.js?v=v178"></script>
-<script src="fonts.js?v=v178"></script>
-<script src="settings.js?v=v178"></script>
-<script src="js/state.js?v=v178"></script>
-<script src="js/ui.js?v=v178"></script>
-<script src="js/config.js?v=v178"></script>
-<script src="js/engine-bridge.js?v=v178"></script>
-<script src="js/source.js?v=v178"></script>
-<script src="js/pipeline.js?v=v178"></script>
-<script src="js/preview.js?v=v178"></script>
-<script src="js/tools.js?v=v178"></script>
-<script src="js/art.js?v=v178"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v178");</script>
-<script src="js/readouts.js?v=v178"></script>
-<script src="js/controls.js?v=v178"></script>
-<script>feature("levels", "features/levels/levels.js?v=v178");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v178");</script>
-<script src="js/export.js?v=v178"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v178");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v178");</script>
-<script>feature("ties", "features/ties/ties.js?v=v178");</script>
-<script src="js/views.js?v=v178"></script>
-<script src="js/zoom.js?v=v178"></script>
-<script src="js/layers.js?v=v178"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v178");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v178");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v178");</script>
-<script src="js/workflow.js?v=v178"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v178");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v178");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v178");</script>
-<script>feature("camera", "features/camera/camera.js?v=v178");</script>
-<script src="js/steppers.js?v=v178"></script>
-<script src="js/scroll.js?v=v178"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v178");</script>
-<script>feature("model", "features/model/model.js?v=v178");</script>
-<script>feature("vase", "features/vase/vase.js?v=v178");</script>
-<script>feature("relief", "features/relief/relief.js?v=v178");</script>
-<script>feature("morph", "features/morph/morph.js?v=v178");</script>
-<script src="js/history.js?v=v178"></script>
-<script src="js/map.js?v=v178"></script>
-<script src="js/showall.js?v=v178"></script>
-<script src="js/main.js?v=v178"></script>
-<script src="js/parts.js?v=v178"></script>
-<script src="js/agent.js?v=v178"></script>
+<script src="00-util.js?v=v179"></script>
+<script src="01-image.js?v=v179"></script>
+<script src="02-lines.js?v=v179"></script>
+<script src="03-text.js?v=v179"></script>
+<script src="04-walk.js?v=v179"></script>
+<script src="05-fill.js?v=v179"></script>
+<script src="06-fourier.js?v=v179"></script>
+<script src="07-measure.js?v=v179"></script>
+<script src="08-shape.js?v=v179"></script>
+<script src="09-plate.js?v=v179"></script>
+<script src="10-export.js?v=v179"></script>
+<script src="11-stages.js?v=v179"></script>
+<script src="12-models.js?v=v179"></script>
+<script src="13-patterns.js?v=v179"></script>
+<script src="14-photo.js?v=v179"></script>
+<script src="15-cutout.js?v=v179"></script>
+<script src="16-molecule.js?v=v179"></script>
+<script src="17-vase.js?v=v179"></script>
+<script src="18-ties.js?v=v179"></script>
+<script src="19-relief.js?v=v179"></script>
+<script src="20-morph.js?v=v179"></script>
+<script src="core.js?v=v179"></script>
+<script src="fonts.js?v=v179"></script>
+<script src="morph-fonts.js?v=v179"></script>
+<script src="settings.js?v=v179"></script>
+<script src="js/state.js?v=v179"></script>
+<script src="js/ui.js?v=v179"></script>
+<script src="js/config.js?v=v179"></script>
+<script src="js/engine-bridge.js?v=v179"></script>
+<script src="js/source.js?v=v179"></script>
+<script src="js/pipeline.js?v=v179"></script>
+<script src="js/preview.js?v=v179"></script>
+<script src="js/tools.js?v=v179"></script>
+<script src="js/art.js?v=v179"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v179");</script>
+<script src="js/readouts.js?v=v179"></script>
+<script src="js/controls.js?v=v179"></script>
+<script>feature("levels", "features/levels/levels.js?v=v179");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v179");</script>
+<script src="js/export.js?v=v179"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v179");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v179");</script>
+<script>feature("ties", "features/ties/ties.js?v=v179");</script>
+<script src="js/views.js?v=v179"></script>
+<script src="js/zoom.js?v=v179"></script>
+<script src="js/layers.js?v=v179"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v179");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v179");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v179");</script>
+<script src="js/workflow.js?v=v179"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v179");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v179");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v179");</script>
+<script>feature("camera", "features/camera/camera.js?v=v179");</script>
+<script src="js/steppers.js?v=v179"></script>
+<script src="js/scroll.js?v=v179"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v179");</script>
+<script>feature("model", "features/model/model.js?v=v179");</script>
+<script>feature("vase", "features/vase/vase.js?v=v179");</script>
+<script>feature("relief", "features/relief/relief.js?v=v179");</script>
+<script>feature("morph", "features/morph/morph.js?v=v179");</script>
+<script src="js/history.js?v=v179"></script>
+<script src="js/map.js?v=v179"></script>
+<script src="js/showall.js?v=v179"></script>
+<script src="js/main.js?v=v179"></script>
+<script src="js/parts.js?v=v179"></script>
+<script src="js/agent.js?v=v179"></script>
 
 </body>
 </html>

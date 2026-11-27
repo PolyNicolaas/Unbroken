@@ -277,9 +277,6 @@ async function loadURL(url) {
 }
 
 // size + units
-function syncHeight() {
-  if (st.bw) showSize(); // pipeline.js: both boxes, as printed
-}
 function syncSpacingUI() {
   $("simplify").value = Math.round((st.simplify / 0.5) * 100);
   $("simplifyVal").textContent = st.simplify ? `${fmt(st.simplify, 3)} mm tolerance` : "off";
