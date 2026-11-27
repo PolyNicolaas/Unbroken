@@ -10,9 +10,10 @@ work on one, its folder, its marked parts of the page and its tests are everythi
 | Feature | What it is | Scripts | Lines | Parts of the page | Tests |
 |---|---|---|---|---|---|
 | **plotter** | made for a pen plotter: the Plot step, pens, fills, SVG | `plot.js` | 1063 | 6 | E22, A15, A16, A32 |
-| **model** | a 3D model (STL) sliced into layers | `model.js`, `sample-skull.js` | 823 | 9 | E23, E30, E50, A17, A28 |
+| **model** | a 3D model (STL) sliced into layers | `model.js`, `sample-skull.js` | 824 | 9 | E23, E30, E50, A17, A28 |
 | **vase** | Make a vase (needs model) | `vase.js` | 912 | 2 | E57, E59, E62, A59, A62, A66 |
-| **relief** | a picture, text or pattern standing out from a wall (needs vase) | `relief.js` | 622 | 14 | E65, E66, E67, A72, A77 |
+| **relief** | a picture, text or pattern standing out from a wall (needs vase) | `relief.js` | 634 | 14 | E65, E66, E67, A72, A77 |
+| **morph** | a vase whose shape changes into another up the wall: a letter, a drawing (needs vase) | `morph.js` | 414 | 14 | E68, A79 |
 | **patterns** | the pattern styles (labyrinth, spirograph, wave portrait …) | `pathpad.js`, `patterns.js` | 592 | 4 | E33, A31 |
 | **molecule** | a molecule drawn from its name | `molecule.js`, `moleditor.js` | 939 | 5 | E39, E40, E44, A40, A45, A50 |
 | **pieces** | a text printed as a piece per line | `pieces.js` | 444 | 1 | E31, A29, A70 |
@@ -60,6 +61,12 @@ a picture, text or pattern standing out from a wall (needs vase) Needs: vase, mo
 
 - moments it answers: vaseSending, vaseReshape, artUI, sourceChanged, vaseShown, vaseLabelled, lightDefault
 - moments it announces: vaseSending
+
+### morph
+
+a vase whose shape changes into another up the wall: a letter, a drawing (needs vase) Needs: vase, model.
+
+- moments it answers: vaseSending, vaseShown, vaseLabelled, ready
 
 ### patterns
 

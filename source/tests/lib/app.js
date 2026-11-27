@@ -30,7 +30,7 @@ const SETTLE = () => {
       return false;
     }
   };
-  window.__settled = () => live.size === 0 && !["PIPE", "LAY", "AUX", "OPT", "PHO", "CUT"].some(busy);
+  window.__settled = () => live.size === 0 && !["PIPE", "LAY", "AUX", "OPT", "PHO", "CUT", "MORPH_ENG"].some(busy);
 };
 const withExample = (url, ex) => (ex && !/[?&]example=/.test(url) ? url + (url.includes("?") ? "&" : "?") + "example=" + ex : url);
 async function open(ctx, opts = {}) {
@@ -43,7 +43,11 @@ async function open(ctx, opts = {}) {
     errors = [];
   page.on("pageerror", (e) => errors.push(e.message + (process.env.STACK ? " " + e.stack : "")));
   page.on("console", (m) => {
-    if (m.type() === "error") errors.push("console: " + m.text());
+    if (m.type() === "error") {
+      const at = m.location && m.location().url; // (a failed load says which file)
+      if (/\/favicon\.ico$/.test(at || "")) return; // (the browser asking the test server for an icon it doesn't have)
+      errors.push("console: " + m.text() + (at && /Failed to load/.test(m.text()) ? ` (${at})` : ""));
+    }
   });
   if (opts.freezeProbe)
     await page.addInitScript(() => {

@@ -3,6 +3,30 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v176 · 2026-11-27
+
+The morph (Nicolaas, 26–27 November 2026: one shape at the bottom changing into another at the rim; trials in
+docs/MORPH-PLAN.md):
+
+- **A letter at the rim.** The Shape tool's **At the rim** has **Letter**: one capital letter, ! or ?, and the vase's
+  shape changes into it as the wall rises. The letters are the Chocolate lettering made into one closed outline each
+  (counters slit open where choc OS opens them, so the line goes in, round and out again). The first letter makes the
+  vase 20 mm tall, with no texture or movement; **Letter size** moves the rim.
+- **A traced line at the rim.** **Use as the rim shape** on the Line tool, beside Make a vase from this line (a vase
+  is made first if there isn't one).
+- **Every rim shape pairs corner to corner** and each lap is kept a spacing apart, so the wall doesn't twist or cross
+  itself on the way. **Change starts / ends**, **Pair the shapes** (Corners or Evenly) and **Turn the rim shape** are
+  new rows on the Shape tool.
+- **Auto finds a turn that prints**: no turn, then 20°, 45°, 90° and 180°, the smallest that prints. The panel and
+  the ready list say whether the morph prints, and when it's too short, the height that would; **Turn it over** shows
+  when the other way up prints.
+- **A drawing at either end is followed through the middle.** A vase pushes anything nearer the middle than 1 mm
+  out; a drawing was exempt only at the bottom, so a letter at the rim of a star was pushed out of shape.
+- **The stacking check searches the whole lap below** for a morph, whose laps no longer pair share for share once
+  untangled (it reported steps of 30 mm that weren't there).
+- Tests: E68 (the engine), A79 (the app), A61 (the morph switched off); the test browser's favicon request no longer
+  counts as a page error.
+
 ## v175 · 2026-11-26
 
 From the v174 browser check (a logo with a transparent background, swapped):

@@ -296,239 +296,21 @@
   function planPoint(A, B, s, t, Mo) {
     const p = planAt(A, s);
     if (B === undefined) return p;
-    let q = planAt(B, Mo && Mo.W ? morphWarpAt(Mo, s) : s);
+    let q = planAt(B, Mo && Mo.pair ? Mo.pair(s) : s);
     if (Mo && Mo.turn) q = [q[0] * Mo.c - q[1] * Mo.s, q[0] * Mo.s + q[1] * Mo.c];
     return [p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1])];
   }
 
-  // ---------- a morph: the shape from above changing into another up the wall ----------
-  // A vase with a rim shape (planTop) blends from the bottom's plan to it. How the two outlines' points pair up decides
-  // what the laps in between look like. planTop.match:
-  //   "even": by share of the way round, both counted from where the outline crosses +x (as before 27 November 2026;
-  //     the built-in shapes pair well this way)
-  //   "corners" (a drawing's default): the rim's outline turned to sit best over the bottom's, then each point paired
-  //     by dynamic time warping on position and turning angle, so a heart's lobes go to a letter's arms and its dip
-  //     to a notch, and the laps in between don't twist
-  // planTop.turn (degrees): the rim's shape turned against the bottom's before pairing. V.blend: [[t, k], …] how far
-  // the change has got at each height (as a strength curve; null: straight, k = t).
-  // Laps in between can still cross themselves or pinch (two parts of the lap closer than a bead apart, where a
-  // narrow part of one shape meets a wide part of the other): vaseLap keeps them apart (vaseKeepApart).
-  const MORPH_N = 720,
-    morphCache = new Map();
-  // turning angle at N points round a plan (signed, radians, over about a degree's share either side)
-  function morphTurning(T, N, rot) {
-    const P = [],
-      w = Math.max(2, Math.round(N / 180)),
-      c = Math.cos(rot),
-      sn = Math.sin(rot);
-    for (let i = 0; i < N; i++) {
-      const [x, y] = planAt(T, i / N);
-      P.push([x * c - y * sn, x * sn + y * c]);
-    }
-    const k = new Float64Array(N);
-    for (let i = 0; i < N; i++) {
-      const a = P[(i - w + N) % N],
-        b = P[i],
-        q = P[(i + w) % N];
-      let d = Math.atan2(q[1] - b[1], q[0] - b[0]) - Math.atan2(b[1] - a[1], b[0] - a[0]);
-      while (d > Math.PI) d -= 2 * Math.PI;
-      while (d < -Math.PI) d += 2 * Math.PI;
-      k[i] = d;
-    }
-    return { P, k };
-  }
-  // The pairing: W[i] (i = 0 … N) the share round B paired with share i / N round A, rising, W[N] = W[0] + 1.
-  // 1. the offset round B whose points sit nearest A's; 2. dynamic time warping within a band about that offset
-  // (a few offsets either side tried), costing distance² + 0.08 × (turning angle difference)², with a small charge
-  // for every step that isn't along both; 3. the warp's offset smoothed over 2/15 of the way round (a B's two slits tangled at 1/20), kept rising.
-  function morphWarp(A, B, turnDeg) {
-    const key = `${A ? A.key : "circle"}>${B ? B.key : "circle"}>${turnDeg}`;
-    let R = morphCache.get(key);
-    if (R) return R;
-    const N = MORPH_N,
-      lam = 0.08,
-      pen = 0.005,
-      band = Math.round(N * 0.18),
-      W2 = 2 * band + 1,
-      a = morphTurning(A, N, 0),
-      b = morphTurning(B, N, (turnDeg * Math.PI) / 180);
-    let o0 = 0,
-      bc = Infinity;
-    for (let o = 0; o < N; o++) {
-      let s = 0;
-      for (let i = 0; i < N; i += 2) {
-        const p = a.P[i],
-          q = b.P[(i + o) % N];
-        s += (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2;
-      }
-      if (s < bc) {
-        bc = s;
-        o0 = o;
-      }
-    }
-    const cost = (i, j) => {
-      const ii = i % N,
-        jj = ((j % N) + N) % N,
-        p = a.P[ii],
-        q = b.P[jj],
-        dk = a.k[ii] - b.k[jj];
-      return (p[0] - q[0]) ** 2 + (p[1] - q[1]) ** 2 + lam * dk * dk;
-    };
-    const D = new Float64Array((N + 1) * W2),
-      from = new Int8Array((N + 1) * W2);
-    let best = null,
-      bestC = Infinity;
-    for (let dd = -3; dd <= 3; dd++) {
-      const o = o0 + Math.round((dd * N) / 72);
-      D.fill(Infinity);
-      from.fill(0);
-      D[band] = 0;
-      // cell (i, q): A's point i paired with B's point i + o + (q − band)
-      for (let i = 0; i <= N; i++)
-        for (let q = 0; q < W2; q++) {
-          if (i === 0 && q === band) continue;
-          const j = i + q - band;
-          if (j < 0 || j > N) continue;
-          let m = Infinity,
-            f = 0;
-          if (i > 0 && D[(i - 1) * W2 + q] < m) {
-            m = D[(i - 1) * W2 + q];
-            f = 1; // along both
-          }
-          if (i > 0 && q + 1 < W2 && D[(i - 1) * W2 + q + 1] < m) {
-            m = D[(i - 1) * W2 + q + 1];
-            f = 2; // along A only
-          }
-          if (q > 0 && D[i * W2 + q - 1] < m) {
-            m = D[i * W2 + q - 1];
-            f = 3; // along B only
-          }
-          if (m < Infinity) {
-            D[i * W2 + q] = m + (f === 1 ? cost(i, j + o) : 0.5 * cost(i, j + o) + pen);
-            from[i * W2 + q] = f;
-          }
-        }
-      const end = D[N * W2 + band];
-      if (end < bestC) {
-        bestC = end;
-        const sum = new Float64Array(N + 1),
-          cnt = new Float64Array(N + 1);
-        let i = N,
-          q = band;
-        while (i > 0 || q !== band) {
-          sum[i] += i + q - band + o;
-          cnt[i]++;
-          const f = from[i * W2 + q];
-          if (f === 1) i--;
-          else if (f === 2) {
-            i--;
-            q++;
-          } else if (f === 3) q--;
-          else break;
-        }
-        sum[0] += o;
-        cnt[0]++;
-        best = Array.from(sum, (v, k) => (cnt[k] ? v / cnt[k] : k + o));
-      }
-    }
-    const off = best.map((j, i) => j - i),
-      W = new Float64Array(N + 1),
-      K = Math.round(N / 15);
-    for (let i = 0; i <= N; i++) {
-      let v = 0;
-      for (let d = -K; d <= K; d++) v += off[(((i + d) % N) + N) % N];
-      W[i] = (i + v / (2 * K + 1)) / N;
-    }
-    for (let i = 1; i <= N; i++) W[i] = Math.max(W[i], W[i - 1] + 0.05 / N);
-    const err = W[N] - (W[0] + 1);
-    for (let i = 0; i <= N; i++) W[i] -= (err * i) / N;
-    // and the share round A at even steps of the two shares together ((sA + sB) / 2), so a lap sampled at those
-    // steps keeps both outlines' detail: where the pairing crowds much of B into a little of A (a letter's serif
-    // onto a heart's side), A's even steps would sample B too sparsely and cut its corners
-    const c = new Float64Array(N + 1),
-      U = new Float64Array(N + 1);
-    for (let i = 0; i <= N; i++) c[i] = (i / N + W[i] - W[0]) / 2;
-    for (let k = 0, i = 0; k <= N; k++) {
-      const u = k / N;
-      while (i < N - 1 && c[i + 1] < u) i++;
-      U[k] = (i + (u - c[i]) / Math.max(1e-12, c[i + 1] - c[i])) / N;
-    }
-    R = { W, U, N, offset: o0 / N };
-    if (morphCache.size > 12) morphCache.clear();
-    morphCache.set(key, R);
-    return R;
-  }
-  // share round A for the lap's point at share u of the morph's even steps (above)
-  function morphShare(Mo, u) {
-    if (!Mo || !Mo.U) return u;
-    const v = (((u % 1) + 1) % 1) * Mo.N,
-      i = Math.floor(v),
-      f = v - i;
-    return Mo.U[i] + f * (Mo.U[Math.min(Mo.N, i + 1)] - Mo.U[i]);
-  }
-  function morphWarpAt(Mo, s) {
-    const u = (((s % 1) + 1) % 1) * Mo.N,
-      i = Math.floor(u),
-      f = u - i;
-    return Mo.W[i] + f * (Mo.W[Math.min(Mo.N, i + 1)] - Mo.W[i]);
-  }
-  // how the rim's plan pairs with the bottom's for this vase: null (no rim shape, or paired evenly and not turned)
-  // or { W, N (corners), turn, c, s (the turn's cos and sin) }
-  function vaseMorph(V, A, B) {
-    if (B === undefined) return null;
-    const P = V.planTop || {},
-      turn = +P.turn || 0,
-      match = UNB.vaseMatch(V);
-    const Mo = { turn, c: Math.cos((turn * Math.PI) / 180), s: Math.sin((turn * Math.PI) / 180), W: null, N: 0 };
-    if (match === "corners") Object.assign(Mo, morphWarp(A, B, turn));
-    return Mo.W || turn ? Mo : null;
-  }
-  // the rim shape's pairing as set, or its default: corners when either shape is a drawing
-  UNB.vaseMatch = function (V) {
-    const P = V.planTop;
-    if (!P) return null;
-    if (P.match === "corners" || P.match === "even") return P.match;
-    return P.kind === "drawing" || (V.plan && V.plan.kind === "drawing") ? "corners" : "even";
-  };
   // how far the change to the rim's shape has got at share t of the height (0–1)
   const blendAt = (V, t) => (V.blend && V.blend.length ? UNB.vaseStrength(V.blend, t) : t);
-  // Keep a lap's parts apart: where a lap in the middle of a morph crosses itself or two of its parts (more than ~3
-  // spacings apart along it) come closer than the spacing d, untangle it the way a traced line is (UNB.uncross,
-  // UNB.enforceSpacing at 0.95 d, so a traced rim's own gaps, made at d, aren't touched). Each lap is a little
-  // different from the one below, so the pushes are too, and the laps still stack. x, y: the lap (closed; changed in
-  // place). Returns how far a point moved (mm, 0: nothing needed), and whether it crossed.
-  function vaseKeepApart(x, y, d) {
-    const n = x.length;
-    if (!(d > 0) || n < 16) return { moved: 0, crossed: false };
-    // (evenly along its length first: the spacing tools count neighbours in points, and a morph's points crowd
-    // where one outline's detail is paired with little of the other)
-    const cum = new Float64Array(n + 1);
-    for (let i = 1; i <= n; i++) cum[i] = cum[i - 1] + Math.hypot(x[i % n] - x[i - 1], y[i % n] - y[i - 1]);
-    const ex = new Float64Array(n),
-      ey = new Float64Array(n);
-    for (let i = 0, j = 0; i < n; i++) {
-      const sv = (i / n) * cum[n];
-      while (j < n - 1 && cum[j + 1] < sv) j++;
-      const f = (sv - cum[j]) / Math.max(1e-12, cum[j + 1] - cum[j]),
-        b = (j + 1) % n;
-      ex[i] = x[j] + f * (x[b] - x[j]);
-      ey[i] = y[j] + f * (y[b] - y[j]);
-    }
-    const crossed = UNB.findCrossings(ex, ey, true).length > 0;
-    if (!crossed && !(UNB.closestGap(ex, ey, 0.95 * d, true) < 0.95 * d)) return { moved: 0, crossed: false };
-    x.set(ex);
-    y.set(ey);
-    let u = crossed ? UNB.uncross(x, y, true, {}) : { re: x, im: y };
-    const sp = UNB.enforceSpacing(u.re, u.im, 0.95 * d, 80, true);
-    u = UNB.uncross(sp.re, sp.im, true, {});
-    let moved = 0;
-    for (let i = 0; i < n; i++) {
-      if (!crossed) moved = Math.max(moved, Math.hypot(u.re[i] - x[i], u.im[i] - y[i]));
-      x[i] = u.re[i];
-      y[i] = u.im[i];
-    }
-    return { moved: crossed ? Math.max(moved, d) : Math.max(moved, 1e-9), crossed };
-  }
+  // ---------- a morph (20-morph.js) ----------
+  // A vase with a rim shape blends from the bottom's plan to it. How the two outlines' points pair up, and keeping a
+  // lap's parts apart in between, belong to the morph (20-morph.js): with planTop.match "corners" it pairs corners
+  // with corners (UNB.morphPair: { share(u), pair(s), turn, c, s } or null), and with planTop.keepApart each lap is
+  // untangled and kept a spacing apart (UNB.morphKeepApart). Without them, as before: even shares, nothing moved.
+  const vaseMorph = (V, A, B) => (B !== undefined && UNB.morphPair ? UNB.morphPair(V, A, B, planAt) : null);
+  const morphShare = (Mo, u) => (Mo && Mo.share ? Mo.share(u) : u);
+  const keepsApart = (V) => !!(V.planTop && V.planTop.keepApart && UNB.morphKeepApart);
   // how far round the plan is, against a circle of the same reach (for the points a lap needs)
   const planLength = (P) => {
     const T = planTable(P);
@@ -841,7 +623,7 @@
         ey = wy[F] - wy[0],
         lx = wx.subarray(0, F),
         ly = wy.subarray(0, F);
-      kept = vaseKeepApart(lx, ly, V.keep);
+      kept = UNB.morphKeepApart(lx, ly, V.keep);
       if (kept.moved > 0) {
         wx[F] = wx[0] + ex;
         wy[F] = wy[0] + ey;
@@ -924,7 +706,7 @@
         Math.PI *
         rmax *
         Math.max(planLength(V.plan), V.planTop ? planLength(V.planTop) : 0) *
-        (V.planTop && UNB.vaseMatch(V) === "corners" ? 1.5 : 1) *
+        (V.planTop && V.planTop.match === "corners" ? 1.5 : 1) *
         (T.kind && T.kind !== "none" && T.kind !== "rings" ? 1.3 : 1) *
         (T.kind === "relief" ? 1.6 : 1),
       m = M.kind && M.kind !== "none" ? Math.max(1, Math.round(M.count || 1)) : 0;
@@ -1070,7 +852,7 @@
       n = vaseLapPoints(V),
       cx = o.cx || 0,
       cy = o.cy || 0;
-    V.keep = V.planTop ? Math.max(w, o.d || 0) : 0; // (a morph's laps kept this far apart: vaseKeepApart)
+    V.keep = keepsApart(V) ? Math.max(w, o.d || 0) : 0; // (a morph's laps kept this far apart: UNB.morphKeepApart)
     const shiftTo = (L) => {
       for (let i = 0; i < L.x.length; i++) {
         L.x[i] -= cx;
@@ -1190,7 +972,7 @@
     }
     const M = V.move || {};
     walls.cycles = M.kind && M.kind !== "none" ? Math.max(1, Math.round(M.count || 1)) : 0;
-    walls.global = !!V.planTop;
+    walls.global = V.keep > 0; // (laps kept apart no longer pair share for share)
     const stk = vaseStacking(walls, base.length),
       step = o.overhang || w / 3,
       tight = vaseTightest(walls, base.length);
@@ -1218,11 +1000,19 @@
     // a morph: how many laps had to be kept apart, the most a point moved, and the closest two parts of any lap come
     // after that (every other lap; a traced rim's own gaps are made at the spacing)
     let morph = null;
-    if (V.planTop) {
-      morph = { kept: 0, crossed: 0, moved: 0, movedAt: -1, closest: Infinity, closestAt: -1, match: UNB.vaseMatch(V) };
+    if (V.keep > 0) {
+      morph = {
+        kept: 0,
+        crossed: 0,
+        moved: 0,
+        movedAt: -1,
+        closest: Infinity,
+        closestAt: -1,
+        match: V.planTop.match || "even",
+      };
       walls.forEach((L, k) => {
         const K = L.kept;
-        if (K) {
+        if (K && (K.crossed || K.moved > 0.05)) {
           morph.kept++;
           if (K.crossed) morph.crossed++;
           if (K.moved > morph.moved) {
@@ -1282,7 +1072,7 @@
       n = vaseLapPoints(V),
       // (a long plan, a traced line's, gets more columns, so the preview keeps its turns)
       cols = Math.max(24, Math.min(o.cols || Math.ceil(360 * Math.max(1, planLength(V.plan))), n, 4000));
-    V.keep = V.planTop ? +o.d || 0 : 0; // (a morph's laps kept apart, as printed: vaseStack)
+    V.keep = keepsApart(V) ? +o.d || 0 : 0; // (a morph's laps kept apart, as printed: vaseStack)
     const rows = [];
     for (let k = 0; ; k += every) {
       const z = Math.min(H, k * h),

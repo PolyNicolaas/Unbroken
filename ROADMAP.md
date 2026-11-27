@@ -69,7 +69,10 @@ Tests:
     a small curve from bottom to rim, edited like the profile, so a texture can grow, fade or tighten towards the neck.
     **Next.**
   - *A cross-section editor* (DigitalClay3D, printpal's vase generator): a polygon, star or SVG outline in place of the
-    circle, with symmetry, and lofting between outlines at different heights. Shapes beyond round vases.
+    circle, with symmetry, and lofting between outlines at different heights. Shapes beyond round vases. Lofting:
+    done as the morph (v176, docs/MORPH-PLAN.md): a letter or a traced line at the rim, paired corner to corner.
+    Maybe later: words (2+ letters; their counters tangle: a word mode with filled counters on a taller morph was
+    close), and shapes at more than two heights.
   - *Texture on an STL's wall* (Eazao maps textures onto G-code it didn't make): the vase's ribs, waves and loops on a
     sliced model's outer wall, e.g. a knitted skull cup.
   - *Draw the movement* (SketchPath's hand-drawn toolpaths): sketch one repeat on a pad, like the Spirograph's path pad,
