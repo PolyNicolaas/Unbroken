@@ -766,7 +766,7 @@
                   : null;
     const px = new Float64Array(n),
       py = new Float64Array(n),
-      onLine = !!(V.plan && V.plan.kind === "drawing"),
+      onLine = !!((V.plan && V.plan.kind === "drawing") || (V.planTop && V.planTop.kind === "drawing")), // (either end a drawing: a morph to a letter passes near the middle too)
       // a relief: its depth out from the wall at each point (fitted to the face at the reach halfway up)
       G = UNB.reliefOn(V) && D > 0 ? UNB.reliefGrid(V, UNB.reliefFace(V, UNB.vaseRadius(V.profile, 0.5))) : null,
       pic = G ? new Float64Array(n) : null,
