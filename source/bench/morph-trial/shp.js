@@ -2,7 +2,12 @@
 const { wordShape } = require("./wordshape.js"), { UNB } = require("./shapes.js");
 const D = 1.34, HOLD = 0.28;
 const plan = (x, y) => { const O = UNB.vaseLineLoop(x, y); return { P: { kind: "drawing", loop: O.loop, round: 0 }, reach: O.reach }; };
-const SH = { square: { kind: "polygon", sides: 4, round: 0.25 }, hexagon: { kind: "polygon", sides: 6, round: 0.2 }, star: { kind: "star", sides: 5, depth: 0.4, round: 0.2 }, flower: { kind: "flower", sides: 5, depth: 0.3 }, circle: { kind: "circle" } };
+const SH = { square: { kind: "polygon", sides: 4, round: 0.25 }, hexagon: { kind: "polygon", sides: 6, round: 0.2 }, star: { kind: "star", sides: 5, depth: 0.4, round: 0.2 }, flower: { kind: "flower", sides: 5, depth: 0.3 }, circle: { kind: "circle" },
+  triangle: { kind: "polygon", sides: 3, round: 0.25 }, pentagon: { kind: "polygon", sides: 5, round: 0.2 }, octagon: { kind: "polygon", sides: 8, round: 0.2 },
+  star4: { kind: "star", sides: 4, depth: 0.4, round: 0.2 }, star6: { kind: "star", sides: 6, depth: 0.35, round: 0.2 }, star8: { kind: "star", sides: 8, depth: 0.3, round: 0.2 },
+  flower3: { kind: "flower", sides: 3, depth: 0.3 }, flower4: { kind: "flower", sides: 4, depth: 0.3 }, flower6: { kind: "flower", sides: 6, depth: 0.3 }, flower8: { kind: "flower", sides: 8, depth: 0.25 } };
+module.exports = { SH };
+if (require.main !== module) return;
 const shapes = (process.env.SHAPES || "square,hexagon,star,flower").split(","), turns = (process.env.TURNS || "0,20,-20").split(",").map(Number), ratio = +(process.env.RATIO || 0.9);
 const glyphs = (process.env.GLYPHS || "ABCDEFGHIJKLMNOPQRSTUVWXYZ!?").split("");
 for (const ch of glyphs) {
