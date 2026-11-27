@@ -3,6 +3,13 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v180 · 2026-11-27
+
+From trying v179 on the published site:
+
+- **A ready-made shape's button is lit only while it's the bottom.** After Circle (or any of the vase's own shapes),
+  the shape's button stayed lit and the row still named it. **Shape** still brings it back. A80 checks it.
+
 ## v179 · 2026-11-27
 
 Shapes and lettering for the morph (Nicolaas, 27 November 2026: lots of basic shapes for the top or the bottom, drawn

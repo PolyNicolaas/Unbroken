@@ -56,6 +56,14 @@ module.exports = {
         1
       )
     );
+    // a Circle after it: the heart's button no longer lit (Shape brings it back)
+    await page.click('label[for="vpCircle"]');
+    await waitCheck();
+    o.circleLit = await page.evaluate(() => [...document.querySelectorAll("#moBotShapes button.on")].length);
+    await page.click('label[for="vpDrawing"]');
+    await waitCheck();
+    o.backHeart = await page.evaluate(() => st.model.vase.plan.kind === "drawing" && st.model.vase.plan.shape === "heart" && !!document.querySelector('#moBotShapes button.on[data-shape="heart"]'));
+    checks.push(check("Circle after the heart: no shape button lit; Shape brings the heart back, lit", +(o.circleLit === 0 && o.backHeart), "==", 1));
     await page.click('[data-node="mtop"]');
     await A.idle(page, 400);
     await page.click('#moTopShapes button[data-shape="star"]');
