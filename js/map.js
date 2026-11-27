@@ -575,10 +575,14 @@ function mapOpen(id) {
     if (!c) continue;
     c.dataset.map = "1";
   }
-  // a node that's one part of a card (a vase's Shape, say) shows only that part of it: [data-part] marks the parts
+  // a node that's one part of a card (a vase's Shape, say) shows only that part of it: [data-part] marks the parts (a
+  // row can belong to several, space between); data-part="whole" is only for the card as a whole (the design's own
+  // node: where the model comes from, its size), not for any one of its parts
   document
     .querySelectorAll(".panel [data-part]")
-    .forEach((el) => el.classList.toggle("part-off", !!N.part && el.dataset.part !== N.part));
+    .forEach((el) => el.classList.toggle("part-off", !!N.part && !el.dataset.part.split(" ").includes(N.part)));
+  // (one part of a card: the panel's own title names it, so the card's heading isn't repeated under it)
+  document.body.dataset.toolPart = N.part ? "1" : "";
   // a node's extra parts (the math, for the Line step) move into the panel after its cards
   for (const ref of N.extra || []) {
     const el = mapFieldOf(ref);
