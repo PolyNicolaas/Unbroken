@@ -29,6 +29,8 @@ let morphLastTop = null; // the traced line last at the top ({ loop, exact, from
 // in use: the 3D model input, a vase with a shape at the top
 const morphOn = () => !!(st.art.kind === "model" && st.model && st.model.vase && st.model.vase.planTop);
 on("artKind", () => (morphOn() ? { kind: "morph", cap: "Morph" } : null));
+// its name (the print's name until one is typed, the file's, the preview's label): "morph A", or "morph"
+on("vaseName", (V) => (V.planTop ? (V.planTop.letter ? `morph ${V.planTop.letter}` : "morph") : null));
 // the vase's top-shape rows are the morph's Top (a vase's Shape tool then has only the shape from above)
 {
   const lab = $("vaseTopVal").closest(".lab"),
@@ -441,7 +443,9 @@ function morphVerdict() {
   const flip = r.flip && r.flip.ok;
   return {
     cls: "warn",
-    text: `Too short to print as it is${V.planTop.auto !== false ? ` at any turn (${MORPH_TURNS_HINT})` : " at this turn"}: about ${r.needH} mm tall would${flip ? ". The other way up prints at this height" : ""}.`,
+    text: r.cut
+      ? `Doesn't print as it is at the turns tried in time (a detailed shape is slow to check): about ${r.needH} mm tall would, or a simpler shape.`
+      : `Too short to print as it is${V.planTop.auto !== false ? ` at any turn (${MORPH_TURNS_HINT})` : " at this turn"}: about ${r.needH} mm tall would${flip ? ". The other way up prints at this height" : ""}.`,
     flip,
   };
 }

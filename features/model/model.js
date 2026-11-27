@@ -183,9 +183,15 @@ let vaseStl = null; // the STL that was in use before the vase, to go back to
 function useVase(V, record) {
   const prev = st.model;
   if (prev && !prev.vase) vaseStl = prev;
-  const mesh = UNB.vaseMesh(V, { h: layerHmm() });
+  // (d: a morph's laps kept apart, as printed; not for a lap of thousands of points, where that would hold the page up
+  // for seconds: the print and its check still do it)
+  const mesh = UNB.vaseMesh(V, {
+    h: layerHmm(),
+    d: UNB.vaseLapPoints(V) <= 2500 ? Math.max(lineWidthMM(), spacingMM() || 0) : 0,
+  });
   st.model = {
-    name: UNB.reliefOn(V) ? "relief" : "vase", // (a relief: a picture, text or pattern standing out from the wall)
+    // (a relief: a picture, text or pattern standing out from the wall; a feature can name it: "vaseName")
+    name: ask("vaseName", V).find(Boolean) || (UNB.reliefOn(V) ? "relief" : "vase"),
     tri: mesh.tri,
     n: mesh.n,
     turns: { x: 0, y: 0, z: 0 },

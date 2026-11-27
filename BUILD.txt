@@ -1,6 +1,6 @@
-Unbroken · web app build v177
-Built:  2026-11-27T16:00:51.267Z
-Tests:  144 of 144 tests passed (full suite; A61 and A79 rerun after the last change)
+Unbroken · web app build v178
+Built:  2026-11-27T16:24:12.718Z
+Tests:  144 of 144 tests passed at v177; at v178 the engine (67) and A59, A61, A62, A79 again
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -21,22 +21,22 @@ Files (sha1, first 12):
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   755c4b83e7df  16-molecule.js
-  95f7557ba94a  17-vase.js
+  373f8a572612  17-vase.js
   0e52c6f85462  18-ties.js
   6005b41c00a4  19-relief.js
-  1507b6246c96  20-morph.js
-  221bdcaeb5b4  core.js
+  acb781465e00  20-morph.js
+  587382920385  core.js
   c68ced4ee94c  css/app.css
   2e7b02cdb930  css/theme.css
   8ddfb3bb0b15  features/camera/camera.js
   91b174b409e5  features/cutout/cutout.js
   c78689907075  features/levels/levels.js
   86a7dd76f6ff  features/matrix/matrix.js
-  6386f4e27e04  features/model/model.js
+  8d922cc4f39b  features/model/model.js
   ce0678154019  features/model/sample-skull.js
   da8e563b27ca  features/molecule/molecule.js
   add9b908520a  features/molecule/moleditor.js
-  d3f90a6941c9  features/morph/morph.js
+  26e3206b4b11  features/morph/morph.js
   993de1d0b4b7  features/optimize/optimize.js
   035f0cc17156  features/patterns/pathpad.js
   c064bb2fa3f9  features/patterns/patterns.js
@@ -47,12 +47,12 @@ Files (sha1, first 12):
   265c82ae5c9b  features/ties/ties.js
   d50adf674c43  features/vase/vase.js
   84cc740df42b  fonts.js
-  406ef8fdd696  index.html
+  ce4a8096551d  index.html
   97fe045db38e  js/agent.js
   ce4fd6897391  js/art.js
   5a825c30dfdd  js/config.js
   bafd7476b5d7  js/controls.js
-  f37a98135016  js/engine-bridge.js
+  4de6f4459fea  js/engine-bridge.js
   f703454f1231  js/export.js
   e877225ef298  js/history.js
   f5ebf0221081  js/layers.js
@@ -73,4 +73,4 @@ Files (sha1, first 12):
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
   40380fce0493  settings.js
-  bfb75c9913eb  worker.js
+  6c6dcd7d2914  worker.js

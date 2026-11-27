@@ -712,6 +712,7 @@
       m = M.kind && M.kind !== "none" ? Math.max(1, Math.round(M.count || 1)) : 0;
     return Math.min(24000, Math.max(256, Math.ceil(L / 0.25), m * (M.kind === "loops" ? 32 : 24)));
   }
+  UNB.vaseLapPoints = (V) => vaseLapPoints(vaseClean(V)); // (how long a lap is in points: the app keeps big ones cheap)
 
   // ---------- the checks ----------
   // How far each lap's bead sits off the one below (mm): every point's distance to the nearest piece of the lap below
