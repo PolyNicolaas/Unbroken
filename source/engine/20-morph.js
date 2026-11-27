@@ -224,7 +224,7 @@
       ry = ey;
     if (crossed || pinched) {
       let u = crossed ? UNB.uncross(ex, ey, true, {}) : { re: ex, im: ey };
-      const sp = UNB.enforceSpacing(u.re, u.im, 0.95 * d, 80, true);
+      const sp = UNB.enforceSpacing(u.re, u.im, 0.95 * d, 20, true); // (20 rounds: as good as 80 on every letter morph tried, in half the time)
       u = UNB.uncross(sp.re, sp.im, true, {});
       rx = Float64Array.from(u.re);
       ry = Float64Array.from(u.im);
@@ -243,7 +243,7 @@
   };
   // Round off turns tighter than rmin (mm) on a closed line evenly spaced (changed in place): each point whose turn
   // (the circle through it and the points about 0.3 mm either side) is tighter is eased towards its neighbours, with
-  // the points round it, until none is (at most 300 rounds). Returns whether anything moved.
+  // the points round it, until none is (at most 300 rounds, each looking again only near the last). Returns whether anything moved.
   function morphRoundTight(x, y, rmin) {
     const n = x.length;
     let len = 0;
@@ -262,23 +262,24 @@
           ? Infinity
           : (Math.hypot(ax, ay) * Math.hypot(cx, cy) * Math.hypot(cx - ax, cy - ay)) / (2 * cr);
       };
-    let any = false;
-    for (let pass = 0; pass < 300; pass++) {
-      const tight = [];
-      for (let i = 0; i < n; i++) if (R(i) < rmin) tight.push(i);
-      if (!tight.length) break;
-      any = true;
-      const mark = new Uint8Array(n);
-      for (const i of tight) for (let k = -g; k <= g; k++) mark[at(i + k)] = 1;
-      const px = Float64Array.from(x),
-        py = Float64Array.from(y);
-      for (let i = 0; i < n; i++)
-        if (mark[i]) {
-          const a = at(i - 1),
-            b = at(i + 1);
-          x[i] = px[i] + 0.5 * ((px[a] + px[b]) / 2 - px[i]);
-          y[i] = py[i] + 0.5 * ((py[a] + py[b]) / 2 - py[i]);
-        }
+    // (only near the tight points: each round eases those and their neighbours, then looks again just there, so a
+    // drawing whose own corners are tight costs its corners, not its whole length, every round)
+    let tight = [];
+    for (let i = 0; i < n; i++) if (R(i) < rmin) tight.push(i);
+    const any = tight.length > 0;
+    for (let pass = 0; pass < 300 && tight.length; pass++) {
+      const mark = new Set();
+      for (const i of tight) for (let k = -g; k <= g; k++) mark.add(at(i + k));
+      const idx = [...mark],
+        nx = idx.map((i) => x[i] + 0.5 * ((x[at(i - 1)] + x[at(i + 1)]) / 2 - x[i])),
+        ny = idx.map((i) => y[i] + 0.5 * ((y[at(i - 1)] + y[at(i + 1)]) / 2 - y[i]));
+      idx.forEach((i, k) => {
+        x[i] = nx[k];
+        y[i] = ny[k];
+      });
+      const near = new Set();
+      for (const i of idx) for (let k = -g; k <= g; k++) near.add(at(i + k));
+      tight = [...near].filter((i) => R(i) < rmin);
     }
     return any;
   }
@@ -658,7 +659,8 @@
   // Generator (yields { done, of } after each try). V: a vase with a rim shape; opt: as UNB.vaseStack's (w, d, h, z0,
   // overhang). Tries the rim's turn as set and then UNB.MORPH_TURNS (opt.turns), stopping at the first that prints;
   // if none does, the vase the other way up too. Returns { ok, turn, bad, worst, inWorst, closest, needH (mm: the
-  // height the best try would print at, from steps that scale with 1 ÷ height; 0 when it prints), flip (null, or
+  // height the best try would print at, from steps that scale with 1 ÷ height; 0 when it prints), cut (true: stopped
+  // trying turns after opt.budget ms), flip (null, or
   // { ok, turn, bad }: the other way up, tried only when this way doesn't print) }.
   UNB.morphCheck = function* (V, opt) {
     const o = Object.assign({}, opt, { base: 0 }),
@@ -681,8 +683,17 @@
         closest: R.morph ? R.morph.closest : Infinity,
       };
     };
-    let best = null;
+    // (a detailed outline makes each try slow: after opt.budget ms (20 s) no more turns are tried, and the answer
+    // says so: cut)
+    const t0 = Date.now(),
+      budget = o.budget || 20000;
+    let best = null,
+      cut = false;
     for (const t of turns) {
+      if (best && Date.now() - t0 > budget) {
+        cut = true;
+        break;
+      }
       const r = tryOne(V, t);
       yield { done: ++done, of };
       if (!best || r.bad < best.bad) best = r;
@@ -690,8 +701,8 @@
     }
     const ok = best.bad < 0.05,
       scale = Math.max(1, best.worst / hold, (best.inWorst + hold) / hold),
-      res = Object.assign({ ok, needH: ok ? 0 : Math.ceil(V.height * scale), flip: null }, best);
-    if (!ok) {
+      res = Object.assign({ ok, needH: ok ? 0 : Math.ceil(V.height * scale), flip: null, cut }, best);
+    if (!ok && !cut) {
       const F = morphFlip(V);
       let fb = null;
       for (const t of turns) {

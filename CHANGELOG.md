@@ -3,6 +3,20 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v178 · 2026-11-27
+
+From trying v177 on the published site:
+
+- **A morph is named a morph:** the print's name, the file's and the preview's label say "morph A" (they said vase).
+  A feature can name a vase it makes into something else (`ask("vaseName")`, model.js).
+- **The design preview keeps a morph's laps apart, as the print does** (it showed the middle laps before they were
+  untangled). Not for a lap of more than 2,500 points, where that held the page up for seconds
+  (`UNB.vaseLapPoints`).
+- **A detailed drawing at the bottom no longer stalls the check for minutes.** Keeping a lap apart uses 20 rounds of
+  spacing (as good as 80 on all 112 letter morphs tried, in half the time); turns too tight are rounded only near
+  where they are; and the check stops trying turns after 20 s, saying so ("a detailed shape is slow to check") with
+  the height that would print. The Shapes & text drawing into an A: an answer in about 25 s, was minutes.
+
 ## v177 · 2026-11-27
 
 The morph as its own design (Nicolaas, 27 November 2026: all the morph's things in one place, shape to letter first;
