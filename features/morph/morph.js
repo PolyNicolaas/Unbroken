@@ -566,12 +566,14 @@ function morphLabels() {
   $("vrDrawingLab").hidden = $("vrDrawing").hidden = !((Q && Q.kind === "drawing" && !Q.letter) || morphLastTop);
   $("vrDrawingLab").textContent = topShape ? "Shape" : "Drawing";
   $("vpDrawingLab").textContent = P && P.shape ? "Shape" : "Drawing";
+  // (lit, and named, only while it's the shape in use: a Circle picked after it keeps it for the Shape button)
+  const botShape = P && P.kind === "drawing" && P.shape;
   for (const [box, k] of [
-    ["moBotShapes", P && P.shape],
+    ["moBotShapes", botShape],
     ["moTopShapes", topShape && Q.shape],
   ])
     $(box).querySelectorAll("button").forEach((b) => b.classList.toggle("on", b.dataset.shape === k));
-  $("moBotShapeVal").textContent = P && P.shape ? morphShapeName(P.shape) : "";
+  $("moBotShapeVal").textContent = botShape ? morphShapeName(P.shape) : "";
   $("moTopShapeVal").textContent = topShape ? morphShapeName(Q.shape) : "";
   if (topShape) $("vaseTopVal").textContent = `blends to ${morphShapeName(Q.shape).toLowerCase()}`;
   $("moFontVal").textContent = morphFontLabel(letter ? Q.font || "chocolate" : morphFont);

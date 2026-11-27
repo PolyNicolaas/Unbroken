@@ -1,6 +1,6 @@
-Unbroken · web app build v179
-Built:  2026-11-27T18:12:48.951Z
-Tests:  145 of 145 tests passed at v179 (node run.js all, 2157 s)
+Unbroken · web app build v180
+Built:  2026-11-27T18:17:33.406Z
+Tests:  145 of 145 tests passed at v179; at v180 A80 again (pass)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -25,7 +25,7 @@ Files (sha1, first 12):
   0e52c6f85462  18-ties.js
   6005b41c00a4  19-relief.js
   efe101932cf8  20-morph.js
-  b4970334973a  core.js
+  b75b334270bd  core.js
   ac087fffa45d  css/app.css
   2e7b02cdb930  css/theme.css
   8ddfb3bb0b15  features/camera/camera.js
@@ -36,7 +36,7 @@ Files (sha1, first 12):
   ce0678154019  features/model/sample-skull.js
   da8e563b27ca  features/molecule/molecule.js
   add9b908520a  features/molecule/moleditor.js
-  b53330b7616f  features/morph/morph.js
+  bbd2846a88bb  features/morph/morph.js
   993de1d0b4b7  features/optimize/optimize.js
   035f0cc17156  features/patterns/pathpad.js
   c064bb2fa3f9  features/patterns/patterns.js
@@ -47,12 +47,12 @@ Files (sha1, first 12):
   265c82ae5c9b  features/ties/ties.js
   d0bb8036334c  features/vase/vase.js
   84cc740df42b  fonts.js
-  cda2592864b6  index.html
+  f3fef5c7b276  index.html
   97fe045db38e  js/agent.js
   ce4fd6897391  js/art.js
   5a825c30dfdd  js/config.js
   81f44eef8db0  js/controls.js
-  8b92431cbf50  js/engine-bridge.js
+  e702d16dc476  js/engine-bridge.js
   f703454f1231  js/export.js
   e877225ef298  js/history.js
   f5ebf0221081  js/layers.js
@@ -74,4 +74,4 @@ Files (sha1, first 12):
   cb0c999d9f14  js/zoom.js
   0c0c4ffbadb3  morph-fonts.js
   40380fce0493  settings.js
-  7a86f4bf3b96  worker.js
+  edbb8ab16904  worker.js
