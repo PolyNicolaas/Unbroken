@@ -363,9 +363,12 @@ function modelProj(M, cv) {
       Zc = z - h / 2;
     return [X, -(Zc * cp + Y * sp), Zc * sp - Y * cp];
   }; // screen x, screen y (down), depth (towards you: seen from above when pitch > 0)
-  const R = Math.hypot(w, d, h) / 2 || 1,
-    pad = 30 * (window.devicePixelRatio || 1),
-    s = Math.min(cv.width - 2 * pad, cv.height - 2 * pad) / (2 * R);
+  // fitted to what it takes up: across, its widest turned any way round (so turning it doesn't zoom); up and down, its
+  // height and depth as tilted. A tall narrow view (an iPad held upright) fills its width.
+  const across = Math.hypot(w, d) || 1,
+    upDown = Math.abs(h * cp) + across * Math.abs(sp) || 1,
+    pad = 18 * (window.devicePixelRatio || 1),
+    s = Math.min((cv.width - 2 * pad) / across, (cv.height - 2 * pad) / upDown);
   return { P, s, cx: cv.width / 2, cy: cv.height / 2, k };
 }
 function drawModel() {

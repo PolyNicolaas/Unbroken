@@ -118,8 +118,23 @@ function labels() {
     answer("pictureCut") && "cut out",
   ].filter(Boolean);
   $("prepVal").textContent = on.length ? on.join(", ") : "off";
+  if (on.length) $("h-prep").closest("section").classList.add("open"); // (in use: shown open)
   bgPickUI();
   ask("prepUI"); // (levels.js: its greys and their shares)
+}
+// Image prep folds away while it's all off (most pictures need none of it): its heading opens and closes it
+{
+  const h = $("h-prep"),
+    card = h.closest("section");
+  card.classList.add("fold");
+  h.tabIndex = 0;
+  h.setAttribute("role", "button");
+  const flip = () => {
+    card.classList.toggle("open");
+    h.setAttribute("aria-expanded", card.classList.contains("open"));
+  };
+  h.addEventListener("click", flip);
+  h.addEventListener("keydown", (e) => (e.key === "Enter" || e.key === " ") && (e.preventDefault(), flip()));
 }
 for (const id of ["sens", "blur", "minLen", "far", "bright", "contrast", "bgTol"])
   $(id).addEventListener("input", () => {

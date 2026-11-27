@@ -21,6 +21,29 @@ header.top p { margin: 0; color: var(--muted); }
   background-size: 24px 24px; }
 #view { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
 .chip { position: absolute; left: 10px; top: 10px; font: 500 calc(12px * var(--text))/1 var(--font-mono); background: var(--surface); border: 1px solid var(--rule); padding: calc(6px * var(--space)) calc(8px * var(--space)); border-radius: calc(6px * var(--corner)); font-variant-numeric: tabular-nums; }
+.card.fold > h2 { cursor: pointer; }
+.card.fold > h2::before { content: "▸ "; color: var(--muted); }
+.card.fold.open > h2::before { content: "▾ "; }
+.card.fold:not(.open):is(body:not(.show-all) *) > :not(h2) { display: none !important; }
+/* a vase or a morph: its design first on the Morph / Vase node; where its input comes from (Picture, Text, …) last,
+   without the drop zone (dropping a file on the page still works) */
+body[data-vase="1"] .panel section.card[aria-labelledby="h-input"] { order: 1; }
+body[data-vase="1"] .panel #dropZone { display: none; }
+.mo-above { position: absolute; left: 10px; bottom: 10px; background: color-mix(in srgb, var(--surface) 88%, transparent); border: 1px solid var(--rule); border-radius: calc(8px * var(--corner)); padding: 4px; display: flex; flex-direction: column; align-items: center; pointer-events: none; }
+.mo-above canvas { width: 120px; height: 120px; }
+.mo-above span { font: 500 calc(11px * var(--text))/1.2 var(--font-body); color: var(--muted); }
+body:not([data-stage="line"]) #moAbove { display: none !important; }
+label.mo-font { display: inline-flex; align-items: center; justify-content: center; gap: 6px; }
+label.mo-font svg { width: 18px; height: 18px; flex: none; }
+label.mo-font path { fill: currentColor; fill-rule: evenodd; stroke: none; }
+label.mo-font path.hair { fill: none; stroke: currentColor; stroke-width: 0.5; }
+.mo-chip { position: absolute; right: 10px; top: 10px; font: 600 calc(12px * var(--text))/1 var(--font-body); padding: calc(6px * var(--space)) calc(10px * var(--space)); border-radius: 999px; border: 1px solid var(--rule); background: var(--surface); color: var(--ink); cursor: pointer; }
+.mo-chip.ok { border-color: var(--good); color: var(--good); }
+.mo-chip.warn { border-color: var(--warn); color: var(--warn); }
+.mo-chip.busy { color: var(--muted, var(--ink)); }
+body:not([data-stage="line"]) #moChip { display: none !important; }
+body[data-src="model"] .toolbar .trace-switch { display: none; }
+body[data-src="model"][data-stage="line"] .toolbar .tb-sep { display: none; }
 .chip.busy::after { content: " · working…"; color: var(--accent); }
 #box.working #view { opacity: .55; transition: opacity .25s .1s; }
 #view { transition: opacity .15s; }
