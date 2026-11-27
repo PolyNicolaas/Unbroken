@@ -3,6 +3,27 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v177 · 2026-11-27
+
+The morph as its own design (Nicolaas, 27 November 2026: all the morph's things in one place, shape to letter first;
+the vase stays vases):
+
+- **Make a morph.** The 3D model card has **Make a morph** beside Make a vase: a letter on top of the vase in use (or
+  a new one), 20 mm tall, no texture or movement. The rail then says **Morph**, with only a morph's tools:
+  **Bottom** (the shape on the plate), **Top** (a letter first, or a shape, or a traced line), **Change** (where it
+  starts and ends, how the shapes pair, the top's turn with Auto, and whether it prints), **Profile** and **Rim**.
+  Make a vase turns it back into a vase.
+- **A drawn or imported shape into a letter.** The Line tool's **Make a morph from this line** puts the traced line
+  at the bottom, at its own size, with the letter on top. **Use as the top shape** (there while a morph is in use)
+  puts it at the top instead. Bottom says so for a shape you draw or import.
+- **A vase is a vase.** Its Shape tool has no shape at the top with the morph on (that's the morph's Top).
+- **Changing the top no longer resets.** A shape at the top after a letter now replaces it (the letter used to come
+  straight back), and a letter after a shape keeps the height, profile and bottom (it used to start over at 20 mm).
+  Drawing brings back the traced line last at the top.
+- The rail's design tool can be named by a feature (`ask("artKind")`, map.js).
+- Tests: A79 walks the new layout (Make a morph, the rail, the top changed and back, the bottom, Make a vase, a traced
+  line at the bottom and the top).
+
 ## v176 · 2026-11-27
 
 The morph (Nicolaas, 26–27 November 2026: one shape at the bottom changing into another at the rim; trials in

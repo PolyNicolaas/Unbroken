@@ -180,25 +180,28 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   transparent background starts swapped. A solid (coloured) background is part of the picture, as before: it frames the
   art as a panel. Tests E65, E66, E67, A72, A77, A78.
 - **A morph** (`web-app/features/morph/morph.js`, engine `20-morph.js`; trials and reasons in `docs/MORPH-PLAN.md`): a
-  vase whose shape from above changes into another up the wall. **At the rim** offers **Letter** (one capital, ! or ?)
-  and **Drawing** (a traced line: **Use as the rim shape**, on the Line tool, beside Make a vase from this line; it
-  makes a 20 mm vase if there isn't one). The letter comes from the Chocolate lettering made into one closed outline
-  (`UNB.morphLetter`): choc OS's hairline letters flooded from outside so their shapes and stroke width stay, each
-  counter slit open where choc OS opens it (straightened, 1.7 spacings wide), so the line goes in, round it and out
-  again, the dots of ! and ? joined with a neck, corners rounded to the bead; G is redrawn without the bar into its
-  bowl, which tangled every morph. The first letter on a vase makes it 20 mm tall with no texture or movement (they'd
-  fight the letter's corners); **Letter size** moves the rim. With the morph on, every rim shape (the built-in ones
-  too) is **paired corner to corner** (`UNB.morphPair`: the rim's outline turned to sit best over the bottom's, then
-  dynamic time warping on position and turning angle, smoothed over 2/15 of the way round) and **each lap is kept
-  apart** (`UNB.morphKeepApart`: a lap that crosses itself or comes closer than the spacing is untangled the way a
-  traced line is, and turns tighter than 0.36 of the spacing are rounded off). **Change starts / ends** set where up
-  the wall it happens (the vase's `blend` curve); **Pair the shapes** can go back to *Evenly*; **Turn the rim shape**
-  turns it against the bottom's. **Auto** (on) runs the check in its own background engine (`UNB.morphCheck`): no
-  turn, then 20°, 45°, 90° and 180°, keeping the smallest that prints, and says so in the panel and the ready list; if
-  none prints it says *too short* with the height that would (the steps scale with 1 ÷ height), and offers **Turn it
-  over** when the other way up prints. Found in the trials: every character prints out of a circle, square, hexagon,
-  pentagon, octagon, the stars, the flowers and a heart on a 20 mm morph with 20 mm letters (a few turned); the
-  letter at the rim is cleaner than at the bottom; words don't morph yet (one character only). Tests E68, A79.
+  shape at the bottom that changes into a letter (or another shape) at the top as the wall rises. It's its own design:
+  **Make a morph** on the 3D model card (a letter on top of the vase in use, 20 mm tall, no texture or movement), or
+  **Make a morph from this line** on the Line tool (a shape you draw or import, traced, at the bottom at its own size,
+  the letter on top). The rail then says **Morph**, with only its tools: **Bottom** (the vase's shape from above, or
+  the traced line), **Top** (a **Letter**: one capital, ! or ?, with Letter size; or Circle, Polygon, Star, Flower; or
+  **Drawing**: Use as the top shape, on the Line tool), **Change** and the vase's **Profile** and **Rim**. Make a vase
+  turns it back into a vase, whose own tools have no top shape. The letter comes from the Chocolate lettering made
+  into one closed outline (`UNB.morphLetter`): choc OS's hairline letters flooded from outside so their shapes and
+  stroke width stay, each counter slit open where choc OS opens it (straightened, 1.7 spacings wide), so the line goes
+  in, round it and out again, the dots of ! and ? joined with a neck, corners rounded to the bead; G is redrawn without
+  the bar into its bowl, which tangled every morph. Every morph is **paired corner to corner** (`UNB.morphPair`: the
+  top's outline turned to sit best over the bottom's, then dynamic time warping on position and turning angle,
+  smoothed over 2/15 of the way round) and **each lap is kept apart** (`UNB.morphKeepApart`: a lap that crosses
+  itself or comes closer than the spacing is untangled the way a traced line is, and turns tighter than 0.36 of the
+  spacing are rounded off). **Change** has where it starts and ends (the vase's `blend` curve), **Pair the shapes**
+  (Corners or Evenly), **Turn the top shape**, and **Auto** (on): the check in its own background engine
+  (`UNB.morphCheck`) tries no turn, then 20°, 45°, 90° and 180°, keeps the smallest that prints and says so in the
+  panel and the ready list; if none prints it says *too short* with the height that would (the steps scale with
+  1 ÷ height), and offers **Turn it over** when the other way up prints. Changing the top keeps the height, profile
+  and bottom. Found in the trials: every character prints out of a circle, square, hexagon, pentagon, octagon, the
+  stars, the flowers and a heart on a 20 mm morph with 20 mm letters (a few turned); the letter at the top is cleaner
+  than at the bottom; words don't morph yet (one character only). Tests E68, A79.
 
 **Take a picture** (`web-app/features/camera/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
 phone) outlines the page it finds (`UNB.findPage`: the largest light, plain area on a small copy of the frame, its four

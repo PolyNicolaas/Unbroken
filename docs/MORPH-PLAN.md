@@ -351,3 +351,14 @@ needed.
   - Turns tighter than half a bead are rounded off on the morph's laps: 74 of 112 letter morphs had them, 29 after.
 - **Tests:** E68, A79; A61's record has the morph switching off clean.
 - **Part B** (built interiors) stays a plan, in the Project's `claude/loft-and-interior-plan.md`.
+
+## v177 (27 November 2026): the morph as its own design
+
+Nicolaas asked for all of the morph's settings in one place, with shape to letter first and the vase left as vases.
+- **Make a morph** (3D model card) and **Make a morph from this line** (Line tool: a drawn or imported shape, traced,
+  at the bottom) make one. The rail says **Morph**, with Bottom, Top, Change, Profile and Rim, and no Texture or
+  Movement.
+- A vase's Shape tool no longer has a top shape while the morph is on.
+- **Fixed resets.** A shape at the top after a letter kept the letter's outline, so the letter came straight back.
+  A letter after a shape started over at 20 mm. Now the top's own data is cleared when it becomes a shape, and only
+  making a morph sets the height.

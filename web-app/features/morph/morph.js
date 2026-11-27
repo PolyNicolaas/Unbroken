@@ -1,12 +1,14 @@
 // Unbroken · web app · morph.js
-// A morph: a vase whose shape from above changes into another up the wall (a heart into a letter, a star into a
-// flower). The rim's shape can be a letter (one capital, ! or ?, from the Chocolate lettering made into one closed
-// outline: UNB.morphLetter) or a traced line (Use as the rim shape, on the Line tool), as well as the vase's own
-// shapes. With this feature on, every rim shape pairs corner to corner and each lap is kept apart (planTop.match
-// "corners", keepApart: the engine's 20-morph.js); off, a vase is as before. The Shape tool gets where the change
-// starts and ends, how the shapes pair, and the rim shape's turn; Auto finds the smallest turn that prints
-// (UNB.morphCheck, in the background), and the panel and the ready list say when the morph is too short to print, or
-// prints only the other way up (Turn it over).
+// A morph: a shape at the bottom that changes into a letter (or another shape) at the top as the wall rises: a heart
+// into an A, a traced drawing into a G. It's its own design (the rail says Morph): a vase with a top shape, whose tools
+// are only the ones a morph uses: Bottom (the shape on the plate: a vase's shape from above, or a traced line: Make a
+// morph from this line, on the Line tool), Top (a letter: one capital, ! or ?, from the Chocolate lettering made into
+// one closed outline, UNB.morphLetter; a shape; or a traced line: Use as the top shape), Change (where the change
+// starts and ends, how the shapes pair, the top's turn, and the check), the vase's Profile and Rim. A vase stays a
+// vase: with this feature on, its tools have no shape at the top (that's a morph's). Every morph pairs corner to
+// corner and each lap is kept apart (planTop.match "corners", keepApart: the engine's 20-morph.js); Auto finds the
+// smallest turn that prints (UNB.morphCheck, in its own background engine), and the panel and the ready list say when
+// it's too short to print, or prints only the other way up (Turn it over). Off, a vase is as before.
 // Found on 26–27 November 2026 (docs/MORPH-PLAN.md): one character prints out of every shape tried on a 20 mm morph
 // with 20 mm letters, the letter at the rim; words don't yet.
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
@@ -21,11 +23,71 @@ let morphRes = null, // the last check: { key, r (UNB.morphCheck's answer) }
   morphRun = 0,
   morphTimer = 0;
 const morphD = () => Math.max(lineWidthMM(), spacingMM() || 0);
+let morphLastTop = null; // the traced line last at the top ({ loop, exact, from }): Drawing brings it back
+
+// ---------- a morph is its own design ----------
+// in use: the 3D model input, a vase with a shape at the top
+const morphOn = () => !!(st.art.kind === "model" && st.model && st.model.vase && st.model.vase.planTop);
+on("artKind", () => (morphOn() ? { kind: "morph", cap: "Morph" } : null));
+// the vase's top-shape rows are the morph's Top (a vase's Shape tool then has only the shape from above)
+{
+  const lab = $("vaseTopVal").closest(".lab"),
+    end = document.querySelector("#vaseBox .vr-round");
+  for (let el = lab; el; el = el.nextElementSibling) {
+    el.dataset.part = "mtop";
+    if (el === end) break;
+  }
+  lab.querySelector(".name").textContent = "Top shape";
+  // a letter first: it's what a morph is for
+  const first = $(VASE_RADIO.top.same).parentElement.querySelector("input:not([hidden])") || $(VASE_RADIO.top.circle);
+  first.before($("vrLetter"), $("vrLetter").nextElementSibling);
+  for (const el of [$(VASE_RADIO.top.same), $(VASE_RADIO.top.same).nextElementSibling]) el.hidden = true; // (no top shape: a vase)
+}
+addMapNode("mbottom", {
+  icon: "shape",
+  cap: "Bottom",
+  step: "art",
+  cards: ["h-model"],
+  part: "vshape",
+  val: () => vasePlanWords(vaseFill(vaseCur).plan),
+});
+addMapNode("mtop", {
+  icon: "text",
+  cap: "Top",
+  step: "art",
+  cards: ["h-model"],
+  part: "mtop",
+  val: () => {
+    const Q = vaseCur.planTop;
+    return !Q ? "" : Q.letter ? `the letter ${Q.letter}, ${Q.cap} mm` : Q.kind === "drawing" ? "a traced line" : Q.kind;
+  },
+});
+addMapNode("mchange", {
+  icon: "change",
+  cap: "Change",
+  step: "art",
+  cards: ["h-model"],
+  part: "mchange",
+  val: () => {
+    const v = morphVerdict();
+    return v ? (v.cls === "ok" ? "prints" : "too short") : "";
+  },
+});
+MAP_SHAPERS.push((S) => {
+  // (map.js loads after the features: the icon is added when the map is first drawn; a wall rising into a shape)
+  MAP_ICONS.morph ||= "M5 20h14M7 20c0-4 2-6 2-9M17 20c0-4-2-6-2-9M8 3h8l-2 8h-4z";
+  MAP_ICONS.change ||= "M4 20h16M12 17V5M8 9l4-4 4 4"; // (Change: up the wall)
+  if (morphOn()) S.down.art = ["mbottom", "mtop", "mchange", "vprofile", "vrim"];
+});
 
 // ---------- every rim shape pairs corner to corner, each lap kept apart ----------
 on("vaseSending", (V) => {
   const Q = V.planTop;
   if (!Q) return;
+  // a shape at the top isn't a letter or a drawing any more: what made it one goes (or a letter picked after a
+  // shape would come back as the shape, and a shape after a letter as the letter)
+  if (Q.kind !== "drawing") for (const k of ["letter", "cap", "loop", "exact", "from"]) delete Q[k];
+  else if (!Q.letter) morphLastTop = { loop: Q.loop, exact: Q.exact, from: Q.from };
   if (Q.match !== "even") Q.match = "corners";
   Q.keepApart = true;
   morphCheckSoon();
@@ -46,8 +108,9 @@ function morphPlainWall() {
 }
 
 // ---------- a letter at the rim ----------
-// ch: one of UNB.MORPH_CHARS; cap: its height (mm). The first letter on a vase makes the morph 20 mm tall (what was
-// tried) with the bottom a little narrower than the letter; a new letter or size keeps the rest and moves the rim.
+// ch: one of UNB.MORPH_CHARS; cap: its height (mm). Making a morph (no top shape yet) makes it 20 mm tall (what was
+// tried), with no texture or movement, the bottom at its own size if it's a traced line or else a little narrower
+// than the letter; within a morph a new letter, size or kind of top keeps the rest and moves the top.
 function morphLetterPlan(ch, cap) {
   const L = UNB.morphLetter(ch, UNB_FONTS.chocolate, { cap, d: morphD() });
   if (!L || L.loops !== 1) return null;
@@ -72,8 +135,9 @@ function morphUseLetter(ch0) {
     msg.className = "hint warn";
     return false;
   }
+  // (entering a morph: no top shape yet. Changing the top within one keeps the height, profile and bottom)
   const was = vaseCur.planTop,
-    first = !(was && was.letter);
+    first = !was;
   vaseCur.planTop = {
     kind: "drawing",
     loop: L.loop,
@@ -93,7 +157,8 @@ function morphUseLetter(ch0) {
     // tighter than a bead): both off, as Make a vase from this line does
     morphPlainWall();
     vaseCur.height = 20;
-    const r0 = +(0.9 * L.reach).toFixed(2);
+    // the bottom at its own size if it's a traced line, else a little narrower than the letter
+    const r0 = +(vaseCur.plan && vaseCur.plan.kind === "drawing" ? vaseCur.profile[0][1] : 0.9 * L.reach).toFixed(2);
     vaseCur.profile = [
       [0, r0],
       [0.5, +((r0 + L.reach) / 2).toFixed(2)],
@@ -115,8 +180,8 @@ $("moCap").addEventListener("change", () => {
 });
 $("moCap").addEventListener("input", () => ($("moCapVal").textContent = `${$("moCap").value} mm tall`));
 
-// ---------- a traced line at the rim (the Line tool) ----------
-function morphFromLine() {
+// ---------- a traced line at the top of a morph (the Line tool: Use as the top shape) ----------
+function morphTopFromLine() {
   const F = st.final,
     msg = $("vaseFromMsg");
   if (!F || !F.re || F.re.length < 8) {
@@ -153,7 +218,7 @@ function morphFromLine() {
   } else vaseCur = structuredClone(st.model.vase);
   if (!(vaseCur.planTop && vaseCur.planTop.kind === "drawing")) morphPlainWall();
   artUse("model"); // art.js: the 3D model input, the vase in it
-  $("mfVase").checked = true;
+  $("mfMorph").checked = true;
   vaseCur.planTop = {
     kind: "drawing",
     loop: O.loop,
@@ -174,12 +239,32 @@ function morphFromLine() {
   if (!$("viewArt").checked) $("viewArt").click();
   if (typeof mapOpen === "function") mapOpen("vshape");
 }
-$("moFromLine").addEventListener("click", morphFromLine);
-// picking Drawing again goes back to the traced line the rim was made from (kept on the vase while it's in use)
+$("moTopFromLine").addEventListener("click", morphTopFromLine);
+// ---------- a traced line at the bottom, a letter at the top (the Line tool: Make a morph from this line) ----------
+// the vase's own Make a vase from this line, at the line's own size, then the letter on top
+function morphBottomFromLine() {
+  vaseFromLine(); // vase.js
+  const V = st.model && st.model.vase;
+  if (!(st.art.kind === "model" && V && V.plan.kind === "drawing")) return; // (it said why)
+  vaseCur = structuredClone(V);
+  if (
+    morphUseLetter((vaseCur.planTop && vaseCur.planTop.letter) || $("moLetter").value || "A") &&
+    typeof mapOpen === "function"
+  )
+    mapOpen("mtop");
+}
+$("moFromLine").addEventListener("click", morphBottomFromLine);
+// Drawing at the top: the traced line last there, or how to put one there
 $("vrDrawing").addEventListener("change", () => {
-  const Q = st.model && st.model.vase && st.model.vase.planTop;
-  if (Q && Q.kind === "drawing" && !Q.letter) return;
-  $("moMsg").textContent = "Trace a line and press Use as the rim shape (Line tool) to put it at the rim.";
+  if (morphLastTop) {
+    vaseCur.planTop = Object.assign({}, vaseCur.planTop, morphLastTop, { kind: "drawing", round: 0, turn: 0 });
+    delete vaseCur.planTop.letter;
+    delete vaseCur.planTop.cap;
+    vaseSend(true);
+    vaseUI();
+    return;
+  }
+  $("moMsg").textContent = "Trace a line, then Use as the top shape on the Line tool, to put it at the top.";
   $("moMsg").className = "hint";
   vaseUI();
 });
@@ -233,6 +318,27 @@ $("moFlip").addEventListener("click", () => {
   V.planTop = Object.assign({}, bottom, { match: Q.match, keepApart: true, turn: 0, auto: true });
   V.profile = V.profile.map(([t, r]) => [+(1 - t).toFixed(4), r]).reverse();
   if (V.blend) V.blend = V.blend.map(([t, k]) => [1 - t, 1 - k]).reverse();
+  vaseSend(true);
+  vaseUI();
+});
+
+// ---------- Make a morph / Make a vase (the 3D model card) ----------
+// a morph from the vase in use (or a new one): the letter on top; a vase from a morph: the top shape goes
+$("mfMorph").addEventListener("change", () => {
+  if (!$("mfMorph").checked) return;
+  if (st.model && st.model.vase) vaseCur = structuredClone(st.model.vase);
+  if (vaseCur.planTop) {
+    useVase(vaseCur, true);
+    vaseUI();
+    return;
+  }
+  if (morphUseLetter($("moLetter").value || "A") && typeof mapOpen === "function") mapOpen("mtop");
+});
+$("mfVase").addEventListener("change", () => {
+  if (!($("mfVase").checked && st.model && st.model.vase && st.model.vase.planTop)) return;
+  vaseCur = structuredClone(st.model.vase);
+  vaseCur.planTop = null;
+  vaseCur.blend = null;
   vaseSend(true);
   vaseUI();
 });
@@ -330,7 +436,7 @@ function morphVerdict() {
   if (r.ok)
     return {
       cls: "ok",
-      text: `Prints: every lap sits on the one below${turn ? `, with the rim's shape turned ${turn}°${V.planTop.auto !== false ? " (Auto)" : ""}` : ""}.`,
+      text: `Prints: every lap sits on the one below${turn ? `, with the top shape turned ${turn}°${V.planTop.auto !== false ? " (Auto)" : ""}` : ""}.`,
     };
   const flip = r.flip && r.flip.ok;
   return {
@@ -354,13 +460,17 @@ function morphLabels() {
     $("vrLetter").checked = true;
     $("vaseTopVal").textContent = `blends to the letter ${Q.letter}, ${Q.cap} mm tall`;
   }
-  $("vrDrawingLab").hidden = $("vrDrawing").hidden = !(Q && Q.kind === "drawing" && !Q.letter);
+  $("vrDrawingLab").hidden = $("vrDrawing").hidden = !((Q && Q.kind === "drawing" && !Q.letter) || morphLastTop);
+  // the 3D model card's switch, and the Line tool's second button (only once there's a morph)
+  if (morphOn()) $("mfMorph").checked = true;
+  $("moTopFromLine").hidden = !morphOn();
+  document.querySelectorAll("#vaseBox .mo-only").forEach((el) => (el.hidden = !morphOn()));
   $("moCapVal").textContent = `${$("moCap").value} mm tall`;
   $("moLetterVal").textContent = letter ? `${Q.letter} (A–Z, ! or ?)` : "A–Z, ! or ?";
   const a = +$("moFrom").value,
     b = +$("moTo").value;
   $("moFromVal").textContent = a ? `${a}% up (${fmt((V.height * a) / 100, 1)} mm)` : "at the bottom";
-  $("moToVal").textContent = b < 100 ? `${b}% up (${fmt((V.height * b) / 100, 1)} mm)` : "at the rim";
+  $("moToVal").textContent = b < 100 ? `${b}% up (${fmt((V.height * b) / 100, 1)} mm)` : "at the top";
   $("moMatchVal").textContent = Q && Q.match === "even" ? "evenly round" : "corner to corner";
   $("moTurnVal").textContent = Q ? `${+Q.turn || 0}°` : "";
   const v = morphVerdict(),
