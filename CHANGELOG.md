@@ -3,6 +3,20 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v181 · 2026-11-27
+
+Cleaning up the tool panels (Nicolaas, 27 November 2026: keep cleaning up the UI; desktop and iPad only):
+
+- **A tool's panel shows only that tool.** Bottom, Top, Change, Profile and Rim (and a vase's Shape, Texture,
+  Movement…) no longer repeat the 3D model card's heading, its STL / vase / morph switch and its size: those stay on
+  the design's own node (Morph, Vase), with all its settings. The size and movement note ("… mm across") is on
+  Profile and Movement only. A panel row can belong to several tools (`data-part="a b"`, map.js).
+- **A morph's Change has everything about how it goes from bottom to top:** where the change starts and ends, how
+  the shapes pair, the top's turn and Auto, then **Twist as it rises** and **Lean** (they were on Bottom), and the
+  verdict last, as a green ✓ (prints) or an orange note (too short).
+- A morph's Profile has no line drawing of the view (it's with all the settings, on Morph).
+- Top no longer says the letter three times; the ready-made shapes are **More shapes**, after the built-in ones.
+
 ## v180 · 2026-11-27
 
 From trying v179 on the published site:

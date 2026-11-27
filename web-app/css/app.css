@@ -725,4 +725,8 @@ body[data-empty="1"] :is(.trace-switch, #play) { opacity: .35; pointer-events: n
 .mo-grid button svg { width: 28px; height: 28px; }
 .mo-grid button svg path { fill: currentColor; fill-opacity: 0.18; stroke: currentColor; stroke-width: 1.4; vector-effect: non-scaling-stroke; }
 .mo-grid button.on { outline: 2px solid var(--accent); outline-offset: -2px; }
+body[data-tool-part="1"] .panel section.card[data-map] > h2 { display: none; }
+.hint.verdict { padding: 6px 10px; border-radius: calc(8px * var(--corner)); color: var(--ink); background: color-mix(in srgb, var(--good) 14%, transparent); }
+.hint.verdict.warn { background: color-mix(in srgb, var(--warn) 14%, transparent); }
+.hint.verdict.ok::before { content: "✓ "; color: var(--good); font-weight: 600; }
 .mo-char { width: 3.2em; text-align: center; font-size: 1.1em; text-transform: uppercase; }

@@ -558,7 +558,7 @@ function morphLabels() {
   document.querySelectorAll("#vaseBox .vr-round").forEach((el) => (el.hidden = letter));
   if (letter) {
     $("vrLetter").checked = true;
-    $("vaseTopVal").textContent = `blends to the letter ${Q.letter}, ${Q.cap} mm tall`;
+    $("vaseTopVal").textContent = "a letter"; // (which, and its size, are on their own rows)
   }
   // a ready-made shape shows as the Drawing button, called Shape (its name on the row above and on its own button)
   const topShape = !!(Q && Q.shape),
@@ -577,12 +577,13 @@ function morphLabels() {
   $("moTopShapeVal").textContent = topShape ? morphShapeName(Q.shape) : "";
   if (topShape) $("vaseTopVal").textContent = `blends to ${morphShapeName(Q.shape).toLowerCase()}`;
   $("moFontVal").textContent = morphFontLabel(letter ? Q.font || "chocolate" : morphFont);
+  morphParts();
   // the 3D model card's switch, and the Line tool's second button (only once there's a morph)
   if (morphOn()) $("mfMorph").checked = true;
   $("moTopFromLine").hidden = !morphOn();
   document.querySelectorAll("#vaseBox .mo-only").forEach((el) => (el.hidden = !morphOn()));
   $("moCapVal").textContent = `${$("moCap").value} mm tall`;
-  $("moLetterVal").textContent = letter ? `${Q.letter} (A–Z, ! or ?)` : "A–Z, ! or ?";
+  $("moLetterVal").textContent = "A–Z, ! or ?";
   const a = +$("moFrom").value,
     b = +$("moTo").value;
   $("moFromVal").textContent = a ? `${a}% up (${fmt((V.height * a) / 100, 1)} mm)` : "at the bottom";
@@ -593,9 +594,27 @@ function morphLabels() {
     msg = $("moMsg");
   if (v) {
     msg.textContent = v.text;
-    msg.className = v.cls === "ok" ? "hint" : "hint warn";
+    msg.className = v.cls === "ok" ? "hint verdict ok" : "hint verdict warn";
   } else if (!on) msg.textContent = "";
   $("moFlip").hidden = !(v && v.flip);
+}
+// what a morph's tools hold that a vase's don't: the twist and the lean are part of the change (Change, not Bottom),
+// and the line drawing of the view isn't the profile's (it stays with all the settings, on the Morph node)
+function morphParts() {
+  const m = morphOn(),
+    moves = [];
+  const set = (el, part) => {
+    if (el && el.dataset.part !== part) {
+      el.dataset.part = part;
+      moves.push(el);
+    }
+  };
+  document.querySelectorAll("#vaseBox .mo-shift").forEach((el) => set(el, m ? "mchange" : "vshape"));
+  set($("drawViewRow"), m ? "whole" : "vprofile");
+  $("vaseTwistLab").textContent = m ? "Twist as it rises" : "Turn the shape, bottom to rim";
+  // (a tool open now: shown or put away as its part says, as map.js does on opening it)
+  const N = typeof mapOpenId !== "undefined" && mapOpenId && MAP_NODES[mapOpenId];
+  if (N) for (const el of moves) el.classList.toggle("part-off", !!N.part && !el.dataset.part.split(" ").includes(N.part));
 }
 on("vaseShown", (V) => {
   const Q = V.planTop;
