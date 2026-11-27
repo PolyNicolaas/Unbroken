@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v175">
-<link rel="stylesheet" href="css/app.css?v=v175">
+<link rel="stylesheet" href="css/theme.css?v=v176">
+<link rel="stylesheet" href="css/app.css?v=v176">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v175</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v176</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -648,10 +648,24 @@
             <input type="radio" name="vaseTop" id="vrPolygon" value="polygon"><label for="vrPolygon">Polygon</label>
             <input type="radio" name="vaseTop" id="vrStar" value="star"><label for="vrStar">Star</label>
             <input type="radio" name="vaseTop" id="vrFlower" value="flower"><label for="vrFlower">Flower</label>
+            <input data-feature="morph" type="radio" name="vaseTop" id="vrLetter" value="letter"><label data-feature="morph" for="vrLetter" title="A capital letter, ! or ? at the rim: the shape below changes into it as the wall rises (one character, from the Chocolate lettering made into one closed outline)">Letter</label>
+            <input data-feature="morph" type="radio" name="vaseTop" id="vrDrawing" value="drawing"><label data-feature="morph" for="vrDrawing" id="vrDrawingLab" title="A traced line at the rim (Use as the rim shape, on the Line tool)">Drawing</label>
           </div>
           <div data-part="vshape" class="row vr-sides"><div class="lab"><label for="vrSides" id="vrSidesLab">Corners</label><span class="val" id="vrSidesVal"></span></div><input type="range" id="vrSides" min="2" max="24" step="1" value="6"></div>
           <div data-part="vshape" class="row vr-depth"><div class="lab"><label for="vrDepth" id="vrDepthLab">Depth</label><span class="val" id="vrDepthVal"></span></div><input type="range" id="vrDepth" min="0" max="90" step="1" value="30"></div>
           <div data-part="vshape" class="row vr-round"><div class="lab"><label for="vrRound" id="vrRoundLab">Rounded</label><span class="val" id="vrRoundVal"></span></div><input type="range" id="vrRound" min="0" max="100" step="1" value="20"></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-letter" hidden title="One capital letter, ! or ?: the shape below changes into it as the wall rises"><div class="lab"><label for="moLetter">Letter</label><span class="val" id="moLetterVal"></span></div><input type="text" id="moLetter" maxlength="1" value="A" autocomplete="off" autocapitalize="characters" spellcheck="false" class="mo-char"></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-letter" hidden title="How tall the letter is from above (its capital height). The rim follows it; the bottom keeps its size"><div class="lab"><label for="moCap">Letter size</label><span class="val" id="moCapVal"></span></div><input type="range" id="moCap" min="10" max="40" step="1" value="20"></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-on" hidden title="Where up the wall the shape starts changing: below this it keeps the bottom's shape"><div class="lab"><label for="moFrom">Change starts</label><span class="val" id="moFromVal"></span></div><input type="range" id="moFrom" min="0" max="80" step="5" value="0"></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-on" hidden title="Where up the wall the change is done: above this it keeps the rim's shape"><div class="lab"><label for="moTo">Change ends</label><span class="val" id="moToVal"></span></div><input type="range" id="moTo" min="20" max="100" step="5" value="100"></div>
+          <div data-feature="morph" data-part="vshape" class="lab mo-on" hidden><span class="name">Pair the shapes</span><span class="val" id="moMatchVal"></span></div>
+          <div data-feature="morph" data-part="vshape" class="seg small mo-on" hidden role="radiogroup" aria-label="How the two shapes' points pair up" title="Corners: corners go to corners and dips to dips, so the wall doesn't twist on the way (best for letters and drawings). Evenly: by the share of the way round, as before">
+            <input type="radio" name="moMatch" id="moCorners" value="corners" checked><label for="moCorners">Corners</label>
+            <input type="radio" name="moMatch" id="moEven" value="even"><label for="moEven">Evenly</label>
+          </div>
+          <div data-feature="morph" data-part="vshape" class="row mo-on" hidden title="The rim's shape turned against the bottom's (seen from above). Auto tries no turn first, then 20°, 45°, 90° and 180°, and keeps the smallest that prints"><div class="lab"><label for="moTurn">Turn the rim shape</label><span class="val" id="moTurnVal"></span></div><input type="range" id="moTurn" min="-180" max="180" step="5" value="0"></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-on" hidden><label class="check" title="Find the smallest turn that prints, whenever the shapes change"><input type="checkbox" id="moAuto" checked> Auto: the smallest turn that prints</label></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-on" hidden><p class="hint" id="moMsg" role="status"></p><div class="inline"><button class="btn mini" type="button" id="moFlip" hidden title="The rim's shape at the bottom and the bottom's at the rim: the check found it prints that way up">Turn it over</button></div></div>
           <div data-part="vshape" class="row " title="The whole shape turns as it rises (ribs and movement with it)"><div class="lab"><label for="vaseTwist" id="vaseTwistLab">Turn the shape, bottom to rim</label><span class="val" id="vaseTwistVal"></span></div><input type="range" id="vaseTwist" min="-360" max="360" step="5" value="0"></div>
           <div data-part="vshape" class="lab"><span class="name">Lean</span><span class="val" id="vaseLeanVal"></span></div>
           <div data-part="vshape" class="row " title="How far the rim sits off the middle of the base"><div class="lab"><label for="vlSize" id="vlSizeLab">Rim moves sideways</label><span class="val" id="vlSizeVal"></span></div><input type="range" id="vlSize" min="0" max="20" step="0.5" value="0"></div>
@@ -913,7 +927,7 @@
       </div>
       <div data-feature="vase" class="row" id="vaseFromRow">
         <div class="lab"><span class="name">Make it 3D</span></div>
-        <div class="inline"><button class="btn mini" type="button" id="vaseFromLine" title="This traced line, exactly as it is, becomes the vase's shape seen from above: every wall of the vase follows it, at its own size">Make a vase from this line</button></div>
+        <div class="inline"><button class="btn mini" type="button" id="vaseFromLine" title="This traced line, exactly as it is, becomes the vase's shape seen from above: every wall of the vase follows it, at its own size">Make a vase from this line</button><button data-feature="morph" class="btn mini" type="button" id="moFromLine" title="This traced line becomes the vase's shape at the rim: the shape below changes into it as the wall rises (a vase is made first if there isn't one)">Use as the rim shape</button></div>
         <p class="hint" id="vaseFromMsg" role="status"></p>
       </div>
 
@@ -1050,70 +1064,72 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v175"></script>
-<script src="01-image.js?v=v175"></script>
-<script src="02-lines.js?v=v175"></script>
-<script src="03-text.js?v=v175"></script>
-<script src="04-walk.js?v=v175"></script>
-<script src="05-fill.js?v=v175"></script>
-<script src="06-fourier.js?v=v175"></script>
-<script src="07-measure.js?v=v175"></script>
-<script src="08-shape.js?v=v175"></script>
-<script src="09-plate.js?v=v175"></script>
-<script src="10-export.js?v=v175"></script>
-<script src="11-stages.js?v=v175"></script>
-<script src="12-models.js?v=v175"></script>
-<script src="13-patterns.js?v=v175"></script>
-<script src="14-photo.js?v=v175"></script>
-<script src="15-cutout.js?v=v175"></script>
-<script src="16-molecule.js?v=v175"></script>
-<script src="17-vase.js?v=v175"></script>
-<script src="18-ties.js?v=v175"></script>
-<script src="19-relief.js?v=v175"></script>
-<script src="core.js?v=v175"></script>
-<script src="fonts.js?v=v175"></script>
-<script src="settings.js?v=v175"></script>
-<script src="js/state.js?v=v175"></script>
-<script src="js/ui.js?v=v175"></script>
-<script src="js/config.js?v=v175"></script>
-<script src="js/engine-bridge.js?v=v175"></script>
-<script src="js/source.js?v=v175"></script>
-<script src="js/pipeline.js?v=v175"></script>
-<script src="js/preview.js?v=v175"></script>
-<script src="js/tools.js?v=v175"></script>
-<script src="js/art.js?v=v175"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v175");</script>
-<script src="js/readouts.js?v=v175"></script>
-<script src="js/controls.js?v=v175"></script>
-<script>feature("levels", "features/levels/levels.js?v=v175");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v175");</script>
-<script src="js/export.js?v=v175"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v175");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v175");</script>
-<script>feature("ties", "features/ties/ties.js?v=v175");</script>
-<script src="js/views.js?v=v175"></script>
-<script src="js/zoom.js?v=v175"></script>
-<script src="js/layers.js?v=v175"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v175");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v175");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v175");</script>
-<script src="js/workflow.js?v=v175"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v175");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v175");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v175");</script>
-<script>feature("camera", "features/camera/camera.js?v=v175");</script>
-<script src="js/steppers.js?v=v175"></script>
-<script src="js/scroll.js?v=v175"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v175");</script>
-<script>feature("model", "features/model/model.js?v=v175");</script>
-<script>feature("vase", "features/vase/vase.js?v=v175");</script>
-<script>feature("relief", "features/relief/relief.js?v=v175");</script>
-<script src="js/history.js?v=v175"></script>
-<script src="js/map.js?v=v175"></script>
-<script src="js/showall.js?v=v175"></script>
-<script src="js/main.js?v=v175"></script>
-<script src="js/parts.js?v=v175"></script>
-<script src="js/agent.js?v=v175"></script>
+<script src="00-util.js?v=v176"></script>
+<script src="01-image.js?v=v176"></script>
+<script src="02-lines.js?v=v176"></script>
+<script src="03-text.js?v=v176"></script>
+<script src="04-walk.js?v=v176"></script>
+<script src="05-fill.js?v=v176"></script>
+<script src="06-fourier.js?v=v176"></script>
+<script src="07-measure.js?v=v176"></script>
+<script src="08-shape.js?v=v176"></script>
+<script src="09-plate.js?v=v176"></script>
+<script src="10-export.js?v=v176"></script>
+<script src="11-stages.js?v=v176"></script>
+<script src="12-models.js?v=v176"></script>
+<script src="13-patterns.js?v=v176"></script>
+<script src="14-photo.js?v=v176"></script>
+<script src="15-cutout.js?v=v176"></script>
+<script src="16-molecule.js?v=v176"></script>
+<script src="17-vase.js?v=v176"></script>
+<script src="18-ties.js?v=v176"></script>
+<script src="19-relief.js?v=v176"></script>
+<script src="20-morph.js?v=v176"></script>
+<script src="core.js?v=v176"></script>
+<script src="fonts.js?v=v176"></script>
+<script src="settings.js?v=v176"></script>
+<script src="js/state.js?v=v176"></script>
+<script src="js/ui.js?v=v176"></script>
+<script src="js/config.js?v=v176"></script>
+<script src="js/engine-bridge.js?v=v176"></script>
+<script src="js/source.js?v=v176"></script>
+<script src="js/pipeline.js?v=v176"></script>
+<script src="js/preview.js?v=v176"></script>
+<script src="js/tools.js?v=v176"></script>
+<script src="js/art.js?v=v176"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v176");</script>
+<script src="js/readouts.js?v=v176"></script>
+<script src="js/controls.js?v=v176"></script>
+<script>feature("levels", "features/levels/levels.js?v=v176");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v176");</script>
+<script src="js/export.js?v=v176"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v176");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v176");</script>
+<script>feature("ties", "features/ties/ties.js?v=v176");</script>
+<script src="js/views.js?v=v176"></script>
+<script src="js/zoom.js?v=v176"></script>
+<script src="js/layers.js?v=v176"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v176");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v176");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v176");</script>
+<script src="js/workflow.js?v=v176"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v176");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v176");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v176");</script>
+<script>feature("camera", "features/camera/camera.js?v=v176");</script>
+<script src="js/steppers.js?v=v176"></script>
+<script src="js/scroll.js?v=v176"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v176");</script>
+<script>feature("model", "features/model/model.js?v=v176");</script>
+<script>feature("vase", "features/vase/vase.js?v=v176");</script>
+<script>feature("relief", "features/relief/relief.js?v=v176");</script>
+<script>feature("morph", "features/morph/morph.js?v=v176");</script>
+<script src="js/history.js?v=v176"></script>
+<script src="js/map.js?v=v176"></script>
+<script src="js/showall.js?v=v176"></script>
+<script src="js/main.js?v=v176"></script>
+<script src="js/parts.js?v=v176"></script>
+<script src="js/agent.js?v=v176"></script>
 
 </body>
 </html>

@@ -718,3 +718,6 @@ body[data-screen="out"] .map-gap { display: none; }
    and Trace and Play drawing have nothing to work on */
 body[data-empty="1"] #chip { display: none; }
 body[data-empty="1"] :is(.trace-switch, #play) { opacity: .35; pointer-events: none; }
+
+/* the morph's letter box (features/morph) */
+.mo-char { width: 3.2em; text-align: center; font-size: 1.1em; text-transform: uppercase; }

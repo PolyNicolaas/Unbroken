@@ -182,6 +182,7 @@ window.UNB_SETTINGS = {
     model: true,                      // a 3D model (STL) sliced into layers
     vase: true,                       // Make a vase (needs model)
     relief: true,                     // a picture, text or pattern standing out from a wall (needs vase)
+    morph: true,                      // a vase whose shape changes into another up the wall: a letter, a drawing (needs vase)
     patterns: true,                   // the pattern styles (labyrinth, spirograph, wave portrait …)
     molecule: true,                   // a molecule drawn from its name
     pieces: true,                     // a text printed as a piece per line

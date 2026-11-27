@@ -338,6 +338,7 @@ async function buildModelLayers(o = {}) {
     vase: !!M.vase,
     tightest: R.tightest || null,
     lattice: R.lattice || null,
+    morph: R.morph || null, // (a vase whose laps were kept apart: 17-vase.js)
   };
 }
 

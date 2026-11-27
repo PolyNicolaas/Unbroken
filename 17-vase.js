@@ -7,7 +7,7 @@
 (function (root) {
   "use strict";
   const UNB = root.UNB,
-    { segDist2, startNearest, rasterPolyline, resampleLoop, isoContours } = UNB._u; // shared helpers (00-util.js)
+    { segDist2, startNearest, rasterPolyline, resampleLoop, isoContours, cellGrid } = UNB._u; // shared helpers (00-util.js)
 
   // ---------- the vase's settings ----------
   // V = { height (mm), profile: [[t, r], …] (t: share of the height, 0 at the plate to 1 at the rim, rising; r: mm
@@ -277,26 +277,40 @@
       x[i] = R[j][0] + f * (R[j + 1][0] - R[j][0]);
       y[i] = R[j][1] + f * (R[j + 1][1] - R[j][1]);
     }
-    T = { x, y, m, perimeter: L };
+    T = { x, y, m, perimeter: L, key };
     if (planCache.size > 40) planCache.clear();
     planCache.set(key, T);
     return T;
   }
-  // the plan's point at share s round it (unit size; a circle: exactly), blended towards the rim's plan by t
-  function planPoint(A, B, s, t) {
-    const at = (T) => {
-      if (!T) return [Math.cos(2 * Math.PI * s), Math.sin(2 * Math.PI * s)];
-      const u = (((s % 1) + 1) % 1) * T.m,
-        i = Math.floor(u) % T.m,
-        j = (i + 1) % T.m,
-        f = u - Math.floor(u);
-      return [T.x[i] + f * (T.x[j] - T.x[i]), T.y[i] + f * (T.y[j] - T.y[i])];
-    };
-    const p = at(A);
+  // the plan's point at share s round it (unit size; a circle: exactly)
+  function planAt(T, s) {
+    if (!T) return [Math.cos(2 * Math.PI * s), Math.sin(2 * Math.PI * s)];
+    const u = (((s % 1) + 1) % 1) * T.m,
+      i = Math.floor(u) % T.m,
+      j = (i + 1) % T.m,
+      f = u - Math.floor(u);
+    return [T.x[i] + f * (T.x[j] - T.x[i]), T.y[i] + f * (T.y[j] - T.y[i])];
+  }
+  // ... blended towards the rim's plan B by t. Mo (a morph, vaseMorph): the rim's plan turned, and read at the share
+  // paired with s (corners matched) instead of at s itself.
+  function planPoint(A, B, s, t, Mo) {
+    const p = planAt(A, s);
     if (B === undefined) return p;
-    const q = at(B);
+    let q = planAt(B, Mo && Mo.pair ? Mo.pair(s) : s);
+    if (Mo && Mo.turn) q = [q[0] * Mo.c - q[1] * Mo.s, q[0] * Mo.s + q[1] * Mo.c];
     return [p[0] + t * (q[0] - p[0]), p[1] + t * (q[1] - p[1])];
   }
+
+  // how far the change to the rim's shape has got at share t of the height (0–1)
+  const blendAt = (V, t) => (V.blend && V.blend.length ? UNB.vaseStrength(V.blend, t) : t);
+  // ---------- a morph (20-morph.js) ----------
+  // A vase with a rim shape blends from the bottom's plan to it. How the two outlines' points pair up, and keeping a
+  // lap's parts apart in between, belong to the morph (20-morph.js): with planTop.match "corners" it pairs corners
+  // with corners (UNB.morphPair: { share(u), pair(s), turn, c, s } or null), and with planTop.keepApart each lap is
+  // untangled and kept a spacing apart (UNB.morphKeepApart). Without them, as before: even shares, nothing moved.
+  const vaseMorph = (V, A, B) => (B !== undefined && UNB.morphPair ? UNB.morphPair(V, A, B, planAt) : null);
+  const morphShare = (Mo, u) => (Mo && Mo.share ? Mo.share(u) : u);
+  const keepsApart = (V) => !!(V.planTop && V.planTop.keepApart && UNB.morphKeepApart);
   // how far round the plan is, against a circle of the same reach (for the points a lap needs)
   const planLength = (P) => {
     const T = planTable(P);
@@ -501,6 +515,8 @@
       reach = Math.max(VASE_MIN_R, UNB.vaseRadius(V.profile, t) + flareAt(V, z, H)),
       A = planTable(V.plan),
       B = V.planTop ? planTable(V.planTop) : undefined,
+      Mo = vaseMorph(V, A, B),
+      tb = blendAt(V, t),
       rot = (((+V.twist || 0) * Math.PI) / 180) * t,
       cr = Math.cos(rot),
       sr = Math.sin(rot),
@@ -532,13 +548,13 @@
                   : null;
     const px = new Float64Array(n),
       py = new Float64Array(n),
-      onLine = !!(V.plan && V.plan.kind === "drawing"),
+      onLine = !!((V.plan && V.plan.kind === "drawing") || (V.planTop && V.planTop.kind === "drawing")), // (either end a drawing: a morph to a letter passes near the middle too)
       // a relief: its depth out from the wall at each point (fitted to the face at the reach halfway up)
       G = UNB.reliefOn(V) && D > 0 ? UNB.reliefGrid(V, UNB.reliefFace(V, UNB.vaseRadius(V.profile, 0.5))) : null,
       pic = G ? new Float64Array(n) : null,
       inMax = G ? UNB.reliefInMax(V, reach) : 0;
     for (let i = 0; i < n; i++) {
-      const [ux, uy] = planPoint(A, B, i / n, t);
+      const [ux, uy] = planPoint(A, B, morphShare(Mo, i / n), tb, Mo);
       px[i] = reach * (ux * cr - uy * sr);
       py[i] = reach * (ux * sr + uy * cr);
       if (G) {
@@ -600,6 +616,20 @@
       wy[i] = (1 - s) * R0.y[j] + s * R1.y[j];
       if (i) cl[i] = cl[i - 1] + Math.hypot(wx[i] - wx[i - 1], wy[i] - wy[i - 1]);
     }
+    // a morph: the wall's parts kept a spacing apart (V.keep, mm: set by vaseStack and vaseMesh), before the movement
+    let kept = null;
+    if (V.planTop && V.keep > 0) {
+      const ex = wx[F] - wx[0],
+        ey = wy[F] - wy[0],
+        lx = wx.subarray(0, F),
+        ly = wy.subarray(0, F);
+      kept = UNB.morphKeepApart(lx, ly, V.keep);
+      if (kept.moved > 0) {
+        wx[F] = wx[0] + ex;
+        wy[F] = wy[0] + ey;
+        for (let i = 1; i <= F; i++) cl[i] = cl[i - 1] + Math.hypot(wx[i] - wx[i - 1], wy[i] - wy[i - 1]);
+      }
+    }
     const L = cl[F] || 1,
       x = new Float64Array(n),
       y = new Float64Array(n);
@@ -640,7 +670,7 @@
         y[i] = py + d * ny;
       }
     }
-    return { x, y };
+    return kept && kept.moved > 0 ? { x, y, kept } : { x, y };
   }
   // does a closed lap cross itself? (checked on at most 360 of its points)
   function vaseCrosses(L) {
@@ -676,6 +706,7 @@
         Math.PI *
         rmax *
         Math.max(planLength(V.plan), V.planTop ? planLength(V.planTop) : 0) *
+        (V.planTop && V.planTop.match === "corners" ? 1.5 : 1) *
         (T.kind && T.kind !== "none" && T.kind !== "rings" ? 1.3 : 1) *
         (T.kind === "relief" ? 1.6 : 1),
       m = M.kind && M.kind !== "none" ? Math.max(1, Math.round(M.count || 1)) : 0;
@@ -705,8 +736,25 @@
             const na = A.x.length,
               c = Math.round((i / nb) * na),
               win = Math.min(80, Math.ceil(na / Math.max(1, laps.cycles || 1)) + 6);
-            for (let d = -win; d <= win; d++) {
-              const a = (((c + d) % na) + na) % na,
+            // (a morph's laps: searched everywhere near the point, since a lap that was untangled no longer pairs
+            // share for share with the one below)
+            const cand = laps.global ? [] : null;
+            if (cand) {
+              let G = A.__grid;
+              if (!G) {
+                G = A.__grid = cellGrid(2);
+                for (let a = 0; a < na; a++) G.add(A.x[a], A.y[a], a);
+              }
+              G.near(B.x[i], B.y[i], (a) => {
+                cand.push(a, (a - 1 + na) % na);
+              });
+              if (!cand.length) {
+                best = Math.min(best, 9);
+                side = 1;
+              }
+            }
+            for (let d = -win; d <= (cand ? -win + cand.length - 1 : win); d++) {
+              const a = cand ? cand[d + win] : (((c + d) % na) + na) % na,
                 b = (a + 1) % na,
                 dd = segDist2(B.x[i], B.y[i], A.x[a], A.y[a], A.x[b], A.y[b]);
               if (dd < best) {
@@ -786,7 +834,9 @@
   // point: the middle of the footprint, as the preview's mesh is centred), and UNB.fillPlan's base settings. Returns
   // { base: [lines] (a spiral base's are open: { x, y, open: true }), walls: [lines], T, N, spiralBase, terms, joins, empty: 0, height, overhang: { worst, at, inWorst, inAt }
   // (as UNB.modelStack: inWorst is how far a step inwards goes past what a bead holds), support: null,
-  // stacking: { out, outAt, in, inAt }, tightest: { r, at }, points (per lap) }; lines are mm, y up.
+  // stacking: { out, outAt, in, inAt }, tightest: { r, at }, points (per lap), morph (a rim shape: null without one;
+  // { kept, crossed (laps kept apart; of them, laps that crossed themselves), moved, movedAt (mm, layer), closest,
+  // closestAt (the closest two parts of a lap come afterwards, mm), match }) }; lines are mm, y up.
   UNB.vaseStack = function* (V0, opt) {
     const V = vaseClean(V0),
       o = opt || {},
@@ -802,6 +852,7 @@
       n = vaseLapPoints(V),
       cx = o.cx || 0,
       cy = o.cy || 0;
+    V.keep = keepsApart(V) ? Math.max(w, o.d || 0) : 0; // (a morph's laps kept this far apart: UNB.morphKeepApart)
     const shiftTo = (L) => {
       for (let i = 0; i < L.x.length; i++) {
         L.x[i] -= cx;
@@ -921,10 +972,13 @@
     }
     const M = V.move || {};
     walls.cycles = M.kind && M.kind !== "none" ? Math.max(1, Math.round(M.count || 1)) : 0;
+    walls.global = V.keep > 0; // (laps kept apart no longer pair share for share)
     const stk = vaseStacking(walls, base.length),
       step = o.overhang || w / 3,
       tight = vaseTightest(walls, base.length);
     delete walls.cycles;
+    delete walls.global;
+    for (const L of walls) for (const P of L.parts || [L]) delete P.__grid;
     // a lattice: the longest span a flip layer bridges, crossing to crossing (half a repeat of the movement along the
     // lap below)
     let lattice = null;
@@ -943,7 +997,41 @@
       lattice = { bridges, span };
     }
     for (let i = 0; i < walls.length; i++) terms.push(0);
+    // a morph: how many laps had to be kept apart, the most a point moved, and the closest two parts of any lap come
+    // after that (every other lap; a traced rim's own gaps are made at the spacing)
+    let morph = null;
+    if (V.keep > 0) {
+      morph = {
+        kept: 0,
+        crossed: 0,
+        moved: 0,
+        movedAt: -1,
+        closest: Infinity,
+        closestAt: -1,
+        match: V.planTop.match || "even",
+      };
+      walls.forEach((L, k) => {
+        const K = L.kept;
+        if (K && (K.crossed || K.moved > 0.05)) {
+          morph.kept++;
+          if (K.crossed) morph.crossed++;
+          if (K.moved > morph.moved) {
+            morph.moved = K.moved;
+            morph.movedAt = base.length + k;
+          }
+          delete L.kept;
+        }
+        if (k % 2 && !L.parts) {
+          const g = UNB.closestGap(L.x, L.y, V.keep, true);
+          if (g < morph.closest) {
+            morph.closest = g;
+            morph.closestAt = base.length + k;
+          }
+        }
+      });
+    }
     return {
+      morph,
       base,
       walls,
       T: base.length + walls.length,
@@ -970,7 +1058,8 @@
   // The vase for the preview and the plate (the middle of the bead; a closed bottom, an open top). Rows: laps as they
   // print, every layer (every few layers past `maxRows`), each resampled to `cols` points, so the movement's shift
   // from layer to layer shows; the mesh joins every few rows into triangles (at most `meshRows` bands), for the
-  // footprint on the plate and Draw this view. opt: h (layer height), maxRows (240), meshRows (60), cols (360).
+  // footprint on the plate and Draw this view. opt: h (layer height), maxRows (240), meshRows (60), cols (360), d (the
+  // line spacing: a morph's laps kept that far apart, as vaseStack does).
   // Returns { tri (flat x, y, z per corner, 9 per triangle), n (triangles), cx, cy (the middle of its footprint:
   // UNB.vaseStack's opt.cx, cy), rows: [{ x, y, z }] (mm, centred on cx, cy) }.
   UNB.vaseMesh = function (V0, opt) {
@@ -983,6 +1072,7 @@
       n = vaseLapPoints(V),
       // (a long plan, a traced line's, gets more columns, so the preview keeps its turns)
       cols = Math.max(24, Math.min(o.cols || Math.ceil(360 * Math.max(1, planLength(V.plan))), n, 4000));
+    V.keep = keepsApart(V) ? +o.d || 0 : 0; // (a morph's laps kept apart, as printed: vaseStack)
     const rows = [];
     for (let k = 0; ; k += every) {
       const z = Math.min(H, k * h),

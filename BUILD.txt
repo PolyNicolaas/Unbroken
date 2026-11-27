@@ -1,6 +1,6 @@
-Unbroken · web app build v175
-Built:  2026-11-26T20:28:31.674Z
-Tests:  142 of 142 tests passed
+Unbroken · web app build v176
+Built:  2026-11-27T07:23:07.955Z
+Tests:  144 of 144 tests passed (full suite; A31, known flaky, passed on its rerun); quick set passed with the build
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -21,20 +21,22 @@ Files (sha1, first 12):
   421f32f99e03  14-photo.js
   db42a3da56bd  15-cutout.js
   755c4b83e7df  16-molecule.js
-  e2ca01c2a48e  17-vase.js
+  95f7557ba94a  17-vase.js
   0e52c6f85462  18-ties.js
   6005b41c00a4  19-relief.js
-  af964115e0ca  core.js
-  10c0a2cd3115  css/app.css
+  1507b6246c96  20-morph.js
+  5b40d992ca0e  core.js
+  c68ced4ee94c  css/app.css
   2e7b02cdb930  css/theme.css
   8ddfb3bb0b15  features/camera/camera.js
   91b174b409e5  features/cutout/cutout.js
   c78689907075  features/levels/levels.js
   86a7dd76f6ff  features/matrix/matrix.js
-  61266adbb86f  features/model/model.js
+  6386f4e27e04  features/model/model.js
   ce0678154019  features/model/sample-skull.js
   da8e563b27ca  features/molecule/molecule.js
   add9b908520a  features/molecule/moleditor.js
+  1fde7435051a  features/morph/morph.js
   993de1d0b4b7  features/optimize/optimize.js
   035f0cc17156  features/patterns/pathpad.js
   c064bb2fa3f9  features/patterns/patterns.js
@@ -45,12 +47,12 @@ Files (sha1, first 12):
   265c82ae5c9b  features/ties/ties.js
   d50adf674c43  features/vase/vase.js
   84cc740df42b  fonts.js
-  6f1f5797c10e  index.html
+  833f1c36824a  index.html
   97fe045db38e  js/agent.js
   ce4fd6897391  js/art.js
   5a825c30dfdd  js/config.js
   bafd7476b5d7  js/controls.js
-  6d13ae6edb6d  js/engine-bridge.js
+  daf383ac6833  js/engine-bridge.js
   f703454f1231  js/export.js
   e877225ef298  js/history.js
   f5ebf0221081  js/layers.js
@@ -63,12 +65,12 @@ Files (sha1, first 12):
   01f3cf4a980c  js/scroll.js
   d6016ac55cd8  js/showall.js
   3a59d1ef66f6  js/source.js
-  f099151058f2  js/state.js
+  90ab8cbc7518  js/state.js
   49125f92bd01  js/steppers.js
   50cfea04f9b3  js/tools.js
   217858df3a5d  js/ui.js
   1e497ad2bf76  js/views.js
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
-  1a1e41339cc9  settings.js
-  da8dd4f6f102  worker.js
+  40380fce0493  settings.js
+  e26fc68bf8af  worker.js

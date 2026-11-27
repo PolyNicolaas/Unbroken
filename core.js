@@ -89,6 +89,13 @@
                       UNB.reliefMap, UNB.reliefGrid, UNB.reliefAt, UNB.reliefShort, onFaces, faceOf, UNB.reliefUV,
                       UNB.reliefFace, RELIEF_GAP, UNB.reliefInMax
 
+    20-morph.js   19. Morphs — a vase's shape from above changing into another up the wall: the outlines paired corner
+                      to corner, each lap kept printable, a one-character font for the rim, and the check (a turn that
+                      prints, which way up, how tall).
+                      MORPH_N, morphTurning, morphWarp, morphShare, morphWarpAt, UNB.morphPair, UNB.morphKeepApart, morphRoundTight,
+                      UNB.MORPH_CHARS, morphGlyphs, UNB.morphLetter, UNB.MORPH_TURNS, morphBad, morphFlip,
+                      UNB.morphCheck
+
    Typical run (11-stages.js): stageLines → stageWalk → stageSignal → sweepSteps + pickTerms
    → synth → stageFinal.
 
@@ -118,6 +125,7 @@
     "17-vase.js",
     "18-ties.js",
     "19-relief.js",
+    "20-morph.js",
   ];
   if (typeof module !== "undefined" && module.exports) {
     // Node
@@ -126,7 +134,7 @@
     module.exports = root.UNB;
   } else if (typeof importScripts === "function") {
     // a Web Worker (worker.js): the parts sit next to this file
-    importScripts(...PARTS.map((p) => p + "?v=v175"));
+    importScripts(...PARTS.map((p) => p + "?v=v176"));
     root.UNB.PARTS = PARTS;
   } else if (root.UNB) root.UNB.PARTS = PARTS; // the page: index.html loads the parts itself, before this file
 })(typeof window !== "undefined" ? window : globalThis);
