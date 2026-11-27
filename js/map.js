@@ -70,9 +70,11 @@ const MAP_CORE = {
     // (a picture's brightness, contrast and background are with the picture: Image prep)
     cards: ["h-input", "h-pic", "h-prep", "h-text", "h-art", "h-mol", "h-model"],
     val: () => {
-      const kind =
-        { picture: "Picture", text: "Text", pattern: "Pattern", molecule: "Molecule" }[st.art.kind] ||
-        (st.model && st.model.vase ? "Vase" : "3D model");
+      const own = mapArtOwn(),
+        kind =
+          (own && own.cap) ||
+          { picture: "Picture", text: "Text", pattern: "Pattern", molecule: "Molecule" }[st.art.kind] ||
+          (st.model && st.model.vase ? "Vase" : "3D model");
       const what = st.art.kind === "model" ? (st.model && !st.model.vase && st.model.name) || "" : st.srcLabel || "";
       return what ? `${kind} · ${what}` : kind;
     },
@@ -255,15 +257,28 @@ const MAP_ICONS = {
 };
 const mapSvg = (name) =>
   `<svg viewBox="0 0 24 24" width="22" height="22" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="${MAP_ICONS[name] || MAP_ICONS.dot}"/></svg>`;
-// the source tool's icon and name follow what the art is
-const mapArtKind = () =>
-  st.art.kind === "model" ? (st.model && st.model.vase ? "vase" : "model") : st.art.kind in MAP_ICONS ? st.art.kind : "picture";
+// the source tool's icon and name follow what the art is. A feature can name it (a vase that's really something else):
+// it answers "artKind" with { kind (its icon in MAP_ICONS), cap } or nothing
+const mapArtOwn = () => ask("artKind").find((a) => a && a.kind);
+const mapArtKind = () => {
+  const own = mapArtOwn();
+  if (own) return own.kind;
+  return st.art.kind === "model"
+    ? st.model && st.model.vase
+      ? "vase"
+      : "model"
+    : st.art.kind in MAP_ICONS
+      ? st.art.kind
+      : "picture";
+};
 const mapIcon = (id) => (id === "art" ? mapArtKind() : MAP_NODES[id].icon || id);
 const mapCap = (id) =>
   id === "art"
-    ? { picture: "Picture", text: "Text", pattern: "Pattern", molecule: "Molecule", model: "3D object", vase: "Vase" }[
+    ? (mapArtOwn() || {}).cap ||
+      { picture: "Picture", text: "Text", pattern: "Pattern", molecule: "Molecule", model: "3D object", vase: "Vase" }[
         mapArtKind()
-      ] || "Art"
+      ] ||
+      "Art"
     : MAP_NODES[id].cap;
 // the palette for this design: the design's rail in groups, and the output's own rail
 function mapPalette() {
@@ -317,7 +332,8 @@ function mapButton(id, rail) {
     el.className = "map-node";
     el.dataset.node = id;
     el.dataset.key = key;
-    el.innerHTML = '<span class="map-ico"></span><span class="map-cap"></span><span class="map-val"></span><span class="map-dot"></span>';
+    el.innerHTML =
+      '<span class="map-ico"></span><span class="map-cap"></span><span class="map-val"></span><span class="map-dot"></span>';
     el.addEventListener("click", () => {
       if (MAP_NODES[id].tray) return mapTray(!mapTrayOpen);
       if (mapOpenId === id && !mapShut && mapScreen === rail) return mapClose();
@@ -675,7 +691,13 @@ $("mapRecipeReset").addEventListener("click", () => $("tuneReset").click());
 $("mapClose").addEventListener("click", mapClose);
 // Esc closes the panel (not while typing in it)
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape" && !e.defaultPrevented && !/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) && !mapShut && mapOpenId)
+  if (
+    e.key === "Escape" &&
+    !e.defaultPrevented &&
+    !/^(INPUT|SELECT|TEXTAREA)$/.test(e.target.tagName) &&
+    !mapShut &&
+    mapOpenId
+  )
     mapClose();
 });
 // the Drawing tool: Play, and the speed and circles (the View menu's, kept the same both ways)

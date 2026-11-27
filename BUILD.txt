@@ -1,6 +1,6 @@
-Unbroken · web app build v176
-Built:  2026-11-27T07:23:07.955Z
-Tests:  144 of 144 tests passed (full suite; A31, known flaky, passed on its rerun); quick set passed with the build
+Unbroken · web app build v177
+Built:  2026-11-27T16:00:51.267Z
+Tests:  144 of 144 tests passed (full suite; A61 and A79 rerun after the last change)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -25,7 +25,7 @@ Files (sha1, first 12):
   0e52c6f85462  18-ties.js
   6005b41c00a4  19-relief.js
   1507b6246c96  20-morph.js
-  5b40d992ca0e  core.js
+  221bdcaeb5b4  core.js
   c68ced4ee94c  css/app.css
   2e7b02cdb930  css/theme.css
   8ddfb3bb0b15  features/camera/camera.js
@@ -36,7 +36,7 @@ Files (sha1, first 12):
   ce0678154019  features/model/sample-skull.js
   da8e563b27ca  features/molecule/molecule.js
   add9b908520a  features/molecule/moleditor.js
-  1fde7435051a  features/morph/morph.js
+  d3f90a6941c9  features/morph/morph.js
   993de1d0b4b7  features/optimize/optimize.js
   035f0cc17156  features/patterns/pathpad.js
   c064bb2fa3f9  features/patterns/patterns.js
@@ -47,17 +47,17 @@ Files (sha1, first 12):
   265c82ae5c9b  features/ties/ties.js
   d50adf674c43  features/vase/vase.js
   84cc740df42b  fonts.js
-  833f1c36824a  index.html
+  406ef8fdd696  index.html
   97fe045db38e  js/agent.js
   ce4fd6897391  js/art.js
   5a825c30dfdd  js/config.js
   bafd7476b5d7  js/controls.js
-  daf383ac6833  js/engine-bridge.js
+  f37a98135016  js/engine-bridge.js
   f703454f1231  js/export.js
   e877225ef298  js/history.js
   f5ebf0221081  js/layers.js
   f0e0c037d497  js/main.js
-  5d6889374a60  js/map.js
+  943973e7ef38  js/map.js
   620f87a5cad0  js/parts.js
   5ef514c93439  js/pipeline.js
   2e48d2a66bf6  js/preview.js
@@ -73,4 +73,4 @@ Files (sha1, first 12):
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
   40380fce0493  settings.js
-  e26fc68bf8af  worker.js
+  bfb75c9913eb  worker.js
