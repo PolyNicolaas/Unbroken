@@ -3,6 +3,17 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v183 · 2026-11-27
+
+Small things from clicking through every tool of a picture, lettering, a pattern, a molecule, an STL, a vase and a
+morph, for a printer and a pen plotter (Nicolaas, 27 November 2026):
+
+- **No empty tools on the rail.** For a pen plotter's separate strokes, Math and Size had nothing in them, and Fills
+  nothing for the art as drawn: they aren't on the rail then (a node's `off()`, map.js), and come back when they apply.
+- **The Size readout is one short line:** "×1.3 smallest · line centre 37.0 × 32.7"; the tilted box is in its hover
+  text.
+- The folded Image prep's arrow has room beside its title; Tests' Best strip row sits in line with the rest.
+
 ## v182 · 2026-11-27
 
 Twelve UI improvements from trying v181 (Nicolaas, 27 November 2026: "i like all of these"):
