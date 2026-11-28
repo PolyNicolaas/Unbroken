@@ -6,15 +6,15 @@
 <title>Unbroken · one continuous line</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,600;12..96,750&family=IBM+Plex+Mono:wght@400;500&family=IBM+Plex+Sans:wght@400;500;600&display=swap">
-<link rel="stylesheet" href="css/theme.css?v=v183">
-<link rel="stylesheet" href="css/app.css?v=v183">
+<link rel="stylesheet" href="css/theme.css?v=v184">
+<link rel="stylesheet" href="css/app.css?v=v184">
 <style>[hidden]{display:none!important} body{margin:0}</style>
 </head>
 <body data-state="loading" data-view="art" data-stage="line" data-art="picture" data-copies="one">
 
 <header class="top">
   <h1>Unbroken</h1>
-  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v183</span></p>
+  <p>One continuous line. <span class="version" id="appVersion" title="Version (CHANGELOG.md)">v184</span></p>
   <label class="design-name" title="The print's name: every file you save or export is named after it (G-code, the saved design, SVG, DXF). Empty: named after the text, pattern or picture, shown here in grey."><span>Name</span><input type="text" id="designName" maxlength="60" spellcheck="false" autocomplete="off" placeholder="Name this print"></label>
 </header>
 
@@ -642,6 +642,7 @@
             <input type="radio" name="vasePlan" id="vpDrawing" value="drawing"><label for="vpDrawing" id="vpDrawingLab" title="The traced line this vase was made from (Make a vase from this line, on the Line tool)">Drawing</label>
           </div>
           <div data-feature="morph" data-part="vshape" class="row mo-only" hidden title="A ready-made shape at the bottom: it keeps the size the profile gives it"><div class="lab" hidden><span class="name">Shapes</span><span class="val" id="moBotShapeVal"></span></div><div class="mo-grid" id="moBotShapes" role="group" aria-label="Shapes for the bottom"></div></div>
+          <div data-feature="morph" data-part="vshape" class="row mo-only" hidden title="Letters at the bottom too: up to 4 capitals, ! or ?, at the top's letter size and lettering. Word to word prints best with the same number of letters each end, and Solid letters"><div class="lab"><label for="moBotLetters">Letters</label><span class="val">for word to word</span></div><input type="text" id="moBotLetters" maxlength="6" placeholder="e.g. MOM" autocomplete="off" autocapitalize="characters" spellcheck="false" class="mo-char mo-word"></div>
           <div data-part="vshape" class="row vp-sides"><div class="lab"><label for="vpSides" id="vpSidesLab">Corners</label><span class="val" id="vpSidesVal"></span></div><input type="range" id="vpSides" min="2" max="24" step="1" value="6"></div>
           <div data-part="vshape" class="row vp-depth" title="How far in between the points or petals, as a share of the reach"><div class="lab"><label for="vpDepth" id="vpDepthLab">Depth</label><span class="val" id="vpDepthVal"></span></div><input type="range" id="vpDepth" min="0" max="90" step="1" value="30"></div>
           <div data-part="vshape" class="row vp-round" title="Corners and dips rounded off"><div class="lab"><label for="vpRound" id="vpRoundLab">Rounded</label><span class="val" id="vpRoundVal"></span></div><input type="range" id="vpRound" min="0" max="100" step="1" value="20"></div>
@@ -663,7 +664,8 @@
           <div data-part="vshape" class="row vr-round"><div class="lab"><label for="vrRound" id="vrRoundLab">Rounded</label><span class="val" id="vrRoundVal"></span></div><input type="range" id="vrRound" min="0" max="100" step="1" value="20"></div>
           <div data-feature="morph" data-part="mtop" class="lab mo-letter" hidden><span class="name">Lettering</span><span class="val" id="moFontVal"></span></div>
           <div data-feature="morph" data-part="mtop" class="seg small mo-letter" hidden role="radiogroup" aria-label="The letter's lettering" id="moFonts"></div>
-          <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="One capital letter, ! or ?: the shape below changes into it as the wall rises"><div class="lab"><label for="moLetter">Letter</label><span class="val" id="moLetterVal"></span></div><input type="text" id="moLetter" maxlength="1" value="A" autocomplete="off" autocapitalize="characters" spellcheck="false" class="mo-char"></div>
+          <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="Up to 4 capitals, ! or ? on a line; a / starts a second line, touching the first (5 letters in all: HAP/PY, with Solid letters). The shape below changes into them as the wall rises; a word needs about as much height as it is wide"><div class="lab"><label for="moLetter">Letters</label><span class="val" id="moLetterVal"></span></div><input type="text" id="moLetter" maxlength="6" value="A" autocomplete="off" autocapitalize="characters" spellcheck="false" class="mo-char mo-word"></div>
+          <label data-feature="morph" data-part="mtop" class="check mo-letter" hidden title="Every counter filled: an O is a solid shape. Word to word (letters at the bottom too) prints with it"><input type="checkbox" id="moSolid"> Solid letters</label>
           <div data-feature="morph" data-part="mtop" class="row mo-letter" hidden title="How tall the letter is from above (its capital height). The rim follows it; the bottom keeps its size"><div class="lab"><label for="moCap">Letter size</label><span class="val" id="moCapVal"></span></div><input type="range" id="moCap" min="10" max="40" step="1" value="20"></div>
           <div data-feature="morph" data-part="mtop" class="row mo-on" hidden title="A ready-made shape at the top: the bottom changes into it as the wall rises"><div class="lab"><span class="name">Shapes</span><span class="val" id="moTopShapeVal"></span></div><div class="mo-grid" id="moTopShapes" role="group" aria-label="Shapes for the top"></div></div>
           <div data-feature="morph" data-part="mchange" class="row mo-on" hidden title="Where up the wall the shape starts changing: below this it keeps the bottom's shape"><div class="lab"><label for="moFrom">Change starts</label><span class="val" id="moFromVal"></span></div><input type="range" id="moFrom" min="0" max="80" step="5" value="0"></div>
@@ -1074,73 +1076,73 @@
 </div>
 
 <!-- the engine, part by part (source/engine/core.js lists them and what each holds; test E25 checks this list) -->
-<script src="00-util.js?v=v183"></script>
-<script src="01-image.js?v=v183"></script>
-<script src="02-lines.js?v=v183"></script>
-<script src="03-text.js?v=v183"></script>
-<script src="04-walk.js?v=v183"></script>
-<script src="05-fill.js?v=v183"></script>
-<script src="06-fourier.js?v=v183"></script>
-<script src="07-measure.js?v=v183"></script>
-<script src="08-shape.js?v=v183"></script>
-<script src="09-plate.js?v=v183"></script>
-<script src="10-export.js?v=v183"></script>
-<script src="11-stages.js?v=v183"></script>
-<script src="12-models.js?v=v183"></script>
-<script src="13-patterns.js?v=v183"></script>
-<script src="14-photo.js?v=v183"></script>
-<script src="15-cutout.js?v=v183"></script>
-<script src="16-molecule.js?v=v183"></script>
-<script src="17-vase.js?v=v183"></script>
-<script src="18-ties.js?v=v183"></script>
-<script src="19-relief.js?v=v183"></script>
-<script src="20-morph.js?v=v183"></script>
-<script src="core.js?v=v183"></script>
-<script src="fonts.js?v=v183"></script>
-<script src="morph-fonts.js?v=v183"></script>
-<script src="settings.js?v=v183"></script>
-<script src="js/state.js?v=v183"></script>
-<script src="js/ui.js?v=v183"></script>
-<script src="js/config.js?v=v183"></script>
-<script src="js/engine-bridge.js?v=v183"></script>
-<script src="js/source.js?v=v183"></script>
-<script src="js/pipeline.js?v=v183"></script>
-<script src="js/preview.js?v=v183"></script>
-<script src="js/tools.js?v=v183"></script>
-<script src="js/art.js?v=v183"></script>
-<script>feature("patterns", "features/patterns/patterns.js?v=v183");</script>
-<script src="js/readouts.js?v=v183"></script>
-<script src="js/controls.js?v=v183"></script>
-<script>feature("levels", "features/levels/levels.js?v=v183");</script>
-<script>feature("cutout", "features/cutout/cutout.js?v=v183");</script>
-<script src="js/export.js?v=v183"></script>
-<script>feature("optimize", "features/optimize/optimize.js?v=v183");</script>
-<script>feature("pieces", "features/pieces/pieces.js?v=v183");</script>
-<script>feature("ties", "features/ties/ties.js?v=v183");</script>
-<script src="js/views.js?v=v183"></script>
-<script src="js/zoom.js?v=v183"></script>
-<script src="js/layers.js?v=v183"></script>
-<script>feature("testprint", "features/testprint/testprint.js?v=v183");</script>
-<script>feature("matrix", "features/matrix/matrix.js?v=v183");</script>
-<script>feature("plotter", "features/plotter/plot.js?v=v183");</script>
-<script src="js/workflow.js?v=v183"></script>
-<script>feature("molecule", "features/molecule/molecule.js?v=v183");</script>
-<script>feature("molecule", "features/molecule/moleditor.js?v=v183");</script>
-<script>feature("patterns", "features/patterns/pathpad.js?v=v183");</script>
-<script>feature("camera", "features/camera/camera.js?v=v183");</script>
-<script src="js/steppers.js?v=v183"></script>
-<script src="js/scroll.js?v=v183"></script>
-<script>feature("model", "features/model/sample-skull.js?v=v183");</script>
-<script>feature("model", "features/model/model.js?v=v183");</script>
-<script>feature("vase", "features/vase/vase.js?v=v183");</script>
-<script>feature("relief", "features/relief/relief.js?v=v183");</script>
-<script>feature("morph", "features/morph/morph.js?v=v183");</script>
-<script src="js/history.js?v=v183"></script>
-<script src="js/map.js?v=v183"></script>
-<script src="js/showall.js?v=v183"></script>
-<script src="js/main.js?v=v183"></script>
-<script src="js/parts.js?v=v183"></script>
-<script src="js/agent.js?v=v183"></script>
+<script src="00-util.js?v=v184"></script>
+<script src="01-image.js?v=v184"></script>
+<script src="02-lines.js?v=v184"></script>
+<script src="03-text.js?v=v184"></script>
+<script src="04-walk.js?v=v184"></script>
+<script src="05-fill.js?v=v184"></script>
+<script src="06-fourier.js?v=v184"></script>
+<script src="07-measure.js?v=v184"></script>
+<script src="08-shape.js?v=v184"></script>
+<script src="09-plate.js?v=v184"></script>
+<script src="10-export.js?v=v184"></script>
+<script src="11-stages.js?v=v184"></script>
+<script src="12-models.js?v=v184"></script>
+<script src="13-patterns.js?v=v184"></script>
+<script src="14-photo.js?v=v184"></script>
+<script src="15-cutout.js?v=v184"></script>
+<script src="16-molecule.js?v=v184"></script>
+<script src="17-vase.js?v=v184"></script>
+<script src="18-ties.js?v=v184"></script>
+<script src="19-relief.js?v=v184"></script>
+<script src="20-morph.js?v=v184"></script>
+<script src="core.js?v=v184"></script>
+<script src="fonts.js?v=v184"></script>
+<script src="morph-fonts.js?v=v184"></script>
+<script src="settings.js?v=v184"></script>
+<script src="js/state.js?v=v184"></script>
+<script src="js/ui.js?v=v184"></script>
+<script src="js/config.js?v=v184"></script>
+<script src="js/engine-bridge.js?v=v184"></script>
+<script src="js/source.js?v=v184"></script>
+<script src="js/pipeline.js?v=v184"></script>
+<script src="js/preview.js?v=v184"></script>
+<script src="js/tools.js?v=v184"></script>
+<script src="js/art.js?v=v184"></script>
+<script>feature("patterns", "features/patterns/patterns.js?v=v184");</script>
+<script src="js/readouts.js?v=v184"></script>
+<script src="js/controls.js?v=v184"></script>
+<script>feature("levels", "features/levels/levels.js?v=v184");</script>
+<script>feature("cutout", "features/cutout/cutout.js?v=v184");</script>
+<script src="js/export.js?v=v184"></script>
+<script>feature("optimize", "features/optimize/optimize.js?v=v184");</script>
+<script>feature("pieces", "features/pieces/pieces.js?v=v184");</script>
+<script>feature("ties", "features/ties/ties.js?v=v184");</script>
+<script src="js/views.js?v=v184"></script>
+<script src="js/zoom.js?v=v184"></script>
+<script src="js/layers.js?v=v184"></script>
+<script>feature("testprint", "features/testprint/testprint.js?v=v184");</script>
+<script>feature("matrix", "features/matrix/matrix.js?v=v184");</script>
+<script>feature("plotter", "features/plotter/plot.js?v=v184");</script>
+<script src="js/workflow.js?v=v184"></script>
+<script>feature("molecule", "features/molecule/molecule.js?v=v184");</script>
+<script>feature("molecule", "features/molecule/moleditor.js?v=v184");</script>
+<script>feature("patterns", "features/patterns/pathpad.js?v=v184");</script>
+<script>feature("camera", "features/camera/camera.js?v=v184");</script>
+<script src="js/steppers.js?v=v184"></script>
+<script src="js/scroll.js?v=v184"></script>
+<script>feature("model", "features/model/sample-skull.js?v=v184");</script>
+<script>feature("model", "features/model/model.js?v=v184");</script>
+<script>feature("vase", "features/vase/vase.js?v=v184");</script>
+<script>feature("relief", "features/relief/relief.js?v=v184");</script>
+<script>feature("morph", "features/morph/morph.js?v=v184");</script>
+<script src="js/history.js?v=v184"></script>
+<script src="js/map.js?v=v184"></script>
+<script src="js/showall.js?v=v184"></script>
+<script src="js/main.js?v=v184"></script>
+<script src="js/parts.js?v=v184"></script>
+<script src="js/agent.js?v=v184"></script>
 
 </body>
 </html>

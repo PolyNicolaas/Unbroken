@@ -119,8 +119,14 @@ function vasePlanWords(P, V = vaseCur) {
   if (!P || P.kind === "circle") return "circle";
   if (P.kind === "plaque") return `flat, ${fmt(2 * UNB.vaseRadius(V.profile, 0.5), 0)} mm wide, ${fmt(vaseThickMM(V), 1)} mm front to back`;
   // (a morph's ready-made shape, UNB.MORPH_SHAPES: named)
-  if (P.kind === "drawing" && P.shape && UNB.MORPH_SHAPES && UNB.MORPH_SHAPES[P.shape])
-    return `${UNB.MORPH_SHAPES[P.shape].toLowerCase()}${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`;
+  if (P.kind === "drawing" && P.letter) return `the letters ${P.letter}${P.solid ? ", solid" : ""}`;
+  const named =
+    P.kind === "drawing" && P.shape
+      ? P.shape.startsWith("p:")
+        ? UNB.MORPH_PATTERNS && UNB.MORPH_PATTERNS[P.shape.slice(2)]
+        : UNB.MORPH_SHAPES && UNB.MORPH_SHAPES[P.shape]
+      : "";
+  if (named) return `${named.toLowerCase()}${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`;
   if (P.kind === "drawing")
     return P.loop
       ? `${P.exact ? `the traced line${P.from ? ` (${P.from})` : ""}, as traced` : "a drawing's outline"}${P.round ? `, rounded ${Math.round(P.round * 100)}%` : ""}`
