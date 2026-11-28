@@ -10,7 +10,7 @@ module.exports = {
   guards:
     "features/morph/morph.js: Make a morph not making one, the rail not saying Morph or showing a vase's Texture and Movement, a vase keeping a top shape, changing the top's kind or the bottom resetting the height or bringing back the wrong top, a letter outside A–Z ! ? taken, the check not run or not shown in the panel and the ready list, a short morph not flagged, Make a morph from this line and Use as the top shape, and the app with the morph off",
   why: "Nicolaas (26–27 November 2026): a shape at the bottom (drawn, imported or a vase's own) changing into a letter at the top, as its own design with all the morph's settings in one place, the vase left as vases; one character from the Chocolate lettering, 20 mm tall to start, flagged when it's too short to print (docs/MORPH-PLAN.md).",
-  how: "Opens the Wavy vase example and reads the rail; taps Make a morph. Types G, then 7 (refused). Sets the height to 24 mm, a star at the top, then Letter again; a star at the bottom. Changes the letter's size and undoes it; Make a vase and opens the saved design again; Evenly and a star at the top; Turn it over and undo. On the Print step reads the ready list and downloads the G-code. At 8 mm on a star, reads the panel and the ready list. Opens the leaf: Make a morph from this line, then Use as the top shape. Opens the app with ?off=morph.",
+  how: "Opens the Wavy vase example and reads the rail; taps Make a morph. Types G, then 7 (left out). Sets the height to 24 mm, a star at the top, then Letter again; a star at the bottom. Changes the letter's size and undoes it; Make a vase and opens the saved design again; Evenly and a star at the top; Turn it over and undo. On the Print step reads the ready list and downloads the G-code. At 8 mm on a star, reads the panel and the ready list. Opens the leaf: Make a morph from this line, then Use as the top shape. Opens the app with ?off=morph.",
   pass: "A vase has no top shape and the rail says Vase; Make a morph puts an A on top, 20 mm tall with no texture or movement, and the rail says Morph with Bottom, Top, Change, Profile and Rim only. G replaces the A; 7 is refused. A star at the top replaces the letter and Letter brings the G back at 24 mm; a star at the bottom keeps the G. Size, undo, the saved design, Evenly and Turn it over do what they say. The ready list says it prints and the G-code reaches the height. At 8 mm it's too short, with a height over 8 mm. The leaf goes to the bottom under the G, then to the top. With the morph off: no Letter, no Make a morph from this line, no errors. No page errors.",
   slow: true,
   async run(ctx) {
@@ -99,10 +99,10 @@ module.exports = {
     );
     await page.fill("#moLetter", "7");
     await A.idle(page, 800);
-    o.msg7 = await page.evaluate(() => $("moMsg").textContent);
+    o.msg7 = await page.evaluate(() => $("moLetter").value); // (what can't morph is left out as it's typed)
     o.v7 = await V();
     checks.push(
-      check("7: refused, the G kept", +(/can't morph yet/.test(o.msg7) && o.v7.planTop.letter === "G"), "==", 1)
+      check("7: left out of the field, the G kept", +(o.msg7 === "" && o.v7.planTop.letter === "G"), "==", 1)
     );
     await page.fill("#moLetter", "G");
     await waitCheck();

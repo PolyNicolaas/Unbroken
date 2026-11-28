@@ -21,7 +21,7 @@ function wordShape(text, opt) {
   const stadium = (x0, x1, y, r, k = 12) => { const P = []; for (let i = 0; i <= k; i++) { const a = -Math.PI / 2 + (Math.PI * i) / k; P.push([x1 + r * Math.cos(a), y + r * Math.sin(a)]); } for (let i = 0; i <= k; i++) { const a = Math.PI / 2 + (Math.PI * i) / k; P.push([x0 + r * Math.cos(a), y + r * Math.sin(a)]); } P.push(P[0]); return P.map(([x, y]) => `${Math.round(x)},${Math.round(y)}`).join(" "); };
   const font = font0.label && font0.family === "Chocolate" ? Object.assign({}, font0, { glyphs: Object.assign({}, font0.glyphs, { ".": [150, ring(70, 68, 68)], "-": [330, stadium(63, 267, 300, 63)], ...MORPH_GLYPHS(font0) }) }) : font0;
   const ws = (opt.slit || 1.2) * d, neck = (opt.neck || 1.5) * d, rc = (opt.round || 0.5) * d;
-  const lay = UNB.textLayout(text, font, { cap, join: false, dots: "keep", spacing: "even", gap: (opt.gap || 1.6) * d, word: 0.6 * cap });
+  const lay = UNB.textLayout(text, font, { cap, join: false, dots: "keep", spacing: "even", gap: (opt.gap || 1.6) * d, word: 0.6 * cap, lineGap: opt.lineGap || 1.7, align: opt.align || "left" });
   const g = opt.g || 0.06, pad = 3 * d, w = Math.ceil((lay.width + 2 * pad) / g), h = Math.ceil((lay.height + 2 * pad) / g);
   const P = (v) => (v + pad) / g, N = w * h;
   const stats = { joins: 0, dots: 0, slits: 0, filled: 0, loops: 0 };

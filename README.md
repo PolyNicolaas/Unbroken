@@ -205,7 +205,7 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   1 ÷ height), and offers **Turn it over** when the other way up prints. Changing the top keeps the height, profile
   and bottom. Found in the trials: every character prints out of a circle, square, hexagon, pentagon, octagon, the
   stars, the flowers and a heart on a 20 mm morph with 20 mm letters (a few turned); the letter at the top is cleaner
-  than at the bottom; words don't morph yet (one character only). Tests E68, A79, A80.
+  than at the bottom. **Words** (v184): up to 4 letters, or 5 over two touching lines (a / in Letters), with **Solid letters** for word to word and two lines; **Letters** at the bottom; the **patterns** Moore (three details) and Spiral (plain, twisted). A word needs about as much height as it is wide (60–150 mm). Tests E68, E70, A79, A80, A82.
 
 **Take a picture** (`web-app/features/camera/camera.js`, engine `14-photo.js`): a live camera in the preview (full screen on a
 phone) outlines the page it finds (`UNB.findPage`: the largest light, plain area on a small copy of the frame, its four

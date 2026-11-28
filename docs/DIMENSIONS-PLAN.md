@@ -18,17 +18,19 @@ The plan makes **the dimension** the first choice, beside the machine:
 | | **2D** | **2.5D** | **3D** |
 |---|---|---|---|
 | What it is | One line, flat | A line or a picture built up in layers | A full shape |
-| Made from | Picture, Text, Pattern, Molecule | The same, plus a relief from a picture's greys | Vase, Morph, STL |
-| Its own tools | Tracing, Line, Size, Math, Drawing | 2D's, plus Layers (Height, Base, Infill, Ties) and Relief depth | Profile, Shape, Top, Change, Texture, Movement, Rim; for an STL: turn, cut, walls, support |
-| Machines | Pen plotter; printer (one layer) | Printer | Printer |
-| Comes out as | SVG, DXF, G-code for one layer | G-code | G-code, STL |
+| Made from | Picture, Text, Pattern, Molecule | The same | Vase, Morph, Relief, STL |
+| Its own tools | Tracing, Line, Size, Math, Drawing | 2D's, plus Layers (Height, Base, Infill, Ties) | Profile, Shape, Top, Change, Texture, Movement, Rim; a relief's Depth; for an STL: turn, cut, walls, support |
+| Machines | Pen plotter | Printer (one layer or more) | Printer |
+| Comes out as | SVG, DXF | G-code | G-code, STL |
 
 The rule the rail follows: **a tool shows only in the dimensions it does something in.**
 
-**Taken as decided** (from the proposal on 27 November; say if not):
+**Decided (Nicolaas, 27 November 2026):**
 - The names are 2D, 2.5D and 3D.
-- A relief (a plaque) is 2.5D. A relief texture round a vase wall stays part of the 3D vase.
-- A one-layer print is 2D: the same design as a plot, with a different machine.
+- **Reliefs are 3D** (a plaque and a relief round a vase alike).
+- **A one-layer print is 2.5D with one layer.** 2D is the line itself: what a pen plotter draws, and SVG or DXF.
+- The morph gets a limited set (of patterns and words) that works.
+- **M1 is the target for now** (built in v184); the 2D · 2.5D · 3D change comes after.
 
 ## 2. The top bar
 
@@ -36,10 +38,10 @@ The rule the rail follows: **a tool shows only in the dimensions it does somethi
 [ Pen plotter | Printer ]   [ 2D | 2.5D | 3D ]        Undo Redo   File  View
 ```
 
-- **Pen plotter** offers 2D only. 2.5D and 3D are greyed out with the reason in their hover text ("a plotter draws flat").
+- **Pen plotter** offers 2D only. **Printer** offers 2.5D (one layer by default) and 3D. 2.5D and 3D are greyed out with the reason in their hover text ("a plotter draws flat").
   Picking the plotter while in 2.5D or 3D asks first: a 3D design can still be plotted as a view of it (*Draw this
   view*), which makes a 2D design.
-- **Printer** offers all three. (A clay printer, later, would offer 2.5D and 3D.)
+- (A clay printer, later, would offer 2.5D and 3D too.)
 - The bar also shows what the design is, in words: "2.5D · picture · 6 layers, 1.8 mm".
 
 ## 3. The workflow, per dimension
@@ -49,18 +51,18 @@ The rule the rail follows: **a tool shows only in the dimensions it does somethi
 2. **Tracing** (a picture only), Grey levels.
 3. **Line**: spacing, path, crossings, round corners. **Drawing** (Watch) and **Math** below it.
 4. **Size**.
-5. **Out**: *Plot…* (page, pens, fills, export SVG) or *Print…* (one layer: Material, Machine, Plate, Tests).
+5. **Out**: *Plot…* (page, pens, fills, export SVG). Printing it is 2.5D: one layer to start.
 
 ### 2.5D: a line in layers
 Everything in 2D, then:
 - **Layers** joins the design rail (it's on the Print screen today): Height, Base, Infill, Ties. Lines of text as
   separate pieces lives here too.
-- **Relief**: a source can be made a relief instead of a raised line. The greys become depth on an upright plaque.
-  Its tools: Depth (Smooth, Steps or Shapes), the inset, which way it faces. The source and its line stay editable.
+- **Height starts at one layer**: a flat chocolate drawing is a 2.5D print one layer high.
 - **Out**: *Print…*.
 
 ### 3D: a full shape
-1. **Kind**: Vase, Morph or STL (where *3D model* sits in Input today). Examples are grouped under 3D.
+1. **Kind**: Vase, Morph, Relief or STL (where *3D model* sits in Input today). Examples are grouped under 3D. A relief
+   takes a 2D source (a picture, text or pattern) and makes its greys depth on an upright plaque or round a wall.
 2. Its own tools (as now): a vase's Profile, Shape, Texture, Movement, Rim; a morph's Bottom, Top, Change, Profile, Rim;
    an STL's turn and cut.
 3. **Out**: *Print…* (Material, Machine, Plate, Tests, Layers kept to what a 3D print uses).
@@ -72,17 +74,16 @@ Everything in 2D, then:
 | 2.5D → 2D | Kept; the height goes back to one layer (the 2.5D settings are remembered, for going back) |
 | 2D or 2.5D → 3D | Asks: *A vase from this line*, *A morph from this line* (the line is the bottom; the top starts as a letter) or *Start empty*. This replaces the "Make it 3D" buttons |
 | 3D → 2D | *Draw this view*: the 3D preview's view as one line (a vase from above, a profile, an STL's outline) |
-| 3D → 2.5D | Not offered (a 3D design has no flat source to raise). A relief is made from a 2D source |
+| 3D → 2.5D | Not offered (a 3D design has no flat source to raise). A relief goes back to its source in 2D |
 
 Undo goes back across a change of dimension.
 
 ### Opening a saved design
 | Saved as | Opens in |
 |---|---|
-| Picture, Text, Pattern, Molecule, 1 layer | 2D |
-| The same, more than one layer, a base or infill | 2.5D |
-| A relief | 2.5D |
-| Vase, Morph, STL | 3D |
+| Picture, Text, Pattern, Molecule, made for a pen plotter | 2D |
+| The same, made for a printer (one layer or more) | 2.5D |
+| Vase, Morph, Relief, STL | 3D |
 
 Nothing in a saved file changes. The dimension is worked out on opening, and saved from then on.
 
@@ -96,8 +97,7 @@ Nothing in a saved file changes. The dimension is worked out on opening, and sav
 | Line, Drawing, Math | ✓ | ✓ | — |
 | Size | ✓ | ✓ | (in Profile) |
 | Layers (Height, Base, Infill, Ties) | — | ✓ | — |
-| Relief depth | — | ✓ (a relief) | — |
-| Vase / Morph / STL tools | — | — | ✓ |
+| Vase / Morph / Relief / STL tools | — | — | ✓ |
 
 On the Print screen: Material, Machine, Plate and Tests for all three. Layers (as a Print tool) shows only Seconds per
 layer and the warnings in 2D and 3D, since their height comes from the design.
@@ -116,10 +116,10 @@ Turned off, the app works as it does today.
 | optimize | Presets, Optimize tracing | 2D, 2.5D | None |
 | patterns | Pattern settings | 2D, 2.5D; a morph's bottom or top | Patterns become morph shapes (§7) |
 | molecule | Molecules | 2D, 2.5D | None |
-| plotter | Page, pens, fills, SVG | 2D | Offered only in 2D |
+| plotter | Page, pens, fills, SVG | 2D | 2D is the plotter's |
 | pieces | Lines of text as separate pieces | 2D, 2.5D | Moves with Layers |
 | ties | Struts across gaps in tall prints | 2.5D | Shown only in 2.5D |
-| relief | A picture's greys as depth on a plaque | 2.5D | Made from the Relief choice, not "Make it 3D" |
+| relief | A picture's greys as depth on a plaque or wall | 3D | Under Kind; takes a 2D source |
 | vase | Vases | 3D | Under Kind; *from this line* comes from the 2D → 3D step |
 | morph | Morphs | 3D | Under Kind; big morphs (§7) |
 | model | STL, the 3D preview, Draw this view | 3D | Under Kind |
@@ -132,7 +132,7 @@ The rail filter is the `off()` each tool already has (v183), plus the tool's dim
 
 1. **The switch and the filter.** `dims` module; each tool says its dimensions; the bar shows the dimension; opening a
    saved design picks it. Nothing moves yet.
-2. **2.5D.** Layers joins the design rail; Infill and Base only here; Relief as a choice; 2D ↔ 2.5D keeps settings.
+2. **2.5D.** Layers joins the design rail, one layer by default; Infill and Base only here; 2D ↔ 2.5D keeps settings.
 3. **3D.** Kind replaces *3D model* in Input; 2D → 3D asks how to start; Draw this view goes to 2D; Examples grouped.
 4. **The plotter** offers 2D only, and Draw this view from 3D.
 5. **Tests:**
@@ -240,9 +240,29 @@ spread to where the outline changes most:
 morph in two stages, shape → the word's silhouette (its letters as one blob, which is a shape-to-shape morph) →
 the word (a melt from its own silhouette, which has nothing to split).
 
-### Decisions for Nicolaas
-1. Is M1 worth shipping on its own (patterns and 4-letter words, 125 mm), before M2's research?
-2. Solid letters (an O as a solid shape) for word morphs: is that look all right? It's what makes word to word
-   print.
-3. Where does the morph's pattern come from: the Pattern source's own settings (the 2D tools), or a short list inside
-   the morph (Moore, Spiral, Labyrinth with a detail slider)?
+### Words over two lines (Nicolaas: "the letters on multiple lines should touch")
+
+Two lines, centred, the second's capitals just overlapping the first's baseline (line spacing 0.98 × the letter
+height), so the letters meet and the word is one block. 125 mm tall:
+
+| Morph | Lines joined by a bar | Touching | Touching, solid |
+|---|---|---|---|
+| Heart → LO/VE | ✓ | ✓ | |
+| Pebble → HAP/PY | ✗ | ✗ | ✓ |
+| Heart → HAP/PY | | | ✓ |
+| MOM → HAP/PY | | | ✓ |
+| Heart → NICO/LAAS | ✗ | ✗ | ✗ |
+| Square → HAP/PY | ✗ | ✗ | |
+| Pebble → CHE/ERS, THA/NKS | | | ✗ |
+
+So two touching lines with solid letters take **5 letters** (one line: 4). 6 fail.
+
+### M1 as built (v184)
+- **Letters**, Top: up to 4 on a line; a "/" starts a second line, touching the first, 5 in all. A word raises the
+  height to about its width (60–150 mm) and grows a small bottom to about the word's size.
+- **Solid letters**: every counter filled.
+- **Letters at the bottom** (Bottom): for word to word, at the top's size, lettering and solidity.
+- **Patterns** in the Bottom and Top shape grids: Moore coarse, Moore, Moore fine, Spiral, Spiral twisted
+  (`UNB.MORPH_PATTERNS`). The end a pattern is at is made at least its width (40–72 mm) so its channels print.
+- The check's time budget grows with the morph (20 s at 20 mm, up to 3 minutes).
+- Labyrinth left out: it didn't morph into anything but itself at 125 mm.

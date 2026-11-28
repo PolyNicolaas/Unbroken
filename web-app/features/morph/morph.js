@@ -11,7 +11,8 @@
 // smallest turn that prints (UNB.morphCheck, in its own background engine), and the panel and the ready list say when
 // it's too short to print, or prints only the other way up (Turn it over). Off, a vase is as before.
 // Found on 26–27 November 2026 (docs/MORPH-PLAN.md): one character prints out of every shape tried on a 20 mm morph
-// with 20 mm letters, the letter at the rim; words don't yet.
+// with 20 mm letters, the letter at the rim. Words: up to 4 letters on a line, or 5 over two touching lines with Solid
+// letters, about as tall as they are wide (docs/DIMENSIONS-PLAN.md §7).
 // Plain script (not a module) so the app also works opened straight from disk; files share top-level names and load in
 // the order listed in index.html.
 "use strict";
@@ -67,7 +68,7 @@ addMapNode("mtop", {
     return !Q
       ? ""
       : Q.letter
-        ? `the letter ${Q.letter}, ${Q.cap} mm${Q.font && Q.font !== "chocolate" ? `, ${morphFontLabel(Q.font)}` : ""}`
+        ? `${Q.letter.replace("/", "").length > 1 ? "the letters" : "the letter"} ${Q.letter}, ${Q.cap} mm${Q.solid ? ", solid" : ""}${Q.font && Q.font !== "chocolate" ? `, ${morphFontLabel(Q.font)}` : ""}`
         : Q.shape
           ? morphShapeName(Q.shape).toLowerCase()
           : Q.kind === "drawing"
@@ -108,10 +109,29 @@ on("vaseSending", (V) => {
 
 // ---------- the rim's size: the profile scaled up the wall so the rim's reach is R, the bottom kept ----------
 function morphRimReach(R) {
+  const P = vaseCur.profile;
+  morphEnds(P[0][1], R);
+}
+// the ends of the profile moved to r0 (bottom) and r1 (rim): every point keeps its share of the straight wall between
+// the ends (a straight wall stays straight, a bulge stays a bulge of the same share)
+function morphEnds(r0, r1) {
   const P = vaseCur.profile,
-    top = P[P.length - 1][1];
-  if (!(top > 0) || !(R > 0)) return;
-  vaseCur.profile = P.map(([t, r]) => [t, +(r * (1 + t * (R / top - 1))).toFixed(2)]);
+    a = P[0][1],
+    b = P[P.length - 1][1];
+  if (!(a > 0 && b > 0 && r0 > 0 && r1 > 0)) return;
+  vaseCur.profile = P.map(([t, r]) => [t, +((r * (r0 + t * (r1 - r0))) / (a + t * (b - a))).toFixed(2)]);
+}
+
+// the bottom's size changed to R: the profile's points follow, most at the bottom, none at the rim (as morphRimReach)
+function morphFootReach(R) {
+  const P = vaseCur.profile;
+  morphEnds(R, P[P.length - 1][1]);
+}
+// a word takes about as much height as it is wide: raised to that (never lowered), 60–150 mm
+function morphWordHeight(ch, reach) {
+  if (ch.replace("/", "").length < 2) return;
+  const want = Math.max(60, Math.min(150, Math.round(2 * reach)));
+  if (vaseCur.height < want) vaseCur.height = want;
 }
 
 // a wall with no texture and no movement (the first letter or drawing at the rim)
@@ -129,20 +149,37 @@ function morphPlainWall() {
 const MORPH_FONTS = Object.assign({ chocolate: UNB_FONTS.chocolate }, window.UNB_MORPH_FONTS || {});
 const morphFontLabel = (k) => (k === "chocolate" ? "Chocolate" : (MORPH_FONTS[k] && MORPH_FONTS[k].label) || k);
 let morphFont = "chocolate"; // (the one picked: a new letter is made from it)
-function morphLetterPlan(ch, cap, font = morphFont) {
-  const L = UNB.morphLetter(ch, MORPH_FONTS[font] || UNB_FONTS.chocolate, { cap, d: morphD() });
+let morphSolid = false; // (Solid letters: every counter filled; what makes word to word print)
+function morphLetterPlan(ch, cap, font = morphFont, solid = morphSolid) {
+  const L = UNB.morphLetter(ch.replace("/", "\n"), MORPH_FONTS[font] || UNB_FONTS.chocolate, { cap, d: morphD(), solid });
   if (!L || L.loops !== 1) return null;
   const O = UNB.vaseLineLoop(L.x, L.y);
   return O ? { loop: O.loop, reach: O.reach } : null;
 }
+// letters typed: capitals, ! and ?, up to UNB.MORPH_MAX on one line; a "/" starts a second line (touching the first),
+// then up to UNB.MORPH_MAX2 in all (what else is typed is left out)
+function morphChars(v) {
+  let out = "",
+    n = 0,
+    slash = false;
+  for (const c of String(v || "").toUpperCase()) {
+    if (c === "/" && !slash && n > 0) {
+      slash = true;
+      out += c;
+    } else if (UNB.MORPH_CHARS.includes(c) && n < (slash ? UNB.MORPH_MAX2 : UNB.MORPH_MAX)) {
+      out += c;
+      n++;
+    }
+  }
+  return out;
+}
+// (as made: no "/" at the end, a "/" between lines is the engine's line break)
+const morphText = (v) => morphChars(v).replace(/\/$/, "");
 function morphUseLetter(ch0) {
-  const ch = String(ch0 || "")
-      .trim()
-      .toUpperCase()
-      .slice(0, 1),
+  const ch = morphText(ch0),
     msg = $("moMsg");
-  if (!ch || !UNB.MORPH_CHARS.includes(ch)) {
-    msg.textContent = `One capital letter, ! or ? (${ch ? `“${ch}” can't morph yet` : "type one"}).`;
+  if (!ch) {
+    msg.textContent = `Up to ${UNB.MORPH_MAX} capitals, ! or ? on a line, or ${UNB.MORPH_MAX2} over two (type some).`;
     msg.className = "hint warn";
     return false;
   }
@@ -164,9 +201,10 @@ function morphUseLetter(ch0) {
     letter: ch,
     cap,
     font: MORPH_FONTS[morphFont] ? morphFont : "chocolate",
+    solid: morphSolid,
     match: was && was.match === "even" ? "even" : "corners",
     keepApart: true,
-    turn: was && was.letter === ch && (was.font || "chocolate") === morphFont ? +was.turn || 0 : 0,
+    turn: was && was.letter === ch && (was.font || "chocolate") === morphFont && !!was.solid === morphSolid ? +was.turn || 0 : 0,
     auto: !(was && was.auto === false),
     sides: 6,
     depth: 0.3,
@@ -175,7 +213,8 @@ function morphUseLetter(ch0) {
     // a letter's corners and slits leave no room for a texture or a movement on the wall (a wave on a G turned
     // tighter than a bead): both off, as Make a vase from this line does
     morphPlainWall();
-    vaseCur.height = 20;
+    // (20 mm for one letter, as tried; a word needs about as much height as it is wide)
+    vaseCur.height = ch.replace("/", "").length > 1 ? Math.max(60, Math.min(150, Math.round(2 * L.reach))) : 20;
     // the bottom at its own size if it's a traced line, else a little narrower than the letter
     const r0 = +(vaseCur.plan && vaseCur.plan.kind === "drawing" ? vaseCur.profile[0][1] : 0.9 * L.reach).toFixed(2);
     vaseCur.profile = [
@@ -183,17 +222,72 @@ function morphUseLetter(ch0) {
       [0.5, +((r0 + L.reach) / 2).toFixed(2)],
       [1, +L.reach.toFixed(2)],
     ];
-  } else morphRimReach(L.reach);
+  } else {
+    morphRimReach(L.reach);
+    morphWordHeight(ch, L.reach);
+    // (a word out of a small shape has too far to grow: the bottom made about as wide, as the trials had it)
+    if (ch.replace("/", "").length > 1 && vaseCur.profile[0][1] < 0.7 * L.reach && !(vaseCur.plan && vaseCur.plan.letter)) morphFootReach(+(0.9 * L.reach).toFixed(2));
+  }
   vaseSend(true);
   vaseUI();
   return true;
 }
 $("vrLetter").addEventListener("change", () => morphUseLetter($("moLetter").value || "A"));
+// (typed: made after a short pause, since a word takes a second or two to make)
+let morphTypeTimer = 0;
 $("moLetter").addEventListener("input", () => {
-  const v = $("moLetter").value.toUpperCase();
+  const v = morphChars($("moLetter").value);
   $("moLetter").value = v;
-  if (v) morphUseLetter(v);
+  clearTimeout(morphTypeTimer);
+  if (v) morphTypeTimer = setTimeout(() => morphUseLetter(v), v.length > 1 ? 500 : 0);
 });
+$("moLetter").maxLength = UNB.MORPH_MAX2 + 1;
+// Solid letters: the counters filled (an O a solid shape). The top's letters, and the bottom's, made again with it
+$("moSolid").addEventListener("change", () => {
+  morphSolid = $("moSolid").checked;
+  if (vaseCur.plan && vaseCur.plan.letter) morphUseBottomLetters(vaseCur.plan.letter, true);
+  if (vaseCur.planTop && vaseCur.planTop.letter) morphUseLetter(vaseCur.planTop.letter);
+  else morphLabels();
+});
+// letters at the bottom (word to word: the same number of letters each end prints best, with Solid letters): made at
+// the top's letter size, lettering and solidity
+function morphUseBottomLetters(ch0, quiet) {
+  const ch = morphText(ch0),
+    Q = vaseCur.planTop,
+    cap = +$("moCap").value || 20;
+  if (!ch) return false;
+  const L = morphLetterPlan(ch, cap);
+  if (!L) {
+    $("vpDrawMsg").textContent = `“${ch}” didn't come out as one outline at ${cap} mm: try it bigger.`;
+    return false;
+  }
+  vaseCur.plan = {
+    kind: "drawing",
+    loop: L.loop,
+    exact: true,
+    round: 0,
+    letter: ch,
+    cap,
+    font: MORPH_FONTS[morphFont] ? morphFont : "chocolate",
+    solid: morphSolid,
+    sides: 6,
+    depth: 0.3,
+  };
+  $("vpDrawMsg").textContent = "";
+  morphFootReach(L.reach);
+  if (!quiet) morphWordHeight(ch, L.reach);
+  vaseSend(true);
+  vaseUI();
+  return true;
+}
+let morphBotTimer = 0;
+$("moBotLetters").addEventListener("input", () => {
+  const v = morphChars($("moBotLetters").value);
+  $("moBotLetters").value = v;
+  clearTimeout(morphBotTimer);
+  if (v) morphBotTimer = setTimeout(() => morphUseBottomLetters(v), 500);
+});
+$("moBotLetters").maxLength = UNB.MORPH_MAX2 + 1;
 $("moCap").addEventListener("change", () => {
   if (vaseCur.planTop && vaseCur.planTop.letter) morphUseLetter(vaseCur.planTop.letter);
 });
@@ -247,10 +341,24 @@ function morphFontPics(ch) {
 morphFontPics("A");
 
 // ---------- a ready-made shape at the bottom or the top (UNB.MORPH_SHAPES) ----------
-const morphShapeName = (k) => (UNB.MORPH_SHAPES && UNB.MORPH_SHAPES[k]) || k;
+const morphShapeName = (k) =>
+  (k && k.startsWith("p:") ? UNB.MORPH_PATTERNS && UNB.MORPH_PATTERNS[k.slice(2)] : UNB.MORPH_SHAPES && UNB.MORPH_SHAPES[k]) || k;
+// (a shape's key, or "p:" and a pattern's: UNB.MORPH_PATTERNS)
 function morphShapeLoop(key) {
-  const S = UNB.morphShape(key);
+  const S = key.startsWith("p:") ? UNB.morphPattern(key.slice(2)) : UNB.morphShape(key);
   return S ? UNB.vaseLineLoop(S.x, S.y) : null;
+}
+// a pattern needs room for its channels: the end it's at is made at least its minW across (mm), keeping the other end
+function morphPatternRoom(where, key) {
+  if (!key.startsWith("p:")) return "";
+  const P = UNB.morphPattern(key.slice(2)),
+    O = morphShapeLoop(key),
+    need = +((O.reach * P.minW) / 40).toFixed(2),
+    k = where === "bottom" ? 0 : vaseCur.profile.length - 1;
+  if (vaseCur.profile[k][1] >= need) return "";
+  if (where === "bottom") morphFootReach(need);
+  else morphRimReach(need);
+  return ` Made ${P.minW} mm across, so its channels print.`;
 }
 // where: "bottom" (the vase's shape from above, at the size the profile gives it) or "top" (the rim's shape, at the
 // rim's size; entering a morph with it makes it 20 mm tall, a plain wall)
@@ -259,7 +367,7 @@ function morphUseShape(where, key) {
   if (!O) return;
   if (where === "bottom") {
     vaseCur.plan = { kind: "drawing", loop: O.loop, exact: true, round: 0, shape: key, sides: 6, depth: 0.3 };
-    $("vpDrawMsg").textContent = "";
+    $("vpDrawMsg").textContent = morphPatternRoom("bottom", key).trim();
   } else {
     const was = vaseCur.planTop;
     if (!was) {
@@ -279,6 +387,8 @@ function morphUseShape(where, key) {
       sides: 6,
       depth: 0.3,
     };
+    const room = morphPatternRoom("top", key);
+    if (room) $("vpDrawMsg").textContent = room.trim();
   }
   vaseSend(true);
   vaseUI();
@@ -334,17 +444,20 @@ for (const [where, box] of [
     });
     box.append(b);
   }
+// the patterns last (UNB.MORPH_PATTERNS: the few that morph), as shapes keyed "p:moore3"
+const morphShapeKeys = () => Object.keys(UNB.MORPH_SHAPES || {}).concat(Object.keys(UNB.MORPH_PATTERNS || {}).map((k) => "p:" + k));
 // the ready-made shapes after them: each drawn small, its name on hover
 for (const [where, box] of [
   ["bottom", $("moBotShapes")],
   ["top", $("moTopShapes")],
 ]) {
-  for (const k of Object.keys(UNB.MORPH_SHAPES || {})) {
-    const S = UNB.morphShape(k),
+  for (const k of morphShapeKeys()) {
+    const S = k.startsWith("p:") ? UNB.morphPattern(k.slice(2)) : UNB.morphShape(k),
       b = document.createElement("button");
     b.type = "button";
     b.className = "btn mini";
     b.dataset.shape = k;
+    if (k.startsWith("p:")) b.classList.add("mo-pat"); // (a pattern: its line drawn, not filled)
     b.title = morphShapeName(k);
     b.setAttribute("aria-label", morphShapeName(k));
     const x0 = Math.min(...S.x),
@@ -563,6 +676,8 @@ async function morphCheckNow() {
       d: morphD(),
       overhang: overhangMM(),
       turns: auto ? UNB.MORPH_TURNS : [+Q.turn || 0],
+      // (a big morph takes longer a turn: 20 s for a 20 mm one, more the taller and longer its laps, up to 3 minutes)
+      budget: Math.round(Math.min(180000, 20000 * Math.max(1, (V.height / 20) * Math.min(3, UNB.vaseLapPoints(V) / 2500)))),
     };
   $("moMsg").textContent = "Checking the morph…";
   $("moMsg").className = "hint";
@@ -714,6 +829,12 @@ function morphLabels() {
   $("moTopShapeVal").textContent = topShape ? morphShapeName(Q.shape) : "";
   if (topShape) $("vaseTopVal").textContent = `blends to ${morphShapeName(Q.shape).toLowerCase()}`;
   $("moFontVal").textContent = morphFontLabel(letter ? Q.font || "chocolate" : morphFont);
+  // the bottom's letters, and Solid letters, as the design has them
+  if (document.activeElement !== $("moBotLetters")) $("moBotLetters").value = (P && P.kind === "drawing" && P.letter) || "";
+  if (letter || (P && P.letter)) {
+    morphSolid = !!((letter && Q.solid) || (P && P.letter && P.solid));
+    $("moSolid").checked = morphSolid;
+  }
   morphFontPics(letter ? Q.letter : $("moLetter").value);
   morphParts();
   morphFromAbove(V);
@@ -727,7 +848,7 @@ function morphLabels() {
   $("moTopFromLine").hidden = !morphOn();
   document.querySelectorAll("#vaseBox .mo-only").forEach((el) => (el.hidden = !morphOn()));
   $("moCapVal").textContent = `${$("moCap").value} mm tall`;
-  $("moLetterVal").textContent = "A–Z, ! or ?";
+  $("moLetterVal").textContent = `up to ${UNB.MORPH_MAX}; / for a 2nd line`;
   const a = +$("moFrom").value,
     b = +$("moTo").value;
   $("moFromVal").textContent = a ? `${a}% up (${fmt((V.height * a) / 100, 1)} mm)` : "at the bottom";

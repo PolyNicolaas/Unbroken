@@ -294,6 +294,12 @@
   // Chocolate font's "." is empty and its "-" a full-height block). Only these characters morph cleanly as one
   // character on a 20 mm morph out of every built-in shape and a heart (27 November 2026); words don't yet.
   UNB.MORPH_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZ!?";
+  // the most characters a morph's word may have (27 November 2026: 4-letter words print 125 mm tall out of a heart, a
+  // star, a pebble or the Moore pattern; 5 and more don't, at any height: docs/DIMENSIONS-PLAN.md §7)
+  UNB.MORPH_MAX = 4;
+  // over two lines (a "\n" between them), touching, one under the other and centred: up to 5 letters print, with solid
+  // letters (HAP/PY out of a pebble, a heart or MOM; 6 don't: CHE/ERS, THA/NKS)
+  UNB.MORPH_MAX2 = 5;
   function morphGlyphs(f) {
     const pts = (P) => P.map(([x, y]) => `${Math.round(x)},${Math.round(y)}`).join(" ");
     const vstad = (x, y0, y1, r, k = 12) => {
@@ -314,10 +320,12 @@
     if (f.glyphs.C) out.G = [613, f.glyphs.C[1] + "|" + vstad(497, 95, 330, 63)];
     return out;
   }
-  // ch: one character (UNB.MORPH_CHARS); font: the Chocolate font (UNB_FONTS.chocolate, from fonts.js). opt (mm unless
-  // noted): cap (letter height, 20), d (line spacing: slits, necks and rounding follow it), slit (× d, 1.7), neck
-  // (× d, 1.5), round (× d, 1), g (grid, 0.06). Returns { x, y } (the outline, mm, y up, closed, anticlockwise,
-  // evenly every 0.15 mm), loops (how many outlines it came to: 1), slits, filled; or null.
+  // ch: one character, or a word of up to UNB.MORPH_MAX (UNB.MORPH_CHARS); font: the Chocolate font (UNB_FONTS.chocolate,
+  // from fonts.js) or a morph font. opt (mm unless noted): cap (letter height, 20), d (line spacing: slits, necks and
+  // rounding follow it), slit (× d, 1.7), neck (× d, 1.5), round (× d, 1), g (grid, 0.06; coarser for a long word),
+  // solid (every counter filled, no slits: an O is a solid shape; what makes word to word print). Returns { x, y }
+  // (the outline, mm, y up, closed, anticlockwise, evenly every 0.15 mm), loops (how many outlines it came to: 1),
+  // slits, filled; or null.
   UNB.morphLetter = function (ch, font, opt) {
     const o = opt || {},
       d = o.d || 1.34,
@@ -326,7 +334,12 @@
       neck = (o.neck || 1.5) * d,
       rc = (o.round || 1) * d,
       F = Object.assign({}, font, { glyphs: Object.assign({}, font.glyphs, morphGlyphs(font)) });
-    if (!ch || !F.glyphs[ch]) return null;
+    const lines = String(ch || "").split("\n"),
+      count = lines.join("").length;
+    if (!count || lines.length > 2 || lines.some((l) => !l) || count > (lines.length > 1 ? UNB.MORPH_MAX2 : UNB.MORPH_MAX))
+      return null;
+    if ([...lines.join("")].some((c) => !F.glyphs[c])) return null;
+    // (two lines touch: the second's capitals just overlap the first's baseline, so the letters meet)
     const lay = UNB.textLayout(ch, F, {
       cap,
       join: false,
@@ -334,9 +347,11 @@
       spacing: "even",
       gap: 1.6 * d,
       word: 0.6 * cap,
+      lineGap: 0.98,
+      align: "center",
     });
     if (!lay.strokes.length) return null;
-    const g = o.g || Math.min(0.06, cap / 250),
+    const g = o.g || Math.max(Math.min(0.06, cap / 250), (lay.width + 6 * d) / 1600),
       pad = 3 * d,
       w = Math.ceil((lay.width + 2 * pad) / g),
       h = Math.ceil((lay.height + 2 * pad) / g),
@@ -475,7 +490,7 @@
             y0 = Math.min(y0, y);
             y1 = Math.max(y1, y);
           }
-        if (deep * g < 0.6 * d) {
+        if (o.solid || deep * g < 0.6 * d) {
           for (let i = 0; i < N; i++) if (holeM[i]) ink[i] = 1;
           stats.filled++;
           continue;
@@ -663,6 +678,56 @@
       ys = P.map((p) => p[1]),
       k = 40 / Math.max(Math.max(...xs) - Math.min(...xs), Math.max(...ys) - Math.min(...ys));
     return { x: xs.map((v) => v * k), y: ys.map((v) => v * k) };
+  };
+
+  // ---------- patterns, for the bottom or the top ----------
+  // A short list that morphs (27 November 2026, 125 mm tall: docs/DIMENSIONS-PLAN.md §7): the Moore curve at three
+  // levels of detail (into each other, from a circle or a shape, into a 4-letter word) and the spiral, plain and
+  // twisted (into each other). Other patterns are open lines or cross themselves, and the labyrinth didn't morph.
+  // UNB.morphPattern(key) → { x, y } (40 mm across, like a shape), minW (the narrowest the morph can be, mm across:
+  // its channels at least 2.5 line spacings at d = 1.34), or null.
+  const MP = {
+    moore2: ["Moore, coarse", "moore", { detail: 2 }],
+    moore3: ["Moore", "moore", { detail: 3 }],
+    moore4: ["Moore, fine", "moore", { detail: 4 }],
+    spiral: ["Spiral", "spiral", { detail: 3, sides: 4, twist: 0 }],
+    spiral2: ["Spiral, twisted", "spiral", { detail: 3, sides: 4, twist: 60 }],
+  };
+  UNB.MORPH_PATTERNS = Object.fromEntries(Object.entries(MP).map(([k, [name]]) => [k, name]));
+  const mpCache = {};
+  UNB.morphPattern = function (key) {
+    const M = MP[key];
+    if (!M || !UNB.pattern) return null;
+    if (mpCache[key]) return mpCache[key];
+    const r = UNB.pattern(M[1], M[2]),
+      p = r && r.paths[0];
+    if (!p) return null;
+    const k = 40 / Math.max(r.box[0], r.box[1]),
+      x = [],
+      y = [],
+      m = p.length / 2;
+    let cx = 0,
+      cy = 0;
+    for (let i = 0; i < m; i++) {
+      cx += p[2 * i] / m;
+      cy += p[2 * i + 1] / m;
+    }
+    // (evenly every 0.25 of 40, so the corners stay corners)
+    for (let i = 0; i < m; i++) {
+      const j = (i + 1) % m,
+        ax = (p[2 * i] - cx) * k,
+        ay = -(p[2 * i + 1] - cy) * k,
+        bx = (p[2 * j] - cx) * k,
+        by = -(p[2 * j + 1] - cy) * k,
+        n = Math.max(1, Math.ceil(Math.hypot(bx - ax, by - ay) / 0.25));
+      for (let t = 0; t < n; t++) {
+        x.push(ax + ((bx - ax) * t) / n);
+        y.push(ay + ((by - ay) * t) / n);
+      }
+    }
+    // (the pattern's own gap between its lines, at 40 mm: the morph's channels)
+    const gap = (r.gap || 1) * k;
+    return (mpCache[key] = { x, y, minW: Math.max(40, Math.ceil((40 * 2.5 * 1.34) / gap)) });
   };
 
   // ---------- the check: a turn that prints, which way up, how tall ----------

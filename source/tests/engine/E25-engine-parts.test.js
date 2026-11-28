@@ -17,7 +17,8 @@ module.exports = {
     const leaks = [];
     for (const p of parts) for (const name of own[p]) for (const q of parts) {
       if (q === p) continue;
-      const code = src[q].replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "");
+      // (comments and plain quoted text left out: a pattern named "moore" in a string isn't a use of the helper moore)
+      const code = src[q].replace(/\/\/.*$/gm, "").replace(/\/\*[\s\S]*?\*\//g, "").replace(/"(?:[^"\\\n]|\\.)*"/g, '""');
       const imported = new RegExp(`\\{[^}]*\\b${name}\\b[^}]*\\}\\s*=\\s*UNB\\._u`).test(src[q]);   // taken from the shared helpers on purpose
       if (!imported && new RegExp(`(?<![\\w.])${name}\\b(?!\\s*:)`).test(code) && !new RegExp(`^  (?:function\\*?\\s+${name}\\b|(?:const|let)\\s+${name}\\b)`, "m").test(src[q])) leaks.push(`${name} (${p}) used in ${q}`);
     }

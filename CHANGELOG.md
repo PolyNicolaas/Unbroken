@@ -3,6 +3,26 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v184 · 2026-11-27
+
+**Big morphs (M1)** (Nicolaas, 27 November 2026: the morph on bigger prints, 125 mm tall, pattern to pattern and
+full words, a limited set that works; words over two lines, the lines touching). The trials are in
+docs/DIMENSIONS-PLAN.md §7 and source/bench/morph-trial/big/.
+
+- **Words at the top:** up to 4 letters on a line, or 5 over two lines (type a "/"), the lines touching and centred.
+  A word raises the height to about its width (60–150 mm) and grows a small bottom to about its size. Heart, star
+  and pebble → LOVE, Moore → LOVE, pebble → HAP/PY print 72–125 mm tall.
+- **Solid letters** (Top): every counter filled, an O a solid shape. That's what makes word to word and two-line
+  words print.
+- **Letters at the bottom** (Bottom): word to word (HOPE → LOVE, MOM → DAD), at the top's size and lettering.
+- **Patterns** in the Bottom and Top grids: Moore at three levels of detail and the spiral, plain and twisted
+  (`UNB.MORPH_PATTERNS`, `UNB.morphPattern`). A pattern's end is made wide enough for its channels. Moore → Moore,
+  fine prints 125 mm tall.
+- The check's time budget grows with the morph (up to 3 minutes for a big one; it runs in the background).
+- Changing either end keeps the wall's shape between them (a straight wall stays straight; no more pinch or bulge).
+- Engine: `UNB.morphLetter` takes a word or two lines (`UNB.MORPH_MAX` 4, `UNB.MORPH_MAX2` 5) and `solid`.
+- Tests: E70, A82; A79 (a 7 is left out of the Letters field as it's typed); A80 counts the pattern buttons; E25 skips quoted text. 148 of 148 pass.
+
 ## v183 · 2026-11-27
 
 Small things from clicking through every tool of a picture, lettering, a pattern, a molecule, an STL, a vase and a

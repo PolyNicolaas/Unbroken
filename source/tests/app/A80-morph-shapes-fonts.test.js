@@ -34,7 +34,7 @@ module.exports = {
     await waitCheck();
     // the shapes: as many buttons as UNB.MORPH_SHAPES, at the bottom and the top
     o.count = await page.evaluate(() => ({
-      shapes: Object.keys(UNB.MORPH_SHAPES).length,
+      shapes: Object.keys(UNB.MORPH_SHAPES).length + Object.keys(UNB.MORPH_PATTERNS || {}).length,
       bottom: $("moBotShapes").querySelectorAll("button[data-shape]").length,
       top: $("moTopShapes").querySelectorAll("button[data-shape]").length,
     }));
