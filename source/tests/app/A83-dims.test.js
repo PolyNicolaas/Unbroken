@@ -52,7 +52,7 @@ module.exports = {
       );
       await page.click('.dims-chip[data-dim="2.5d"]');
       await A.idle(page, 3000);
-      o.back = { dim: await dim(), kind: await page.evaluate(() => st.art.kind), out: await page.evaluate(() => outputNow()) };
+      o.back = { dim: await dim(), kind: await page.evaluate(() => st.art.kind), out: await page.evaluate(() => outputNow()), w: await page.evaluate(() => +$("outW").value) };
       checks.push(check("2.5D from 3D: the picture again, for the printer", +(o.back.dim === "2.5d" && o.back.kind === "picture" && o.back.out === "print"), "==", 1));
       await page.click('.dims-chip[data-dim="3d"]');
       await A.idle(page, 400);
@@ -62,7 +62,21 @@ module.exports = {
       checks.push(check("a relief is 3D, with the vase's tools", +(o.relief.dim === "3d" && o.relief.rail.includes("vtexture")), "==", 1));
       await page.click('.dims-chip[data-dim="3d"]');
       await A.idle(page, 300);
-      checks.push(check("3D again while in 3D: no menu", await page.evaluate(() => document.querySelectorAll(".dims-menu").length), "==", 0));
+      // (in 3D the menu starts another full shape: nothing "from this line", there's no line)
+      o.menu3 = await page.$$eval(".dims-menu button b", (bs) => bs.map((b) => b.textContent));
+      checks.push(check("3D again while in 3D: the menu, without the line's items", +(o.menu3.includes("A new vase") && !o.menu3.some((t) => /this (line|picture)/.test(t))), "==", 1));
+      await page.click('.dims-chip[data-dim="3d"]');
+      await A.idle(page, 200);
+      checks.push(check("… a second tap closes it", await page.evaluate(() => document.querySelectorAll(".dims-menu").length), "==", 0));
+      o.wBefore = o.back.w;
+      await page.click('.dims-chip[data-dim="2.5d"]');
+      await A.idle(page, 3000);
+      o.wAfter = await page.evaluate(() => +$("outW").value);
+      checks.push(check("2.5D from a relief: the print's own width again (mm off)", +Math.abs(o.wAfter - o.wBefore).toFixed(2), "<", 0.1));
+      await page.click('.dims-chip[data-dim="3d"]');
+      await A.idle(page, 300);
+      await page.click(".dims-menu button:has-text('A new vase')");
+      await A.idle(page, 3000);
       await page.click('.dims-chip[data-dim="2d"]');
       await A.idle(page, 3000);
       o.d2b = { dim: await dim(), kind: await page.evaluate(() => st.art.kind) };

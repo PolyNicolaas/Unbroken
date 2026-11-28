@@ -154,6 +154,7 @@ The rail filter is the `off()` each tool already has (v183), plus the tool's dim
 - From 3D, 2D or 2.5D brings back the line kind you had; the print keeps its size when you go to the plotter and back.
 - A model opened while plotting goes to the printer (plotting it afterwards is Draw this view, 2D).
 - 2.5D shows Layers on the rail.
+- v186: the 3D chip opens the menu in 3D too; the print's width comes back the same after 3D or the plotter.
 - Not yet: Draw this view (3D → 2D), Examples grouped by D, Infill and Base only in 2.5D, a Kind control in place of
   the 3D model tile.
 - Tests: A83; A12, A60 and A63 click the chips (lib/app.js maps the old output radios to them).

@@ -3,6 +3,18 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v186 · 2026-11-28
+
+From walking through v185 on the site (every kind: 2D plot, 2.5D print, a vase, a morph and a relief from the line, a
+new morph, the skull cup, and back):
+
+- **3D in 3D opens the menu** (a new vase, a new morph, an STL, the skull cup): starting another full shape no longer
+  means going back to 2.5D first. A second tap closes it.
+- **The print keeps its size** through 3D and the plotter: the leaf at 37.9 mm comes back at 37.9 after a vase, a
+  morph, a relief or a plot (it came back at 48.3: the 3D shape's width, or the size set while the plotter's strokes
+  were still the line).
+- Tests: A83 (the menu in 3D, the width back from a relief, 2D from 3D). 
+
 ## v185 · 2026-11-28
 
 **2D · 2.5D · 3D** (Nicolaas, 27 November 2026: organise the app by what it makes; relief is 3D, a one-layer print
