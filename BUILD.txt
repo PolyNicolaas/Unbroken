@@ -1,6 +1,6 @@
-Unbroken · web app build v184
-Built:  2026-11-28T04:29:55.431Z
-Tests:  148 of 148 at v184 (node run.js all: 147, E25 again after its fix)
+Unbroken · web app build v185
+Built:  2026-11-28T06:15:00.589Z
+Tests:  149 of 149 pass (node run.js all, 28 November 2026; the failing 7 rerun after their fixes)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -25,18 +25,19 @@ Files (sha1, first 12):
   0e52c6f85462  18-ties.js
   6005b41c00a4  19-relief.js
   19d8ec3e8415  20-morph.js
-  85bf7dd47138  core.js
-  f8815913a1b3  css/app.css
+  8051b97e448e  core.js
+  eb3db41faab5  css/app.css
   2e7b02cdb930  css/theme.css
   8ddfb3bb0b15  features/camera/camera.js
   91b174b409e5  features/cutout/cutout.js
+  b8a8f42a88fc  features/dims/dims.js
   c78689907075  features/levels/levels.js
   86a7dd76f6ff  features/matrix/matrix.js
   fd6b634479aa  features/model/model.js
   ce0678154019  features/model/sample-skull.js
   da8e563b27ca  features/molecule/molecule.js
   add9b908520a  features/molecule/moleditor.js
-  7f441a6b7e37  features/morph/morph.js
+  a9fcfb336fd2  features/morph/morph.js
   993de1d0b4b7  features/optimize/optimize.js
   035f0cc17156  features/patterns/pathpad.js
   c064bb2fa3f9  features/patterns/patterns.js
@@ -47,17 +48,17 @@ Files (sha1, first 12):
   265c82ae5c9b  features/ties/ties.js
   daa6dd6756b2  features/vase/vase.js
   84cc740df42b  fonts.js
-  9c4b6b9758ea  index.html
+  8aeb14cff064  index.html
   97fe045db38e  js/agent.js
   ce4fd6897391  js/art.js
   5a825c30dfdd  js/config.js
   f89d67073855  js/controls.js
-  c5dd7edc7f05  js/engine-bridge.js
+  25303a544849  js/engine-bridge.js
   f703454f1231  js/export.js
   e877225ef298  js/history.js
   0d15cd5d2d6c  js/layers.js
   f0e0c037d497  js/main.js
-  f15f62e7ea75  js/map.js
+  9e8bd25a57eb  js/map.js
   620f87a5cad0  js/parts.js
   84317f5a25cf  js/pipeline.js
   2e48d2a66bf6  js/preview.js
@@ -73,5 +74,5 @@ Files (sha1, first 12):
   0bf995963253  js/workflow.js
   cb0c999d9f14  js/zoom.js
   0c0c4ffbadb3  morph-fonts.js
-  40380fce0493  settings.js
-  2e04723a51d4  worker.js
+  54e046aca002  settings.js
+  ad872e0750b8  worker.js

@@ -319,7 +319,9 @@ function mapPalette() {
   if (how.length) design.push(how);
   const own = before.flatMap(group);
   // a 3D object's layers are its design: they're with its material too (above it, as Math is above it for a line)
-  if (st.art.kind === "model" && MAP_NODES.layers && OUTPUTS[outputNow()] === OUTPUTS.print) own.unshift("layers");
+  // (in 2.5D, dims.js, a line's layers are its design too: the dimension it's named for)
+  if ((st.art.kind === "model" || document.body.dataset.dim === "2.5d") && MAP_NODES.layers && OUTPUTS[outputNow()] === OUTPUTS.print)
+    own.unshift("layers");
   if (own.length) design.push(own);
   const out = [...group(O.step), ...before.filter((k) => MAP_NODES[k])];
   // the tools every kind of art shares (the line's, how it's made, the material) sit at the rail's foot, so they keep
