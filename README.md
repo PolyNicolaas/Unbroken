@@ -179,8 +179,8 @@ Everything comes in through the **Art** tab, the first of four (Art, Trace, 2D, 
   Swap out and in on a transparent badge raises its white inside as a coin and not the background, and white art on a
   transparent background starts swapped. A solid (coloured) background is part of the picture, as before: it frames the
   art as a panel. Tests E65, E66, E67, A72, A77, A78.
-- **2D · 2.5D · 3D** (`web-app/features/dims/dims.js`, plan in `docs/DIMENSIONS-PLAN.md`): the header's Make chips
-  say what the work is: 2D a line for a pen plotter, 2.5D the line in layers for a printer (one layer included), 3D a
+- **2D · 2.5D · 3D** (`web-app/features/dims/dims.js`, plan in `docs/DIMENSIONS-PLAN.md`): the three buttons at the
+  top of the tool rail say what the work is: 2D a line for a pen plotter, 2.5D the line in layers for a printer (one layer included), 3D a
   full shape. 3D opens one menu (a vase, morph or relief from the line, a new vase or morph, an STL, the skull cup);
   going back brings the line back at its own size. `?off=dims` gives back the For chips. Test A83.
 - **A morph** (`web-app/features/morph/morph.js`, engine `20-morph.js`; trials and reasons in `docs/MORPH-PLAN.md`): a

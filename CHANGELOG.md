@@ -3,6 +3,15 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v187 · 2026-11-28
+
+- **The D's are in the tool rail** (Nicolaas: "instead of putting the D in the header … put them in the tool bar"): 2D
+  (Plotter), 2.5D (Layers) and 3D (Shape) are their own group at the top of the rail, above the tools, so what it is
+  comes first and its tools follow under it. The chosen one is tinted and outlined (a filled button in the rail is
+  the open tool). The 3D menu opens beside the rail. The header is back to the name and the print's name.
+- On a landscape iPad (under 880 px tall) the D's show their names only, so a morph's rail still fits down to Print….
+- Tests: A63 (layout, both iPad sizes), A83, A12, A60, A61, A81.
+
 ## v186 · 2026-11-28
 
 From walking through v185 on the site (every kind: 2D plot, 2.5D print, a vase, a morph and a relief from the line, a

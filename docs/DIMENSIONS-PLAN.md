@@ -155,6 +155,8 @@ The rail filter is the `off()` each tool already has (v183), plus the tool's dim
 - A model opened while plotting goes to the printer (plotting it afterwards is Draw this view, 2D).
 - 2.5D shows Layers on the rail.
 - v186: the 3D chip opens the menu in 3D too; the print's width comes back the same after 3D or the plotter.
+- v187 (Nicolaas: "instead of putting the D in the header, put them in the tool bar"): the D's are their own group at
+  the top of the tool rail, above the tools; the 3D menu opens beside it. The header keeps the name and the print's name.
 - Not yet: Draw this view (3D → 2D), Examples grouped by D, Infill and Base only in 2.5D, a Kind control in place of
   the 3D model tile.
 - Tests: A83; A12, A60 and A63 click the chips (lib/app.js maps the old output radios to them).

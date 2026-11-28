@@ -14,9 +14,9 @@
 "use strict";
 
 const DIMS = [
-  { key: "2d", cap: "2D", sub: "a line · pen plotter" },
-  { key: "2.5d", cap: "2.5D", sub: "a line in layers · printer" },
-  { key: "3d", cap: "3D", sub: "a full shape · printer" },
+  { key: "2d", cap: "2D", sub: "a line · pen plotter", rail: "Plotter" },
+  { key: "2.5d", cap: "2.5D", sub: "a line in layers · printer", rail: "Layers" },
+  { key: "3d", cap: "3D", sub: "a full shape · printer", rail: "Shape" },
 ];
 let dimsLast2D = "picture"; // the line's source to come back to from 3D
 const dimsNow = () => (OUTPUTS.plot && outputNow() === "plot" ? "2d" : st.art.kind === "model" ? "3d" : "2.5d");
@@ -35,13 +35,14 @@ for (const D of DIMS) {
   b.dataset.dim = D.key;
   b.innerHTML = "<b></b><small></small>";
   b.querySelector("b").textContent = D.cap;
-  b.querySelector("small").textContent = D.sub;
+  b.querySelector("small").textContent = D.rail;
   b.title = `${D.cap}: ${D.sub}`;
   b.addEventListener("click", (e) => dimsGo(D.key, e.currentTarget));
   dimsBar.append(b);
 }
-document.querySelector(".map-top").append(dimsBar);
-document.querySelector(".map-top .name").textContent = "Make"; // (it said For: what it's for is now what it is)
+// (in the tool rail, above the tools: what it is comes first, and the tools under it follow; the header's For chips
+// are hidden)
+document.querySelector(".map").insertBefore(dimsBar, $("mapNodes"));
 // (2D is the pen plotter's: without the plotter feature there's no 2D)
 if (!OUTPUTS.plot) dimsBar.querySelector('[data-dim="2d"]').disabled = true;
 
@@ -184,8 +185,9 @@ function dimsMenu(open, chip) {
     m.append(b);
   }
   const r = chip.getBoundingClientRect();
-  m.style.left = `${Math.max(8, r.left)}px`;
-  m.style.top = `${r.bottom + 6}px`;
+  // (beside the rail, level with the 3D button)
+  m.style.left = `${r.right + 10}px`;
+  m.style.top = `${Math.max(8, r.top)}px`;
   document.body.append(m);
   dimsMenuEl = m;
   m.querySelector("button").focus();
