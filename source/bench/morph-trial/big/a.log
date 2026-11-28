@@ -1,0 +1,6 @@
+{"name":"moore1→moore2 (finer)","H":125,"ok":true,"needH":0,"turn":0,"cut":false,"bad":0,"closest":3.46,"pts":3772,"s":4}
+{"name":"hilbert2→hilbert3","H":125,"ok":false,"needH":1565,"turn":45,"cut":true,"bad":7.49,"closest":0.02,"pts":6789,"s":134}
+{"name":"gosper1→gosper2","H":125,"ok":false,"needH":1386,"turn":20,"cut":true,"bad":6.72,"closest":0.05,"pts":5641,"s":142}
+{"name":"circle→moore1","H":125,"ok":true,"needH":0,"turn":0,"cut":false,"bad":0,"closest":3.44,"pts":3772,"s":4}
+{"name":"labyrinth→labyrinth (other seed)","H":125,"ok":false,"needH":409,"turn":180,"cut":false,"bad":1.09,"closest":1.29,"pts":6026,"s":143}
+done

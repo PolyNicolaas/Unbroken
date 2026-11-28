@@ -1,0 +1,6 @@
+{"name":"star→LOVE","H":125,"ok":true,"needH":0,"turn":-45,"cut":false,"bad":0,"closest":2.05,"pts":5267,"s":51}
+{"name":"pebble→LOVE","H":125,"ok":true,"needH":0,"turn":20,"cut":false,"bad":0,"closest":1.71,"pts":5267,"s":17}
+{"name":"heart→HAPPY","H":125,"ok":false,"needH":1771,"turn":45,"cut":true,"bad":8.8,"closest":0.01,"pts":5506,"s":150}
+{"name":"heart→NICOLAAS","H":125,"ok":false,"needH":1755,"turn":90,"cut":false,"bad":7.62,"closest":0.04,"pts":4664,"s":273}
+{"name":"moore3→LOVE","H":125,"ok":true,"needH":0,"turn":-45,"cut":false,"bad":0.03,"closest":1.57,"pts":5267,"s":87}
+done

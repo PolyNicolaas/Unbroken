@@ -1,0 +1,6 @@
+{"name":"circle→LOVE 25mm","H":125,"ok":false,"needH":723,"turn":90,"cut":false,"bad":3.59,"closest":0.02,"pts":5267,"s":99}
+{"name":"heart→LOVE","H":125,"ok":true,"needH":0,"turn":-45,"cut":false,"bad":0,"closest":1.51,"pts":5267,"s":42}
+{"name":"LOVE→HOPE","H":125,"ok":false,"needH":1650,"turn":-45,"cut":false,"bad":7.63,"closest":0.04,"pts":5971,"s":190}
+{"name":"MOM→DAD","H":125,"ok":false,"needH":206,"turn":180,"cut":false,"bad":0.26,"closest":1.28,"pts":5629,"s":180}
+{"name":"circle→JOY","H":125,"ok":false,"needH":765,"turn":45,"cut":false,"bad":4.31,"closest":0.12,"pts":4821,"s":81}
+done

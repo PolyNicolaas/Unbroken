@@ -1,0 +1,6 @@
+{"name":"moore2→moore3 (finer)","H":125,"ok":true,"needH":0,"turn":0,"cut":false,"bad":0,"closest":3.23,"pts":6465,"s":9}
+{"name":"circle→moore3","H":125,"ok":true,"needH":0,"turn":0,"cut":false,"bad":0,"closest":1.99,"pts":6465,"s":11}
+{"name":"moore3→moore4 (finer)","H":125,"ok":true,"needH":0,"turn":0,"cut":false,"bad":0,"closest":3.19,"pts":8192,"s":22}
+{"name":"labyrinth8 twist30→80","H":125,"ok":false,"needH":1979,"turn":0,"cut":true,"bad":8.13,"closest":0.02,"pts":8192,"s":141}
+{"name":"spiral twist→80","H":125,"ok":true,"needH":0,"turn":0,"cut":false,"bad":0,"closest":1.44,"pts":8192,"s":78}
+done
