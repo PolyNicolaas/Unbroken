@@ -69,8 +69,10 @@ module.exports = {
     await A.idle(page, 600);
     o.node = await page.evaluate(() => {
       const m = document.querySelector('.panel section[aria-labelledby="h-model"]').getBoundingClientRect().top,
-        i = document.querySelector('.panel section[aria-labelledby="h-input"]').getBoundingClientRect().top;
-      return { modelFirst: m < i, drop: $("dropZone").getClientRects().length };
+        inp = document.querySelector('.panel section[aria-labelledby="h-input"]'),
+        i = inp.getBoundingClientRect().top;
+      // (with 2D · 2.5D · 3D a morph has no Input card at all)
+      return { modelFirst: m < i || !inp.getClientRects().length, drop: $("dropZone").getClientRects().length };
     });
     checks.push(check("the Morph node: the 3D model card above Input, no drop zone", +(o.node.modelFirst && !o.node.drop), "==", 1));
     // the tray over a panel

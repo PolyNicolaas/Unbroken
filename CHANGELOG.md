@@ -3,6 +3,26 @@
 One entry per published version, newest first. The build reads the version from the top heading and shows it next to
 the page's title (it shows "dev" when the page runs from the source folder). Add the next heading before building.
 
+## v185 · 2026-11-28
+
+**2D · 2.5D · 3D** (Nicolaas, 27 November 2026: organise the app by what it makes; relief is 3D, a one-layer print
+is 2.5D). The plan is docs/DIMENSIONS-PLAN.md.
+
+- The header says **Make: 2D · 2.5D · 3D** where it said For: Print · Plot. 2D is a line for a pen plotter, 2.5D the
+  line in layers for a printer, 3D a full shape.
+- **3D** opens one menu for every full shape: a vase or a morph from the line you have, a relief from it, a new vase,
+  a new morph, an STL file, the sample skull cup. The scattered ways in (the 3D model tile, Make it 3D, Make a vase /
+  morph from this line, Relief) are folded into it.
+- Going back from 3D to 2D or 2.5D brings back the line you had; each keeps its own size (the plotter's page fitting
+  no longer carries over to the printer).
+- A full shape opened while plotting (an example, a file) goes to the printer; 2D from a model is still Draw this view.
+- 2.5D shows Layers on the rail, as 3D does.
+- Under 1000 px wide the chips show their names only.
+- Morph: the verdict says "Checking…" as soon as anything changes (an old "Prints" no longer stays up while the new
+  check waits), and a word that doesn't fit says to start from a heart, star or pebble, or use Solid letters.
+- `?off=dims` gives back the For chips and the old ways in.
+- Tests: A83 (new); A12, A60, A63 click the 2D · 2.5D chips; A17, A31, A62, A66, A75, A79, A81 reach the folded 3D buttons (lib/app.js); A61, E58 know the module. 149 of 149 pass.
+
 ## v184 · 2026-11-27
 
 **Big morphs (M1)** (Nicolaas, 27 November 2026: the morph on bigger prints, 125 mm tall, pattern to pattern and

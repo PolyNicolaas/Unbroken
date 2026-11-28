@@ -19,7 +19,8 @@ module.exports = {
     // the leaf
     await page.goto(page.url().split("?")[0] + "?example=leaf");
     await A.idle(page, 2500);
-    o.relief = await page.evaluate(() => { mapOpen("art"); return $("reliefRow").getClientRects().length > 0; });
+    // (with 2D · 2.5D · 3D, Make it 3D is the 3D chip's menu: there for a picture, no menu item for nothing)
+    o.relief = await page.evaluate(() => { mapOpen("art"); return $("reliefRow").getClientRects().length > 0 || (document.body.dataset.dims === "1" && !$("reliefRow").hidden); });
     await page.evaluate(async () => { mapOpen("size"); await new Promise((r) => setTimeout(r, 300)); });
     o.size = await page.evaluate(() => ({ w: +$("outW").value, h: +$("outH").value, head: sizeText(), info: $("sizeInfo").textContent, lay: plateNow() }));
     o.toolsLine = await page.evaluate(() => $("box").closest(".stage").querySelector(".toolbar.tools").getBoundingClientRect().height);

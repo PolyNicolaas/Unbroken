@@ -3,7 +3,7 @@ const { appScripts } = require("../lib/scripts.js"), { check } = require("../lib
 // names a core script and a feature script both happen to use for their own local things
 const LOCALS = ["drag", "pad", "me"];
 // a feature may use another's names only when it needs it (state.js FEATURE_NEEDS) or checks it's there first
-const MAY_USE = { vase: ["model"], relief: ["vase", "model"], morph: ["vase", "model"], pieces: ["molecule"], molecule: ["pieces"] };
+const MAY_USE = { vase: ["model"], relief: ["vase", "model"], morph: ["vase", "model"], dims: ["relief"], pieces: ["molecule"], molecule: ["pieces"] };
 const code = (file) => fs.readFileSync(file, "utf8").replace(/\/\*[\s\S]*?\*\//g, "").replace(/\/\/.*$/gm, "").replace(/"(?:[^"\\\n]|\\.)*"|'(?:[^'\\\n]|\\.)*'/g, '""');
 const names = (file) => [...fs.readFileSync(file, "utf8").matchAll(/^(?:async\s+)?function\s+(\w+)|^(?:const|let|var)\s+(\w+)/gm)].map((m) => m[1] || m[2]);
 module.exports = {

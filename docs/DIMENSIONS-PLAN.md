@@ -1,6 +1,6 @@
 # Unbroken by dimension: 2D · 2.5D · 3D · plan (27 November 2026)
 
-Status: a plan for Nicolaas to review. Nothing is built yet. Written against v183.
+Status: built in v185 (28 November 2026; see §6 As built). The big morph (M1, §7) shipped in v184.
 
 Nicolaas: *"we have 2D (plotter), 2.5D for any line that is extended in layers, 3D having full shape. What if we
 organize based on these."* Keep the D names: they make sense to the people who use the app.
@@ -143,6 +143,20 @@ The rail filter is the `off()` each tool already has (v183), plus the tool's dim
 
    A12 and A61 need updating (controls per dimension). The full run must pass.
 6. **Docs:** README (the D's first), AGENT.md, CHANGELOG.
+
+### As built (v185, 28 November 2026)
+
+- The header's **Make: 2D · 2.5D · 3D** chips replace For: Print · Plot. Which one is lit follows the work
+  (`body.dataset.dim`): the plot output is 2D, a model is 3D, everything else 2.5D.
+- **3D** opens one menu: a vase or morph from this line, a relief from this line, a new vase, a new morph, an STL
+  file, the sample skull cup. The 3D model tile, Make it 3D, Make a vase / morph from this line and the Relief row are
+  hidden (they come back with `?off=dims`). In 3D the input card loses its line sources; a vase or morph has none.
+- From 3D, 2D or 2.5D brings back the line kind you had; the print keeps its size when you go to the plotter and back.
+- A model opened while plotting goes to the printer (plotting it afterwards is Draw this view, 2D).
+- 2.5D shows Layers on the rail.
+- Not yet: Draw this view (3D → 2D), Examples grouped by D, Infill and Base only in 2.5D, a Kind control in place of
+  the 3D model tile.
+- Tests: A83; A12, A60 and A63 click the chips (lib/app.js maps the old output radios to them).
 
 ---
 

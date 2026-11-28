@@ -648,6 +648,12 @@ function morphKey(V) {
 }
 function morphCheckSoon() {
   clearTimeout(morphTimer);
+  // (the last verdict was for the design before this change: not shown as if it were for this one)
+  if (st.model && st.model.vase && st.model.vase.planTop) {
+    $("moMsg").textContent = "Checking the morph…";
+    $("moMsg").className = "hint";
+    morphChip("busy", "Checking…");
+  }
   morphTimer = setTimeout(morphCheckNow, 600);
 }
 async function morphCheckNow() {
@@ -735,9 +741,19 @@ function morphVerdict() {
     cls: "warn",
     text: r.cut
       ? `Doesn't print as it is at the turns tried in time (a detailed shape is slow to check): about ${r.needH} mm tall would, or a simpler shape.`
-      : `Too short to print as it is${V.planTop.auto !== false ? ` at any turn (${MORPH_TURNS_HINT})` : " at this turn"}: about ${r.needH} mm tall would${flip ? ". The other way up prints at this height" : ""}.`,
+      : `Too short to print as it is${V.planTop.auto !== false ? ` at any turn (${MORPH_TURNS_HINT})` : " at this turn"}: about ${r.needH} mm tall would${flip ? ". The other way up prints at this height" : ""}.${morphWordTip(V)}`,
     flip,
   };
+}
+
+// a word out of a round or plain bottom rarely prints (the trials: a circle → LOVE needs 723 mm; a heart, a star or a
+// pebble → LOVE print 72–125 mm tall): said with the failing verdict
+function morphWordTip(V) {
+  const Q = V.planTop,
+    P = V.plan;
+  if (!(Q && Q.letter && Q.letter.replace("/", "").length > 1)) return "";
+  if (P.kind === "drawing" && (P.letter || ["heart", "star", "pebble"].includes(P.shape) || (P.shape || "").startsWith("p:"))) return "";
+  return " Words print far better out of a heart, a star or a pebble (Bottom), or with Solid letters.";
 }
 
 // From above: the bottom (grey) and the top (the accent) drawn over each other as they print, in a corner of the

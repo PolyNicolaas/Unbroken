@@ -131,12 +131,23 @@ async function reveal(page, sel, method) {
         return { done: true, opened: id };
       }
       const out = sel.match(/^(?:label\[for="?|#)artFor(Plot|Print)"?\]?$/);
-      if (out && method === "click") return { sel: `.map-for[data-for="${out[1].toLowerCase()}"]` };
+      if (out && method === "click") {
+        // (with the 2D · 2.5D · 3D bar the output chips are hidden: the plotter is 2D, the printer 2.5D)
+        const dim = out[1] === "Plot" ? "2d" : "2.5d", chip = document.querySelector(`.dims-chip[data-dim="${dim}"]`);
+        if (chip && chip.getClientRects().length) return { sel: `.dims-chip[data-dim="${dim}"]` };
+        return { sel: `.map-for[data-for="${out[1].toLowerCase()}"]` };
+      }
       let el = null;
       try {
         el = document.querySelector(sel);
       } catch (e) {}
       if (!el || el.getClientRects().length) return null;
+      // (with 2D · 2.5D · 3D the old ways into 3D are the 3D menu's, hidden where they were: the tests' clicks still
+      // reach them, as the menu does)
+      if (method === "click" && document.body.dataset.dims === "1" && el.closest('#reliefRow, #vaseFromRow, #vaseFromLine, #moFromLine, label[for="srcModel"]')) {
+        el.click();
+        return { done: true };
+      }
       const card = el.closest("section.card"),
         h = card && card.querySelector("h2"),
         v = document.body.dataset.view;

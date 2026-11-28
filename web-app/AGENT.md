@@ -73,6 +73,7 @@ For an agent that clicks instead (or to find a setting on screen):
 
 | Refinement in plain words | Control |
 |---|---|
+| 2D, 2.5D or 3D (what it is, in the header after "Make") | `.dims-chip[data-dim="2d"]` a line for a pen plotter (the plot output), `[data-dim="2.5d"]` the line in layers for a printer (one layer is still 2.5D), `[data-dim="3d"]` opens a menu: a vase or a morph from this line, a relief from it, a new vase or morph, an STL file, the sample skull cup. `document.body.dataset.dim` says which it is. With `?off=dims` the old For chips (`.map-for`) come back |
 | Bigger / smaller | `#outW` or `#outH` (then a `change` event), or Fit inside a box: `#fitW`, `#fitH`, `#fitBtn` |
 | Closer to the picture, keep thin parts | `#optBtn` (Optimize tracing, at the top of the Line step's Fit card; can take a minute), then `#optAccept` or `#optUndo`. It changes `#sens`, `#blur`, `#minLen`, `#loose` and the terms; never the size, needle or painted areas. |
 | One line down each stroke / around each edge | `#modeCenter` / `#modeOutline` |

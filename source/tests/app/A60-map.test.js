@@ -29,7 +29,7 @@ module.exports = {
     checks.push(check("leaf: the spine", await spine(), "==", "material,art,line,size,print"));
     checks.push(check("leaf: every node", await nodes(), "==", "art,examples,layers,levels,line,machine,material,math,plate,print,size,tests,ties,tracing,watch"));
     // the palette: the design's rail at the left, in groups; Print… at its foot
-    checks.push(check("leaf: the design's rail, top to bottom", await rail(), "==", "examples,art,levels,tracing,line,size,watch,math,material,mapGo"),
+    checks.push(check("leaf: the design's rail, top to bottom", await rail(), "==", "examples,art,levels,tracing,line,size,watch,math,layers,material,mapGo"),
       check("… at the left of the preview", await page.evaluate(() => Math.round($("map").getBoundingClientRect().right - document.querySelector(".left").getBoundingClientRect().left)), "<", 0));
     // (Line open, then Print… and Design: back where you were, v172)
     await page.$eval('#mapNodes [data-key="design:line"]', (b) => b.click()); await page.waitForTimeout(200);
@@ -93,10 +93,10 @@ module.exports = {
     checks.push(check("vase: the ready list's warning on Layers", await page.$eval('[data-node="layers"] .map-dot', (e) => e.className), "==", "map-dot warn"));
     await page.click('[data-node="vmove"]'); await A.idle(page, 600);
     checks.push(check("Movement: the 3D model card", +/h-model/.test(await cards()), "==", 1));
-    await page.click('.map-for[data-for="plot"]'); await A.idle(page, 1500); await page.waitForTimeout(700);
+    await page.click('.dims-chip[data-dim="2d"], .map-for[data-for="plot"]:visible'); await A.idle(page, 1500); await page.waitForTimeout(700);
     checks.push(check("pen plotter: no step on another", await overlaps(), "==", 0));
     checks.push(check("pen plotter: the line ends in Plot, no Material", +/plot$/.test(await spine()) + +!/material|machine/.test(await nodes()), "==", 2));
-    await page.click('.map-for[data-for="print"]'); await A.idle(page, 800);
+    await page.click('.dims-chip[data-dim="2.5d"], .map-for[data-for="print"]:visible'); await A.idle(page, 800);
     await page.click('[data-node="material"]'); await A.idle(page, 800);
     // a control moved into a node's rows goes back to its card when another node opens
     await page.click('[data-node="print"]'); await A.idle(page, 400);

@@ -17,7 +17,7 @@ module.exports = {
       const { page, errors, close } = await A.open(ctx, { example: ex, viewport: { width: w, height: h } });
       await A.idle(page, 10000);
       if (plotter) {
-        await page.click('.map-for[data-for="plot"]').catch(() => page.evaluate(() => { $("artForPlot").checked = true; $("artForPlot").dispatchEvent(new Event("change", { bubbles: true })); }));
+        await page.click('.dims-chip[data-dim="2d"], .map-for[data-for="plot"]:visible').catch(() => page.evaluate(() => { $("artForPlot").checked = true; $("artForPlot").dispatchEvent(new Event("change", { bubbles: true })); }));
         await A.idle(page, 8000);
       }
       const nodes = await page.evaluate(() => [...new Set(Object.keys(MAP_NODES))].filter((id) => !MAP_NODES[id].tray));

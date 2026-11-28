@@ -62,7 +62,10 @@ module.exports = {
     checks.push(check("back to Waves: its settings as left (rows)", await page.evaluate(() => st.art.pattern.detail), "==", 10));
     await page.click("label[for=srcText]"); await A.idle(page, 1200);
     checks.push(check("Text: traced from its strokes", +((await page.evaluate(() => document.body.dataset.src)) === "text" && (await page.isVisible("#textIn"))), "==", 1));
-    await page.click("label[for=srcModel]"); await A.idle(page, 1200);
+    // (with 2D · 2.5D · 3D the 3D model tile is the 3D menu's: pick the radio itself)
+    if (await page.isVisible("label[for=srcModel]")) await page.click("label[for=srcModel]");
+    else await page.evaluate(() => { $("srcModel").checked = true; $("srcModel").dispatchEvent(new Event("change", { bubbles: true })); });
+    await A.idle(page, 1200);
     checks.push(check("3D model: the sample skull cup, its card showing", +((await page.evaluate(() => document.body.dataset.src)) === "model" && (await page.isVisible("#turnX"))), "==", 1));
     // undo the switch to the model
     await page.mouse.click(5, 5); await page.keyboard.press("Control+z"); await A.idle(page, 1200);
