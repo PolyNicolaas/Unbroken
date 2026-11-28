@@ -1,6 +1,6 @@
-Unbroken · web app build v185
-Built:  2026-11-28T06:15:00.589Z
-Tests:  149 of 149 pass (node run.js all, 28 November 2026; the failing 7 rerun after their fixes)
+Unbroken · web app build v186
+Built:  2026-11-28T06:33:44.907Z
+Tests:  149 of 149 (full run 28 November 2026 on v185; v186's dims change rerun: A12, A17, A21, A60, A62, A66, A79, A81, A83 pass)
 Check:  opened and traced the sample: 332 terms · error 0.03 mm
 
 Files (sha1, first 12):
@@ -25,12 +25,12 @@ Files (sha1, first 12):
   0e52c6f85462  18-ties.js
   6005b41c00a4  19-relief.js
   19d8ec3e8415  20-morph.js
-  8051b97e448e  core.js
+  a6f89ec1e9f6  core.js
   eb3db41faab5  css/app.css
   2e7b02cdb930  css/theme.css
   8ddfb3bb0b15  features/camera/camera.js
   91b174b409e5  features/cutout/cutout.js
-  b8a8f42a88fc  features/dims/dims.js
+  805c01365448  features/dims/dims.js
   c78689907075  features/levels/levels.js
   86a7dd76f6ff  features/matrix/matrix.js
   fd6b634479aa  features/model/model.js
@@ -48,12 +48,12 @@ Files (sha1, first 12):
   265c82ae5c9b  features/ties/ties.js
   daa6dd6756b2  features/vase/vase.js
   84cc740df42b  fonts.js
-  8aeb14cff064  index.html
+  f0dc68c9099b  index.html
   97fe045db38e  js/agent.js
   ce4fd6897391  js/art.js
   5a825c30dfdd  js/config.js
   f89d67073855  js/controls.js
-  25303a544849  js/engine-bridge.js
+  dac95f64ee5f  js/engine-bridge.js
   f703454f1231  js/export.js
   e877225ef298  js/history.js
   0d15cd5d2d6c  js/layers.js
@@ -75,4 +75,4 @@ Files (sha1, first 12):
   cb0c999d9f14  js/zoom.js
   0c0c4ffbadb3  morph-fonts.js
   54e046aca002  settings.js
-  ad872e0750b8  worker.js
+  4cc2495e0ec1  worker.js

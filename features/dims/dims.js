@@ -67,23 +67,49 @@ dimsUI();
 // each keeps its own size: a plot fills its page, a print is as big as it was made (the Size card) — the plotter's
 // page fitting used to carry over when you went back to the printer
 let dimsPrintW = 0;
-function dimsOutput(key) {
+function dimsOutput(key, from3d) {
   const r = $(key === "plot" ? "artForPlot" : "artForPrint");
   if (!r || r.checked) return;
-  if (key === "plot") dimsPrintW = +$("outW").value || 0;
+  // (from 3D the width is the shape's, not the print's: keep the one from before 3D)
+  if (key === "plot" && st.art.kind !== "model" && !from3d) dimsPrintW = +$("outW").value || 0;
   mapPick(r);
-  if (key === "print" && dimsPrintW > 0 && Math.abs(+$("outW").value - dimsPrintW) > 0.05) {
-    $("outW").value = dimsPrintW;
-    $("outW").dispatchEvent(new Event("change", { bubbles: true }));
+  if (key === "print") dimsSizeBack();
+}
+// (the print's own size, as it was before the plotter or a 3D shape made from it changed the width)
+// The width as printed depends on the line traced (printedW): back from the plotter its strokes are still the line,
+// so it's set again once the printer's own trace is in.
+async function dimsSizeBack() {
+  const want = dimsPrintW,
+    set = () => {
+      if (want > 0 && st.art.kind !== "model" && Math.abs(+$("outW").value - want) > 0.05) {
+        $("outW").value = want;
+        $("outW").dispatchEvent(new Event("change", { bubbles: true }));
+      }
+    };
+  set();
+  const was = st.final;
+  for (let i = 0; i < 60; i++) {
+    await new Promise((r) => setTimeout(r, 250));
+    if (dimsPrintW !== want || st.art.kind === "model" || (OUTPUTS.plot && outputNow() === "plot")) return; // (moved on)
+    if (st.final !== was && !$("chip").classList.contains("busy")) return set();
   }
 }
 function dimsGo(key, chip) {
   const now = dimsNow();
+  const wasOpen = !!dimsMenuEl;
   dimsMenu(false);
+  // 3D opens the menu, in 3D too (it's how to start another full shape); a second tap closes it
+  if (key === "3d") {
+    if (wasOpen) return;
+    if (now !== "3d") dimsPrintW = (OUTPUTS.plot && outputNow() === "plot") ? dimsPrintW : +$("outW").value || dimsPrintW;
+    return dimsMenu(true, chip);
+  }
   if (key === now) return;
-  if (key === "3d") return dimsMenu(true, chip);
-  if (now === "3d") artUse(dimsLast2D || "picture"); // (back to the line's source, as it was)
-  dimsOutput(key === "2d" ? "plot" : "print");
+  if (now === "3d") {
+    artUse(dimsLast2D || "picture"); // (back to the line's source, as it was)
+    if (key === "2.5d") setTimeout(dimsSizeBack, 0);
+  }
+  dimsOutput(key === "2d" ? "plot" : "print", now === "3d");
   dimsUI();
   setTimeout(() => {
     mapFollowStep();
