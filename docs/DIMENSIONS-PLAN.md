@@ -25,6 +25,11 @@ The plan makes **the dimension** the first choice, beside the machine:
 
 The rule the rail follows: **a tool shows only in the dimensions it does something in.**
 
+**Taken as decided** (from the proposal on 27 November; say if not):
+- The names are 2D, 2.5D and 3D.
+- A relief (a plaque) is 2.5D. A relief texture round a vase wall stays part of the 3D vase.
+- A one-layer print is 2D: the same design as a plot, with a different machine.
+
 ## 2. The top bar
 
 ```
@@ -184,8 +189,8 @@ word from a simple shape still fails, filled or not.
 - **More height helps a lot** where the change is mostly *how far* the wall goes (pattern growth, a 4-letter word from
   a shape): 125 mm gives 400 layers to get there.
 - **It doesn't help where the wall would have to cross itself.** That happens with long words from a shape, word to
-  word with slit counters, and two different patterns. The pairing sends neighbouring parts of the wall to far-apart places, the keep-apart repair runs
-  out of room, and the walls meet (closest 0.01–0.12 mm). No height fixes that.
+  word with slit counters, and two different patterns. The pairing sends neighbouring parts of the wall to far-apart
+  places, the keep-apart repair runs out of room, and the walls meet (closest 0.01–0.12 mm). No height fixes that.
 - **The shape at the bottom matters more than its size.** The heart, star and pebble make LOVE where a circle can't,
   because their lobes give the letters somewhere to start from.
 
